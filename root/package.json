@@ -1,0 +1,38 @@
+{
+  "name": "hazzat",
+  "version": "1.0.0",
+  "description": "Hazzat.com webpage",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack  --progress --display-error-details"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CopticDevs/hazzat-web.git"
+  },
+  "keywords": [
+    "hazzat",
+    "Coptic",
+    "Deacons",
+    "Hymns"
+  ],
+  "author": "Hazzat.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CopticDevs/hazzat-web/issues"
+  },
+  "homepage": "https://github.com/CopticDevs/hazzat-web#readme",
+  "dependencies": {
+    "@types/react": "^16.0.31",
+    "@types/react-dom": "^15.5.6",
+    "bootstrap": "^4.0.0-alpha.6",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.2"
+  },
+  "devDependencies": {
+    "awesome-typescript-loader": "^3.4.1",
+    "source-map-loader": "^0.2.3",
+    "typescript": "^2.6.2"
+  }
+}
