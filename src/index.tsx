@@ -8,6 +8,7 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import SeasonDetails from './SeasonDetails';
 import Seasons from './Seasons';
+import Services from './Services';
 
 ReactDOM.render(
     <React.StrictMode>
@@ -16,6 +17,7 @@ ReactDOM.render(
                 <Route path="/" element={<Home />} />
                 <Route path="/Seasons" element={<Seasons />} />
                 <Route path={`/Seasons/:seasonId`} element={<SeasonDetails />} />
+                <Route path={`/Seasons/:seasonId/Services`} element={<Services />} />
                 <Route path="*" element={
                     <main style={{ padding: "1rem" }}>
                         <p>There's nothing here!</p>
