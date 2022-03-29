@@ -10,6 +10,10 @@
 
 # production
 /build
+bin/
+obj/
+.vs/
+*.user
 
 # misc
 .DS_Store
