@@ -6,6 +6,7 @@ import {
 import Home from './Home';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
+import SeasonDetails from './SeasonDetails';
 import Seasons from './Seasons';
 
 ReactDOM.render(
@@ -13,7 +14,8 @@ ReactDOM.render(
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="Seasons" element={<Seasons />} />
+                <Route path="/Seasons" element={<Seasons />} />
+                <Route path={`/Seasons/:seasonId`} element={<SeasonDetails />} />
                 <Route path="*" element={
                     <main style={{ padding: "1rem" }}>
                         <p>There's nothing here!</p>
