@@ -3,12 +3,12 @@ import ReactDOM from 'react-dom';
 import {
     BrowserRouter, Route, Routes
 } from "react-router-dom";
-import Home from './Home';
+import Home from './Components/Home';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import SeasonDetails from './SeasonDetails';
-import Seasons from './Seasons';
-import Services from './Services';
+import SeasonDetails from './Components/SeasonDetails';
+import Seasons from './Components/Seasons';
+import Services from './Components/Services';
 
 ReactDOM.render(
     <React.StrictMode>
