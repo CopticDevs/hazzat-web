@@ -9,23 +9,24 @@ import reportWebVitals from './reportWebVitals';
 import SeasonDetails from './Components/SeasonDetails';
 import Seasons from './Components/Seasons';
 import Services from './Components/Services';
+import Page from './Components/Page';
 
 ReactDOM.render(
     <React.StrictMode>
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/Seasons" element={<Seasons />} />
-                <Route path={`/Seasons/:seasonId`} element={<SeasonDetails />} />
-                <Route path={`/Seasons/:seasonId/Services`} element={<Services />} />
-                <Route path="*" element={
-                    <main style={{ padding: "1rem" }}>
-                        <p>There's nothing here!</p>
-                    </main>
-                }
-                />
-            </Routes>
-        </BrowserRouter>
+        <Page>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/Seasons" element={<Seasons />} />
+                    <Route path={`/Seasons/:seasonId`} element={<SeasonDetails />} />
+                    <Route path={`/Seasons/:seasonId/Services`} element={<Services />} />
+                    <Route path="*" element={
+                        <main style={{ padding: "1rem" }}>
+                            <p>There's nothing here!</p>
+                        </main>} />
+                </Routes>
+            </BrowserRouter>
+        </Page>
     </React.StrictMode>,
     document.getElementById('root')
 );
