@@ -36,12 +36,18 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\Components\Footer.tsx" />
+    <TypeScriptCompile Include="src\Components\Header.tsx" />
     <TypeScriptCompile Include="src\Components\Home.test.tsx" />
     <TypeScriptCompile Include="src\Components\Home.tsx" />
+    <TypeScriptCompile Include="src\App.tsx" />
     <TypeScriptCompile Include="src\index.tsx" />
     <TypeScriptCompile Include="src\Components\SeasonDetails.tsx" />
     <TypeScriptCompile Include="src\Components\Services.tsx" />
     <TypeScriptCompile Include="src\Components\Seasons.tsx" />
+    <TypeScriptCompile Include="src\Providers\HymnsDataProvider\HymnsDataProvider.ts" />
+    <TypeScriptCompile Include="src\Providers\HymnsDataProvider\IHymnsDataProvider.ts" />
+    <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\ISeasonInfo.ts" />
     <TypeScriptCompile Include="src\react-app-env.d.ts" />
     <TypeScriptCompile Include="src\reportWebVitals.ts" />
     <TypeScriptCompile Include="src\setupTests.ts" />
@@ -55,6 +61,9 @@
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="src\Components\" />
+    <Folder Include="src\Providers\" />
+    <Folder Include="src\Providers\HymnsDataProvider\" />
+    <Folder Include="src\Providers\HymnsDataProvider\Models\" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
