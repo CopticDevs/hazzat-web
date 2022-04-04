@@ -45,6 +45,7 @@
     <TypeScriptCompile Include="src\Components\SeasonDetails.tsx" />
     <TypeScriptCompile Include="src\Components\Services.tsx" />
     <TypeScriptCompile Include="src\Components\Seasons.tsx" />
+    <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Utils\HymnUtils.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\HymnsDataProvider.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\IHymnsDataProvider.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\ISeasonInfo.ts" />
@@ -64,6 +65,7 @@
     <Folder Include="src\Providers\" />
     <Folder Include="src\Providers\HymnsDataProvider\" />
     <Folder Include="src\Providers\HymnsDataProvider\Models\" />
+    <Folder Include="src\Providers\HymnsDataProvider\Utils\" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
