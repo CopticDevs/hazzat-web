@@ -4,6 +4,7 @@ import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvi
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
+import MainPaper from "./MainPaper";
 
 function Seasons() {
     const [dateSpecificSeasons, setDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
@@ -33,10 +34,11 @@ function Seasons() {
 
     useEffect(() => {
         fetchHymns();
+        document.title = "Seasons - hazzat.com";
     }, []);
 
     return (
-        <div>
+        <MainPaper>
             <div>
                 <div>Seasons</div>
                 {
@@ -66,7 +68,7 @@ function Seasons() {
                         <div>No seasons to display</div>
                 }
             </div>
-        </div>
+        </MainPaper>
     );
 }
 
