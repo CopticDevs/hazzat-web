@@ -20,6 +20,7 @@ steps:
   displayName: 'npm build'
   inputs:
     command: 'custom'
+    workingDir: $(System.DefaultWorkingDirectory)
     verbose: false
     customCommand: 'run build'
 
@@ -27,6 +28,7 @@ steps:
   displayName: 'Unit Tests'
   inputs:
     command: 'custom'
+    workingDir: $(System.DefaultWorkingDirectory)
     verbose: false
     customCommand: 'run test-unit'
 
@@ -36,6 +38,7 @@ steps:
     testResultsFormat: 'VSTest'
     testResultsFiles: '**/junit.xml'
     failTaskOnFailedTests: false
+
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: HazzatWebBuildDev'
   inputs:
