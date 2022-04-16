@@ -46,6 +46,7 @@ steps:
 
 - task: AzureStaticWebApp@0
   inputs:
+    app_location: '/'
     output_location: 'build'
     skip_app_build: true
     azure_static_web_apps_api_token: '$(deployment_token)'
