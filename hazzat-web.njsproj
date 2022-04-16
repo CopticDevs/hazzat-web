@@ -22,10 +22,10 @@
     <OutputPath>.</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
-    <NodejsPort>1337</NodejsPort>
+    <NodejsPort>3000</NodejsPort>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
     <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
-    <TypeScriptToolsVersion>4.5</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>4.6</TypeScriptToolsVersion>
     <EnableTypeScript>true</EnableTypeScript>
     <StartWebBrowser>True</StartWebBrowser>
   </PropertyGroup>
@@ -41,6 +41,8 @@
     <TypeScriptCompile Include="src\Components\Home.test.tsx" />
     <TypeScriptCompile Include="src\Components\Home.tsx" />
     <TypeScriptCompile Include="src\App.tsx" />
+    <TypeScriptCompile Include="src\Components\MainPaper.tsx" />
+    <TypeScriptCompile Include="src\Components\RightPaper.tsx" />
     <TypeScriptCompile Include="src\index.tsx" />
     <TypeScriptCompile Include="src\Components\SeasonDetails.tsx" />
     <TypeScriptCompile Include="src\Components\Services.tsx" />
@@ -52,14 +54,20 @@
     <TypeScriptCompile Include="src\react-app-env.d.ts" />
     <TypeScriptCompile Include="src\reportWebVitals.ts" />
     <TypeScriptCompile Include="src\setupTests.ts" />
+    <Content Include="public\favicon.ico" />
+    <Content Include="public\index.html" />
+    <Content Include="public\logo192.png" />
+    <Content Include="public\logo512.png" />
+    <Content Include="public\manifest.json" />
+    <Content Include="public\robots.txt" />
     <Content Include="src\App.css" />
-    <Content Include="src\index.css" />
     <Content Include="src\logo.svg" />
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="public\" />
     <Folder Include="src\" />
     <Folder Include="src\Components\" />
     <Folder Include="src\Providers\" />

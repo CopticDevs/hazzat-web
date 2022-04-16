@@ -1,15 +1,21 @@
-import welcomeTop from "../images/welcomeTop.png";
-import welcomeTopMobile from "../images/welcomeTopMobile.png";
 import welcomeBottom from "../images/welcomeBottom.png";
 import welcomeBottomMobile from "../images/welcomeBottomMobile.png";
+import welcomeTop from "../images/welcomeTop.png";
+import welcomeTopMobile from "../images/welcomeTopMobile.png";
+
+export enum Size {
+    Normal,
+    Wide
+}
 
 interface IProps {
+    size?: Size;
     children?: React.ReactNode;
 }
 
 function MainPaper(props: IProps) {
     return (
-        <div className="leftMain fLeft">
+        <div className={props.size === Size.Wide ? "leftMain fLeftWide" : "leftMain fLeft"}>
             <div className="welcomeMain clearfix">
                 <div className="welcome clearfix">
 
