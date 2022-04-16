@@ -9,9 +9,9 @@ function Header() {
             <div className="innerHeader clearfix">
 
                 <div className="logo clearfix">
-                    <a href="#">
+                    <NavLink to="/">
                         <img src={logo} alt="" />
-                    </a>
+                    </NavLink>
                 </div>
 
             </div>

@@ -1,19 +1,20 @@
+import React from "react";
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
-import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
-import MainPaper from "./MainPaper";
+import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
+import MainPaper, { Size } from "./MainPaper";
 
 function Seasons() {
     const [dateSpecificSeasons, setDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [nonDateSpecificSeasons, setNonDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider();
 
-    const fetchHymns = async () => {
+    const fetchHymns = React.useCallback(async () => {
         setIsLoading(true);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider();
         const seasons = await hymnsDataProvider.getSeasonList();
         const dsSeasons: ISeasonInfo[] = [];
         const ndsSeasons: ISeasonInfo[] = [];
@@ -30,15 +31,15 @@ function Seasons() {
         setDateSpecificSeasons(dsSeasons.sort(HymnUtils.seasonInfoComparer));
         setNonDateSpecificSeasons(ndsSeasons.sort(HymnUtils.seasonInfoComparer));
         setIsLoading(false);
-    };
-
-    useEffect(() => {
-        fetchHymns();
-        document.title = "Seasons - hazzat.com";
     }, []);
 
+    useEffect(() => {
+        document.title = "Seasons - hazzat.com";
+        fetchHymns();
+    }, [fetchHymns]);
+
     return (
-        <MainPaper>
+        <MainPaper size={Size.Wide}>
             <div>
                 <div>Seasons</div>
                 {

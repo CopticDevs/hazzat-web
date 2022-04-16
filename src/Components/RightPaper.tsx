@@ -22,15 +22,15 @@ function RightPaper(props: IProps) {
                 </div>
                 <div className="socialMedia clearfix" style={{paddingBottom: "40px"}}>
 
-                    <a href="http://www.facebook.com/hazzat.com" target="_blank">
+                    <a href="http://www.facebook.com/hazzat.com" target="_blank" rel="noreferrer">
                         <img src={facebook} alt="Facebook" />
                     </a>
 
-                    <a href="http://www.twitter.com/CopticHazzat" target="_blank">
+                    <a href="http://www.twitter.com/CopticHazzat" target="_blank" rel="noreferrer">
                         <img src={twitter} alt="" />
                     </a>
 
-                    <a href="http://www.youtube.com/CopticHazzat" target="_blank">
+                    <a href="http://www.youtube.com/CopticHazzat" target="_blank" rel="noreferrer">
                         <img src={youtube} alt="" />
                     </a>
 
