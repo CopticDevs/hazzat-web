@@ -54,6 +54,12 @@
     <TypeScriptCompile Include="src\react-app-env.d.ts" />
     <TypeScriptCompile Include="src\reportWebVitals.ts" />
     <TypeScriptCompile Include="src\setupTests.ts" />
+    <Content Include="public\favicon.ico" />
+    <Content Include="public\index.html" />
+    <Content Include="public\logo192.png" />
+    <Content Include="public\logo512.png" />
+    <Content Include="public\manifest.json" />
+    <Content Include="public\robots.txt" />
     <Content Include="src\App.css" />
     <Content Include="src\logo.svg" />
     <Content Include="package.json" />
@@ -61,6 +67,7 @@
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="public\" />
     <Folder Include="src\" />
     <Folder Include="src\Components\" />
     <Folder Include="src\Providers\" />
