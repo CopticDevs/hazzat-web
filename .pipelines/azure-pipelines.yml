@@ -27,7 +27,6 @@ steps:
   displayName: 'npm build'
   inputs:
     command: 'custom'
-    workingDir: $(System.DefaultWorkingDirectory)
     verbose: false
     customCommand: 'run build'
 
@@ -35,7 +34,6 @@ steps:
   displayName: 'Unit Tests'
   inputs:
     command: 'custom'
-    workingDir: $(System.DefaultWorkingDirectory)
     verbose: false
     customCommand: 'run test-unit'
 
