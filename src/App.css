@@ -1,0 +1,198 @@
+*{ margin:0px; padding:0px;}
+
+body { margin:0px; padding:0px; font-family: "Myriad Pro"; font-size:12px; color:#000; text-decoration:none; 
+background:url(images/pattern.jpg) repeat top center; }
+
+a, a:visited { color:#000; text-decoration:none; outline:none;}
+a:hover { color:#454545; text-decoration: none; outline:none;}
+
+h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; margin:0px; font-weight:normal; outline:none; border:none; list-style-type:none; }
+
+
+/* clearing floats */
+.clearfix:after { content: "&nbsp;"; font-size:0; display:block; height:0; clear:both; visibility:hidden; }
+.clearfix { display: inline-block }
+.clearfix { display:block }
+* html .clearfix { height: 1%; }
+.clear { clear: both; }
+/*-----------------*/
+
+.md { float:left; width:auto; }
+
+.fLeft { float:left;}
+.fRight { float:right;}
+
+/* Main */
+.main {  background:url(images/bg.png) repeat-y top center; background-size: 1280px 1030px; min-width:1270px; }
+
+.mainContainer {width:1000px; margin:0px auto; position:relative; background:url(images/contentBg.png) repeat-y;}
+
+
+/* Header */
+.header { padding:0px; }
+.innerHeader { background:url(images/headerBg.png) no-repeat top center; padding-top:14px; position:relative; }
+
+.logo { width:287px; margin:0px auto 0px auto; z-index:999; position:relative; }
+.logo img { width:287px; }
+
+.topNav {background: url("images/topNavBg.png"); background-position:center top; background-size: 100% 100%; background-repeat:no-repeat; height: auto; min-width: 119px; position: absolute;  right: 48px; top: 42px; }
+.topNav ul { padding:0px 15px 0px 15px; }
+.topNav ul li { float:left; padding:0px 5px; background:url(images/topSep.jpg) no-repeat right 12px; }
+.topNav ul li.last { background:none; }
+.topNav ul li a { padding:0px; font-size:11px; color:#000; line-height:36px; font-weight:bold; font-family: "Helvetica Neue"; }
+.topNav ul li a:hover { padding:0px; color:#333; }
+
+.nav { background:url(images/navBg.png) no-repeat top center; min-height:54px ; margin-top:-2px; margin-left:0px; }
+.nav ul { padding:20px 0px 0px 66px; }
+.nav ul li { float:left; padding:0px 14px; }
+.nav ul li a { font-size:13px; font-family: "Trajan Pro"; font-weight:bold; }
+
+/* body */
+.body { padding:0px; position:relative; min-height:580px; position:relative;}
+
+.topContent { margin:20px 55px 0px;}
+.topContent h2 { font-family: "Trajan Pro"; font-size:34px; font-weight:700; }
+
+.leftMain  { width:602px; margin-left:50px; margin-top:25px; float:left; }
+.leftMainWide  { width:900px; margin-left:50px; margin-top:25px; float:left; }
+
+.welcomeMain { padding-bottom:0px; }
+
+.welcome { padding:0px; }
+.welcome h2 { font-family: "Trajan Pro"; font-size:34px; font-weight:700; }
+
+.welcome p { padding-top:10px; color:#000;  }
+.welcome p.text { padding-top:10px; padding-left:13px;   }
+
+.footerContent { margin:20px 55px 50px;}
+.footerContent h2 { font-family: "Trajan Pro"; font-size:34px; font-weight:700; }
+
+.hymnLeft { position: relative; width:364px; margin-right:-26px; margin-top:20px }
+
+.hymnRep { background:url(images/hymnRep.png) no-repeat left 28px; background-size:100% 100%; padding:0 58px 60px 23px;  }
+
+.hymnData { padding:0px 0px 22px; }
+.hymnData h2 { font-family: "Trajan Pro"; font-size:22px; font-weight:700;  background:url(images/headingBottom.png) no-repeat left bottom; padding-bottom:10px; }
+.hymnData p { padding-top:5px; padding-left:10px; }
+
+.TitleH2 { text-align: center; }
+
+.socialMedia { padding:0px 0px 0px 10px; }
+.socialMedia img { float:left; width:auto; margin-left:7px; }
+
+/* footer */
+.footer { width:912px; background-color:#000; margin:-30px 54px 0px 34px; height:30px; padding-left:20px; position:absolute;  }
+.footer ul { padding:0px 0px 0px 0px; }
+.footer ul li { float:left; padding:8px 9px 0px; }
+.footer ul li a { padding:0px; font-size:11px; font-family:'Conv_TrajanPro-Regular'; color:#bdbdbd; z-index:999; position:relative; }
+
+
+
+/*============New==============*/
+
+.menu-toggle { background: url("images/navBgNew.png") no-repeat scroll center top; cursor: pointer;  height:44px;  margin:0 auto auto auto;  width: 100%; }
+.menu-toggle-footer{ background: #000;  height: 34px; margin-top: 10px;  width: 100%; color:#fff; font-size:16px; text-align:center; cursor:pointer }
+.mobile, .mobile-footer, .welcome .md > img.welcomeTopMobile, .welcome .md > img.welcomeBottomMobile{display:none;}
+
+@media screen and (max-width:1280px){
+    .mainContainer{ max-width: 1000px; width: 100%; background-size: contain}
+    .main{ background-size: contain; min-width: 100%}
+    .hymnLeft .md { width:100%}
+    .hymnLeft .md img{ width:100%}
+    .welcomeMain .md img{ width:100%}
+    .welcomeRep{ padding: 40px 22px 45px 33px}
+    .hymnRep { padding:45px 58px 15px 23px}
+}
+
+@media screen and (max-width:999px){
+   .mainContainer .nav{ background:none;}
+    .footer{ margin-left: 3%;  margin-right: 0;  padding-left: 4%;  width: 90%; }
+    .logo img{ width:100%}
+    .logo{ width:28.5%}
+    .nav{background:url("images/navBg2.jpg"); background-repeat:no-repeat; background-size:100%;}
+    .header .innerHeader { width:100%; margin:auto; padding:0; max-width:100%; background:url("images/headerBgNew.png"); background-position:center top; background-repeat:no-repeat; background-size:cover}
+    .header { width:94%; margin: 0 3%}
+    .footer .sf-menu{ display:none}
+    .nav{ background:none}
+    .mobile, .mobile-footer{display:block;}
+    .sf-menu{display:none;}
+    .nav ul li, .footer ul li{float:none; background:#fff; border-top:1px solid #333; padding: 0; margin-right:0;}
+    .mainContainer .sf-menu li.current{border-top:1px solid #333;}
+    .nav ul, .footer ul {padding:0; width:100%; float:none; margin:auto; position:relative; z-index:1111; margin-top:-7px;}
+    .header .nav, .footer{ min-height:34px;}  
+    .footer ul li a{ color:#000; font-size:12px; text-align:center; padding:10px;}
+    .footer ul li{ padding:0; margin:0;}
+    .footer ul{ float:left; width:100%}
+    .footer{ padding-left:0; width:94%}
+    .footer{ height:auto; padding-top:5px; padding-bottom:5px;}
+    .nav .sf-menu li a:hover { background:#999; color:#fff}
+    .nav ul{ padding:0; margin-top:0;}
+    .nav ul li a { padding:10px 0}
+    .nav .mobile{background:url("images/navBgBottom.jpg"); background-repeat:no-repeat; background-position:bottom; padding-bottom:5px; float:left; width:100%; }
+}
+
+@media screen and (min-width:500px) and (max-width:1280px){
+     .leftMain{ width: 56%; margin-left:4%}
+     .hymnLeft{ width: 40%}
+}
+
+@media screen and (max-width:767px){
+     .leftMain{ width: 92%; margin:0 4%;}
+     .hymnLeft{ width: 92%; margin:0 4%;}
+     .logo{ width:27%}
+     .hymnRep{ padding-left:45px;}
+     .md img{display:none}
+     .welcome .md > img.welcomeTopMobile, .welcome .md > img.welcomeBottomMobile{display:block;}
+     .welcome .md > img, .hymnLeft .md > img{ display:none}
+     .welcomeRep{ background:url("images/welcomeRepBk.png"); background-position:left 0; float:left; background-size:100% 100%; background-repeat:no-repeat }
+     .welcomeRep{ padding:0; width:100%;}
+     .welcomeMain .DNNModuleContent { padding:20px;}
+}
+
+@media screen and (min-width:1001px) {
+     .sf-menu{ display:block}
+     .sf-menu-mobile{ display:none}
+     .menu-toggle{ display:none}
+     .menu-toggle-footer{ display:none}
+     .nav ul li a{ padding:0}
+}
+
+@media screen and (min-width:769px) and (max-width:1000px) {
+     .footer{ height:auto; padding-top:5px; padding-bottom:5px;}
+     
+}
+@media screen and (min-width:768px) and (max-width:1000px) {
+      .welcomeRep { background:url("images/welcomeRep.png"); background-position:center top; background-size:100% 100%; background-repeat:no-repeat;}
+}
+
+@media screen and (max-width:1000px) {
+    .welcome .md > img, .hymnLeft .md > img{ display:none}
+  
+    .hymnRep { background: url("images/hymnRep.png"); background-position:center top; background-size:100% 100%; background-repeat:no-repeat}
+}
+
+@media screen and (min-width:1000px) {
+    .welcome .md > img, .hymnLeft .md > img{ display:block}
+    .welcomeRep{ background:url("images/welcomeRepBk.png"); background-position:left 25px; background-size:100% 100%; background-repeat:no-repeat; padding:20px 22px 30px 33px }
+    .hymnRep { background:url("images/hymnRepBk.png"); background-position:left 28px; background-size:100% 100%; background-repeat:no-repeat; min-height:200px;}
+}
+
+
+@media screen and (max-width:480px) {
+    .hymnRep {padding-left:30px;}
+    .welcome h2{ font-size:25px;}
+}
+
+@media screen and (min-width:481px) and (max-width:768px) {
+    .menu-toggle{ margin-top:0;}
+    .welcome h2{ font-size:25px;}
+}
+
+@media screen and (max-width:500px) {
+    .topNav{ top:auto; left:0; right:0; width:125px; margin:auto}
+    .menu-toggle{ margin:45px auto auto}
+}
+
+@media screen and (max-width:1100px) {
+    .header{ width:94%; margin:0 3%;}
+}
