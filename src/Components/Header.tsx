@@ -1,7 +1,14 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import logo from "../images/logo.png";
 
 function Header() {
+    const [showMenu, setShowMenu] = useState<boolean>(false);
+
+    function toggleMenu() {
+        setShowMenu(!showMenu);   
+    }
+
     return (
         
         <div className="header clearfix">
@@ -17,7 +24,7 @@ function Header() {
             </div>
 
             <div className="nav clearfix">
-                <ul className="sf-menu sf-js-enabled sf-shadow">
+                <ul className="sf-menu">
                     <li><NavLink to="/">Home</NavLink></li>
                     <li><NavLink to="/Seasons">Seasons</NavLink></li>
                     <li><NavLink to="/Types">Types</NavLink></li>
@@ -28,9 +35,9 @@ function Header() {
                     <li><NavLink to="/ContactUs">Contact Us</NavLink></li>
                 </ul>
             
-                 <div className="mobile">
-                    <div className="menu-toggle"></div>
-                    <ul className="sf-menu sf-js-enabled sf-shadow">
+                <div className="mobile">
+                    <div className="menu-toggle" onClick={toggleMenu}></div>
+                    {showMenu ? <ul onClick={toggleMenu}>
                         <li><NavLink to="/">Home</NavLink></li>
                         <li><NavLink to="/Seasons">Seasons</NavLink></li>
                         <li><NavLink to="/Types">Types</NavLink></li>
@@ -39,7 +46,8 @@ function Header() {
                         <li><NavLink to="/Fonts">Fonts</NavLink></li>
                         <li><NavLink to="/Help">Help</NavLink></li>
                         <li><NavLink to="/ContactUs">Contact Us</NavLink></li>
-                    </ul>
+                    </ul> : null }
+                    
                 </div>
             </div>
 

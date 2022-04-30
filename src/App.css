@@ -151,7 +151,6 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 
 @media screen and (min-width:1001px) {
      .sf-menu{ display:block}
-     .sf-menu-mobile{ display:none}
      .menu-toggle{ display:none}
      .menu-toggle-footer{ display:none}
      .nav ul li a{ padding:0}
