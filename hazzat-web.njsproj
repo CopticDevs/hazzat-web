@@ -36,6 +36,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\AppSettings.ts" />
     <TypeScriptCompile Include="src\Components\Footer.tsx" />
     <TypeScriptCompile Include="src\Components\Header.tsx" />
     <TypeScriptCompile Include="src\Components\Home.test.tsx" />
@@ -64,12 +65,15 @@
     <Content Include="src\logo.svg" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <Content Include="src\Types\INavMenuItem.ts" />
     <Content Include="tsconfig.json" />
+    <TypeScriptCompile Include="src\Types\IAppSettings.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="public\" />
     <Folder Include="src\" />
     <Folder Include="src\Components\" />
+    <Folder Include="src\Types\" />
     <Folder Include="src\Providers\" />
     <Folder Include="src\Providers\HymnsDataProvider\" />
     <Folder Include="src\Providers\HymnsDataProvider\Models\" />
