@@ -1,7 +1,14 @@
 import { NavLink } from "react-router-dom";
 import logo from "../images/logo.png";
+import { useState } from "react";
 
 function Header() {
+    const [showMenu, setShowMenu] = useState<boolean>(false);
+
+    function handleOnClick() {
+        setShowMenu(!showMenu);   
+    }
+
     return (
         
         <div className="header clearfix">
@@ -28,9 +35,9 @@ function Header() {
                     <li><NavLink to="/ContactUs">Contact Us</NavLink></li>
                 </ul>
             
-                 <div className="mobile">
-                    <div className="menu-toggle"></div>
-                    <ul className="sf-menu sf-js-enabled sf-shadow">
+                <div className="mobile">
+                    <div className="menu-toggle" onClick={handleOnClick}></div>
+                    {showMenu ? <ul onClick={handleOnClick}>
                         <li><NavLink to="/">Home</NavLink></li>
                         <li><NavLink to="/Seasons">Seasons</NavLink></li>
                         <li><NavLink to="/Types">Types</NavLink></li>
@@ -39,7 +46,8 @@ function Header() {
                         <li><NavLink to="/Fonts">Fonts</NavLink></li>
                         <li><NavLink to="/Help">Help</NavLink></li>
                         <li><NavLink to="/ContactUs">Contact Us</NavLink></li>
-                    </ul>
+                    </ul> : null }
+                    
                 </div>
             </div>
 
