@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { INavMenuItem } from "../Types/INavMenuItem";
 
-function Footer() {
+interface IProps {
+    menuItems: INavMenuItem[];
+}
+
+function Footer(props: IProps) {
     const [showMenu, setShowMenu] = useState<boolean>(false);
 
     function toggleMenu() {
@@ -12,27 +17,25 @@ function Footer() {
         <div className="footer clearfix">
             
             <ul className="sf-menu">
-                <li><NavLink to="/">Home</NavLink></li>
-                <li><NavLink to="/Seasons">Seasons</NavLink></li>
-                <li><NavLink to="/Types">Types</NavLink></li>
-                <li><NavLink to="/Tunes">Tunes</NavLink></li>
-                <li><NavLink to="/Booklets">Booklets</NavLink></li>
-                <li><NavLink to="/Fonts">Fonts</NavLink></li>
-                <li><NavLink to="/Help">Help</NavLink></li>
-                <li><NavLink to="/ContactUs">Contact Us</NavLink></li>
+                {
+                    props.menuItems.map((item) => {
+                        return (
+                            <li key={item.name}><NavLink to={item.location}>{item.name}</NavLink></li>
+                        );
+                    })
+                }
             </ul>
 
             <div className="mobile-footer">
                 <div className="menu-toggle-footer" onClick={toggleMenu}>MENU</div>
                 {showMenu ? <ul onClick={toggleMenu}>
-                    <li><NavLink to="/">Home</NavLink></li>
-                    <li><NavLink to="/Seasons">Seasons</NavLink></li>
-                    <li><NavLink to="/Types">Types</NavLink></li>
-                    <li><NavLink to="/Tunes">Tunes</NavLink></li>
-                    <li><NavLink to="/Booklets">Booklets</NavLink></li>
-                    <li><NavLink to="/Fonts">Fonts</NavLink></li>
-                    <li><NavLink to="/Help">Help</NavLink></li>
-                    <li><NavLink to="/ContactUs">Contact Us</NavLink></li>
+                    {
+                        props.menuItems.map((item) => {
+                            return (
+                                <li key={item.name}><NavLink to={item.location}>{item.name}</NavLink></li>
+                            );
+                        })
+                    }
                 </ul> : null }
             </div>
             
