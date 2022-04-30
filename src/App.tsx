@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
+import { AppSettings } from "./AppSettings";
 import Footer from "./Components/Footer";
 import Header from "./Components/Header";
 import Home from './Components/Home';
@@ -10,11 +11,12 @@ import "./css/hazzat.css";
 import "./fonts/fonts.css";
 
 function App() {
+
     return (
         <BrowserRouter>
             <div className="main">
                 <div className="mainContainer">
-                    <Header />
+                    <Header menuItems={AppSettings.navigationMenuItems} />
                     <div className="body clearfix">
                         <div className="rightleftmain clearfix">
                             <Routes>
@@ -29,7 +31,7 @@ function App() {
                             </Routes>
                         </div>
                     </div>
-                    <Footer />
+                    <Footer menuItems={AppSettings.navigationMenuItems} />
                 </div>
             </div>
         </BrowserRouter>
