@@ -52,6 +52,7 @@
     <TypeScriptCompile Include="src\LanguageProvider.tsx" />
     <TypeScriptCompile Include="src\LanguageContext.tsx" />
     <TypeScriptCompile Include="src\Locales\en.json" />
+    <TypeScriptCompile Include="src\LocalizedMessage.tsx" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Utils\HymnUtils.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\HymnsDataProvider.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\IHymnsDataProvider.ts" />
