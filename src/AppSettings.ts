@@ -1,38 +1,17 @@
+import { ArabicLanguageProperties, EnglishLanguageProperties } from "./l8n";
 import { IAppSettings } from "./Types/IAppSettings";
 
 export const AppSettings: IAppSettings = {
     navigationMenuItems: [
-        {
-            name: "Home",
-            location: "/"
-        },
-        {
-            name: "Seasons",
-            location: "/Seasons"
-        },
-        {
-            name: "Types",
-            location: "/Types"
-        },
-        {
-            name: "Tunes",
-            location: "/Tunes"
-        },
-        {
-            name: "Booklets",
-            location: "/Booklets"
-        },
-        {
-            name: "Fonts",
-            location: "/Fonts"
-        },
-        {
-            name: "Help",
-            location: "/Help"
-        },
-        {
-            name: "Contact Us",
-            location: "/ContactUs"
-        }
-    ]
+        { id: "home", location: "/" },
+        { id: "seasons", location: "/Seasons" },
+        { id: "types", location: "/Types" },
+        { id: "tunes", location: "/Tunes" },
+        { id: "booklets", location: "/Booklets" },
+        { id: "fonts", location: "/Fonts" },
+        { id: "help", location: "/Help" },
+        { id: "contactUs", location: "/ContactUs" }
+    ],
+    supportedLanguages: [EnglishLanguageProperties, ArabicLanguageProperties],
+    defaultLanguage: EnglishLanguageProperties
 };

@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { AppSettings } from "./AppSettings";
@@ -9,29 +10,32 @@ import Seasons from './Components/Seasons';
 import Services from './Components/Services';
 import "./css/hazzat.css";
 import "./fonts/fonts.css";
+import { LanguageContext } from "./LanguageContext";
+import LocalizedMessage from "./LocalizedMessage";
 
 function App() {
+    const { languageProperties } = useContext(LanguageContext);
 
     return (
         <BrowserRouter>
-            <div className="main">
+            <div className={languageProperties.isRtl ? "mainAr" : "main"}>
                 <div className="mainContainer">
-                    <Header menuItems={AppSettings.navigationMenuItems} />
+                    <Header navItems={AppSettings.navigationMenuItems} />
                     <div className="body clearfix">
                         <div className="rightleftmain clearfix">
                             <Routes>
-                                <Route path="/" element={<Home />} />
+                                <Route path="/" element={<Home navItems={AppSettings.navigationMenuItems} />} />
                                 <Route path="/Seasons" element={<Seasons />} />
                                 <Route path={`/Seasons/:seasonId`} element={<SeasonDetails />} />
                                 <Route path={`/Seasons/:seasonId/Services`} element={<Services />} />
                                 <Route path="*" element={
                                     <main style={{ padding: "1rem" }}>
-                                        <p>There's nothing here!</p>
+                                        <p><LocalizedMessage of="noContent" /></p>
                                     </main>} />
                             </Routes>
                         </div>
                     </div>
-                    <Footer menuItems={AppSettings.navigationMenuItems} />
+                    <Footer navItems={AppSettings.navigationMenuItems} />
                 </div>
             </div>
         </BrowserRouter>

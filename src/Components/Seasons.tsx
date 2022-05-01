@@ -1,6 +1,8 @@
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { strings } from "../l8n";
+import { LanguageContext } from "../LanguageContext";
+import LocalizedMessage from "../LocalizedMessage";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
@@ -8,13 +10,14 @@ import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import MainPaper, { Size } from "./MainPaper";
 
 function Seasons() {
+    const { languageProperties } = useContext(LanguageContext);
     const [dateSpecificSeasons, setDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [nonDateSpecificSeasons, setNonDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const fetchHymns = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider();
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
         const seasons = await hymnsDataProvider.getSeasonList();
         const dsSeasons: ISeasonInfo[] = [];
         const ndsSeasons: ISeasonInfo[] = [];
@@ -31,19 +34,19 @@ function Seasons() {
         setDateSpecificSeasons(dsSeasons.sort(HymnUtils.seasonInfoComparer));
         setNonDateSpecificSeasons(ndsSeasons.sort(HymnUtils.seasonInfoComparer));
         setIsLoading(false);
-    }, []);
+    }, [languageProperties]);
 
     useEffect(() => {
-        document.title = "Seasons - hazzat.com";
+        document.title = strings.seasons + " - hazzat.com";
         fetchHymns();
     }, [fetchHymns]);
 
     return (
         <MainPaper size={Size.Wide}>
             <div>
-                <div>Seasons</div>
+                <div><LocalizedMessage of="seasons" /></div>
                 {
-                    isLoading ? <div>Loading seasons...</div> :
+                    isLoading ? <div><LocalizedMessage of="loading" /></div> :
                     dateSpecificSeasons && dateSpecificSeasons.length > 0 ?
                         dateSpecificSeasons.map((season) => {
                             return (
@@ -52,12 +55,12 @@ function Seasons() {
                                 </div>
                             )
                         })
-                        :
-                        <div>No seasons to display</div>
+                            :
+                            <div><LocalizedMessage of="noSeasons" /></div>
                 }
-                <div>Other Services</div>
+                <div><LocalizedMessage of="otherServices" /></div>
                 {
-                    isLoading ? <div>Loading seasons...</div> :
+                    isLoading ? <div><LocalizedMessage of="loading" /></div> :
                     nonDateSpecificSeasons && nonDateSpecificSeasons.length > 0 ?
                         nonDateSpecificSeasons.map((season) => {
                             return (
@@ -66,7 +69,7 @@ function Seasons() {
                                 </div>
                             )
                         }) :
-                        <div>No seasons to display</div>
+                            <div><LocalizedMessage of="noSeasons" /></div>
                 }
             </div>
         </MainPaper>
