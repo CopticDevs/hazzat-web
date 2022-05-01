@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { strings } from "../l8n";
+import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
@@ -9,13 +10,14 @@ import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import MainPaper, { Size } from "./MainPaper";
 
 function Seasons() {
+    const { language } = useContext(LanguageContext);
     const [dateSpecificSeasons, setDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [nonDateSpecificSeasons, setNonDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const fetchHymns = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider();
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(language);
         const seasons = await hymnsDataProvider.getSeasonList();
         const dsSeasons: ISeasonInfo[] = [];
         const ndsSeasons: ISeasonInfo[] = [];
@@ -32,7 +34,7 @@ function Seasons() {
         setDateSpecificSeasons(dsSeasons.sort(HymnUtils.seasonInfoComparer));
         setNonDateSpecificSeasons(ndsSeasons.sort(HymnUtils.seasonInfoComparer));
         setIsLoading(false);
-    }, []);
+    }, [language]);
 
     useEffect(() => {
         document.title = strings.seasonsPageTitle;
