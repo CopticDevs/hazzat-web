@@ -9,6 +9,7 @@ import Seasons from './Components/Seasons';
 import Services from './Components/Services';
 import "./css/hazzat.css";
 import "./fonts/fonts.css";
+import LocalizedMessage from "./LocalizedMessage";
 
 function App() {
 
@@ -26,7 +27,7 @@ function App() {
                                 <Route path={`/Seasons/:seasonId/Services`} element={<Services />} />
                                 <Route path="*" element={
                                     <main style={{ padding: "1rem" }}>
-                                        <p>There's nothing here!</p>
+                                        <p><LocalizedMessage of="noContent" /></p>
                                     </main>} />
                             </Routes>
                         </div>

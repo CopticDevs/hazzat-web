@@ -48,6 +48,10 @@
     <TypeScriptCompile Include="src\Components\SeasonDetails.tsx" />
     <TypeScriptCompile Include="src\Components\Services.tsx" />
     <TypeScriptCompile Include="src\Components\Seasons.tsx" />
+    <TypeScriptCompile Include="src\l8n.ts" />
+    <TypeScriptCompile Include="src\LanguageProvider.tsx" />
+    <TypeScriptCompile Include="src\LanguageContext.tsx" />
+    <TypeScriptCompile Include="src\Locales\en.json" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Utils\HymnUtils.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\HymnsDataProvider.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\IHymnsDataProvider.ts" />
@@ -62,6 +66,7 @@
     <Content Include="public\manifest.json" />
     <Content Include="public\robots.txt" />
     <Content Include="src\App.css" />
+    <Content Include="src\Locales\ar.json" />
     <Content Include="src\logo.svg" />
     <Content Include="package.json" />
     <Content Include="README.md" />
@@ -73,6 +78,7 @@
     <Folder Include="public\" />
     <Folder Include="src\" />
     <Folder Include="src\Components\" />
+    <Folder Include="src\Locales\" />
     <Folder Include="src\Types\" />
     <Folder Include="src\Providers\" />
     <Folder Include="src\Providers\HymnsDataProvider\" />

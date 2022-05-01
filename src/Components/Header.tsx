@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { NavLink } from "react-router-dom";
 import logo from "../images/logo.png";
+import { LanguageContext } from "../LanguageContext";
+import LocalizedMessage from "../LocalizedMessage";
 import { INavMenuItem } from "../Types/INavMenuItem";
 
 interface IProps {
@@ -9,9 +11,14 @@ interface IProps {
 
 function Header(props: IProps) {
     const [showMenu, setShowMenu] = useState<boolean>(false);
+    const { language, setLanguage } = useContext(LanguageContext);
 
-    function toggleMenu() {
+    const toggleMenu = () => {
         setShowMenu(!showMenu);   
+    }
+
+    const handleChangeLanguage = (targetLanguage: string) => {
+        setLanguage && setLanguage(targetLanguage);
     }
 
     return (
@@ -33,21 +40,31 @@ function Header(props: IProps) {
                     {
                         props.menuItems.map((item) => {
                             return (
-                                <li key={item.name}><NavLink to={item.location}>{item.name}</NavLink></li>
+                                <li key={item.id}><NavLink to={item.location}><LocalizedMessage of={item.id} /></NavLink></li>
                             );
                         })
+                    }
+                    {
+                        language === "en" ?
+                            <li><NavLink to="#" onClick={() => handleChangeLanguage("ar")}><LocalizedMessage of="switchLang" /></NavLink></li> :
+                            <li><NavLink to="#" onClick={() => handleChangeLanguage("en")}><LocalizedMessage of="switchLang" /></NavLink></li>
                     }
                 </ul>
             
                 <div className="mobile">
-                    <div className="menu-toggle" onClick={toggleMenu}></div>
+                    <div className="menu-toggle" onClick={toggleMenu}><LocalizedMessage of="menu" /></div>
                     {showMenu ? <ul onClick={toggleMenu}>
                         {
                             props.menuItems.map((item) => {
                                 return (
-                                    <li key={item.name}><NavLink to={item.location}>{item.name}</NavLink></li>
+                                    <li key={item.id}><NavLink to={item.location}><LocalizedMessage of={item.id} /></NavLink></li>
                                 );
                             })
+                        }
+                        {
+                            language === "en" ?
+                                <li><NavLink to="#" onClick={() => handleChangeLanguage("ar")}><LocalizedMessage of="switchLang" /></NavLink></li> :
+                                <li><NavLink to="#" onClick={() => handleChangeLanguage("en")}><LocalizedMessage of="switchLang" /></NavLink></li>
                         }
                     </ul> : null }
                     
