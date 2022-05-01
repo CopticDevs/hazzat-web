@@ -1,28 +1,28 @@
 import { useState } from "react";
-import { strings } from "./l8n";
+import { ArabicLanguageProperties, EnglishLanguageProperties, ILanguageProperties, strings } from "./l8n";
 import { LanguageContext } from "./LanguageContext";
 
 interface IProps {
     children?: React.ReactNode;
 }
 
-const setDefaultLanguage = (interfaceLanguage: string): string => {
+const setDefaultLanguage = (interfaceLanguage: string): ILanguageProperties => {
     switch (interfaceLanguage.toUpperCase().substr(0, 2)) {
         case "AR":
-            return "ar";
+            return ArabicLanguageProperties;
     }
 
     // fallback:
-    return "en";
+    return EnglishLanguageProperties;
 }
 
 function LanguageProvider(props: IProps) {
-    const [language, setLanguage] = useState<string>(setDefaultLanguage(strings.getInterfaceLanguage()));
+    const [languageProperties, setLanguageProperties] = useState<ILanguageProperties>(setDefaultLanguage(strings.getInterfaceLanguage()));
 
     return (
         <LanguageContext.Provider value={{
-            language,
-            setLanguage
+            languageProperties,
+            setLanguageProperties
         }}>
             {props.children}
         </LanguageContext.Provider>

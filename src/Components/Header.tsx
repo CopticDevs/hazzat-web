@@ -1,24 +1,26 @@
 import { useContext, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { AppSettings } from "../AppSettings";
 import logo from "../images/logo.png";
+import { ILanguageProperties } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { INavMenuItem } from "../Types/INavMenuItem";
 
 interface IProps {
-    menuItems: INavMenuItem[];
+    navItems: INavMenuItem[];
 }
 
 function Header(props: IProps) {
     const [showMenu, setShowMenu] = useState<boolean>(false);
-    const { language, setLanguage } = useContext(LanguageContext);
+    const { languageProperties, setLanguageProperties } = useContext(LanguageContext);
 
     const toggleMenu = () => {
         setShowMenu(!showMenu);   
     }
 
-    const handleChangeLanguage = (targetLanguage: string) => {
-        setLanguage && setLanguage(targetLanguage);
+    const handleChangeLanguage = (targetLanguageProperties: ILanguageProperties) => {
+        setLanguageProperties && setLanguageProperties(targetLanguageProperties);
     }
 
     return (
@@ -38,16 +40,17 @@ function Header(props: IProps) {
             <div className="nav clearfix">
                 <ul className="sf-menu">
                     {
-                        props.menuItems.map((item) => {
+                        props.navItems.map((item) => {
                             return (
                                 <li key={item.id}><NavLink to={item.location}><LocalizedMessage of={item.id} /></NavLink></li>
                             );
                         })
                     }
                     {
-                        language === "en" ?
-                            <li><NavLink to="#" onClick={() => handleChangeLanguage("ar")}><LocalizedMessage of="switchLang" /></NavLink></li> :
-                            <li><NavLink to="#" onClick={() => handleChangeLanguage("en")}><LocalizedMessage of="switchLang" /></NavLink></li>
+                        AppSettings.supportedLanguages.map((langProps) => {
+                            return languageProperties.localeName !== langProps.localeName ?
+                                <li><NavLink to="#" onClick={() => handleChangeLanguage(langProps)}>{langProps.friendlyName}</NavLink></li> : null
+                        })
                     }
                 </ul>
             
@@ -55,16 +58,17 @@ function Header(props: IProps) {
                     <div className="menu-toggle" onClick={toggleMenu}><LocalizedMessage of="menu" /></div>
                     {showMenu ? <ul onClick={toggleMenu}>
                         {
-                            props.menuItems.map((item) => {
+                            props.navItems.map((item) => {
                                 return (
                                     <li key={item.id}><NavLink to={item.location}><LocalizedMessage of={item.id} /></NavLink></li>
                                 );
                             })
                         }
                         {
-                            language === "en" ?
-                                <li><NavLink to="#" onClick={() => handleChangeLanguage("ar")}><LocalizedMessage of="switchLang" /></NavLink></li> :
-                                <li><NavLink to="#" onClick={() => handleChangeLanguage("en")}><LocalizedMessage of="switchLang" /></NavLink></li>
+                            AppSettings.supportedLanguages.map((langProps) => {
+                                return languageProperties.localeName !== langProps.localeName ?
+                                    <li><NavLink to="#" onClick={() => handleChangeLanguage(langProps)}>{langProps.friendlyName}</NavLink></li> : null
+                            })
                         }
                     </ul> : null }
                     

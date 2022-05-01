@@ -9,7 +9,7 @@ interface IProps {
     children?: React.ReactNode;
 }
 
-function RightPaper(props: IProps) {
+function SidePaper(props: IProps) {
     return (
         <div className="hymnLeft fLeft">
             <div className="md">
@@ -61,4 +61,4 @@ function RightPaper(props: IProps) {
     );
 }
 
-export default RightPaper;
+export default SidePaper;

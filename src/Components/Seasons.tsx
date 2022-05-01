@@ -10,14 +10,14 @@ import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import MainPaper, { Size } from "./MainPaper";
 
 function Seasons() {
-    const { language } = useContext(LanguageContext);
+    const { languageProperties } = useContext(LanguageContext);
     const [dateSpecificSeasons, setDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [nonDateSpecificSeasons, setNonDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const fetchHymns = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(language);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
         const seasons = await hymnsDataProvider.getSeasonList();
         const dsSeasons: ISeasonInfo[] = [];
         const ndsSeasons: ISeasonInfo[] = [];
@@ -34,10 +34,10 @@ function Seasons() {
         setDateSpecificSeasons(dsSeasons.sort(HymnUtils.seasonInfoComparer));
         setNonDateSpecificSeasons(ndsSeasons.sort(HymnUtils.seasonInfoComparer));
         setIsLoading(false);
-    }, [language]);
+    }, [languageProperties]);
 
     useEffect(() => {
-        document.title = strings.seasonsPageTitle;
+        document.title = strings.seasons + " - hazzat.com";
         fetchHymns();
     }, [fetchHymns]);
 

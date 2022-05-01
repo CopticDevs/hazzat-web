@@ -23,7 +23,8 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 .fRight { float:right;}
 
 /* Main */
-.main {  background:url(images/bg.png) repeat-y top center; background-size: 1280px 1030px; min-width:1270px; }
+.main {  background:url(images/bg.png) repeat-y top center; background-size: 1280px 1030px; min-width:1270px; direction:ltr; }
+.mainAr {  background:url(images/bg.png) repeat-y top center; background-size: 1280px 1030px; min-width:1270px; direction:rtl; }
 
 .mainContainer {width:1000px; margin:0px auto; position:relative; background:url(images/contentBg.png) repeat-y;}
 

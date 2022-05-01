@@ -1,3 +1,4 @@
+import { ArabicLanguageProperties, EnglishLanguageProperties } from "./l8n";
 import { IAppSettings } from "./Types/IAppSettings";
 
 export const AppSettings: IAppSettings = {
@@ -10,5 +11,7 @@ export const AppSettings: IAppSettings = {
         { id: "fonts", location: "/Fonts" },
         { id: "help", location: "/Help" },
         { id: "contactUs", location: "/ContactUs" }
-    ]
+    ],
+    supportedLanguages: [EnglishLanguageProperties, ArabicLanguageProperties],
+    defaultLanguage: EnglishLanguageProperties
 };

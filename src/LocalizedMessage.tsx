@@ -11,8 +11,8 @@ function LocalizedMessage(props: IProps) {
 
     return (
         <LanguageContext.Consumer>
-            {({ language }) => {
-                strings.setLanguage(language)
+            {({ languageProperties }) => {
+                strings.setLanguage(languageProperties.localeName)
                 return stringResouces[of]
             }}
         </LanguageContext.Consumer>
