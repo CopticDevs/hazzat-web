@@ -23,7 +23,8 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 .fRight { float:right;}
 
 /* Main */
-.main {  background:url(images/bg.png) repeat-y top center; background-size: 1280px 1030px; min-width:1270px; }
+.main {  background:url(images/bg.png) repeat-y top center; background-size: 1280px 1030px; min-width:1270px; direction:ltr; }
+.mainAr {  background:url(images/bg.png) repeat-y top center; background-size: 1280px 1030px; min-width:1270px; direction:rtl; }
 
 .mainContainer {width:1000px; margin:0px auto; position:relative; background:url(images/contentBg.png) repeat-y;}
 
@@ -90,7 +91,7 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 
 /*============New==============*/
 
-.menu-toggle { background: url("images/navBgNew.png") no-repeat scroll center top; cursor: pointer;  height:44px;  margin:0 auto auto auto;  width: 100%; }
+.menu-toggle { background: url("images/navBgNew.png") no-repeat scroll center top; cursor: pointer;  height:44px;  margin:0 auto auto auto;  width: 100%; font-size:26px; text-align:center; font-family: "Trajan Pro"; padding-top: 6px; }
 .menu-toggle-footer{ background: #000;  height: 34px; margin-top: 10px;  width: 100%; color:#fff; font-size:16px; text-align:center; cursor:pointer }
 .mobile, .mobile-footer, .welcome .md > img.welcomeTopMobile, .welcome .md > img.welcomeBottomMobile{display:none;}
 

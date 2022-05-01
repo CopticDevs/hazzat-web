@@ -1,9 +1,15 @@
 import { useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import LocalizedMessage from "../LocalizedMessage";
+import { INavMenuItem } from "../Types/INavMenuItem";
 import MainPaper from "./MainPaper";
-import RightPaper from "./RightPaper";
+import SidePaper from "./RightPaper";
 
-function Home() {
+interface IProps {
+    navItems: INavMenuItem[];
+}
+
+function Home(props: IProps) {
     useEffect(() => {
         document.title = "hazzat.com";
     }, []);
@@ -12,14 +18,18 @@ function Home() {
         <div>
             <MainPaper>
                 <div>
-                    <p><NavLink to="/Seasons">Seasons</NavLink></p>
-                    <p><NavLink to="/Types">Types</NavLink></p>
-                    <p><NavLink to="/Tunes">Tunes</NavLink></p>
+                    {
+                        props.navItems.map((item) => {
+                            return (
+                                item.id !== "home" ?
+                                <p key={item.id}><NavLink to={item.location}><LocalizedMessage of={item.id} /></NavLink></p> : null
+                            );
+                        })
+                    }
                 </div>
             </MainPaper>
 
-            <RightPaper>
-            </RightPaper>
+            <SidePaper />
         </div>
     );
 }

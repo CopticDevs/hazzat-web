@@ -1,12 +1,15 @@
+import 'bootstrap/dist/css/bootstrap.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import reportWebVitals from './reportWebVitals';
 import App from './App';
-import 'bootstrap/dist/css/bootstrap.css';
+import LanguageProvider from './LanguageProvider';
+import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
     <React.StrictMode>
-        <App />
+        <LanguageProvider>
+            <App />
+        </LanguageProvider>
     </React.StrictMode>,
     document.getElementById('root')
 );

@@ -1,4 +1,6 @@
+import { strings } from "../l8n";
+
 export interface INavMenuItem {
-	name: string;
+	id: keyof typeof strings;
 	location: string;
 }

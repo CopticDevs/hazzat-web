@@ -15,7 +15,7 @@ interface IProps {
 
 function MainPaper(props: IProps) {
     return (
-        <div className={props.size === Size.Wide ? "leftMain fLeftWide" : "leftMain fLeft"}>
+        <div className={props.size === Size.Wide ? "leftMain fLeft" : "leftMain fLeft"}>
             <div className="welcomeMain clearfix">
                 <div className="welcome clearfix">
 

@@ -1,14 +1,15 @@
-import hymnTop from "../images/hymnTop.png";
 import facebook from "../images/facebook.png";
+import hymnBottom from "../images/hymnBottom.png";
+import hymnTop from "../images/hymnTop.png";
 import twitter from "../images/twitter.png";
 import youtube from "../images/youtube.png";
-import hymnBottom from "../images/hymnBottom.png";
+import LocalizedMessage from "../LocalizedMessage";
 
 interface IProps {
     children?: React.ReactNode;
 }
 
-function RightPaper(props: IProps) {
+function SidePaper(props: IProps) {
     return (
         <div className="hymnLeft fLeft">
             <div className="md">
@@ -18,7 +19,7 @@ function RightPaper(props: IProps) {
             <div className="hymnRep clearfix">
 
                 <div className="hymnData clearfix">
-                    <h2>Follow us</h2>
+                    <h2><LocalizedMessage of="followUs" /></h2>
                 </div>
                 <div className="socialMedia clearfix" style={{paddingBottom: "40px"}}>
 
@@ -60,4 +61,4 @@ function RightPaper(props: IProps) {
     );
 }
 
-export default RightPaper;
+export default SidePaper;
