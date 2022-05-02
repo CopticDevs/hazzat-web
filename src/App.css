@@ -22,9 +22,10 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 .fLeft { float:left;}
 .fRight { float:right;}
 
+.dirRtl { direction: rtl; }
+
 /* Main */
 .main {  background:url(images/bg.png) repeat-y top center; background-size: 1280px 1030px; min-width:1270px; direction:ltr; }
-.mainAr {  background:url(images/bg.png) repeat-y top center; background-size: 1280px 1030px; min-width:1270px; direction:rtl; }
 
 .mainContainer {width:1000px; margin:0px auto; position:relative; background:url(images/contentBg.png) repeat-y;}
 
@@ -96,8 +97,8 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 .mobile, .mobile-footer, .welcome .md > img.welcomeTopMobile, .welcome .md > img.welcomeBottomMobile{display:none;}
 
 @media screen and (max-width:1280px){
-    .mainContainer{ max-width: 1000px; width: 100%; background-size: contain}
     .main{ background-size: contain; min-width: 100%}
+    .mainContainer{ max-width: 1000px; width: 100%; background-size: contain}
     .hymnLeft .md { width:100%}
     .hymnLeft .md img{ width:100%}
     .welcomeMain .md img{ width:100%}
@@ -132,11 +133,6 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
     .nav .mobile{background:url("images/navBgBottom.jpg"); background-repeat:no-repeat; background-position:bottom; padding-bottom:5px; float:left; width:100%; }
 }
 
-@media screen and (min-width:500px) and (max-width:1280px){
-     .leftMain{ width: 56%; margin-left:4%}
-     .hymnLeft{ width: 40%}
-}
-
 @media screen and (max-width:767px){
      .leftMain{ width: 92%; margin:0 4%;}
      .hymnLeft{ width: 92%; margin:0 4%;}
@@ -146,9 +142,15 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
      .welcome .md > img.welcomeTopMobile, .welcome .md > img.welcomeBottomMobile{display:block;}
      .welcome .md > img, .hymnLeft .md > img{ display:none}
      .welcomeRep{ background:url("images/welcomeRepBk.png"); background-position:left 0; float:left; background-size:100% 100%; background-repeat:no-repeat }
-     .welcomeRep{ padding:0; width:100%;}
+     .welcomeRep{ width:100%;}
      .welcomeMain .DNNModuleContent { padding:20px;}
 }
+
+/*@media screen and (min-width:500px) and (max-width:1280px){
+     .leftMain{ width: 56%; margin-left:4%}
+     .hymnLeft{ width: 40%}
+}
+*/
 
 @media screen and (min-width:1001px) {
      .sf-menu{ display:block}
@@ -157,17 +159,13 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
      .nav ul li a{ padding:0}
 }
 
-@media screen and (min-width:769px) and (max-width:1000px) {
-     .footer{ height:auto; padding-top:5px; padding-bottom:5px;}
-     
-}
 @media screen and (min-width:768px) and (max-width:1000px) {
-      .welcomeRep { background:url("images/welcomeRep.png"); background-position:center top; background-size:100% 100%; background-repeat:no-repeat;}
+    .footer{ height:auto; padding-top:5px; padding-bottom:5px;}
+    .welcomeRep { background:url("images/welcomeRep.png"); background-position:center top; background-size:100% 100%; background-repeat:no-repeat;}
 }
 
 @media screen and (max-width:1000px) {
     .welcome .md > img, .hymnLeft .md > img{ display:none}
-  
     .hymnRep { background: url("images/hymnRep.png"); background-position:center top; background-size:100% 100%; background-repeat:no-repeat}
 }
 
@@ -178,21 +176,23 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 }
 
 
-@media screen and (max-width:480px) {
+/*@media screen and (max-width:480px) {
     .hymnRep {padding-left:30px;}
     .welcome h2{ font-size:25px;}
-}
+}*/
 
-@media screen and (min-width:481px) and (max-width:768px) {
+/*@media screen and (min-width:481px) and (max-width:768px) {
     .menu-toggle{ margin-top:0;}
     .welcome h2{ font-size:25px;}
 }
-
-@media screen and (max-width:500px) {
+*/
+/*@media screen and (max-width:500px) {
     .topNav{ top:auto; left:0; right:0; width:125px; margin:auto}
+    .nav { margin-top: -45px; }
     .menu-toggle{ margin:45px auto auto}
-}
+}*/
 
+/*
 @media screen and (max-width:1100px) {
     .header{ width:94%; margin:0 3%;}
-}
+}*/
