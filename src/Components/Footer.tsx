@@ -36,7 +36,7 @@ function Footer(props: IProps) {
                 {
                     AppSettings.supportedLanguages.map((langProps) => {
                         return languageProperties.localeName !== langProps.localeName ?
-                            <li><NavLink to="#" onClick={() => handleChangeLanguage(langProps)}>{langProps.friendlyName}</NavLink></li> : null
+                            <li key={langProps.localeName}><NavLink to="#" onClick={() => handleChangeLanguage(langProps)}>{langProps.friendlyName}</NavLink></li> : null
                     })
                 }
             </ul>
@@ -54,7 +54,7 @@ function Footer(props: IProps) {
                     {
                         AppSettings.supportedLanguages.map((langProps) => {
                             return languageProperties.localeName !== langProps.localeName ?
-                                <li><NavLink to="#" onClick={() => handleChangeLanguage(langProps)}>{langProps.friendlyName}</NavLink></li> : null
+                                <li key={langProps.localeName}><NavLink to="#" onClick={() => handleChangeLanguage(langProps)}>{langProps.friendlyName}</NavLink></li> : null
                         })
                     }
                 </ul> : null }
