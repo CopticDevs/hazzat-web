@@ -18,7 +18,7 @@ function App() {
 
     return (
         <BrowserRouter>
-            <div className={languageProperties.isRtl ? "mainAr" : "main"}>
+            <div className={languageProperties.isRtl ? "main dirRtl" : "main"}>
                 <div className="mainContainer">
                     <Header navItems={AppSettings.navigationMenuItems} />
                     <div className="body clearfix">
