@@ -32,7 +32,7 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 
 /* Header */
 .header { padding:0px; }
-.innerHeader { background:url(images/headerBg.png) no-repeat top center; padding-top:14px; position:relative; }
+.innerHeader { background:url(images/headerBg.png) no-repeat top center; padding-top:17px; position:relative; }
 
 .logo { width:287px; margin:0px auto 0px auto; z-index:999; position:relative; }
 .logo img { width:287px; }
@@ -50,7 +50,7 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 .nav ul li a { font-size:13px; font-family: "Trajan Pro"; font-weight:bold; }
 
 /* body */
-.body { padding:0px; position:relative; min-height:580px; position:relative;}
+.body { padding:0px; position:relative; min-height:595px; position:relative;}
 
 .topContent { margin:20px 55px 0px;}
 .topContent h2 { font-family: "Trajan Pro"; font-size:34px; font-weight:700; }
@@ -83,7 +83,7 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 .socialMedia img { float:left; width:auto; margin-left:7px; }
 
 /* footer */
-.footer { width:912px; background-color:#000; margin:-30px 54px 0px 34px; height:30px; padding-left:20px; position:absolute;  }
+.footer { width:936px; background-color:#000; margin:-30px 54px 0px 34px; height:30px; padding-left:20px; position:absolute;  }
 .footer ul { padding:0px 0px 0px 0px; }
 .footer ul li { float:left; padding:8px 9px 0px; }
 .footer ul li a { padding:0px; font-size:11px; font-family:'Conv_TrajanPro-Regular'; color:#bdbdbd; z-index:999; position:relative; }
@@ -98,12 +98,13 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 
 @media screen and (max-width:1280px){
     .main{ background-size: contain; min-width: 100%}
-    .mainContainer{ max-width: 1000px; width: 100%; background-size: contain}
+    .mainContainer{ max-width: 989px; width: 100%; background-size: contain}
     .hymnLeft .md { width:100%}
     .hymnLeft .md img{ width:100%}
     .welcomeMain .md img{ width:100%}
     .welcomeRep{ padding: 40px 22px 45px 33px}
     .hymnRep { padding:45px 58px 15px 23px}
+    .footer { width:925px;}
 }
 
 @media screen and (max-width:999px){
