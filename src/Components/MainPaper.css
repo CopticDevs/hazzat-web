@@ -1,0 +1,18 @@
+.wideTopImage {
+    width: 900px;
+    margin-top: -6px;
+}
+
+.topImage {
+    width: 602px;
+}
+
+.bottomImage {
+    width: 602px;
+    margin-bottom: 50px;
+}
+
+.wideBottomImage {
+    width: 900px;
+    margin-bottom: 50px;
+}

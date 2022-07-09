@@ -8,6 +8,7 @@ import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataPro
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import MainPaper, { Size } from "./MainPaper";
+import "./Seasons.css";
 
 function Seasons() {
     const { languageProperties } = useContext(LanguageContext);
@@ -44,7 +45,7 @@ function Seasons() {
     return (
         <MainPaper size={Size.Wide}>
             <div>
-                <div><LocalizedMessage of="seasons" /></div>
+                <div className="pageTitle"><LocalizedMessage of="seasons" /></div>
                 {
                     isLoading ? <div><LocalizedMessage of="loading" /></div> :
                     dateSpecificSeasons && dateSpecificSeasons.length > 0 ?
@@ -58,7 +59,7 @@ function Seasons() {
                             :
                             <div><LocalizedMessage of="noSeasons" /></div>
                 }
-                <div><LocalizedMessage of="otherServices" /></div>
+                <div className="otherServicesTitle"><LocalizedMessage of="otherServices" /></div>
                 {
                     isLoading ? <div><LocalizedMessage of="loading" /></div> :
                     nonDateSpecificSeasons && nonDateSpecificSeasons.length > 0 ?
