@@ -58,7 +58,9 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 .leftMain  { width:602px; margin-left:50px; margin-top:25px; float:left; }
 .leftMainWide  { width:900px; margin-left:50px; margin-top:25px; float:left; }
 
-.welcomeMain { padding-bottom:0px; }
+.welcomeMain {
+    padding-bottom: 0px;
+}
 
 .welcome { padding:0px; }
 .welcome h2 { font-family: "Trajan Pro"; font-size:34px; font-weight:700; }
