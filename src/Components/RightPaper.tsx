@@ -1,8 +1,10 @@
+import { useContext } from "react";
 import facebook from "../images/facebook.png";
 import hymnBottom from "../images/hymnBottom.png";
 import hymnTop from "../images/hymnTop.png";
 import twitter from "../images/twitter.png";
 import youtube from "../images/youtube.png";
+import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 
 interface IProps {
@@ -10,8 +12,11 @@ interface IProps {
 }
 
 function SidePaper(props: IProps) {
+    const { languageProperties } = useContext(LanguageContext);
+    const langClassName = languageProperties.isRtl ? "dirRtl" : "";
+
     return (
-        <div className="hymnLeft fLeft">
+        <div className={`hymnLeft fLeft ${langClassName}`}>
             <div className="md">
                 <img src={hymnTop} alt="" />
             </div>
