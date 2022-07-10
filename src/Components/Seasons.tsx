@@ -16,7 +16,7 @@ function Seasons() {
     const [nonDateSpecificSeasons, setNonDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    const fetchHymns = React.useCallback(async () => {
+    const fetchSeasons = React.useCallback(async () => {
         setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
         const seasons = await hymnsDataProvider.getSeasonList();
@@ -39,8 +39,8 @@ function Seasons() {
 
     useEffect(() => {
         document.title = strings.seasons + " - hazzat.com";
-        fetchHymns();
-    }, [fetchHymns]);
+        fetchSeasons();
+    }, [fetchSeasons]);
 
     return (
         <MainPaper size={Size.Wide}>

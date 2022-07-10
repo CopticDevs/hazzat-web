@@ -51,6 +51,7 @@
     <TypeScriptCompile Include="src\l8n.ts" />
     <TypeScriptCompile Include="src\LanguageProvider.tsx" />
     <TypeScriptCompile Include="src\LanguageContext.tsx" />
+    <TypeScriptCompile Include="src\stringFormat.ts" />
     <TypeScriptCompile Include="src\LocalizedMessage.tsx" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Utils\HymnUtils.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\HymnsDataProvider.ts" />
@@ -67,6 +68,7 @@
     <Content Include="public\robots.txt" />
     <Content Include="src\App.css" />
     <Content Include="src\Components\MainPaper.css" />
+    <Content Include="src\Components\SeasonDetails.css" />
     <Content Include="src\Components\Seasons.css" />
     <Content Include="src\Components\Home.css" />
     <Content Include="src\css\all-ie-only.css" />
