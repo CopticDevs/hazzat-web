@@ -34,7 +34,8 @@ export const strings = new LocalizedStrings({
         "loading": "Loading...",
         "noSeasons": "No seasons to display",
         "followUs": "Follow Us",
-        "menu": "Menu"
+        "menu": "Menu",
+        "seasonTitle": "{0} Hymns"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -51,6 +52,7 @@ export const strings = new LocalizedStrings({
         "loading": "جار التحميل...",
         "noSeasons": "لا توجد مواسم للعرض",
         "followUs": "تابعنا",
-        "menu": "القائمة"
+        "menu": "القائمة",
+        "seasonTitle": "الحان {0}"
     }
 });

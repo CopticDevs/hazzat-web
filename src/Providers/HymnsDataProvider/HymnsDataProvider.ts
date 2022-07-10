@@ -26,6 +26,12 @@ export class HymnsDataProvider implements IHymnsDataProvider {
     }
 
     public async getSeason(seasonId: string): Promise<ISeasonInfo> {
-        throw new Error("Method not implemented.");
+        try {
+            const response = await this.httpClient.get<ISeasonInfo>(`/seasons/${seasonId}`);
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            throw ex;
+        }
     }
 }
