@@ -1,7 +1,9 @@
+import { useContext } from "react";
 import welcomeBottom from "../images/welcomeBottom.png";
 import welcomeBottomMobile from "../images/welcomeBottomMobile.png";
 import welcomeTop from "../images/welcomeTop.png";
 import welcomeTopMobile from "../images/welcomeTopMobile.png";
+import { LanguageContext } from "../LanguageContext";
 import "./MainPaper.css";
 
 export enum Size {
@@ -15,8 +17,11 @@ interface IProps {
 }
 
 function MainPaper(props: IProps) {
+    const { languageProperties } = useContext(LanguageContext);
+    const langClassName = languageProperties.isRtl ? "dirRtl" : "";
+
     return (
-        <div className={props.size === Size.Wide ? "leftMainWide fLeft" : "leftMain fLeft"}>
+        <div className={props.size === Size.Wide ? `leftMainWide fLeft ${langClassName}` : `leftMain fLeft ${langClassName}`}>
             <div className="welcomeMain clearfix">
                 <div className="welcome clearfix">
 
