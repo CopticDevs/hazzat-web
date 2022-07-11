@@ -37,6 +37,9 @@
   </PropertyGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\AppSettings.ts" />
+    <TypeScriptCompile Include="src\Components\ServiceContents.tsx" />
+    <TypeScriptCompile Include="src\Components\HymnRow.tsx" />
+    <TypeScriptCompile Include="src\Components\HymnTitle.tsx" />
     <TypeScriptCompile Include="src\Components\Footer.tsx" />
     <TypeScriptCompile Include="src\Components\Header.tsx" />
     <TypeScriptCompile Include="src\Components\Home.test.tsx" />
@@ -51,6 +54,7 @@
     <TypeScriptCompile Include="src\l8n.ts" />
     <TypeScriptCompile Include="src\LanguageProvider.tsx" />
     <TypeScriptCompile Include="src\LanguageContext.tsx" />
+    <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IServiceInfo.ts" />
     <TypeScriptCompile Include="src\stringFormat.ts" />
     <TypeScriptCompile Include="src\LocalizedMessage.tsx" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Utils\HymnUtils.ts" />
@@ -126,6 +130,7 @@
     <Content Include="src\Types\INavMenuItem.ts" />
     <Content Include="tsconfig.json" />
     <TypeScriptCompile Include="src\Types\IAppSettings.ts" />
+    <TypeScriptCompile Include="src\Utils\ParserUtils.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="public\" />
@@ -134,6 +139,7 @@
     <Folder Include="src\css\" />
     <Folder Include="src\fonts\" />
     <Folder Include="src\images\" />
+    <Folder Include="src\Utils\" />
     <Folder Include="src\Types\" />
     <Folder Include="src\Providers\" />
     <Folder Include="src\Providers\HymnsDataProvider\" />
