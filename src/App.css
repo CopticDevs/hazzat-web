@@ -103,7 +103,6 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
     .mainContainer{ max-width: 989px; width: 100%; background-size: contain}
     .hymnLeft .md { width:100%}
     .hymnLeft .md img{ width:100%}
-    .welcomeMain .md img{ width:100%}
     .welcomeRep{ padding: 40px 22px 45px 33px}
     .hymnRep { padding:45px 58px 15px 23px}
     .footer { width:925px;}
