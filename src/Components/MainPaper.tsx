@@ -1,8 +1,4 @@
 import { useContext } from "react";
-import welcomeBottom from "../images/welcomeBottom.png";
-import welcomeBottomMobile from "../images/welcomeBottomMobile.png";
-import welcomeTop from "../images/welcomeTop.png";
-import welcomeTopMobile from "../images/welcomeTopMobile.png";
 import { LanguageContext } from "../LanguageContext";
 import "./MainPaper.css";
 
@@ -21,26 +17,8 @@ function MainPaper(props: IProps) {
     const langClassName = languageProperties.isRtl ? "dirRtl" : "";
 
     return (
-        <div className={props.size === Size.Wide ? `leftMainWide fLeft ${langClassName}` : `leftMain fLeft ${langClassName}`}>
-            <div className="welcomeMain clearfix">
-                <div className="welcome clearfix">
-
-                    <div className="md">
-                        <img src={welcomeTop} className={props.size === Size.Wide ? "wideTopImage" : "topImage"} alt="" />
-                        <img src={welcomeTopMobile} className="welcomeTopMobile" alt="" />
-                    </div>
-
-                    <div className="welcomeRep clearfix">
-                        {props.children}
-                    </div>
-
-                    <div className="md">
-                        <img src={welcomeBottom} className={props.size === Size.Wide ? "wideBottomImage" : "bottomImage"} alt="" />
-                        <img src={welcomeBottomMobile} alt="" className="welcomeBottomMobile"/>
-                    </div>
-
-                </div>
-            </div>
+        <div className={props.size === Size.Wide ? `mainPaper widePaper ${langClassName}` : `mainPaper ${langClassName}`}>
+            {props.children}
         </div>
     );
 }

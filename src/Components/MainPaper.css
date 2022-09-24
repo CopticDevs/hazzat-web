@@ -1,18 +1,18 @@
-.wideTopImage {
-    width: 900px;
-    margin-top: -6px;
+.mainPaper {
+    width: 55%;
+    border: 20px solid;
+    border-image: url(../images/mainPage.svg);
+    border-image-slice: 100;
+    background-color: #ffffff;
+    margin:10px 10px 40px 50px;
 }
 
-.topImage {
-    width: 602px;
+.widePaper {
+    width: 90%;
 }
 
-.bottomImage {
-    width: 602px;
-    margin-bottom: 50px;
-}
-
-.wideBottomImage {
-    width: 900px;
-    margin-bottom: 50px;
+@media screen and (max-width:800px) {
+    .mainPaper {
+        margin: 10px 10px 40px 20px;
+    }
 }

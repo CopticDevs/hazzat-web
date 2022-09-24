@@ -4,7 +4,7 @@ import LocalizedMessage from "../LocalizedMessage";
 import { INavMenuItem } from "../Types/INavMenuItem";
 import "./Home.css";
 import MainPaper from "./MainPaper";
-import SidePaper from "./RightPaper";
+import SidePaper from "./SidePaper";
 
 interface IProps {
     navItems: INavMenuItem[];
@@ -16,7 +16,7 @@ function Home(props: IProps) {
     }, []);
 
     return (
-        <div>
+        <div className="row">
             <MainPaper>
                 <div>
                     {
