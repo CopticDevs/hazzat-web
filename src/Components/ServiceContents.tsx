@@ -15,6 +15,7 @@ function ServiceContents(props: IProps) {
     const { languageProperties } = useContext(LanguageContext);
     const [serviceInfo, setServiceInfo] = useState<IServiceInfo | undefined>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
     const fetchService = React.useCallback(async () => {
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
@@ -34,7 +35,9 @@ function ServiceContents(props: IProps) {
 
     return (
         <div style={{ padding: "7px 3px 7px 3px" }}>
-            <HymnTitle content={serviceInfo.name} />
+            <div className={langClassName}>
+                <HymnTitle content={serviceInfo.name} />
+            </div>
             <div className="clear" />
             <HymnRow title="hymns will go here" />
         </div>

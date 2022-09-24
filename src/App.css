@@ -58,20 +58,10 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 .leftMain  { width:602px; margin-left:50px; margin-top:25px; float:left; }
 .leftMainWide  { width:900px; margin-left:50px; margin-top:25px; float:left; }
 
-.welcomeMain {
-    padding-bottom: 0px;
-}
-
-.welcome { padding:0px; }
-.welcome h2 { font-family: "Trajan Pro"; font-size:34px; font-weight:700; }
-
-.welcome p { padding-top:10px; color:#000;  }
-.welcome p.text { padding-top:10px; padding-left:13px;   }
-
 .footerContent { margin:20px 55px 50px;}
 .footerContent h2 { font-family: "Trajan Pro"; font-size:34px; font-weight:700; }
 
-.hymnLeft { position: relative; width:364px; margin-right:-26px; margin-top:20px }
+.hymnLeft { position: relative; width:388px; margin-right:-26px; margin-top:20px }
 
 .hymnRep { background:url(images/hymnRep.png) no-repeat left 28px; background-size:100% 100%; padding:0 58px 60px 23px;  }
 
@@ -96,14 +86,13 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 
 .menu-toggle { background: url("images/navBgNew.png") no-repeat scroll center top; cursor: pointer;  height:44px;  margin:0 auto auto auto;  width: 100%; font-size:26px; text-align:center; font-family: "Trajan Pro"; padding-top: 6px; }
 .menu-toggle-footer{ background: #000;  height: 34px; margin-top: 10px;  width: 100%; color:#fff; font-size:16px; text-align:center; cursor:pointer }
-.mobile, .mobile-footer, .welcome .md > img.welcomeTopMobile, .welcome .md > img.welcomeBottomMobile{display:none;}
+.mobile, .mobile-footer {display:none;}
 
 @media screen and (max-width:1280px){
     .main{ background-size: contain; min-width: 100%}
     .mainContainer{ max-width: 989px; width: 100%; background-size: contain}
     .hymnLeft .md { width:100%}
     .hymnLeft .md img{ width:100%}
-    .welcomeRep{ padding: 40px 22px 45px 33px}
     .hymnRep { padding:45px 58px 15px 23px}
     .footer { width:925px;}
 }
@@ -141,11 +130,6 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
      .logo{ width:27%}
      .hymnRep{ padding-left:45px;}
      .md img{display:none}
-     .welcome .md > img.welcomeTopMobile, .welcome .md > img.welcomeBottomMobile{display:block;}
-     .welcome .md > img, .hymnLeft .md > img{ display:none}
-     .welcomeRep{ background:url("images/welcomeRepBk.png"); background-position:left 0; float:left; background-size:100% 100%; background-repeat:no-repeat }
-     .welcomeRep{ width:100%;}
-     .welcomeMain .DNNModuleContent { padding:20px;}
 }
 
 /*@media screen and (min-width:500px) and (max-width:1280px){
@@ -163,29 +147,23 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 
 @media screen and (min-width:768px) and (max-width:1000px) {
     .footer{ height:auto; padding-top:5px; padding-bottom:5px;}
-    .welcomeRep { background:url("images/welcomeRep.png"); background-position:center top; background-size:100% 100%; background-repeat:no-repeat;}
 }
 
 @media screen and (max-width:1000px) {
-    .welcome .md > img, .hymnLeft .md > img{ display:none}
     .hymnRep { background: url("images/hymnRep.png"); background-position:center top; background-size:100% 100%; background-repeat:no-repeat}
 }
 
 @media screen and (min-width:1000px) {
-    .welcome .md > img, .hymnLeft .md > img{ display:block}
-    .welcomeRep{ background:url("images/welcomeRepBk.png"); background-position:left 25px; background-size:100% 100%; background-repeat:no-repeat; padding:20px 22px 30px 33px }
     .hymnRep { background:url("images/hymnRepBk.png"); background-position:left 28px; background-size:100% 100%; background-repeat:no-repeat; min-height:200px;}
 }
 
 
 /*@media screen and (max-width:480px) {
     .hymnRep {padding-left:30px;}
-    .welcome h2{ font-size:25px;}
 }*/
 
 /*@media screen and (min-width:481px) and (max-width:768px) {
     .menu-toggle{ margin-top:0;}
-    .welcome h2{ font-size:25px;}
 }
 */
 /*@media screen and (max-width:500px) {
