@@ -5,7 +5,7 @@ interface IProps {
 function HymnTitle(props: IProps) {
 
     return (
-        <div className="hymnData fLeft">
+        <div className="hymnData">
             <h2>{props.content}</h2>
         </div>
     );
