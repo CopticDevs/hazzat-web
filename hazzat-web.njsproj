@@ -46,7 +46,7 @@
     <TypeScriptCompile Include="src\Components\Home.tsx" />
     <TypeScriptCompile Include="src\App.tsx" />
     <TypeScriptCompile Include="src\Components\MainPaper.tsx" />
-    <TypeScriptCompile Include="src\Components\RightPaper.tsx" />
+    <TypeScriptCompile Include="src\Components\SidePaper.tsx" />
     <TypeScriptCompile Include="src\index.tsx" />
     <TypeScriptCompile Include="src\Components\SeasonDetails.tsx" />
     <TypeScriptCompile Include="src\Components\Services.tsx" />
