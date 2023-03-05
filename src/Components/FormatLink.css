@@ -1,6 +1,11 @@
-img {
+.formatImage {
     border: 0px;
     width: 16px;
     height: 20px;
     margin-right: 4px;
+}
+
+.flipRtl {
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
 }

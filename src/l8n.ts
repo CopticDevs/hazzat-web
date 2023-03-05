@@ -35,7 +35,14 @@ export const strings = new LocalizedStrings({
         "noSeasons": "No seasons to display",
         "followUs": "Follow Us",
         "menu": "Menu",
-        "seasonTitle": "{0} Hymns"
+        "seasonTitle": "{0} Hymns",
+        "textFormatName": "Text",
+        "hazzatFormatName": "Hazzat",
+        "verticalHazzatFormatName": "Vertical Hazzat",
+        "musicFormatName": "Musical Notes",
+        "audioFormatName": "Audio",
+        "videoFormatName": "Video",
+        "informationFormatName": "Information"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -53,6 +60,13 @@ export const strings = new LocalizedStrings({
         "noSeasons": "لا توجد مواسم للعرض",
         "followUs": "تابعنا",
         "menu": "القائمة",
-        "seasonTitle": "الحان {0}"
+        "seasonTitle": "الحان {0}",
+        "textFormatName": "نَص",
+        "hazzatFormatName": "هزّات",
+        "verticalHazzatFormatName": "هزّات أفقية",
+        "musicFormatName": "نوتة موسيقية",
+        "audioFormatName": "مَلفّ صوتي",
+        "videoFormatName": "فيديو",
+        "informationFormatName": "معلومات"
     }
 });

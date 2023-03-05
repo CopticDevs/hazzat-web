@@ -30,8 +30,8 @@ function Header(props: IProps) {
             <div className="innerHeader clearfix">
 
                 <div className="logo clearfix">
-                    <NavLink to="/">
-                        <img src={logo} alt="" />
+                    <NavLink to="/" aria-label="logo">
+                        <img src={logo} alt="logo" />
                     </NavLink>
                 </div>
 
