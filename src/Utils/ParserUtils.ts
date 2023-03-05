@@ -1,5 +1,6 @@
 const serviceIdRegEx: string = "^/seasons/[0-9]+/services/([0-9]+)$";
 const hymnIdRegEx: string = "^/seasons/[0-9]+/services/[0-9]+/hymns/([0-9]+)$";
+const formatIdRegEx: string = "^/seasons/[0-9]+/services/[0-9]+/hymns/[0-9]+/formats/([0-9]+)$";
 
 /**
  * Extracts the service number from the full service id.
@@ -29,6 +30,21 @@ export function getHymnNumberFromId(fullHymnId: string): string {
     }
 
     const match = expression.exec(fullHymnId);
+    if (match === null) {
+        return "";
+    }
+
+    return match[1];
+}
+
+export function getFormatNumberFromId(fullFormatId: string): string {
+    const expression = new RegExp(formatIdRegEx, "i");
+
+    if (!fullFormatId || !expression.test(fullFormatId)) {
+        return "";
+    }
+
+    const match = expression.exec(fullFormatId);
     if (match === null) {
         return "";
     }

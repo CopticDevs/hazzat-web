@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\AppSettings.ts" />
+    <TypeScriptCompile Include="src\Components\FormatLink.tsx" />
     <TypeScriptCompile Include="src\Components\ServiceContents.tsx" />
     <TypeScriptCompile Include="src\Components\HymnRow.tsx" />
     <TypeScriptCompile Include="src\Components\HymnTitle.tsx" />
@@ -55,6 +56,7 @@
     <TypeScriptCompile Include="src\LanguageProvider.tsx" />
     <TypeScriptCompile Include="src\LanguageContext.tsx" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IHymnInfo.ts" />
+    <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IFormatInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IServiceInfo.ts" />
     <TypeScriptCompile Include="src\stringFormat.ts" />
     <TypeScriptCompile Include="src\LocalizedMessage.tsx" />
@@ -72,6 +74,8 @@
     <Content Include="public\manifest.json" />
     <Content Include="public\robots.txt" />
     <Content Include="src\App.css" />
+    <Content Include="src\Components\FormatLink.css" />
+    <Content Include="src\Components\HymnRow.css" />
     <Content Include="src\Components\MainPaper.css" />
     <Content Include="src\Components\SeasonDetails.css" />
     <Content Include="src\Components\Seasons.css" />
@@ -99,9 +103,13 @@
     <Content Include="src\fonts\TrajanPro-Regular.otf" />
     <Content Include="src\fonts\TrajanPro-Regular.ttf" />
     <Content Include="src\fonts\TrajanPro-Regular.woff" />
+    <Content Include="src\images\audio_mouseon.gif" />
+    <Content Include="src\images\audio_mouseout.gif" />
     <Content Include="src\images\bg.png" />
     <Content Include="src\images\contentBg.png" />
     <Content Include="src\images\facebook.png" />
+    <Content Include="src\images\hazzat_mouseon.gif" />
+    <Content Include="src\images\hazzat_mouseout.gif" />
     <Content Include="src\images\headerBg.png" />
     <Content Include="src\images\headerBgNew.png" />
     <Content Include="src\images\headingBottom.png" />
@@ -109,15 +117,26 @@
     <Content Include="src\images\hymnRep.png" />
     <Content Include="src\images\hymnRepBk.png" />
     <Content Include="src\images\hymnTop.png" />
+    <Content Include="src\images\information_mouseon.gif" />
+    <Content Include="src\images\information_mouseout.gif" />
     <Content Include="src\images\logo.png" />
+    <Content Include="src\images\music_mouseon.gif" />
+    <Content Include="src\images\music_mouseout.gif" />
     <Content Include="src\images\navBg.png" />
     <Content Include="src\images\navBg2.jpg" />
     <Content Include="src\images\navBgBottom.jpg" />
     <Content Include="src\images\navBgNew.png" />
     <Content Include="src\images\pattern.jpg" />
+    <Content Include="src\images\space.gif" />
+    <Content Include="src\images\text_mouseon.gif" />
+    <Content Include="src\images\text_mouseout.gif" />
     <Content Include="src\images\topNavBg.png" />
     <Content Include="src\images\topSep.jpg" />
     <Content Include="src\images\twitter.png" />
+    <Content Include="src\images\verticalhazzat_mouseon.gif" />
+    <Content Include="src\images\verticalhazzat_mouseout.gif" />
+    <Content Include="src\images\video_mouseon.gif" />
+    <Content Include="src\images\video_mouseout.gif" />
     <Content Include="src\images\welcomeBottom.png" />
     <Content Include="src\images\welcomeBottomMobile.png" />
     <Content Include="src\images\welcomeRep.png" />
@@ -130,6 +149,7 @@
     <Content Include="README.md" />
     <Content Include="src\Types\INavMenuItem.ts" />
     <Content Include="tsconfig.json" />
+    <TypeScriptCompile Include="src\Types\StringMap.ts" />
     <TypeScriptCompile Include="src\Types\IAppSettings.ts" />
     <TypeScriptCompile Include="src\Utils\ParserUtils.ts" />
   </ItemGroup>

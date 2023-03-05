@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { IHymnsDataProvider } from "./IHymnsDataProvider";
+import { IFormatInfo } from "./Models/IFormatInfo";
 import { IHymnInfo } from "./Models/IHymnInfo";
 import { ISeasonInfo } from "./Models/ISeasonInfo";
 import { IServiceInfo } from "./Models/IServiceInfo";
@@ -60,6 +61,36 @@ export class HymnsDataProvider implements IHymnsDataProvider {
     public async getServiceHymnList(seasonId: string, serviceId: string): Promise<IHymnInfo[]> {
         try {
             const response = await this.httpClient.get<IHymnInfo[]>(`/seasons/${seasonId}/services/${serviceId}/hymns`);
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            throw ex;
+        }
+    }
+
+    public async getServiceHymn(seasonId: string, serviceId: string, hymnId: string): Promise<IHymnInfo> {
+        try {
+            const response = await this.httpClient.get<IHymnInfo>(`/seasons/${seasonId}/services/${serviceId}/hymns/${hymnId}`);
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            throw ex;
+        }
+    }
+
+    public async getServiceHymnFormatList(seasonId: string, serviceId: string, hymnId: string): Promise<IFormatInfo[]> {
+        try {
+            const response = await this.httpClient.get<IFormatInfo[]>(`/seasons/${seasonId}/services/${serviceId}/hymns/${hymnId}/formats`);
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            throw ex;
+        }
+    }
+
+    public async getServiceHymnFormat(seasonId: string, serviceId: string, hymnId: string, formatId: string): Promise<IFormatInfo> {
+        try {
+            const response = await this.httpClient.get<IFormatInfo>(`/seasons/${seasonId}/services/${serviceId}/hymns/${hymnId}/formats/${formatId}`);
             return response.data;
         } catch (ex) {
             console.log(ex);

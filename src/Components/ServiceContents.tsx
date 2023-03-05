@@ -4,8 +4,10 @@ import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvi
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
+import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import { getHymnNumberFromId } from "../Utils/ParserUtils";
 import HymnRow from "./HymnRow";
+import "./HymnRow.css";
 import HymnTitle from "./HymnTitle";
 
 interface IProps {
@@ -29,7 +31,7 @@ function ServiceContents(props: IProps) {
     const fetchHymns = React.useCallback(async () => {
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
         const hymnsResponse = await hymnsDataProvider.getServiceHymnList(props.seasonId, props.serviceId);
-        setHymnsInfo(hymnsResponse);
+        setHymnsInfo(hymnsResponse.sort(HymnUtils.hymnInfoComparer));
     }, [languageProperties, props.seasonId, props.serviceId]);
 
     useEffect(() => {
@@ -43,15 +45,18 @@ function ServiceContents(props: IProps) {
         return (<div/>)
     }
 
+    let alternateHymn = true;
+
     return (
-        <div style={{ padding: "7px 3px 7px 3px" }}>
+        <div style={{ padding: "7px 3px 7px 3px", marginTop: "30px" }}>
             <div className={langClassName}>
                 <HymnTitle content={serviceInfo.name} />
             </div>
             <div className="clear" />
             {hymns.map((hymn) => {
+                alternateHymn = !alternateHymn;
                 const hymnId = getHymnNumberFromId(hymn.id);
-                return <HymnRow key={hymn.id} seasonId={props.seasonId} serviceId={props.serviceId} hymnId={hymnId} />
+                return <HymnRow key={hymn.id} seasonId={props.seasonId} serviceId={props.serviceId} hymnId={hymnId} isAlternate={alternateHymn} />
             })}
         </div>
     );
