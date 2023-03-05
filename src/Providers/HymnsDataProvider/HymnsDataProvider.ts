@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { IHymnsDataProvider } from "./IHymnsDataProvider";
+import { IHymnInfo } from "./Models/IHymnInfo";
 import { ISeasonInfo } from "./Models/ISeasonInfo";
 import { IServiceInfo } from "./Models/IServiceInfo";
 
@@ -49,6 +50,16 @@ export class HymnsDataProvider implements IHymnsDataProvider {
     public async getService(seasonId: string, serviceId: string): Promise<IServiceInfo> {
         try {
             const response = await this.httpClient.get<IServiceInfo>(`/seasons/${seasonId}/services/${serviceId}`);
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            throw ex;
+        }
+    }
+
+    public async getServiceHymnList(seasonId: string, serviceId: string): Promise<IHymnInfo[]> {
+        try {
+            const response = await this.httpClient.get<IHymnInfo[]>(`/seasons/${seasonId}/services/${serviceId}/hymns`);
             return response.data;
         } catch (ex) {
             console.log(ex);

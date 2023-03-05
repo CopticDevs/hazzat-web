@@ -2,7 +2,9 @@ import React, { useContext, useEffect, useState } from "react";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
+import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
+import { getHymnNumberFromId } from "../Utils/ParserUtils";
 import HymnRow from "./HymnRow";
 import HymnTitle from "./HymnTitle";
 
@@ -14,6 +16,7 @@ interface IProps {
 function ServiceContents(props: IProps) {
     const { languageProperties } = useContext(LanguageContext);
     const [serviceInfo, setServiceInfo] = useState<IServiceInfo | undefined>();
+    const [hymns, setHymnsInfo] = useState<IHymnInfo[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
@@ -23,11 +26,18 @@ function ServiceContents(props: IProps) {
         setServiceInfo(serviceResponse);
     }, [languageProperties, props.seasonId, props.serviceId]);
 
+    const fetchHymns = React.useCallback(async () => {
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsResponse = await hymnsDataProvider.getServiceHymnList(props.seasonId, props.serviceId);
+        setHymnsInfo(hymnsResponse);
+    }, [languageProperties, props.seasonId, props.serviceId]);
+
     useEffect(() => {
         setIsLoading(true);
         fetchService();
+        fetchHymns();
         setIsLoading(false);
-    }, [fetchService]);
+    }, [fetchService, fetchHymns]);
 
     if (isLoading || !serviceInfo) {
         return (<div/>)
@@ -39,7 +49,10 @@ function ServiceContents(props: IProps) {
                 <HymnTitle content={serviceInfo.name} />
             </div>
             <div className="clear" />
-            <HymnRow title="hymns will go here" />
+            {hymns.map((hymn) => {
+                const hymnId = getHymnNumberFromId(hymn.id);
+                return <HymnRow key={hymn.id} seasonId={props.seasonId} serviceId={props.serviceId} hymnId={hymnId} />
+            })}
         </div>
     );
 }

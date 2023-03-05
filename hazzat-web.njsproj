@@ -54,6 +54,7 @@
     <TypeScriptCompile Include="src\l8n.ts" />
     <TypeScriptCompile Include="src\LanguageProvider.tsx" />
     <TypeScriptCompile Include="src\LanguageContext.tsx" />
+    <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IHymnInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IServiceInfo.ts" />
     <TypeScriptCompile Include="src\stringFormat.ts" />
     <TypeScriptCompile Include="src\LocalizedMessage.tsx" />

@@ -1,11 +1,13 @@
 interface IProps {
-    title: string;
+    seasonId: string;
+    serviceId: string;
+    hymnId: string;
 }
 
 function HymnRow(props: IProps) {
 
     return (
-        <div>{props.title}</div>
+        <div>Season: {props.seasonId} Service: {props.serviceId} Hymn: {props.hymnId}</div>
     );
 }
 
