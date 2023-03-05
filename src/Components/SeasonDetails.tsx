@@ -7,6 +7,7 @@ import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvi
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
+import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import { stringFormat } from "../stringFormat";
 import { getServiceNumberFromId } from "../Utils/ParserUtils";
 import MainPaper, { Size } from "./MainPaper";
@@ -30,7 +31,7 @@ function SeasonDetails() {
     const fetchServices = React.useCallback(async () => {
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
         const servicesResponse = await hymnsDataProvider.getServiceList(seasonIdParam);
-        setServices(servicesResponse);
+        setServices(servicesResponse.sort(HymnUtils.serviceInfoComparer));
     }, [seasonIdParam, languageProperties]);
 
     useEffect(() => {
