@@ -31,15 +31,15 @@ function HymnRow(props: IProps) {
     const fetchFormats = React.useCallback(async () => {
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
         const formatsResponse = await hymnsDataProvider.getServiceHymnFormatList(props.seasonId, props.serviceId, props.hymnId);
+        const resultFormatMap: StringMap<string | undefined> = {};
 
-        // update formats map:
-        formatsResponse.map((formatInfo) => {
+        // update formats map
+        formatsResponse.forEach((formatInfo) => {
             const formatId = getFormatNumberFromId(formatInfo.id);
-            formatsMap[formatId] = formatInfo.id;
-            return undefined;
+            resultFormatMap[formatId] = formatInfo.id;
         });
 
-        setformatsMap(formatsMap);
+        setformatsMap(resultFormatMap);
     }, [languageProperties, props.seasonId, props.serviceId, props.hymnId, formatsMap]);
 
     useEffect(() => {
@@ -55,14 +55,14 @@ function HymnRow(props: IProps) {
 
     return (
         <div className={props.isAlternate ? `alternate` : ""} style={{ padding: "6px" }}>
-            <img src={space} style={{height:"20px",width:"10px",padding:"6px"}} alt="" />
-            <FormatLink formatId="1" fullFormatId={formatsMap["1"]} />
-            <FormatLink formatId="2" fullFormatId={formatsMap["2"]} />
-            <FormatLink formatId="3" fullFormatId={formatsMap["3"]} />
-            <FormatLink formatId="4" fullFormatId={formatsMap["4"]} />
-            <FormatLink formatId="5" fullFormatId={formatsMap["5"]} />
-            <FormatLink formatId="6" fullFormatId={formatsMap["6"]} />
-            <FormatLink formatId="7" fullFormatId={formatsMap["7"]} />
+            <img src={space} style={{ height: "20px", width: "10px", padding: "6px" }} alt="" />
+            <FormatLink formatId="1" title={hymnInfo.name} fullFormatId={formatsMap["1"]} />
+            <FormatLink formatId="2" title={hymnInfo.name} fullFormatId={formatsMap["2"]} />
+            <FormatLink formatId="3" title={hymnInfo.name} fullFormatId={formatsMap["3"]} />
+            <FormatLink formatId="4" title={hymnInfo.name} fullFormatId={formatsMap["4"]} />
+            <FormatLink formatId="5" title={hymnInfo.name} fullFormatId={formatsMap["5"]} />
+            <FormatLink formatId="6" title={hymnInfo.name} fullFormatId={formatsMap["6"]} />
+            <FormatLink formatId="7" title={hymnInfo.name} fullFormatId={formatsMap["7"]} />
             <img src={space} style={{ height: "20px", width: "10px", padding: "6px" }} alt="" />
             {hymnInfo.name}
         </div >
