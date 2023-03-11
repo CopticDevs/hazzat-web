@@ -40,7 +40,7 @@ function HymnRow(props: IProps) {
         });
 
         setformatsMap(resultFormatMap);
-    }, [languageProperties, props.seasonId, props.serviceId, props.hymnId, formatsMap]);
+    }, [languageProperties, props.seasonId, props.serviceId, props.hymnId]);
 
     useEffect(() => {
         setIsLoading(true);
