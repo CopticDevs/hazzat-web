@@ -4,6 +4,7 @@ import { IFormatInfo } from "./Models/IFormatInfo";
 import { IHymnInfo } from "./Models/IHymnInfo";
 import { ISeasonInfo } from "./Models/ISeasonInfo";
 import { IServiceInfo } from "./Models/IServiceInfo";
+import { IHymnContent, IVariationInfo } from "./Models/IVariationInfo";
 
 export class HymnsDataProvider implements IHymnsDataProvider {
     private hazzatApiBaseUrl = "https://api.hazzat.com";
@@ -91,6 +92,26 @@ export class HymnsDataProvider implements IHymnsDataProvider {
     public async getServiceHymnFormat(seasonId: string, serviceId: string, hymnId: string, formatId: string): Promise<IFormatInfo> {
         try {
             const response = await this.httpClient.get<IFormatInfo>(`/seasons/${seasonId}/services/${serviceId}/hymns/${hymnId}/formats/${formatId}`);
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            throw ex;
+        }
+    }
+
+    public async getServiceHymnsFormatVariationList<T extends IHymnContent>(seasonId: string, serviceId: string, hymnId: string, formatId: string): Promise<IVariationInfo<T>[]> {
+        try {
+            const response = await this.httpClient.get<IVariationInfo<T>[]>(`/seasons/${seasonId}/services/${serviceId}/hymns/${hymnId}/formats/${formatId}/variations`);
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            throw ex;
+        }
+    }
+
+    public async getServiceHymnsFormatVariation<T extends IHymnContent>(seasonId: string, serviceId: string, hymnId: string, formatId: string, variationId: string): Promise<IVariationInfo<T>> {
+        try {
+            const response = await this.httpClient.get<IVariationInfo<T>>(`/seasons/${seasonId}/services/${serviceId}/hymns/${hymnId}/formats/${formatId}/variations/${variationId}`);
             return response.data;
         } catch (ex) {
             console.log(ex);

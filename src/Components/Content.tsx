@@ -1,36 +1,45 @@
-import React, { useContext, useEffect, useState } from "react";
+import React from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
+import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
-import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
+import { IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import { stringFormat } from "../stringFormat";
-import { getServiceNumberFromId } from "../Utils/ParserUtils";
 import BreadCrumb from "./BreadCrumb";
+import HazzatContent from "./HazzatContent";
 import MainPaper, { Size } from "./MainPaper";
-import "./SeasonDetails.css";
-import ServiceContents from "./ServiceContents";
 
-function SeasonDetails() {
-    let { seasonId } = useParams();
+function Content() {
+    let { seasonId, serviceId, hymnId, formatId } = useParams();
     const seasonIdParam: string = seasonId || "";
+    const serviceIdParam: string = serviceId || "";
+    const hymnIdParam: string = hymnId || "";
+    const formatIdParam: string = formatId || "";
     const { languageProperties } = useContext(LanguageContext);
     const [seasonInfo, setSeasonInfo] = useState<ISeasonInfo | undefined>();
-    const [services, setServices] = useState<IServiceInfo[]>([]);
+    const [serviceInfo, setServiceInfo] = useState<IServiceInfo | undefined>();
+    const [hymnInfo, setHymnInfo] = useState<IHymnInfo | undefined>();
+    const [variations, setVariations] = useState<IVariationInfo<any>[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const fetchFromBackend = React.useCallback(async () => {
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
         const seasonPromise = hymnsDataProvider.getSeason(seasonIdParam);
-        const servicesPromise = hymnsDataProvider.getServiceList(seasonIdParam);
-        const [seasonResponse, servicesResponse] = await Promise.all([seasonPromise, servicesPromise]);
+        const servicePromise = hymnsDataProvider.getService(seasonIdParam, serviceIdParam);
+        const hymnPromise = hymnsDataProvider.getServiceHymn(seasonIdParam, serviceIdParam, hymnIdParam);
+        const variationsPromise = hymnsDataProvider.getServiceHymnsFormatVariationList(seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam);
+        const [seasonResponse, serviceResponse, hymnResponse, variationsResponse] = await Promise.all([seasonPromise, servicePromise, hymnPromise, variationsPromise]);
         setSeasonInfo(seasonResponse);
-        setServices(servicesResponse.sort(HymnUtils.serviceInfoComparer));
-    }, [seasonIdParam, languageProperties]);
+        setServiceInfo(serviceResponse);
+        setHymnInfo(hymnResponse);
+        setVariations(variationsResponse);
+    }, [seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam, languageProperties]);
 
     useEffect(() => {
         setIsLoading(true);
@@ -38,10 +47,10 @@ function SeasonDetails() {
         setIsLoading(false);
     }, [fetchFromBackend]);
 
-    useEffect(() => {
-        document.title = isLoading ? "hazzat.com" : `${seasonInfo?.name} - hazzat.com`;
-    }, [isLoading, seasonInfo]);
-
+    if (isLoading || !seasonInfo || !serviceInfo || !hymnInfo || !variations) {
+        return (<div />)
+    }
+    
     return (
         <MainPaper size={Size.Wide}>
             {
@@ -52,12 +61,10 @@ function SeasonDetails() {
                             <div className="seasonVerse" dangerouslySetInnerHTML={{ __html: seasonInfo.verse }} />
                             <BreadCrumb items={[
                                 { title: strings.seasons, path: "/Seasons" },
-                                { title: seasonInfo.name }]} />
+                                { title: seasonInfo.name, path: `/Seasons/${seasonIdParam}` },
+                                { title: `${serviceInfo.name}: ${hymnInfo.name}` }]} />
 
-                            {services.map((service) => {
-                                const serviceId = getServiceNumberFromId(service.id);
-                                return <ServiceContents key={service.id} seasonId={seasonIdParam} serviceId={serviceId} />
-                            })}
+                            <HazzatContent formatId={formatIdParam} variations={variations} />
                         </div>
                         : null
             }
@@ -65,4 +72,4 @@ function SeasonDetails() {
     );
 }
 
-export default SeasonDetails;
+export default Content;
