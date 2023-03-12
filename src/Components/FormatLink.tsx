@@ -38,7 +38,6 @@ function FormatLink(props: IProps) {
     const [formatImages, setFormatImages] = useState<IFormatImage | undefined>();
 
     const getFormatImages = (formatId: string, title: string, lang: string): IFormatImage | undefined => {
-        console.log(formatId + " " + lang);
         switch (formatId) {
             case "1":
                 return {

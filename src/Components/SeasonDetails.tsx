@@ -1,41 +1,33 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Route, Routes, useParams } from "react-router-dom";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
-import LocalizedMessage from "../LocalizedMessage";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
-import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
-import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import { stringFormat } from "../stringFormat";
-import { getServiceNumberFromId } from "../Utils/ParserUtils";
-import BreadCrumb from "./BreadCrumb";
-import MainPaper, { Size } from "./MainPaper";
+import Content from "./Content";
+import LoadingSpinner from "./LoadingSpinner";
 import "./SeasonDetails.css";
-import ServiceContents from "./ServiceContents";
+import ServicesMenu from "./ServicesMenu";
 
 function SeasonDetails() {
     let { seasonId } = useParams();
     const seasonIdParam: string = seasonId || "";
     const { languageProperties } = useContext(LanguageContext);
     const [seasonInfo, setSeasonInfo] = useState<ISeasonInfo | undefined>();
-    const [services, setServices] = useState<IServiceInfo[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const fetchFromBackend = React.useCallback(async () => {
+        setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
-        const seasonPromise = hymnsDataProvider.getSeason(seasonIdParam);
-        const servicesPromise = hymnsDataProvider.getServiceList(seasonIdParam);
-        const [seasonResponse, servicesResponse] = await Promise.all([seasonPromise, servicesPromise]);
+        const seasonResponse = await hymnsDataProvider.getSeason(seasonIdParam);
         setSeasonInfo(seasonResponse);
-        setServices(servicesResponse.sort(HymnUtils.serviceInfoComparer));
+        setIsLoading(false);
     }, [seasonIdParam, languageProperties]);
 
     useEffect(() => {
-        setIsLoading(true);
         fetchFromBackend();
-        setIsLoading(false);
     }, [fetchFromBackend]);
 
     useEffect(() => {
@@ -43,25 +35,22 @@ function SeasonDetails() {
     }, [isLoading, seasonInfo]);
 
     return (
-        <MainPaper size={Size.Wide}>
+        <>
             {
-                isLoading ? <div><LocalizedMessage of="loading" /></div> :
+                isLoading ? <LoadingSpinner /> :
                     !!seasonInfo ?
                         <div>
                             <div className="pageTitle">{stringFormat(strings.seasonTitle, seasonInfo.name)}</div>
                             <div className="seasonVerse" dangerouslySetInnerHTML={{ __html: seasonInfo.verse }} />
-                            <BreadCrumb items={[
-                                { title: strings.seasons, path: "/Seasons" },
-                                { title: seasonInfo.name }]} />
 
-                            {services.map((service) => {
-                                const serviceId = getServiceNumberFromId(service.id);
-                                return <ServiceContents key={service.id} seasonId={seasonIdParam} serviceId={serviceId} />
-                            })}
+                            <Routes>
+                                <Route path="/" element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.name} />} />
+                                <Route path={`/Services/:serviceId/hymns/:hymnId/formats/:formatId`} element={<Content />} />
+                            </Routes>
                         </div>
                         : null
             }
-        </MainPaper>
+        </>
     );
 }
 
