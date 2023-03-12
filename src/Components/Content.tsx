@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import { NavLink, useParams } from "react-router-dom";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
@@ -13,6 +13,7 @@ import BreadCrumb from "./BreadCrumb";
 import ContentHazzat from "./ContentHazzat";
 import ContentVerticalHazzat from "./ContentVerticalHazzat";
 import LoadingSpinner from "./LoadingSpinner";
+import MyNavLink from "./MyNavLink";
 
 function Content() {
     let { seasonId, serviceId, hymnId, formatId } = useParams();
@@ -27,6 +28,8 @@ function Content() {
     const [variations, setVariations] = useState<IVariationInfo<any>[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
+    const isMounted = useRef(true);
+
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
@@ -35,15 +38,23 @@ function Content() {
         const hymnPromise = hymnsDataProvider.getServiceHymn(seasonIdParam, serviceIdParam, hymnIdParam);
         const variationsPromise = hymnsDataProvider.getServiceHymnsFormatVariationList(seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam);
         const [seasonResponse, serviceResponse, hymnResponse, variationsResponse] = await Promise.all([seasonPromise, servicePromise, hymnPromise, variationsPromise]);
-        setSeasonInfo(seasonResponse);
-        setServiceInfo(serviceResponse);
-        setHymnInfo(hymnResponse);
-        setVariations(variationsResponse);
-        setIsLoading(false);
-    }, [seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam, languageProperties]);
+
+        if (isMounted.current) {
+            setSeasonInfo(seasonResponse);
+            setServiceInfo(serviceResponse);
+            setHymnInfo(hymnResponse);
+            setVariations(variationsResponse);
+            setIsLoading(false);
+        }
+    }, [seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam, languageProperties, isMounted]);
 
     useEffect(() => {
+        isMounted.current = true;
         fetchFromBackend();
+
+        return () => {
+            isMounted.current = false;
+        };
     }, [fetchFromBackend]);
 
     if (isLoading || !seasonInfo || !serviceInfo || !hymnInfo || !variations) {
@@ -63,9 +74,9 @@ function Content() {
             contentControl = <>
                 <div style={{ textAlign: "center", paddingTop: "30px", paddingBottom: "30px" }}>
                     <LocalizedMessage of="contentNotFoundMessage" /><br /><br />
-                    <NavLink to="#" onClick={() => window.history.back()}>
+                    <MyNavLink to="#" onClick={() => window.history.back()}>
                         <LocalizedMessage of="goBack" />
-                    </NavLink>
+                    </MyNavLink>
                 </div>
             </>
     }

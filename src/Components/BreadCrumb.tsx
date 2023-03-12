@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import MyNavLink from "./MyNavLink";
 
 interface IItem {
     title: string;
@@ -14,7 +14,7 @@ function BreadCrumb(props: IProps) {
         <div className="breadcrumbDiv">
             {props.items.map((item, i) => {
                 if (!!item.path) {
-                    return <span key={i}><NavLink to={item.path} className="breadcrumbLink">{item.title}</NavLink> {(i === props.items.length - 1) ? "" : " > "}</span>
+                    return <span key={i}><MyNavLink to={item.path} className="breadcrumbLink">{item.title}</MyNavLink> {(i === props.items.length - 1) ? "" : " > "}</span>
                 }
                 return item.title
             })}

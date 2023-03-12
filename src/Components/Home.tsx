@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { NavLink } from "react-router-dom";
 import LocalizedMessage from "../LocalizedMessage";
 import { INavMenuItem } from "../Types/INavMenuItem";
 import "./Home.css";
 import MainPaper from "./MainPaper";
+import MyNavLink from "./MyNavLink";
 import SidePaper from "./SidePaper";
 
 interface IProps {
@@ -23,7 +23,7 @@ function Home(props: IProps) {
                         props.navItems.map((item) => {
                             return (
                                 item.id !== "home" ?
-                                    <p key={item.id}><NavLink to={item.location} className="navLink"><LocalizedMessage of={item.id} /></NavLink></p> : null
+                                    <p key={item.id}><MyNavLink to={item.location} className="navLink"><LocalizedMessage of={item.id} /></MyNavLink></p> : null
                             );
                         })
                     }

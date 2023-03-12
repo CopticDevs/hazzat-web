@@ -1,10 +1,8 @@
-import { useContext, useState } from "react";
-import { NavLink } from "react-router-dom";
-import { AppSettings } from "../AppSettings";
-import { ILanguageProperties } from "../l8n";
-import { LanguageContext } from "../LanguageContext";
+import { useState } from "react";
 import LocalizedMessage from "../LocalizedMessage";
 import { INavMenuItem } from "../Types/INavMenuItem";
+import LanguageSwitcher from "./LanguageSwitcher";
+import MyNavLink from "./MyNavLink";
 
 interface IProps {
     navItems: INavMenuItem[];
@@ -12,14 +10,9 @@ interface IProps {
 
 function Footer(props: IProps) {
     const [showMenu, setShowMenu] = useState<boolean>(false);
-    const { languageProperties, setLanguageProperties } = useContext(LanguageContext);
 
     function toggleMenu() {
         setShowMenu(!showMenu);
-    }
-
-    const handleChangeLanguage = (targetLanguageProperties: ILanguageProperties) => {
-        setLanguageProperties && setLanguageProperties(targetLanguageProperties);
     }
 
     return (
@@ -29,16 +22,11 @@ function Footer(props: IProps) {
                 {
                     props.navItems.map((item) => {
                         return (
-                            <li key={item.id}><NavLink to={item.location}><LocalizedMessage of={item.id} /></NavLink></li>
+                            <li key={item.id}><MyNavLink to={item.location}><LocalizedMessage of={item.id} /></MyNavLink></li>
                         );
                     })
                 }
-                {
-                    AppSettings.supportedLanguages.map((langProps) => {
-                        return languageProperties.localeName !== langProps.localeName ?
-                            <li key={langProps.localeName}><NavLink to="#" onClick={() => handleChangeLanguage(langProps)}>{langProps.friendlyName}</NavLink></li> : null
-                    })
-                }
+                <LanguageSwitcher />
             </ul>
 
             <div className="mobile-footer">
@@ -47,16 +35,11 @@ function Footer(props: IProps) {
                     {
                         props.navItems.map((item) => {
                             return (
-                                <li key={item.id}><NavLink to={item.location}><LocalizedMessage of={item.id} /></NavLink></li>
+                                <li key={item.id}><MyNavLink to={item.location}><LocalizedMessage of={item.id} /></MyNavLink></li>
                             );
                         })
                     }
-                    {
-                        AppSettings.supportedLanguages.map((langProps) => {
-                            return languageProperties.localeName !== langProps.localeName ?
-                                <li key={langProps.localeName}><NavLink to="#" onClick={() => handleChangeLanguage(langProps)}>{langProps.friendlyName}</NavLink></li> : null
-                        })
-                    }
+                    <LanguageSwitcher />
                 </ul> : null }
             </div>
             
