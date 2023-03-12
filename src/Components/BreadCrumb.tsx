@@ -14,7 +14,7 @@ function BreadCrumb(props: IProps) {
         <div className="breadcrumbDiv">
             {props.items.map((item, i) => {
                 if (!!item.path) {
-                    return <><NavLink to={item.path} className="breadcrumbLink">{item.title}</NavLink> {(i === props.items.length - 1) ? "" : " > "}</>
+                    return <span key={i}><NavLink to={item.path} className="breadcrumbLink">{item.title}</NavLink> {(i === props.items.length - 1) ? "" : " > "}</span>
                 }
                 return item.title
             })}

@@ -1,6 +1,5 @@
-import React from "react";
-import { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { NavLink, useParams } from "react-router-dom";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
@@ -10,10 +9,10 @@ import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
-import { stringFormat } from "../stringFormat";
 import BreadCrumb from "./BreadCrumb";
-import HazzatContent from "./HazzatContent";
-import MainPaper, { Size } from "./MainPaper";
+import ContentHazzat from "./ContentHazzat";
+import ContentVerticalHazzat from "./ContentVerticalHazzat";
+import LoadingSpinner from "./LoadingSpinner";
 
 function Content() {
     let { seasonId, serviceId, hymnId, formatId } = useParams();
@@ -29,6 +28,7 @@ function Content() {
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const fetchFromBackend = React.useCallback(async () => {
+        setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
         const seasonPromise = hymnsDataProvider.getSeason(seasonIdParam);
         const servicePromise = hymnsDataProvider.getService(seasonIdParam, serviceIdParam);
@@ -39,36 +39,53 @@ function Content() {
         setServiceInfo(serviceResponse);
         setHymnInfo(hymnResponse);
         setVariations(variationsResponse);
+        setIsLoading(false);
     }, [seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam, languageProperties]);
 
     useEffect(() => {
-        setIsLoading(true);
         fetchFromBackend();
-        setIsLoading(false);
     }, [fetchFromBackend]);
 
     if (isLoading || !seasonInfo || !serviceInfo || !hymnInfo || !variations) {
         return (<div />)
     }
+
+    let contentControl: JSX.Element;
+
+    switch (formatIdParam) {
+        case "2":
+            contentControl = <ContentHazzat formatId={formatIdParam} variations={variations} />;
+            break;
+        case "3":
+            contentControl = <ContentVerticalHazzat formatId={formatIdParam} variations={variations} />;
+            break;
+        default:
+            contentControl = <>
+                <div style={{ textAlign: "center", paddingTop: "30px", paddingBottom: "30px" }}>
+                    <LocalizedMessage of="contentNotFoundMessage" /><br /><br />
+                    <NavLink to="#" onClick={() => window.history.back()}>
+                        <LocalizedMessage of="goBack" />
+                    </NavLink>
+                </div>
+            </>
+    }
     
     return (
-        <MainPaper size={Size.Wide}>
+        <>
             {
-                isLoading ? <div><LocalizedMessage of="loading" /></div> :
+                isLoading ? <LoadingSpinner /> :
                     !!seasonInfo ?
                         <div>
-                            <div className="pageTitle">{stringFormat(strings.seasonTitle, seasonInfo.name)}</div>
-                            <div className="seasonVerse" dangerouslySetInnerHTML={{ __html: seasonInfo.verse }} />
                             <BreadCrumb items={[
                                 { title: strings.seasons, path: "/Seasons" },
                                 { title: seasonInfo.name, path: `/Seasons/${seasonIdParam}` },
                                 { title: `${serviceInfo.name}: ${hymnInfo.name}` }]} />
 
-                            <HazzatContent formatId={formatIdParam} variations={variations} />
+                            {contentControl}
                         </div>
                         : null
             }
-        </MainPaper>
+        </>
     );
 }
 

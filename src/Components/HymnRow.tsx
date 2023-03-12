@@ -22,17 +22,14 @@ function HymnRow(props: IProps) {
     const [formatsMap, setformatsMap] = useState<StringMap<string | undefined>>({});
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    const fetchHymn = React.useCallback(async () => {
+    const fetchFromBackend = React.useCallback(async () => {
+        setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
-        const hymnResponse = await hymnsDataProvider.getServiceHymn(props.seasonId, props.serviceId, props.hymnId);
-        setHymnInfo(hymnResponse);
-    }, [languageProperties, props.seasonId, props.serviceId, props.hymnId]);
+        const hymnPromise = hymnsDataProvider.getServiceHymn(props.seasonId, props.serviceId, props.hymnId);
+        const formatsPromise = hymnsDataProvider.getServiceHymnFormatList(props.seasonId, props.serviceId, props.hymnId);
+        const [hymnResponse, formatsResponse] = await Promise.all([hymnPromise, formatsPromise]);
 
-    const fetchFormats = React.useCallback(async () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
-        const formatsResponse = await hymnsDataProvider.getServiceHymnFormatList(props.seasonId, props.serviceId, props.hymnId);
         const resultFormatMap: StringMap<string | undefined> = {};
-
         // update formats map
         formatsResponse.forEach((formatInfo) => {
             const formatId = getFormatNumberFromId(formatInfo.id);
@@ -40,14 +37,13 @@ function HymnRow(props: IProps) {
         });
 
         setformatsMap(resultFormatMap);
+        setHymnInfo(hymnResponse);
+        setIsLoading(false);
     }, [languageProperties, props.seasonId, props.serviceId, props.hymnId]);
 
     useEffect(() => {
-        setIsLoading(true);
-        fetchHymn();
-        fetchFormats();
-        setIsLoading(false);
-    }, [fetchHymn, fetchFormats]);
+        fetchFromBackend();
+    }, [fetchFromBackend]);
 
     if (isLoading || !hymnInfo) {
         return (<div />)

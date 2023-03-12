@@ -9,6 +9,7 @@ import { getHymnNumberFromId } from "../Utils/ParserUtils";
 import HymnRow from "./HymnRow";
 import "./HymnRow.css";
 import HymnTitle from "./HymnTitle";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface IProps {
     seasonId: string;
@@ -22,43 +23,41 @@ function ServiceContents(props: IProps) {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
-    const fetchService = React.useCallback(async () => {
+    const fetchFromBackend = React.useCallback(async () => {
+        setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
-        const serviceResponse = await hymnsDataProvider.getService(props.seasonId, props.serviceId);
+        const servicePromise = hymnsDataProvider.getService(props.seasonId, props.serviceId);
+        const hymnsPromise = hymnsDataProvider.getServiceHymnList(props.seasonId, props.serviceId);
+        const [serviceResponse, hymnsResponse] = await Promise.all([servicePromise, hymnsPromise]);
         setServiceInfo(serviceResponse);
-    }, [languageProperties, props.seasonId, props.serviceId]);
-
-    const fetchHymns = React.useCallback(async () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
-        const hymnsResponse = await hymnsDataProvider.getServiceHymnList(props.seasonId, props.serviceId);
         setHymnsInfo(hymnsResponse.sort(HymnUtils.hymnInfoComparer));
+        setIsLoading(false);
     }, [languageProperties, props.seasonId, props.serviceId]);
 
     useEffect(() => {
-        setIsLoading(true);
-        fetchService();
-        fetchHymns();
-        setIsLoading(false);
-    }, [fetchService, fetchHymns]);
-
-    if (isLoading || !serviceInfo) {
-        return (<div/>)
-    }
+        fetchFromBackend();
+    }, [fetchFromBackend]);
 
     let alternateHymn = true;
 
     return (
-        <div style={{ padding: "7px 3px 7px 3px", marginTop: "30px" }}>
-            <div className={langClassName}>
-                <HymnTitle content={serviceInfo.name} />
-            </div>
-            <div className="clear" />
-            {hymns.map((hymn) => {
-                alternateHymn = !alternateHymn;
-                const hymnId = getHymnNumberFromId(hymn.id);
-                return <HymnRow key={hymn.id} seasonId={props.seasonId} serviceId={props.serviceId} hymnId={hymnId} isAlternate={alternateHymn} />
-            })}
-        </div>
+        <>
+            {
+                isLoading ? <LoadingSpinner /> :
+                    !serviceInfo ? <></> :
+                    <div style={{ padding: "7px 3px 7px 3px", marginTop: "30px" }}>
+                        <div className={langClassName}>
+                            <HymnTitle content={serviceInfo.name} />
+                        </div>
+                        <div className="clear" />
+                        {hymns.map((hymn) => {
+                            alternateHymn = !alternateHymn;
+                            const hymnId = getHymnNumberFromId(hymn.id);
+                            return <HymnRow key={hymn.id} seasonId={props.seasonId} serviceId={props.serviceId} hymnId={hymnId} isAlternate={alternateHymn} />
+                        })}
+                    </div>
+            }
+        </>
     );
 }
 
