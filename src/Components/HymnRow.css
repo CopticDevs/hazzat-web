@@ -1,3 +1,9 @@
 .alternate {
     background-color: #e0e0e0;
 }
+
+.contentLinksDiv {
+    display: flex;
+    justify-items: center;
+    align-items: center;
+}
