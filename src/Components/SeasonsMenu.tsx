@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useContext, useState } from "react";
-import { NavLink } from "react-router-dom";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
@@ -9,12 +8,15 @@ import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataPro
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import LoadingSpinner from "./LoadingSpinner";
+import MyNavLink from "./MyNavLink";
 
 function SeasonsMenu() {
     const { languageProperties } = useContext(LanguageContext);
     const [dateSpecificSeasons, setDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [nonDateSpecificSeasons, setNonDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const isMounted = useRef(true);
 
     const fetchSeasons = React.useCallback(async () => {
         setIsLoading(true);
@@ -32,14 +34,21 @@ function SeasonsMenu() {
             }
         });
 
-        setDateSpecificSeasons(dsSeasons.sort(HymnUtils.seasonInfoComparer));
-        setNonDateSpecificSeasons(ndsSeasons.sort(HymnUtils.seasonInfoComparer));
-        setIsLoading(false);
-    }, [languageProperties]);
+        if (isMounted.current) {
+            setDateSpecificSeasons(dsSeasons.sort(HymnUtils.seasonInfoComparer));
+            setNonDateSpecificSeasons(ndsSeasons.sort(HymnUtils.seasonInfoComparer));
+            setIsLoading(false);
+        }
+    }, [languageProperties, isMounted]);
 
     useEffect(() => {
+        isMounted.current = true;
         document.title = strings.seasons + " - hazzat.com";
         fetchSeasons();
+
+        return () => {
+            isMounted.current = false;
+        };
     }, [fetchSeasons]);
     
     return (
@@ -51,7 +60,7 @@ function SeasonsMenu() {
                         dateSpecificSeasons.map((season) => {
                             return (
                                 <div key={season.id}>
-                                    <NavLink to={`${season.id}`}>{season.name}</NavLink>
+                                    <MyNavLink to={`${season.id}`}>{season.name}</MyNavLink>
                                 </div>
                             )
                         })
@@ -65,7 +74,7 @@ function SeasonsMenu() {
                         nonDateSpecificSeasons.map((season) => {
                             return (
                                 <div key={season.id}>
-                                    <NavLink to={`${season.id}`} key={season.id}>{season.name}</NavLink>
+                                    <MyNavLink to={`${season.id}`} key={season.id}>{season.name}</MyNavLink>
                                 </div>
                             )
                         }) :

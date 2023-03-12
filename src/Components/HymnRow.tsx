@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useContext, useState } from "react";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
@@ -23,6 +23,8 @@ function HymnRow(props: IProps) {
     const [formatsMap, setformatsMap] = useState<StringMap<string | undefined>>({});
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
+    const isMounted = useRef(true);
+
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
@@ -37,13 +39,20 @@ function HymnRow(props: IProps) {
             resultFormatMap[formatId] = formatInfo.id;
         });
 
-        setformatsMap(resultFormatMap);
-        setHymnInfo(hymnResponse);
-        setIsLoading(false);
-    }, [languageProperties, props.seasonId, props.serviceId, props.hymnId]);
+        if (isMounted.current) {
+            setformatsMap(resultFormatMap);
+            setHymnInfo(hymnResponse);
+            setIsLoading(false);
+        }
+    }, [languageProperties, props.seasonId, props.serviceId, props.hymnId, isMounted]);
 
     useEffect(() => {
+        isMounted.current = true;
         fetchFromBackend();
+
+        return () => {
+            isMounted.current = false;
+        };
     }, [fetchFromBackend]);
 
     if (isLoading || !hymnInfo) {

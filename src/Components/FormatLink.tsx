@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
 import audioOn from "../images/audio_mouseon.gif";
 import audioOut from "../images/audio_mouseout.gif";
 import hazzatOn from "../images/hazzat_mouseon.gif";
@@ -18,6 +17,7 @@ import videoOut from "../images/video_mouseout.gif";
 import { LanguageContext } from "../LanguageContext";
 import "./FormatLink.css";
 import { strings } from "../l8n";
+import MyNavLink from "./MyNavLink";
 
 interface IProps {
     formatId: string;
@@ -108,14 +108,14 @@ function FormatLink(props: IProps) {
         <>
             {
                 !!props.fullFormatId ?
-                    <NavLink to={props.fullFormatId}>
+                    <MyNavLink to={props.fullFormatId}>
                         <img
                             src={hovering ? formatImages?.mouseOn : formatImages?.mouseOut}
                             alt={formatImages?.altString}
                             className={formatImages?.cssClass}
                             onMouseEnter={() => setHovering(true)}
                             onMouseLeave={() => setHovering(false)}
-                        /></NavLink>
+                        /></MyNavLink>
                     : <img src={space} alt="" className="formatImage" />
             }
         </>

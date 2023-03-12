@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Route, Routes, useParams } from "react-router-dom";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
@@ -18,16 +18,26 @@ function SeasonDetails() {
     const [seasonInfo, setSeasonInfo] = useState<ISeasonInfo | undefined>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
+    const isMounted = useRef(true);
+
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
         const seasonResponse = await hymnsDataProvider.getSeason(seasonIdParam);
-        setSeasonInfo(seasonResponse);
-        setIsLoading(false);
-    }, [seasonIdParam, languageProperties]);
+
+        if (isMounted.current) {
+            setSeasonInfo(seasonResponse);
+            setIsLoading(false);
+        }
+    }, [seasonIdParam, languageProperties, isMounted]);
 
     useEffect(() => {
+        isMounted.current = true;
         fetchFromBackend();
+
+        return () => {
+            isMounted.current = false;
+        };
     }, [fetchFromBackend]);
 
     useEffect(() => {

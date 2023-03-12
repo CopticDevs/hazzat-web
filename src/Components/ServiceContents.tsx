@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
@@ -23,19 +23,29 @@ function ServiceContents(props: IProps) {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
+    const isMounted = useRef(true);
+
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
         const servicePromise = hymnsDataProvider.getService(props.seasonId, props.serviceId);
         const hymnsPromise = hymnsDataProvider.getServiceHymnList(props.seasonId, props.serviceId);
         const [serviceResponse, hymnsResponse] = await Promise.all([servicePromise, hymnsPromise]);
-        setServiceInfo(serviceResponse);
-        setHymnsInfo(hymnsResponse.sort(HymnUtils.hymnInfoComparer));
-        setIsLoading(false);
-    }, [languageProperties, props.seasonId, props.serviceId]);
+
+        if (isMounted.current) {
+            setServiceInfo(serviceResponse);
+            setHymnsInfo(hymnsResponse.sort(HymnUtils.hymnInfoComparer));
+            setIsLoading(false);
+        }
+    }, [languageProperties, props.seasonId, props.serviceId, isMounted]);
 
     useEffect(() => {
+        isMounted.current = true;
         fetchFromBackend();
+
+        return () => {
+            isMounted.current = false;
+        };
     }, [fetchFromBackend]);
 
     let alternateHymn = true;

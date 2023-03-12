@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React from "react";
+import { useEffect, useState } from "react";
 import { ArabicLanguageProperties, EnglishLanguageProperties, ILanguageProperties, strings } from "./l8n";
 import { LanguageContext } from "./LanguageContext";
 
@@ -7,7 +8,7 @@ interface IProps {
 }
 
 const setDefaultLanguage = (interfaceLanguage: string): ILanguageProperties => {
-    switch (interfaceLanguage.toUpperCase().substr(0, 2)) {
+    switch (interfaceLanguage.toUpperCase().substring(0, 2)) {
         case "AR":
             return ArabicLanguageProperties;
     }
@@ -18,6 +19,18 @@ const setDefaultLanguage = (interfaceLanguage: string): ILanguageProperties => {
 
 function LanguageProvider(props: IProps) {
     const [languageProperties, setLanguageProperties] = useState<ILanguageProperties>(setDefaultLanguage(strings.getInterfaceLanguage()));
+
+    const setApplicationLanguage = React.useCallback(() => {
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const lang = urlSearchParams.get('lang') || strings.getInterfaceLanguage();
+        const appLang = setDefaultLanguage(lang);
+
+        setLanguageProperties(appLang);
+    }, []);
+
+    useEffect(() => {
+        setApplicationLanguage();
+    }, [setApplicationLanguage]);
 
     return (
         <LanguageContext.Provider value={{
