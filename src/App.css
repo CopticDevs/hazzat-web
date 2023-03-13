@@ -1,6 +1,6 @@
 *{ margin:0px; padding:0px;}
 
-body { margin:0px; padding:0px; font-family: "Myriad Pro"; font-size:12px; color:#000; text-decoration:none; 
+body { margin:0px; padding:0px; font-family: "Myriad Pro"; font-size:16px; color:#000; text-decoration:none; 
 background:url(images/pattern.jpg) repeat top center; }
 
 a, a:visited { color:#000; text-decoration:none; outline:none;}
@@ -45,9 +45,11 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 .topNav ul li a:hover { padding:0px; color:#333; }
 
 .nav { background:url(images/navBg.png) no-repeat top center; min-height:54px ; margin-top:-2px; margin-left:0px; }
-.nav ul { padding:20px 0px 0px 66px; }
+.nav ul { padding:20px 40px 0px 66px; display: flex; }
 .nav ul li { float:left; padding:0px 14px; }
 .nav ul li a { font-size:13px; font-family: "Trajan Pro"; font-weight:bold; }
+
+.navRtl ul {direction: rtl; }
 
 /* body */
 .body { padding:0px; position:relative; min-height:595px; position:relative;}
@@ -76,11 +78,10 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 
 /* footer */
 .footer { width:936px; background-color:#000; margin:-30px 54px 0px 34px; height:30px; padding-left:20px; position:absolute;  }
-.footer ul { padding:0px 0px 0px 0px; }
+.footer ul { padding:0px 0px 0px 0px; display: flex; }
 .footer ul li { float:left; padding:8px 9px 0px; }
 .footer ul li a { padding:0px; font-size:11px; font-family:'Conv_TrajanPro-Regular'; color:#bdbdbd; z-index:999; position:relative; }
-
-
+.footerRtl ul { direction: rtl; }
 
 /*============New==============*/
 
@@ -109,9 +110,12 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
     .nav{ background:none}
     .mobile, .mobile-footer{display:block;}
     .sf-menu{display:none;}
-    .nav ul li, .footer ul li{float:none; background:#fff; border-top:1px solid #333; padding: 0; margin-right:0;}
+    .nav .sf-menu{display:none;}
+    .nav ul li, .footer ul li{float:none; background:#fff; border-top:1px solid #333; padding: 5px; margin-right:0;}
+    .footer ul { display: block;}
     .mainContainer .sf-menu li.current{border-top:1px solid #333;}
     .nav ul, .footer ul {padding:0; width:100%; float:none; margin:auto; position:relative; z-index:1111; margin-top:-7px;}
+    .nav ul {display: block;}
     .header .nav, .footer{ min-height:34px;}  
     .footer ul li a{ color:#000; font-size:12px; text-align:center; padding:10px;}
     .footer ul li{ padding:0; margin:0;}

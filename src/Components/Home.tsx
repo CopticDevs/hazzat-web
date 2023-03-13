@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
+import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { INavMenuItem } from "../Types/INavMenuItem";
 import "./Home.css";
@@ -11,12 +12,14 @@ interface IProps {
 }
 
 function Home(props: IProps) {
+    const { languageProperties } = useContext(LanguageContext);
+
     useEffect(() => {
         document.title = "hazzat.com";
     }, []);
 
     return (
-        <div className="row">
+        <div className={languageProperties.isRtl ? "row dirRtl" : "row"} style={languageProperties.isRtl ? { marginRight: "43px" } : {}}>
             <MainPaper>
                 <div>
                     {

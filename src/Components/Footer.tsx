@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { INavMenuItem } from "../Types/INavMenuItem";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -10,13 +11,14 @@ interface IProps {
 
 function Footer(props: IProps) {
     const [showMenu, setShowMenu] = useState<boolean>(false);
+    const { languageProperties } = useContext(LanguageContext);
 
     function toggleMenu() {
         setShowMenu(!showMenu);
     }
 
     return (
-        <div className="footer clearfix">
+        <div className={languageProperties.isRtl ? "footer footerRtl clearfix" : "footer clearfix"}>
             
             <ul className="sf-menu">
                 {

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import logo from "../images/logo.png";
+import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { INavMenuItem } from "../Types/INavMenuItem";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -11,6 +12,7 @@ interface IProps {
 
 function Header(props: IProps) {
     const [showMenu, setShowMenu] = useState<boolean>(false);
+    const { languageProperties } = useContext(LanguageContext);
 
     const toggleMenu = () => {
         setShowMenu(!showMenu);   
@@ -30,7 +32,7 @@ function Header(props: IProps) {
 
             </div>
 
-            <div className="nav clearfix">
+            <div className={languageProperties.isRtl ? "nav navRtl clearfix": "nav clearfix" }>
                 <ul className="sf-menu">
                     {
                         props.navItems.map((item) => {
