@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { LanguageContext } from "../LanguageContext";
 import { IVariationInfo, IVerticalHazzatContent } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import HymnTitle from "./HymnTitle";
-import crossLine from "../images/crossline.gif";
+import CrossDivider from "./CrossDivider";
 
 interface IProps {
     formatId: string;
@@ -24,23 +24,17 @@ function ContentVerticalHazzat(props: IProps) {
                     {variation.content.copticVerticalHazzat ?
                         <>
                             <div lang="en" style={{ direction: "ltr", textAlign: "left" }} dangerouslySetInnerHTML={{ __html: variation.content.copticVerticalHazzat }} />
-                            <div style={{ textAlign: "center" }}>
-                                <img src={crossLine} alt="cross" style={{ width: "70%", maxWidth: "508px" }} />
-                            </div>
+                            <CrossDivider />
                         </> : ""}
                     {variation.content.englishVerticalHazzat ?
                         <>
                             <div lang="en" style={{ direction: "ltr", textAlign: "left" }} dangerouslySetInnerHTML={{ __html: variation.content.englishVerticalHazzat }} />
-                            <div style={{ textAlign: "center" }}>
-                                <img src={crossLine} alt="cross" style={{ width: "70%", maxWidth: "508px" }} />
-                            </div>
+                            <CrossDivider />
                         </> : ""}
                     {variation.content.arabicVerticalHazzat ?
                         <>
                             <div lang="ar" style={{ direction: "rtl", textAlign: "right" }} dangerouslySetInnerHTML={{ __html: variation.content.arabicVerticalHazzat }} />
-                            <div style={{ textAlign: "center" }}>
-                                <img src={crossLine} alt="cross" style={{ width: "70%", maxWidth: "508px" }} />
-                            </div>
+                            <CrossDivider />
                         </> : ""}
                     
                 </div>

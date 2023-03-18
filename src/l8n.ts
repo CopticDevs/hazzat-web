@@ -44,7 +44,9 @@ export const strings = new LocalizedStrings({
         "videoFormatName": "Video",
         "informationFormatName": "Information",
         "contentNotFoundMessage": "The content you are looking for cannot be found...",
-        "goBack": "Go back"
+        "goBack": "Go back",
+        "musicalNotesLinkSuffix": "Musical Notes",
+        "musicAudioLinkSuffix": "Instrumental Audio"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -71,6 +73,8 @@ export const strings = new LocalizedStrings({
         "videoFormatName": "فيديو",
         "informationFormatName": "معلومات",
         "contentNotFoundMessage": "المحتوى الذي تبحث عنه غير موجود...",
-        "goBack": "رجوع"
+        "goBack": "رجوع",
+        "musicalNotesLinkSuffix": "نوتة موسيقية",
+        "musicAudioLinkSuffix": "صوت آلي"
     }
 });

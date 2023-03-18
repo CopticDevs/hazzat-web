@@ -13,5 +13,6 @@ export const AppSettings: IAppSettings = {
         { id: "contactUs", location: "/ContactUs" }
     ],
     supportedLanguages: [EnglishLanguageProperties, ArabicLanguageProperties],
-    defaultLanguage: EnglishLanguageProperties
+    defaultLanguage: EnglishLanguageProperties,
+    showMusicAudio: false
 };

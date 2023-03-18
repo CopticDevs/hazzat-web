@@ -11,6 +11,7 @@ import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo
 import { IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import BreadCrumb from "./BreadCrumb";
 import ContentHazzat from "./ContentHazzat";
+import ContentMusicalNotes from "./ContentMusicalNotes";
 import ContentVerticalHazzat from "./ContentVerticalHazzat";
 import LoadingSpinner from "./LoadingSpinner";
 import MyNavLink from "./MyNavLink";
@@ -69,6 +70,9 @@ function Content() {
             break;
         case "3":
             contentControl = <ContentVerticalHazzat formatId={formatIdParam} variations={variations} />;
+            break;
+        case "4":
+            contentControl = <ContentMusicalNotes formatId={formatIdParam} variations={variations} />;
             break;
         default:
             contentControl = <>
