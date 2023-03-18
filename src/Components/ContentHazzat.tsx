@@ -1,7 +1,7 @@
 import { useContext } from "react";
-import crossLine from "../images/crossline.gif";
 import { LanguageContext } from "../LanguageContext";
 import { IHazzatContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
+import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
 
 interface IProps {
@@ -24,23 +24,17 @@ function ContentHazzat(props: IProps) {
                     {variation.content.copticHazzat ?
                         <>
                             <div lang="en" style={{ direction: "ltr", textAlign: "left" }} dangerouslySetInnerHTML={{ __html: variation.content.copticHazzat }} />
-                            <div style={{ textAlign: "center" }}>
-                                <img src={crossLine} alt="cross" style={{ width: "70%", maxWidth: "508px" }} />
-                            </div>
+                            <CrossDivider />
                         </> : ""}
                     {variation.content.englishHazzat ?
                         <>
                             <div lang="en" style={{ direction: "ltr", textAlign: "left" }} dangerouslySetInnerHTML={{ __html: variation.content.englishHazzat }} />
-                            <div style={{ textAlign: "center" }}>
-                                <img src={crossLine} alt="cross" style={{ width: "70%", maxWidth: "508px" }} />
-                            </div>
+                            <CrossDivider />
                         </> : ""}
                     {variation.content.arabicHazzat ?
                         <>
                             <div lang="ar" style={{ direction: "rtl", textAlign: "right" }} dangerouslySetInnerHTML={{ __html: variation.content.arabicHazzat }} />
-                            <div style={{ textAlign: "center" }}>
-                                <img src={crossLine} alt="cross" style={{ width: "70%", maxWidth: "508px" }} />
-                            </div>
+                            <CrossDivider />
                         </> : ""}
                     
                 </div>
