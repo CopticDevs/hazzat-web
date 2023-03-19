@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\AppSettings.ts" />
+    <TypeScriptCompile Include="src\Components\ContentAudio.tsx" />
     <TypeScriptCompile Include="src\Components\CrossDivider.tsx" />
     <TypeScriptCompile Include="src\Components\ContentMusicalNotes.tsx" />
     <TypeScriptCompile Include="src\Components\LanguageSwitcher.tsx" />
@@ -85,7 +86,7 @@
     <Content Include="public\manifest.json" />
     <Content Include="public\robots.txt" />
     <Content Include="src\App.css" />
-    <Content Include="src\Components\ContentMusicalNotes.css" />
+    <Content Include="src\Components\Content.css" />
     <Content Include="src\Components\FormatLink.css" />
     <Content Include="src\Components\LoadingSpinner.css" />
     <Content Include="src\Components\HymnRow.css" />

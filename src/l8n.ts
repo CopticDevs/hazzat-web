@@ -46,7 +46,8 @@ export const strings = new LocalizedStrings({
         "contentNotFoundMessage": "The content you are looking for cannot be found...",
         "goBack": "Go back",
         "musicalNotesLinkSuffix": "Musical Notes",
-        "musicAudioLinkSuffix": "Instrumental Audio"
+        "musicAudioLinkSuffix": "Instrumental Audio",
+        "audioLinkSuffix": "Audio"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -75,6 +76,7 @@ export const strings = new LocalizedStrings({
         "contentNotFoundMessage": "المحتوى الذي تبحث عنه غير موجود...",
         "goBack": "رجوع",
         "musicalNotesLinkSuffix": "نوتة موسيقية",
-        "musicAudioLinkSuffix": "صوت آلي"
+        "musicAudioLinkSuffix": "صوت آلي",
+        "audioLinkSuffix": "مَلفّ صوتي"
     }
 });
