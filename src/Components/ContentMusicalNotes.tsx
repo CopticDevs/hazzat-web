@@ -1,13 +1,13 @@
 import { useContext } from "react";
 import { AppSettings } from "../AppSettings";
+import instrumentalImg from "../images/Instrumental.png";
+import musicImg from "../images/Music.png";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { IMusicalNotesContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
+import "./Content.css";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
-import musicImg from "../images/Music.png";
-import instrumentalImg from "../images/Instrumental.png";
-import "./ContentMusicalNotes.css";
 
 interface IProps {
     formatId: string;

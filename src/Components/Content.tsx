@@ -10,6 +10,7 @@ import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import BreadCrumb from "./BreadCrumb";
+import ContentAudio from "./ContentAudio";
 import ContentHazzat from "./ContentHazzat";
 import ContentMusicalNotes from "./ContentMusicalNotes";
 import ContentVerticalHazzat from "./ContentVerticalHazzat";
@@ -73,6 +74,9 @@ function Content() {
             break;
         case "4":
             contentControl = <ContentMusicalNotes formatId={formatIdParam} variations={variations} />;
+            break;
+        case "5":
+            contentControl = <ContentAudio formatId={formatIdParam} variations={variations} />;
             break;
         default:
             contentControl = <>
