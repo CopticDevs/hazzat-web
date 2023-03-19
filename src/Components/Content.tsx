@@ -14,6 +14,7 @@ import ContentAudio from "./ContentAudio";
 import ContentHazzat from "./ContentHazzat";
 import ContentInformation from "./ContentInformation";
 import ContentMusicalNotes from "./ContentMusicalNotes";
+import ContentText from "./ContentText";
 import ContentVerticalHazzat from "./ContentVerticalHazzat";
 import ContentVideo from "./ContentVideo";
 import LoadingSpinner from "./LoadingSpinner";
@@ -68,6 +69,9 @@ function Content() {
     let contentControl: JSX.Element;
 
     switch (formatIdParam) {
+        case "1":
+            contentControl = <ContentText formatId={formatIdParam} variations={variations} />;
+            break;
         case "2":
             contentControl = <ContentHazzat formatId={formatIdParam} variations={variations} />;
             break;

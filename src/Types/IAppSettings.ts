@@ -6,4 +6,5 @@ export interface IAppSettings {
     supportedLanguages: ILanguageProperties[];
     defaultLanguage: ILanguageProperties;
     showMusicAudio: boolean;
+    autoPlayVideo: boolean;
 }

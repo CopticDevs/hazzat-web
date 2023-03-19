@@ -1,8 +1,8 @@
 import { useContext } from "react";
 import { LanguageContext } from "../LanguageContext";
 import { IVariationInfo, IVerticalHazzatContent } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
-import HymnTitle from "./HymnTitle";
 import CrossDivider from "./CrossDivider";
+import HymnTitle from "./HymnTitle";
 
 interface IProps {
     formatId: string;
