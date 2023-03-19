@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { LanguageContext } from "../LanguageContext";
 import { IInformationContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
+import "./Content.css";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
 

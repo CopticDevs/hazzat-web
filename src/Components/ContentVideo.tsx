@@ -4,6 +4,7 @@ import { IVariationInfo, IVideoContent } from "../Providers/HymnsDataProvider/Mo
 import "./Content.css";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
+import YouTubeVideo from "./YoutubeVideo";
 
 interface IProps {
     formatId: string;
@@ -24,23 +25,17 @@ function ContentVideo(props: IProps) {
                     <div className="clear" />
                     {variation.content.copticVideo ?
                         <div>
-                            <div style={{ position: "relative", width: "100%", height: "0", paddingBottom: "56.25%" }} >
-                                <iframe title={`${variation.name} Coptic`} style={{ position: "absolute", width: "100%", height: "100%", left: 0, top: 0 }} src={`http://www.youtube.com/embed/${variation.content.copticVideo}`} frameBorder="0" allowFullScreen />
-                            </div>
+                            <YouTubeVideo videoId={variation.content.copticVideo} />
                             <CrossDivider />
                         </div> : ""}
                     {variation.content.englishVideo ?
                         <div>
-                            <div style={{ position: "relative", width: "100%", height: "0", paddingBottom: "56.25%" }} >
-                                <iframe title={`${variation.name} English`} style={{ position: "absolute", width: "100%", height: "100%", left: 0, top: 0 }} src={`http://www.youtube.com/embed/${variation.content.englishVideo}`} frameBorder="0" allowFullScreen />
-                            </div>
+                            <YouTubeVideo videoId={variation.content.englishVideo} />
                             <CrossDivider />
                         </div> : ""}
                     {variation.content.arabicVideo ?
                         <div>
-                            <div style={{ position: "relative", width: "100%", height: "0", paddingBottom: "56.25%" }} >
-                                <iframe title={`${variation.name} Arabic`} style={{ position: "absolute", width: "100%", height: "100%", left: 0, top: 0 }} src={`http://www.youtube.com/embed/${variation.content.arabicVideo}`} frameBorder="0" allowFullScreen />
-                            </div>
+                            <YouTubeVideo videoId={variation.content.arabicVideo} />
                             <CrossDivider />
                         </div> : ""}
                 </div>
