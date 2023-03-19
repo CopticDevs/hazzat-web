@@ -12,6 +12,7 @@ import { IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariation
 import BreadCrumb from "./BreadCrumb";
 import ContentAudio from "./ContentAudio";
 import ContentHazzat from "./ContentHazzat";
+import ContentInformation from "./ContentInformation";
 import ContentMusicalNotes from "./ContentMusicalNotes";
 import ContentVerticalHazzat from "./ContentVerticalHazzat";
 import ContentVideo from "./ContentVideo";
@@ -81,6 +82,9 @@ function Content() {
             break;
         case "6":
             contentControl = <ContentVideo formatId={formatIdParam} variations={variations} />;
+            break;
+        case "7":
+            contentControl = <ContentInformation formatId={formatIdParam} variations={variations} />;
             break;
         default:
             contentControl = <>
