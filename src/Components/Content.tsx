@@ -14,6 +14,7 @@ import ContentAudio from "./ContentAudio";
 import ContentHazzat from "./ContentHazzat";
 import ContentMusicalNotes from "./ContentMusicalNotes";
 import ContentVerticalHazzat from "./ContentVerticalHazzat";
+import ContentVideo from "./ContentVideo";
 import LoadingSpinner from "./LoadingSpinner";
 import MyNavLink from "./MyNavLink";
 
@@ -77,6 +78,9 @@ function Content() {
             break;
         case "5":
             contentControl = <ContentAudio formatId={formatIdParam} variations={variations} />;
+            break;
+        case "6":
+            contentControl = <ContentVideo formatId={formatIdParam} variations={variations} />;
             break;
         default:
             contentControl = <>

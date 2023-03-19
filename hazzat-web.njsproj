@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\AppSettings.ts" />
+    <TypeScriptCompile Include="src\Components\ContentVideo.tsx" />
     <TypeScriptCompile Include="src\Components\ContentAudio.tsx" />
     <TypeScriptCompile Include="src\Components\CrossDivider.tsx" />
     <TypeScriptCompile Include="src\Components\ContentMusicalNotes.tsx" />
