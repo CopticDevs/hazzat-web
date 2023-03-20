@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { LanguageContext } from "../LanguageContext";
-import { ITextContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
+import { ITextContent, IVariationInfo, TextColumn, TextParagraph } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
@@ -10,34 +10,161 @@ interface IProps {
     variations: IVariationInfo<ITextContent>[];
 }
 
+interface IContentTable {
+    colGroup: React.DetailedHTMLProps<React.ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
+    rows: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>[];
+}
+
 function ContentText(props: IProps) {
     const { languageProperties } = useContext(LanguageContext);
     const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
-    //const englishMask: number = 0x100;
-    //const copticMask: number = 0x010;
-    //const arabicMask: number = 0x001;
+    const englishMask: number = 0x100;
+    const copticMask: number = 0x010;
+    const arabicMask: number = 0x001;
 
-    //const getTableMask = (columns: TextColumn[]): number => {
-    //    let resultMask: number = 0;
-    //    columns.forEach((col) => {
-    //        if (col.language.toUpperCase() === "ENGLISH") {
-    //            resultMask |= englishMask;
-    //            return;
-    //        }
-    //        if (col.language.toUpperCase() === "COPTIC") {
-    //            resultMask |= copticMask;
-    //            return;
-    //        }
-    //        if (col.language.toUpperCase() === "ARABIC") {
-    //            resultMask |= arabicMask;
-    //            return;
-    //        }
-    //    });
-    //    return resultMask;
-    //};
+    const englishColWidth: string = "32%";
+    const copticColWidth: string = "44%";
+    const arabicColWidth: string = "24%";
 
-    //let prevMask: number = 0;
+    const getLanguageMask = (language: string): number => {
+        if (language.toUpperCase() === "ENGLISH") {
+            return englishMask;
+        }
+        if (language.toUpperCase() === "COPTIC") {
+            return copticMask;
+        }
+        if (language.toUpperCase() === "ARABIC") {
+            return arabicMask;
+        }
+
+        return 0;
+    };
+
+    const getTableMask = (columns: TextColumn[]): number => {
+        let resultMask: number = 0;
+        columns.forEach((col) => {
+            resultMask |= getLanguageMask(col.language);
+        });
+        return resultMask;
+    };
+
+    let prevMask: number = 0;
+    let currTableId: number = 0;
+    let currRowId: number = 0;
+    let currCelId: number = 0;
+    let colDefId: number = 0;
+    const contentTables: IContentTable[] = [];
+
+    const ensureTableInstantiated = (currentMask: number) => {
+        // Same as pprevious set of contents, use same table
+        if (currentMask === prevMask) {
+            return;
+        }
+
+        // define cols
+        const colDefs: React.DetailedHTMLProps<React.ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>[] = [];
+
+        if ((currentMask & englishMask) !== 0) {
+            colDefs.push(<col key={colDefId++} style={{ width: englishColWidth }} />);
+        }
+
+        if ((currentMask & copticMask) !== 0) {
+            colDefs.push(<col key={colDefId++} style={{ width: copticColWidth }} />);
+        }
+
+        if ((currentMask & arabicMask) !== 0) {
+            colDefs.push(<col key={colDefId++} style={{ width: arabicColWidth }} />);
+        }
+
+        const colGroup = <colgroup>{colDefs}</colgroup>;
+
+        contentTables.push({
+            colGroup,
+            rows: []
+        });
+    };
+
+    const getColCell = (col: TextColumn, isComment: boolean, currentMask: number) => {
+        const langMask = getLanguageMask(col.language);
+        const cssClasses: string[] = [];
+        const rowHasCoptic = (currentMask & copticMask) !== 0;
+        const rowHasArabic = (currentMask & arabicMask) !== 0;
+        const lang: string = langMask === arabicMask ? "ar" : "en";
+
+        // add padding class
+        cssClasses.push("p-2");
+
+        // add lang class
+        if (isComment) {
+            if (langMask === englishMask) cssClasses.push("EnglishComment");
+            if (langMask === copticMask) cssClasses.push("CopticComment");
+            if (langMask === arabicMask) cssClasses.push("ArabicComment");
+        } else {
+            if (langMask === englishMask) cssClasses.push("EnglishFont");
+            if (langMask === copticMask) cssClasses.push("CopticFont");
+            if (langMask === arabicMask) cssClasses.push("ArabicFont");
+        }
+
+        // align text to top
+        cssClasses.push("textAlignTop");
+
+        // Add right border if applicable
+        if (!isComment) {
+            if (langMask === englishMask && rowHasCoptic) cssClasses.push("contentRBorder");
+            if (langMask === copticMask && rowHasArabic) cssClasses.push("contentRBorder");
+        }
+
+        // Add rtl for Arabic
+        if (langMask === arabicMask) cssClasses.push("dirRtl");
+
+        const className = cssClasses.join(" ");
+        let stringSuffix = "";
+
+        if (isComment) {
+            stringSuffix = (langMask === copticMask) ? "@" : ":";
+        }
+
+        const cell = <td key={currCelId++} lang={lang} className={className} dangerouslySetInnerHTML={{ __html: `${col.content}${stringSuffix}` }} />
+        return cell;
+    };
+
+    const addContentRow = (columns: TextColumn[], isComment: boolean, currentMask: number) => {
+        const cells = columns.map((col) => {
+            return getColCell(col, isComment, currentMask);
+        });
+
+        const row = <tr key={currRowId++}>{cells}</tr>;
+
+        contentTables[contentTables.length - 1].rows.push(row);
+    };
+
+    const generateContentTables = (paragraphs: TextParagraph[]) => {
+        paragraphs.forEach((paragraph) => {
+            // get current mask
+            const currentMask = getTableMask(paragraph.columns);
+
+            // ensure table instantiated
+            ensureTableInstantiated(currentMask);
+
+            // add a new row
+            addContentRow(paragraph.columns, !!paragraph.isComment, currentMask);
+
+            // update mask
+            prevMask = currentMask;
+        });
+
+        const tables = contentTables.map((tbl) =>
+            <table key={currTableId++} className="table-borderless" style={{ width: "100%" }}>
+                {tbl.colGroup}
+                <tbody>
+                    {tbl.rows}
+                </tbody>
+            </table>
+        );
+
+        return tables;
+    };
 
     return (
         <>
@@ -48,43 +175,9 @@ function ContentText(props: IProps) {
                     </div>
                     <div className="clear" />
                     <div className="table-responsive dirLtr">
-                        {/*{*/}
-                        {/*    variation.content.paragraphs.map((paragraph, i) => {*/}
-                        {/*        let resultControl: JSX.Element;*/}
-                        {/*        const currentMask = getTableMask(paragraph.columns);*/}
-                                
-                        {/*        if (currentMask !== prevMask || i === 0) {*/}
-                        {/*        }*/}
-
-
-
-                        {/*    })*/}
-                        {/*}*/}
-                    
-                        {/*<table className="table-borderless">*/}
-                        {/*    <colgroup>*/}
-                        {/*        <col style={{ width: "29%" }} />*/}
-                        {/*        <col style={{ width: "50%" }} />*/}
-                        {/*        <col style={{ width: "21%" }} />*/}
-                        {/*    </colgroup>*/}
-                        {/*    <tbody>*/}
-                        {/*        <tr>*/}
-                        {/*            <td lang="en" className="p-2 EnglishFont contentRBorder">{variation.content?.paragraphs[0]?.columns[0]?.content}</td>*/}
-                        {/*            <td lang="en" className="p-2 CopticFont contentRBorder">{variation.content?.paragraphs[0]?.columns[1]?.content}</td>*/}
-                        {/*            <td lang="ar" className="p-2 ArabicFont dirRtl">{variation.content?.paragraphs[0]?.columns[2]?.content}</td>*/}
-                        {/*        </tr>*/}
-                        {/*        <tr>*/}
-                        {/*            <td lang="en" className="p-2 EnglishFont contentRBorder">{variation.content?.paragraphs[1]?.columns[0]?.content}</td>*/}
-                        {/*            <td lang="en" className="p-2 CopticFont contentRBorder">{variation.content?.paragraphs[1]?.columns[1]?.content}</td>*/}
-                        {/*            <td lang="ar" className="p-2 ArabicFont dirRtl">{variation.content?.paragraphs[1]?.columns[2]?.content}</td>*/}
-                        {/*        </tr>*/}
-                        {/*        <tr>*/}
-                        {/*            <td lang="en" className="p-2 EnglishFont contentRBorder">{variation.content?.paragraphs[2]?.columns[0]?.content}</td>*/}
-                        {/*            <td lang="en" className="p-2 CopticFont contentRBorder">{variation.content?.paragraphs[2]?.columns[1]?.content}</td>*/}
-                        {/*            <td lang="ar" className="p-2 ArabicFont dirRtl">{variation.content?.paragraphs[2]?.columns[2]?.content}</td>*/}
-                        {/*        </tr>*/}
-                        {/*    </tbody>*/}
-                        {/*</table>*/}
+                        {
+                            generateContentTables(variation.content.paragraphs)
+                        }
                     </div>
                     <CrossDivider />
                 </div>

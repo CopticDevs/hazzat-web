@@ -11,3 +11,7 @@
 .contentRBorder {
     border-right: 1px solid black;
 }
+
+.textAlignTop {
+    vertical-align: text-top;
+}
