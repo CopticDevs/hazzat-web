@@ -33,6 +33,7 @@ export const strings = new LocalizedStrings({
         "otherServices": "Other Services",
         "loading": "Loading...",
         "noSeasons": "No seasons to display",
+        "noTypes": "No hymn types to display",
         "followUs": "Follow Us",
         "menu": "Menu",
         "seasonTitle": "{0} Hymns",
@@ -47,7 +48,18 @@ export const strings = new LocalizedStrings({
         "goBack": "Go back",
         "musicalNotesLinkSuffix": "Musical Notes",
         "musicAudioLinkSuffix": "Instrumental Audio",
-        "audioLinkSuffix": "Audio"
+        "audioLinkSuffix": "Audio",
+        "numeric0": "0",
+        "numeric1": "1",
+        "numeric2": "2",
+        "numeric3": "3",
+        "numeric4": "4",
+        "numeric5": "5",
+        "numeric6": "6",
+        "numeric7": "7",
+        "numeric8": "8",
+        "numeric9": "9",
+
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -63,6 +75,7 @@ export const strings = new LocalizedStrings({
         "otherServices": "خدمات أُخرى",
         "loading": "جار التحميل...",
         "noSeasons": "لا توجد مواسم للعرض",
+        "noTypes": "لا توجد أنواع للعرض",
         "followUs": "تابعنا",
         "menu": "القائمة",
         "seasonTitle": "الحان {0}",
@@ -77,6 +90,16 @@ export const strings = new LocalizedStrings({
         "goBack": "رجوع",
         "musicalNotesLinkSuffix": "نوتة موسيقية",
         "musicAudioLinkSuffix": "صوت آلي",
-        "audioLinkSuffix": "مَلفّ صوتي"
+        "audioLinkSuffix": "مَلفّ صوتي",
+        "numeric0": "٠",
+        "numeric1": "١",
+        "numeric2": "٢",
+        "numeric3": "٣",
+        "numeric4": "٤",
+        "numeric5": "٥",
+        "numeric6": "٦",
+        "numeric7": "٧",
+        "numeric8": "٨",
+        "numeric9": "٩",
     }
 });

@@ -37,6 +37,8 @@
   </PropertyGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\AppSettings.ts" />
+    <TypeScriptCompile Include="src\Components\TypesMenu.tsx" />
+    <TypeScriptCompile Include="src\Components\Types.tsx" />
     <TypeScriptCompile Include="src\Components\YouTubeVideo.tsx" />
     <TypeScriptCompile Include="src\Components\ContentText.tsx" />
     <TypeScriptCompile Include="src\Components\ContentInformation.tsx" />
@@ -70,10 +72,12 @@
     <TypeScriptCompile Include="src\l8n.ts" />
     <TypeScriptCompile Include="src\LanguageProvider.tsx" />
     <TypeScriptCompile Include="src\LanguageContext.tsx" />
+    <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\ITypeInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IVariationInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IHymnInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IFormatInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IServiceInfo.ts" />
+    <TypeScriptCompile Include="src\Utils\LangUtils.ts" />
     <TypeScriptCompile Include="src\youtube.d.ts" />
     <TypeScriptCompile Include="src\stringFormat.ts" />
     <TypeScriptCompile Include="src\LocalizedMessage.tsx" />

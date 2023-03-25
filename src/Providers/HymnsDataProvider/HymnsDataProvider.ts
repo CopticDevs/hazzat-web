@@ -4,6 +4,7 @@ import { IFormatInfo } from "./Models/IFormatInfo";
 import { IHymnInfo } from "./Models/IHymnInfo";
 import { ISeasonInfo } from "./Models/ISeasonInfo";
 import { IServiceInfo } from "./Models/IServiceInfo";
+import { ITypeInfo } from "./Models/ITypeInfo";
 import { IHymnContent, IVariationInfo } from "./Models/IVariationInfo";
 
 export class HymnsDataProvider implements IHymnsDataProvider {
@@ -116,6 +117,16 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         } catch (ex) {
             console.log(ex);
             throw ex;
+        }
+    }
+
+    public async getTypeList(): Promise<ITypeInfo[]> {
+        try {
+            const response = await this.httpClient.get<ITypeInfo[]>("/types");
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            return [];
         }
     }
 }
