@@ -64,7 +64,20 @@ export const strings = new LocalizedStrings({
         "forPrinting": "For Printing",
         "forPrintingDesc": "Pages are ordered as a booklet style. The page order will be correct once it is assembled as a booklet.",
         "forDevices": "For Devices",
-        "forDevicesDesc": "Pages are ordered sequentially for touch friendly devices."
+        "forDevicesDesc": "Pages are ordered sequentially for touch friendly devices.",
+        "hazzatFont": "Hazzat Font",
+        "hazzatFontVer": "Hazzat Font v1.10a",
+        "hazzatFontDesc": "This font is a freeware, to be shared by Copts and non-Copts all over the world. Just one request from author...Please share your hymns with everybody for teaching purpose. Thank you, and may God reward you.",
+        "copticFonts": "Coptic Fonts",
+        "copticZipTitle": "A zip file containing the following Coptic Fonts:",
+        "copticZipContents": "Antonious 1<br />Athanasius<br />Avva_Bishoy<br />Avva_Kyrillos<br />Avva_Marcos<br />Avva_Shenouda<br />AvvaMarkos<br />Bishop Tadros<br />Copt<br />Coptic<br />Coptic1<br />CopticII<br />Coptonew<br />CS Avva Shenouda<br />CS Copt<br />CS Coptic Manuscript<br />CS Copto Manuscript<br />CS Koptos Manuscript<br />CS New Athanasius<br />CS Pishoi<br />Faith Ornaments<br />Koptos<br />Kyrillos<br />MENA 1<br />New Athanasius<br />Nopher<br />Pishoi<br />Pope Shenouda III<br />Saint Marina<br />SaintAbraham<br />SaintGeorges<br />SPAchmim",
+        "save": "Save",
+        "downloadAllCopticFonts": "Download all Coptic fonts",
+        "hazzatFontReason": "This font is made in order to make long Coptic hymns easier to learn. The idea is to put certain notes between the Coptic letters in order to follow along with the hymn. The hymn notes are not complicated. As a result, a person that doesn’t know the hymn could not chant it just by reading the notes, but should listen to the hymn and be familiar with the melody, and the Hazzat font will guide the chanter through the transition points in the melody.<br /></br />The Hazzat font is not a new idea, but it has been used by the Coptic Church (mainly the deacons) for a long time. However, this is the first time to be made into a font. The idea is to make the following feasible:",
+        "hazzatAdvantagesList": "<li>Store all hymns on the computer, instead of papers all around.</li><li>Be able to share these hymns with friends.</li><li>Post these hymns on the internet for teaching.</li><li>Make it look nice and uniform.</li><li>Set a standard for other fonts for the same purpose.</li>",
+        "hazzatDescSummary": "This font is a <span style=\"color: red\">freeware</span>, to be shared by Copts and non-Copts all over the world. Just one request from author... <span style=\"color: red\">Please share your hymns with everybody</span> for teaching purpose. Thank you, and may God reward you.",
+        "enlargePic": "Click on the picture to enlarge in a new window",
+        "downloadHazzatFont": "Download Hazzat Font v1.10a"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -111,6 +124,19 @@ export const strings = new LocalizedStrings({
         "forPrinting": "للطباعة",
         "forPrintingDesc": "الصفحات مرتبة على شكل كتيب. ستكون ترتيب الصفحات صحيحًا بمجرد تجميعها ككتيب.",
         "forDevices": "للأجهزة",
-        "forDevicesDesc": "الصفحات مرتبة بترتيب متتالٍ للأجهزة الحساسة للمس."
+        "forDevicesDesc": "الصفحات مرتبة بترتيب متتالٍ للأجهزة الحساسة للمس.",
+        "hazzatFont": "خط هزّات",
+        "hazzatFontVer": "خط هزّات v1.10a",
+        "hazzatFontDesc": "هذه الخطوط متاحة مجاناً للمشاركة بين الأقباط وغير الأقباط في جميع أنحاء العالم. نسألكم فقط طلباً واحداً من المؤلف... يرجى مشاركة ألحانكم مع الجميع لغرض التعليم. شكراً لكم، وجزاكم الله خيراً.",
+        "copticFonts": "خطوط قبطية",
+        "copticZipTitle": "ملف مضغوط يحتوي على خطوط قبطية التالية:",
+        "copticZipContents": "Antonious 1<br />Athanasius<br />Avva_Bishoy<br />Avva_Kyrillos<br />Avva_Marcos<br />Avva_Shenouda<br />AvvaMarkos<br />Bishop Tadros<br />Copt<br />Coptic<br />Coptic1<br />CopticII<br />Coptonew<br />CS Avva Shenouda<br />CS Copt<br />CS Coptic Manuscript<br />CS Copto Manuscript<br />CS Koptos Manuscript<br />CS New Athanasius<br />CS Pishoi<br />Faith Ornaments<br />Koptos<br />Kyrillos<br />MENA 1<br />New Athanasius<br />Nopher<br />Pishoi<br />Pope Shenouda III<br />Saint Marina<br />SaintAbraham<br />SaintGeorges<br />SPAchmim",
+        "save": "تحميل",
+        "downloadAllCopticFonts": "تحميل جميع الخطوط القبطية",
+        "hazzatFontReason": "تم إنشاء هذا الفونت لتسهيل تعلم الألحان القبطية الطويلة. فكرة الخط هي وضع علامات معينة بين الحروف القبطية لتسهيل متابعة الألحان. علامات الهزات ليسة معقدة. ولذلك، فإن شخصًا لا يعرف اللحن لا يمكنه ترديده فقط من خلال قراءة العلامات، ولكن يجب أن يستمع إلى اللحن وأن يتعرف على النغمة، وسيوجهه خط الهزات خلال نقاط الانتقال في اللحن.<br /><br />خط الـهزات ليس فكرة جديدة، ولكنه تم استخدامه في الكنيسة القبطية (بشكل رئيسي من قبل الشمامسة) لفترة طويلة. ومع ذلك، هذه هي المرة الأولى التي يتم إنشاء خط فونت له. الفكرة هي جعل ما يلي ممكنًا:",
+        "hazzatAdvantagesList": "<li>تخزين جميع الألحان على كمبيوتر بدلاً من الأوراق المبعثرة في كل مكان.</li><li>القدرة على مشاركة هذه الألحان مع الاخرين.</li><li>نشر هذه الألحان على الإنترنت للتدريس.</li><li>جعلها تبدو جيدة وموحدة.</li><li>وضع مقياس للخطوط الأخرى لنفس الغرد.</li>",
+        "hazzatDescSummary": "هذا الفونت متاح <span style=\"color: red\">للجميع</span> مجانًا، ويمكن مشاركته بين الأقباط وغير الأقباط في جميع أنحاء العالم. طلب وحيد من صاحب الخط... <span style=\"color: red\">يرجى مشاركة الألحان مع الجميع</span> لأجل التعليم. شكرًا لك، والله يعوض تعبك.",
+        "enlargePic": "انقر على الصورة لتكبيرها في نافذة جديدة.",
+        "downloadHazzatFont": "تحميل خط هزّات v1.10a"
     }
 });

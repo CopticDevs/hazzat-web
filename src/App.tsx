@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { AppSettings } from "./AppSettings";
 import Booklets from "./Components/Booklets";
+import Fonts from "./Components/Fonts";
 import Footer from "./Components/Footer";
 import Header from "./Components/Header";
 import Home from './Components/Home';
@@ -30,6 +31,7 @@ function App() {
                                 <Route path="/Types/*" element={<Types />} />
                                 <Route path="/Tunes/*" element={<Tunes />} />
                                 <Route path="/Booklets/*" element={<Booklets />} />
+                                <Route path="/Fonts/*" element={<Fonts />} />
                                 <Route path="*" element={
                                     <main style={{ padding: "1rem" }}>
                                         <p><LocalizedMessage of="noContent" /></p>

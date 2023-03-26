@@ -37,6 +37,8 @@
   </PropertyGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\AppSettings.ts" />
+    <TypeScriptCompile Include="src\Components\HazzatFont.tsx" />
+    <TypeScriptCompile Include="src\Components\Fonts.tsx" />
     <TypeScriptCompile Include="src\Components\Content.tsx" />
     <TypeScriptCompile Include="src\Components\HymnContentFromTune.tsx" />
     <TypeScriptCompile Include="src\Components\HymnContentFromType.tsx" />
@@ -104,6 +106,7 @@
     <TypeScriptCompile Include="src\react-app-env.d.ts" />
     <TypeScriptCompile Include="src\reportWebVitals.ts" />
     <TypeScriptCompile Include="src\setupTests.ts" />
+    <Content Include="public\downloads\Hazzat_v1_10a.zip" />
     <Content Include="public\favicon.ico" />
     <Content Include="public\index.html" />
     <Content Include="public\logo192.png" />
@@ -133,6 +136,7 @@
     <Content Include="src\fonts\998687745-TrajanPro-Regular.eot" />
     <Content Include="src\fonts\998687745-TrajanPro-Regular.ttf" />
     <Content Include="src\fonts\998687745-TrajanPro-Regular.woff" />
+    <Content Include="public\downloads\copticfonts.zip" />
     <Content Include="src\fonts\cs_avva_shenouda.ttf" />
     <Content Include="src\fonts\cs_new_athanasius.ttf" />
     <Content Include="src\fonts\fonts.css" />
@@ -152,6 +156,7 @@
     <Content Include="src\images\crossline.gif" />
     <Content Include="src\images\displayFormat.png" />
     <Content Include="src\images\facebook.png" />
+    <Content Include="src\images\hazzat.jpg" />
     <Content Include="src\images\hazzat_mouseon.gif" />
     <Content Include="src\images\hazzat_mouseout.gif" />
     <Content Include="src\images\headerBg.png" />
@@ -173,6 +178,7 @@
     <Content Include="src\images\navBgBottom.jpg" />
     <Content Include="src\images\navBgNew.png" />
     <Content Include="src\images\pattern.jpg" />
+    <Content Include="src\images\save.gif" />
     <Content Include="src\images\space.gif" />
     <Content Include="src\images\text_mouseon.gif" />
     <Content Include="src\images\text_mouseout.gif" />
@@ -201,6 +207,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="public\" />
+    <Folder Include="public\downloads\" />
     <Folder Include="src\" />
     <Folder Include="src\Components\" />
     <Folder Include="src\css\" />
