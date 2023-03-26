@@ -6,6 +6,7 @@ import Footer from "./Components/Footer";
 import Header from "./Components/Header";
 import Home from './Components/Home';
 import Seasons from './Components/Seasons';
+import Types from "./Components/Types";
 import "./css/hazzat.css";
 import "./fonts/fonts.css";
 import { LanguageContext } from "./LanguageContext";
@@ -24,7 +25,7 @@ function App() {
                             <Routes>
                                 <Route path="/" element={<Home navItems={AppSettings.navigationMenuItems} />} />
                                 <Route path="/Seasons/*" element={<Seasons />} />
-                                
+                                <Route path="/Types/*" element={<Types />} />
                                 <Route path="*" element={
                                     <main style={{ padding: "1rem" }}>
                                         <p><LocalizedMessage of="noContent" /></p>
