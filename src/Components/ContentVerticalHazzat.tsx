@@ -5,7 +5,6 @@ import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
 
 interface IProps {
-    formatId: string;
     variations: IVariationInfo<IVerticalHazzatContent>[];
 }
 

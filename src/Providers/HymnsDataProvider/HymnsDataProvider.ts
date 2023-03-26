@@ -110,16 +110,6 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         }
     }
 
-    public async getServiceHymnsFormatVariation<T extends IHymnContent>(seasonId: string, serviceId: string, hymnId: string, formatId: string, variationId: string): Promise<IVariationInfo<T>> {
-        try {
-            const response = await this.httpClient.get<IVariationInfo<T>>(`/seasons/${seasonId}/services/${serviceId}/hymns/${hymnId}/formats/${formatId}/variations/${variationId}`);
-            return response.data;
-        } catch (ex) {
-            console.log(ex);
-            throw ex;
-        }
-    }
-
     public async getTypeList(): Promise<ITypeInfo[]> {
         try {
             const response = await this.httpClient.get<ITypeInfo[]>("/types");
@@ -150,6 +140,16 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         }
     }
 
+    public async getTypeSeason(typeId: string, seasonId: string): Promise<ISeasonInfo> {
+        try {
+            const response = await this.httpClient.get<ISeasonInfo>(`/types/${typeId}/seasons/${seasonId}`);
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            throw ex;
+        }
+    }
+
     public async getTypeSeasonServiceHymnList(typeId: string, seasonId: string): Promise<IHymnInfoWithServiceDetails[]> {
         try {
             const response = await this.httpClient.get<IHymnInfoWithServiceDetails[]>(`/types/${typeId}/seasons/${seasonId}/hymns`);
@@ -160,9 +160,39 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         }
     }
 
+    public async getTypeSeasonServiceHymn(typeId: string, seasonId: string, hymnId: string): Promise<IHymnInfoWithServiceDetails> {
+        try {
+            const response = await this.httpClient.get<IHymnInfoWithServiceDetails>(`/types/${typeId}/seasons/${seasonId}/hymns/${hymnId}`);
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            throw ex;
+        }
+    }
+
     public async getTypeSeasonServiceHymnFormatList(typeId: string, seasonId: string, hymnId: string): Promise<IFormatInfo[]> {
         try {
             const response = await this.httpClient.get<IFormatInfo[]>(`/types/${typeId}/seasons/${seasonId}/hymns/${hymnId}/formats`);
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            return [];
+        }
+    }
+
+    public async getTypeSeasonServiceHymnFormat(typeId: string, seasonId: string, hymnId: string, formatId: string): Promise<IFormatInfo> {
+        try {
+            const response = await this.httpClient.get<IFormatInfo>(`/types/${typeId}/seasons/${seasonId}/hymns/${hymnId}/formats/${formatId}`);
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            throw ex;
+        }
+    }
+
+    public async getTypeSeasonServiceHymnFormatVariationList<T extends IHymnContent>(typeId: string, seasonId: string, hymnId: string, formatId: string): Promise<IVariationInfo<T>[]> {
+        try {
+            const response = await this.httpClient.get<IVariationInfo<T>[]>(`/types/${typeId}/seasons/${seasonId}/hymns/${hymnId}/formats/${formatId}/variations`);
             return response.data;
         } catch (ex) {
             console.log(ex);

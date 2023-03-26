@@ -4,7 +4,7 @@ import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { ITypeInfo } from "../Providers/HymnsDataProvider/Models/ITypeInfo";
-import Content from "./Content";
+import HymnContentFromType from "./HymnContentFromType";
 import LoadingSpinner from "./LoadingSpinner";
 import "./SeasonDetails.css";
 import TypeSeasonsMenu from "./TypeSeasonsMenu";
@@ -52,7 +52,7 @@ function TypeDetails() {
 
                             <Routes>
                                 <Route path="/" element={<TypeSeasonsMenu typeId={typeIdParam} typeName={typeInfo.name} />} />
-                                {/*<Route path={`/Types/:typeId/seasons/:seasonId/formats/:formatId`} element={<Content />} />*/}
+                                <Route path={`/seasons/:seasonId/hymns/:hymnId/formats/:formatId`} element={<HymnContentFromType typeInfo={typeInfo} />} />
                             </Routes>
                         </div>
                         : null

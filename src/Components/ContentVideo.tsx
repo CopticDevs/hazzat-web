@@ -7,7 +7,6 @@ import HymnTitle from "./HymnTitle";
 import YouTubeVideo from "./YoutubeVideo";
 
 interface IProps {
-    formatId: string;
     variations: IVariationInfo<IVideoContent>[];
 }
 
