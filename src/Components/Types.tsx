@@ -1,6 +1,5 @@
 import { Route, Routes } from "react-router-dom";
 import MainPaper, { Size } from "./MainPaper";
-import "./Seasons.css";
 import TypeDetails from "./TypeDetails";
 import TypesMenu from "./TypesMenu";
 

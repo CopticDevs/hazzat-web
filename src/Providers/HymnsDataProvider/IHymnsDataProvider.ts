@@ -1,3 +1,4 @@
+import { IBookletInfo } from "./Models/IBookletInfo";
 import { IFormatInfo } from "./Models/IFormatInfo";
 import { IHymnInfo, IHymnInfoWithServiceDetails } from "./Models/IHymnInfo";
 import { ISeasonInfo } from "./Models/ISeasonInfo";
@@ -48,4 +49,7 @@ export interface IHymnsDataProvider {
     getTuneSeasonServiceHymnFormat(tuneId: string, seasonId: string, hymnId: string, formatId: string): Promise<IFormatInfo>;
 
     getTuneSeasonServiceHymnFormatVariationList<T extends IHymnContent>(tuneId: string, seasonId: string, hymnId: string, formatId: string): Promise<IVariationInfo<T>[]>;
+
+    getBookletList(): Promise<IBookletInfo[]>;
+    getBooklet(bookletId: string): Promise<IBookletInfo>;
 }

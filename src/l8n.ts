@@ -35,6 +35,7 @@ export const strings = new LocalizedStrings({
         "noSeasons": "No seasons to display",
         "noTypes": "No hymn types to display",
         "noTunes": "No hymn tunes to display",
+        "noBooklets": "No booklets to display",
         "followUs": "Follow Us",
         "menu": "Menu",
         "seasonTitle": "{0} Hymns",
@@ -60,7 +61,10 @@ export const strings = new LocalizedStrings({
         "numeric7": "7",
         "numeric8": "8",
         "numeric9": "9",
-
+        "forPrinting": "For Printing",
+        "forPrintingDesc": "Pages are ordered as a booklet style. The page order will be correct once it is assembled as a booklet.",
+        "forDevices": "For Devices",
+        "forDevicesDesc": "Pages are ordered sequentially for touch friendly devices."
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -68,7 +72,7 @@ export const strings = new LocalizedStrings({
         "home": "الرئيسية",
         "seasons": "مواسم",
         "types": "أنواع",
-        "tunes": "الأنغام",
+        "tunes": "أنغام",
         "booklets": "كتيبات",
         "fonts": "الخطوط",
         "help": "مساعدة",
@@ -78,6 +82,7 @@ export const strings = new LocalizedStrings({
         "noSeasons": "لا توجد مواسم للعرض",
         "noTypes": "لا توجد أنواع للعرض",
         "noTunes": "لا توجد أنغام للعرض",
+        "noBooklets": "لا توجد كتيبات للعرض",
         "followUs": "تابعنا",
         "menu": "القائمة",
         "seasonTitle": "الحان {0}",
@@ -103,5 +108,9 @@ export const strings = new LocalizedStrings({
         "numeric7": "٧",
         "numeric8": "٨",
         "numeric9": "٩",
+        "forPrinting": "للطباعة",
+        "forPrintingDesc": "الصفحات مرتبة على شكل كتيب. ستكون ترتيب الصفحات صحيحًا بمجرد تجميعها ككتيب.",
+        "forDevices": "للأجهزة",
+        "forDevicesDesc": "الصفحات مرتبة بترتيب متتالٍ للأجهزة الحساسة للمس."
     }
 });
