@@ -1,4 +1,4 @@
-import { IHymnInfo } from "../Models/IHymnInfo";
+import { IHymnInfo, IHymnInfoWithServiceDetails } from "../Models/IHymnInfo";
 import { ISeasonInfo } from "../Models/ISeasonInfo";
 import { IServiceInfo } from "../Models/IServiceInfo";
 import { ITypeInfo } from "../Models/ITypeInfo";
@@ -25,13 +25,23 @@ export class HymnUtils {
     }
 
     /**
-     * Comparer method for hymns to sort by hymnb order ascendingly.
+     * Comparer method for hymns to sort by hymn order ascendingly.
      * @param hymnA first hymn
      * @param hymnB second hymn
      * @returns 1 if A > B, -1 if A < B, 0 if equal
      */
     public static hymnInfoComparer(hymnA: IHymnInfo, hymnB: IHymnInfo): number {
         return hymnA.order - hymnB.order;
+    }
+
+    /**
+     * Comparer method for IHymnInfoWithServiceDetails to sort by hymn order ascendingly.
+     * @param hymnA first hymn
+     * @param hymnB second hymn
+     * @returns 1 if A > B, -1 if A < B, 0 if equal
+     */
+    public static hymnInfoWithServiceDetailsComparer(hymnA: IHymnInfoWithServiceDetails, hymnB: IHymnInfoWithServiceDetails): number {
+        return hymnA.serviceOrder - hymnB.serviceOrder || hymnA.order - hymnB.order;
     }
 
     /**

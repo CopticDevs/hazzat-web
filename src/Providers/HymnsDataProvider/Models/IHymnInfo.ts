@@ -13,4 +13,5 @@ export interface IHymnInfo {
 export interface IHymnInfoWithServiceDetails extends IHymnInfo {
     serviceId: number;
     serviceName: string;
+    serviceOrder: number;
 }
