@@ -59,11 +59,11 @@ function BookletDetails() {
 
                             <div className="container">
                                 <div className="row">
-                                    <div className="col-md-3 bookletFullImgDiv">
-                                        <img src={bookletInfo.fullPicturePath} alt={bookletInfo.name} />
+                                    <div className="col-3 col-md-4 bookletFullImgDiv">
+                                        <img src={bookletInfo.fullPicturePath} alt={bookletInfo.name} width="214px" height="330px" />
                                     </div>
-                                    <div className="col-md-auto">
-                                        <div style={{ paddingLeft: "15px" }} dangerouslySetInnerHTML={{ __html: bookletInfo.summary }} />
+                                    <div className="col-9 col-md-8">
+                                        <div style={{ padding: "15px" }} dangerouslySetInnerHTML={{ __html: bookletInfo.summary }} />
                                     </div>
                                 </div>
                             
