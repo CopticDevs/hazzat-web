@@ -14,9 +14,9 @@ import verticalHazzatOn from "../images/verticalhazzat_mouseon.gif";
 import verticalHazzatOut from "../images/verticalhazzat_mouseout.gif";
 import videoOn from "../images/video_mouseon.gif";
 import videoOut from "../images/video_mouseout.gif";
+import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import "./FormatLink.css";
-import { strings } from "../l8n";
 import MyNavLink from "./MyNavLink";
 
 interface IProps {

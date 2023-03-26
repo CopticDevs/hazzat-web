@@ -1,5 +1,5 @@
 import { IFormatInfo } from "./Models/IFormatInfo";
-import { IHymnInfo } from "./Models/IHymnInfo";
+import { IHymnInfo, IHymnInfoWithServiceDetails } from "./Models/IHymnInfo";
 import { ISeasonInfo } from "./Models/ISeasonInfo";
 import { IServiceInfo } from "./Models/IServiceInfo";
 import { ITypeInfo } from "./Models/ITypeInfo";
@@ -23,4 +23,11 @@ export interface IHymnsDataProvider {
 
 
     getTypeList(): Promise<ITypeInfo[]>;
+    getType(typeId: string): Promise<ITypeInfo>;
+
+    getTypeSeasonList(typeId: string): Promise<ISeasonInfo[]>;
+
+    getTypeSeasonServiceHymnList(typeId: string, seasonId: string): Promise<IHymnInfoWithServiceDetails[]>;
+
+    getTypeSeasonServiceHymnFormatList(typeId: string, seasonId: string, hymnId: string): Promise<IFormatInfo[]>;
 }

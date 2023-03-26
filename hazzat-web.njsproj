@@ -37,6 +37,9 @@
   </PropertyGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\AppSettings.ts" />
+    <TypeScriptCompile Include="src\Components\TypeSeasonContents.tsx" />
+    <TypeScriptCompile Include="src\Components\TypeSeasonsMenu.tsx" />
+    <TypeScriptCompile Include="src\Components\TypeDetails.tsx" />
     <TypeScriptCompile Include="src\Components\TypesMenu.tsx" />
     <TypeScriptCompile Include="src\Components\Types.tsx" />
     <TypeScriptCompile Include="src\Components\YouTubeVideo.tsx" />

@@ -1,21 +1,19 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Route, Routes, useParams } from "react-router-dom";
-import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
-import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
-import { stringFormat } from "../stringFormat";
+import { ITypeInfo } from "../Providers/HymnsDataProvider/Models/ITypeInfo";
 import Content from "./Content";
 import LoadingSpinner from "./LoadingSpinner";
 import "./SeasonDetails.css";
-import ServicesMenu from "./ServicesMenu";
+import TypeSeasonsMenu from "./TypeSeasonsMenu";
 
-function SeasonDetails() {
-    let { seasonId } = useParams();
-    const seasonIdParam: string = seasonId || "";
+function TypeDetails() {
+    let { typeId } = useParams();
+    const typeIdParam: string = typeId || "";
     const { languageProperties } = useContext(LanguageContext);
-    const [seasonInfo, setSeasonInfo] = useState<ISeasonInfo | undefined>();
+    const [typeInfo, setTypeInfo] = useState<ITypeInfo | undefined>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const isMounted = useRef(true);
@@ -23,13 +21,13 @@ function SeasonDetails() {
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
-        const seasonResponse = await hymnsDataProvider.getSeason(seasonIdParam);
+        const typeResponse = await hymnsDataProvider.getType(typeIdParam);
 
         if (isMounted.current) {
-            setSeasonInfo(seasonResponse);
+            setTypeInfo(typeResponse);
             setIsLoading(false);
         }
-    }, [seasonIdParam, languageProperties, isMounted]);
+    }, [typeIdParam, languageProperties, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;
@@ -41,21 +39,20 @@ function SeasonDetails() {
     }, [fetchFromBackend]);
 
     useEffect(() => {
-        document.title = isLoading ? "hazzat.com" : `${seasonInfo?.name} - hazzat.com`;
-    }, [isLoading, seasonInfo]);
+        document.title = isLoading ? "hazzat.com" : `${typeInfo?.name} - hazzat.com`;
+    }, [isLoading, typeInfo]);
 
     return (
         <>
             {
                 isLoading ? <LoadingSpinner /> :
-                    !!seasonInfo ?
+                    !!typeInfo ?
                         <div>
-                            <div className="pageTitle">{stringFormat(strings.seasonTitle, seasonInfo.name)}</div>
-                            <div className="seasonVerse" dangerouslySetInnerHTML={{ __html: seasonInfo.verse }} />
+                            <div className="pageTitle">{typeInfo.name}</div>
 
                             <Routes>
-                                <Route path="/" element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.name} />} />
-                                <Route path={`/Services/:serviceId/hymns/:hymnId/formats/:formatId`} element={<Content seasonInfo={seasonInfo} />} />
+                                <Route path="/" element={<TypeSeasonsMenu typeId={typeIdParam} typeName={typeInfo.name} />} />
+                                {/*<Route path={`/Types/:typeId/seasons/:seasonId/formats/:formatId`} element={<Content />} />*/}
                             </Routes>
                         </div>
                         : null
@@ -64,4 +61,4 @@ function SeasonDetails() {
     );
 }
 
-export default SeasonDetails;
+export default TypeDetails;

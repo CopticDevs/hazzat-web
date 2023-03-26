@@ -13,12 +13,9 @@ function SeasonsMenu() {
     const { languageProperties } = useContext(LanguageContext);
     const [dateSpecificSeasons, setDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [nonDateSpecificSeasons, setNonDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-
     const isMounted = useRef(true);
 
     const fetchSeasons = React.useCallback(async () => {
-        setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
         const seasons = await hymnsDataProvider.getSeasonList();
         const dsSeasons: ISeasonInfo[] = [];
@@ -36,7 +33,6 @@ function SeasonsMenu() {
         if (isMounted.current) {
             setDateSpecificSeasons(dsSeasons.sort(HymnUtils.seasonInfoComparer));
             setNonDateSpecificSeasons(ndsSeasons.sort(HymnUtils.seasonInfoComparer));
-            setIsLoading(false);
         }
     }, [languageProperties, isMounted]);
 
@@ -54,7 +50,7 @@ function SeasonsMenu() {
         <div>
             <div className="pageTitle"><LocalizedMessage of="seasons" /></div>
             {
-                isLoading ? <LoadingSpinner /> :
+                !isMounted.current ? <LoadingSpinner /> :
                     dateSpecificSeasons && dateSpecificSeasons.length > 0 ?
                         dateSpecificSeasons.map((season) => {
                             return (
@@ -68,7 +64,7 @@ function SeasonsMenu() {
             }
             <div className="otherServicesTitle"><LocalizedMessage of="otherServices" /></div>
             {
-                isLoading ? <LoadingSpinner /> :
+                !isMounted.current ? <LoadingSpinner /> :
                     nonDateSpecificSeasons && nonDateSpecificSeasons.length > 0 ?
                         nonDateSpecificSeasons.map((season) => {
                             return (

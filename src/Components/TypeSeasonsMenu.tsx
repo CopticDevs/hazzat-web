@@ -3,31 +3,31 @@ import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
-import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
+import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
-import { getServiceNumberFromId } from "../Utils/ParserUtils";
+import { getTypeSeasonNumberFromId } from "../Utils/ParserUtils";
 import BreadCrumb from "./BreadCrumb";
 import LoadingSpinner from "./LoadingSpinner";
 import "./SeasonDetails.css";
-import ServiceContents from "./ServiceContents";
+import TypeSeasonsContents from "./TypeSeasonContents";
 
 interface IProps {
-    seasonName: string;
-    seasonId: string;
+    typeName: string;
+    typeId: string;
 }
-function ServicesMenu(props: IProps) {
+function TypeSeasonsMenu(props: IProps) {
     const { languageProperties } = useContext(LanguageContext);
-    const [services, setServices] = useState<IServiceInfo[]>([]);
+    const [seasons, setSeasons] = useState<ISeasonInfo[]>([]);
     const isMounted = useRef(true);
 
     const fetchFromBackend = React.useCallback(async () => {
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
-        const servicesResponse = await hymnsDataProvider.getServiceList(props.seasonId);
+        const seasonsResponse = await hymnsDataProvider.getTypeSeasonList(props.typeId);
 
         if (isMounted.current) {
-            setServices(servicesResponse.sort(HymnUtils.serviceInfoComparer));
+            setSeasons(seasonsResponse.sort(HymnUtils.seasonInfoComparer));
         }
-    }, [languageProperties, props.seasonId, isMounted]);
+    }, [languageProperties, props.typeId, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;
@@ -42,15 +42,15 @@ function ServicesMenu(props: IProps) {
         <>
             {
                 !isMounted.current ? <LoadingSpinner /> :
-                    !!services ?
+                    !!seasons ?
                         <div>
                             <BreadCrumb items={[
-                                { title: strings.seasons, path: "/Seasons" },
-                                { title: props.seasonName }]} />
+                                { title: strings.types, path: "/Types" },
+                                { title: props.typeName }]} />
 
-                            {services.map((service) => {
-                                const serviceId = getServiceNumberFromId(service.id);
-                                return <ServiceContents key={service.id} seasonId={props.seasonId} serviceId={serviceId} serviceName={service.name} />
+                            {seasons.map((season) => {
+                                const seasonId = getTypeSeasonNumberFromId(season.id);
+                                return <TypeSeasonsContents key={season.id} typeId={props.typeId} seasonId={seasonId} seasonName={season.name} />
                             })}
                         </div>
                         : null
@@ -59,4 +59,4 @@ function ServicesMenu(props: IProps) {
     );
 }
 
-export default ServicesMenu;
+export default TypeSeasonsMenu;

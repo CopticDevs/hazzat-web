@@ -5,6 +5,7 @@ import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
+import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
@@ -20,16 +21,20 @@ import ContentVideo from "./ContentVideo";
 import LoadingSpinner from "./LoadingSpinner";
 import MyNavLink from "./MyNavLink";
 
-function Content() {
+interface IProps {
+    seasonInfo: ISeasonInfo;
+}
+
+function Content(props: IProps) {
     let { seasonId, serviceId, hymnId, formatId } = useParams();
     const seasonIdParam: string = seasonId || "";
     const serviceIdParam: string = serviceId || "";
     const hymnIdParam: string = hymnId || "";
     const formatIdParam: string = formatId || "";
     const { languageProperties } = useContext(LanguageContext);
-    const [seasonInfo, setSeasonInfo] = useState<ISeasonInfo | undefined>();
     const [serviceInfo, setServiceInfo] = useState<IServiceInfo | undefined>();
     const [hymnInfo, setHymnInfo] = useState<IHymnInfo | undefined>();
+    const [formatInfo, setFormatInfo] = useState<IFormatInfo | undefined>();
     const [variations, setVariations] = useState<IVariationInfo<any>[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -38,16 +43,16 @@ function Content() {
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
-        const seasonPromise = hymnsDataProvider.getSeason(seasonIdParam);
         const servicePromise = hymnsDataProvider.getService(seasonIdParam, serviceIdParam);
         const hymnPromise = hymnsDataProvider.getServiceHymn(seasonIdParam, serviceIdParam, hymnIdParam);
         const variationsPromise = hymnsDataProvider.getServiceHymnsFormatVariationList(seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam);
-        const [seasonResponse, serviceResponse, hymnResponse, variationsResponse] = await Promise.all([seasonPromise, servicePromise, hymnPromise, variationsPromise]);
+        const formatPromise = hymnsDataProvider.getServiceHymnFormat(seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam);
+        const [serviceResponse, hymnResponse, variationsResponse, formatResponse] = await Promise.all([servicePromise, hymnPromise, variationsPromise, formatPromise]);
 
         if (isMounted.current) {
-            setSeasonInfo(seasonResponse);
             setServiceInfo(serviceResponse);
             setHymnInfo(hymnResponse);
+            setFormatInfo(formatResponse);
             setVariations(variationsResponse);
             setIsLoading(false);
         }
@@ -62,7 +67,11 @@ function Content() {
         };
     }, [fetchFromBackend]);
 
-    if (isLoading || !seasonInfo || !serviceInfo || !hymnInfo || !variations) {
+    useEffect(() => {
+        document.title = isLoading ? "hazzat.com" : `${props.seasonInfo.name} - ${serviceInfo?.name}: ${hymnInfo?.name} (${formatInfo?.name}) - hazzat.com`;
+    }, [isLoading, props.seasonInfo, serviceInfo?.name, hymnInfo?.name, formatInfo?.name]);
+
+    if (isLoading || !serviceInfo || !hymnInfo || !formatInfo || !variations) {
         return (<div />)
     }
 
@@ -105,16 +114,14 @@ function Content() {
         <>
             {
                 isLoading ? <LoadingSpinner /> :
-                    !!seasonInfo ?
-                        <div>
-                            <BreadCrumb items={[
-                                { title: strings.seasons, path: "/Seasons" },
-                                { title: seasonInfo.name, path: `/Seasons/${seasonIdParam}` },
-                                { title: `${serviceInfo.name}: ${hymnInfo.name}` }]} />
+                    <div>
+                        <BreadCrumb items={[
+                            { title: strings.seasons, path: "/Seasons" },
+                            { title: props.seasonInfo.name, path: `/Seasons/${seasonIdParam}` },
+                            { title: `${serviceInfo.name}: ${hymnInfo.name}` }]} />
 
-                            {contentControl}
-                        </div>
-                        : null
+                        {contentControl}
+                    </div>
             }
         </>
     );
