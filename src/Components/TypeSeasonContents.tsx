@@ -28,7 +28,7 @@ function TypeSeasonsContents(props: IProps) {
         const hymnsResponse = await hymnsDataProvider.getTypeSeasonServiceHymnList(props.typeId, props.seasonId);
 
         if (isMounted.current) {
-            setHymnsInfo(hymnsResponse.sort(HymnUtils.hymnInfoComparer));
+            setHymnsInfo(hymnsResponse.sort(HymnUtils.hymnInfoWithServiceDetailsComparer));
         }
     }, [languageProperties, props.typeId, props.seasonId, isMounted]);
 
