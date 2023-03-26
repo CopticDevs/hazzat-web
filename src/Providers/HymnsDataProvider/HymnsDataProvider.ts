@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { IHymnsDataProvider } from "./IHymnsDataProvider";
+import { IBookletInfo } from "./Models/IBookletInfo";
 import { IFormatInfo } from "./Models/IFormatInfo";
 import { IHymnInfo, IHymnInfoWithServiceDetails } from "./Models/IHymnInfo";
 import { ISeasonInfo } from "./Models/ISeasonInfo";
@@ -288,6 +289,26 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         } catch (ex) {
             console.log(ex);
             return [];
+        }
+    }
+
+    public async getBookletList(): Promise<IBookletInfo[]> {
+        try {
+            const response = await this.httpClient.get<IBookletInfo[]>("/booklets");
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            return [];
+        }
+    }
+
+    public async getBooklet(bookletId: string): Promise<IBookletInfo> {
+        try {
+            const response = await this.httpClient.get<IBookletInfo>(`/booklets/${bookletId}`);
+            return response.data;
+        } catch (ex) {
+            console.log(ex);
+            throw ex;
         }
     }
 }

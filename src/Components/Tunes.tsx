@@ -1,6 +1,5 @@
 import { Route, Routes } from "react-router-dom";
 import MainPaper, { Size } from "./MainPaper";
-import "./Seasons.css";
 import TuneDetails from "./TuneDetails";
 import TunesMenu from "./TunesMenu";
 
