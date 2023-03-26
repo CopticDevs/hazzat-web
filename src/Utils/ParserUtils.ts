@@ -4,6 +4,9 @@ const formatIdRegEx: string = "^/seasons/[0-9]+/services/[0-9]+/hymns/[0-9]+/for
 const typeSeasonIdRegEx: string = "^/types/[0-9]+/seasons/([0-9]+)$";
 const typeSeasonHymnIdRegEx: string = "^/types/[0-9]+/seasons/[0-9]+/hymns/([0-9]+)$";
 const typeSeasonHymnFormatIdRegex: string = "^/types/[0-9]+/seasons/[0-9]+/hymns/[0-9]+/formats/([0-9]+)$";
+const tuneSeasonIdRegEx: string = "^/tunes/[0-9]+/seasons/([0-9]+)$";
+const tuneSeasonHymnIdRegEx: string = "^/tunes/[0-9]+/seasons/[0-9]+/hymns/([0-9]+)$";
+const tuneSeasonHymnFormatIdRegex: string = "^/tunes/[0-9]+/seasons/[0-9]+/hymns/[0-9]+/formats/([0-9]+)$";
 
 /**
  * Extracts the typeSeason number from the full id.
@@ -12,6 +15,26 @@ const typeSeasonHymnFormatIdRegex: string = "^/types/[0-9]+/seasons/[0-9]+/hymns
  */
 export function getTypeSeasonNumberFromId(fullId: string): string {
     const expression = new RegExp(typeSeasonIdRegEx, "i");
+
+    if (!fullId || !expression.test(fullId)) {
+        return "";
+    }
+
+    const match = expression.exec(fullId);
+    if (match === null) {
+        return "";
+    }
+
+    return match[1];
+}
+
+/**
+ * Extracts the tuneSeason number from the full id.
+ * @param fullId Service ID. Eg: /tunes/17/seasons/15
+ * @returns Service number
+ */
+export function getTuneSeasonNumberFromId(fullId: string): string {
+    const expression = new RegExp(tuneSeasonIdRegEx, "i");
 
     if (!fullId || !expression.test(fullId)) {
         return "";
@@ -75,6 +98,21 @@ export function getTypeSeasonHymnNumberFromId(fullHymnId: string): string {
     return match[1];
 }
 
+export function getTuneSeasonHymnNumberFromId(fullHymnId: string): string {
+    const expression = new RegExp(tuneSeasonHymnIdRegEx, "i");
+
+    if (!fullHymnId || !expression.test(fullHymnId)) {
+        return "";
+    }
+
+    const match = expression.exec(fullHymnId);
+    if (match === null) {
+        return "";
+    }
+
+    return match[1];
+}
+
 export function getFormatNumberFromId(fullFormatId: string): string {
     const expression = new RegExp(formatIdRegEx, "i");
 
@@ -92,6 +130,21 @@ export function getFormatNumberFromId(fullFormatId: string): string {
 
 export function getTypeSeasonHymnFormatNumberFromId(fullFormatId: string): string {
     const expression = new RegExp(typeSeasonHymnFormatIdRegex, "i");
+
+    if (!fullFormatId || !expression.test(fullFormatId)) {
+        return "";
+    }
+
+    const match = expression.exec(fullFormatId);
+    if (match === null) {
+        return "";
+    }
+
+    return match[1];
+}
+
+export function getTuneSeasonHymnFormatNumberFromId(fullFormatId: string): string {
+    const expression = new RegExp(tuneSeasonHymnFormatIdRegex, "i");
 
     if (!fullFormatId || !expression.test(fullFormatId)) {
         return "";
