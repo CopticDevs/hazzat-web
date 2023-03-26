@@ -38,10 +38,16 @@
   <ItemGroup>
     <TypeScriptCompile Include="src\AppSettings.ts" />
     <TypeScriptCompile Include="src\Components\Content.tsx" />
+    <TypeScriptCompile Include="src\Components\HymnContentFromTune.tsx" />
     <TypeScriptCompile Include="src\Components\HymnContentFromType.tsx" />
+    <TypeScriptCompile Include="src\Components\Tunes.tsx" />
+    <TypeScriptCompile Include="src\Components\TuneDetails.tsx" />
+    <TypeScriptCompile Include="src\Components\TuneSeasonContents.tsx" />
     <TypeScriptCompile Include="src\Components\TypeSeasonContents.tsx" />
+    <TypeScriptCompile Include="src\Components\TuneSeasonsMenu.tsx" />
     <TypeScriptCompile Include="src\Components\TypeSeasonsMenu.tsx" />
     <TypeScriptCompile Include="src\Components\TypeDetails.tsx" />
+    <TypeScriptCompile Include="src\Components\TunesMenu.tsx" />
     <TypeScriptCompile Include="src\Components\TypesMenu.tsx" />
     <TypeScriptCompile Include="src\Components\Types.tsx" />
     <TypeScriptCompile Include="src\Components\YouTubeVideo.tsx" />
@@ -77,6 +83,7 @@
     <TypeScriptCompile Include="src\l8n.ts" />
     <TypeScriptCompile Include="src\LanguageProvider.tsx" />
     <TypeScriptCompile Include="src\LanguageContext.tsx" />
+    <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\ITuneInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\ITypeInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IVariationInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IHymnInfo.ts" />

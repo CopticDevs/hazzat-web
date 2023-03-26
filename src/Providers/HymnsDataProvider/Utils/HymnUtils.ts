@@ -1,6 +1,7 @@
 import { IHymnInfo, IHymnInfoWithServiceDetails } from "../Models/IHymnInfo";
 import { ISeasonInfo } from "../Models/ISeasonInfo";
 import { IServiceInfo } from "../Models/IServiceInfo";
+import { ITuneInfo } from "../Models/ITuneInfo";
 import { ITypeInfo } from "../Models/ITypeInfo";
 
 export class HymnUtils {
@@ -11,7 +12,11 @@ export class HymnUtils {
      * @returns 1 if A > B, -1 if A < B, 0 if equal
      */
     public static seasonInfoComparer(seasonA: ISeasonInfo, seasonB: ISeasonInfo): number {
-        return seasonA.order - seasonB.order;
+        if (seasonA.isDateSpecific === seasonB.isDateSpecific) {
+            return seasonA.order - seasonB.order;
+        }
+
+        return seasonA.isDateSpecific ? -1 : 1;
     }
 
     /**
@@ -52,5 +57,15 @@ export class HymnUtils {
      */
     public static typeInfoComparer(typeA: ITypeInfo, typeB: ITypeInfo): number {
         return typeA.order - typeB.order;
+    }
+
+    /**
+     * Comparer method for tunes to sort by tune order ascendingly.
+     * @param tuneA first type
+     * @param tuneB second type
+     * @returns 1 if A > B, -1 if A < B, 0 if equal
+     */
+    public static tuneInfoComparer(tuneA: ITuneInfo, tuneB: ITuneInfo): number {
+        return tuneA.order - tuneB.order;
     }
 }
