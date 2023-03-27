@@ -9,7 +9,7 @@ export const AppSettings: IAppSettings = {
         { id: "tunes", location: "/Tunes" },
         { id: "booklets", location: "/Booklets" },
         { id: "fonts", location: "/Fonts" },
-        { id: "help", location: "/Help" },
+        { id: "help", location: "/Help", disabled: true },
         { id: "contactUs", location: "/ContactUs" }
     ],
     supportedLanguages: [EnglishLanguageProperties, ArabicLanguageProperties],

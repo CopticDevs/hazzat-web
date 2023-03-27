@@ -1,16 +1,13 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
+import { Route, Routes } from "react-router-dom";
+import saveImg from "../images/save.gif";
 import { strings } from "../l8n";
 import LocalizedMessage from "../LocalizedMessage";
-import MainPaper, { Size } from "./MainPaper";
-import saveImg from "../images/save.gif";
-import SidePaper from "./SidePaper";
-import { LanguageContext } from "../LanguageContext";
-import MyNavLink from "./MyNavLink";
-import { Route, Routes } from "react-router-dom";
 import HazzatFont from "./HazzatFont";
+import MainPaper, { Size } from "./MainPaper";
+import MyNavLink from "./MyNavLink";
 
 function Fonts() {
-    const { languageProperties } = useContext(LanguageContext);
 
     useEffect(() => {
         document.title = strings.fonts + " - hazzat.com";
@@ -19,9 +16,7 @@ function Fonts() {
     return (
         <Routes>
             <Route path="/" element={
-
-                <div className={languageProperties.isRtl ? "row dirRtl" : "row"} style={languageProperties.isRtl ? { marginRight: "43px" } : {}}>
-                    <MainPaper size={Size.Normal}>
+                <MainPaper size={Size.Wide}>
                         <div className="pageTitle"><LocalizedMessage of="hazzatFont" /></div>
                         <div><strong><MyNavLink to="HazzatFont"><LocalizedMessage of="hazzatFontVer" /></MyNavLink></strong><br /> <LocalizedMessage of="hazzatFontDesc" /></div>
 
@@ -32,10 +27,6 @@ function Fonts() {
                             <a href="/downloads/copticfonts.zip" rel="noopener noreferrer"><img src={saveImg} alt={strings.save} /> <LocalizedMessage of="downloadAllCopticFonts" /></a>
                         </div>
                     </MainPaper>
-                    <SidePaper />
-                </div>
-
-
             } />
             <Route path={`/HazzatFont`} element={<HazzatFont />} />
         </Routes>
