@@ -77,7 +77,14 @@ export const strings = new LocalizedStrings({
         "hazzatAdvantagesList": "<li>Store all hymns on the computer, instead of papers all around.</li><li>Be able to share these hymns with friends.</li><li>Post these hymns on the internet for teaching.</li><li>Make it look nice and uniform.</li><li>Set a standard for other fonts for the same purpose.</li>",
         "hazzatDescSummary": "This font is a <span style=\"color: red\">freeware</span>, to be shared by Copts and non-Copts all over the world. Just one request from author... <span style=\"color: red\">Please share your hymns with everybody</span> for teaching purpose. Thank you, and may God reward you.",
         "enlargePic": "Click on the picture to enlarge in a new window",
-        "downloadHazzatFont": "Download Hazzat Font v1.10a"
+        "downloadHazzatFont": "Download Hazzat Font v1.10a",
+        "yourContactInfo": "Your Contact Information",
+        "yourFeedback": "Your Feedback",
+        "nameFormLabel": "Name:",
+        "emailFormLabel": "Email:",
+        "subjectFormLabel": "Subject:",
+        "messageFormLabel": "Message:",
+        "submitFormLabel": "Send Feedback"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -137,6 +144,13 @@ export const strings = new LocalizedStrings({
         "hazzatAdvantagesList": "<li>تخزين جميع الألحان على كمبيوتر بدلاً من الأوراق المبعثرة في كل مكان.</li><li>القدرة على مشاركة هذه الألحان مع الاخرين.</li><li>نشر هذه الألحان على الإنترنت للتدريس.</li><li>جعلها تبدو جيدة وموحدة.</li><li>وضع مقياس للخطوط الأخرى لنفس الغرد.</li>",
         "hazzatDescSummary": "هذا الفونت متاح <span style=\"color: red\">للجميع</span> مجانًا، ويمكن مشاركته بين الأقباط وغير الأقباط في جميع أنحاء العالم. طلب وحيد من صاحب الخط... <span style=\"color: red\">يرجى مشاركة الألحان مع الجميع</span> لأجل التعليم. شكرًا لك، والله يعوض تعبك.",
         "enlargePic": "انقر على الصورة لتكبيرها في نافذة جديدة.",
-        "downloadHazzatFont": "تحميل خط هزّات v1.10a"
+        "downloadHazzatFont": "تحميل خط هزّات v1.10a",
+        "yourContactInfo": "معلومات الاتصال بك",
+        "yourFeedback": "الرسالة",
+        "nameFormLabel": "الاسم:",
+        "emailFormLabel": "البريد الإلكتروني:",
+        "subjectFormLabel": "عنوان:",
+        "messageFormLabel": "رسالة:",
+        "submitFormLabel": "ارسل رأيك"
     }
 });

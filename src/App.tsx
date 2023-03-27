@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { AppSettings } from "./AppSettings";
 import Booklets from "./Components/Booklets";
+import ContactUs from "./Components/ContactUs";
 import Fonts from "./Components/Fonts";
 import Footer from "./Components/Footer";
 import Header from "./Components/Header";
@@ -32,6 +33,7 @@ function App() {
                                 <Route path="/Tunes/*" element={<Tunes />} />
                                 <Route path="/Booklets/*" element={<Booklets />} />
                                 <Route path="/Fonts/*" element={<Fonts />} />
+                                <Route path="/ContactUs" element={<ContactUs />} />
                                 <Route path="*" element={
                                     <main style={{ padding: "1rem" }}>
                                         <p><LocalizedMessage of="noContent" /></p>

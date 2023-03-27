@@ -24,6 +24,7 @@ function Home(props: IProps) {
                 <div>
                     {
                         props.navItems.map((item) => {
+                            if (item.disabled) return null;
                             return (
                                 item.id !== "home" ?
                                     <p key={item.id}><MyNavLink to={item.location} className="navLink"><LocalizedMessage of={item.id} /></MyNavLink></p> : null

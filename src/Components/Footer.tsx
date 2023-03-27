@@ -23,6 +23,7 @@ function Footer(props: IProps) {
             <ul className="sf-menu">
                 {
                     props.navItems.map((item) => {
+                        if (item.disabled) return null;
                         return (
                             <li key={item.id}><MyNavLink to={item.location}><LocalizedMessage of={item.id} /></MyNavLink></li>
                         );
@@ -36,6 +37,7 @@ function Footer(props: IProps) {
                 {showMenu ? <ul onClick={toggleMenu}>
                     {
                         props.navItems.map((item) => {
+                            if (item.disabled) return null;
                             return (
                                 <li key={item.id}><MyNavLink to={item.location}><LocalizedMessage of={item.id} /></MyNavLink></li>
                             );
