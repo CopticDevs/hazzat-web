@@ -29,13 +29,17 @@ function ContactUs() {
         const errors = validateForm();
         if (Object.keys(errors).length === 0) {
             // Send form data to server or email using a library or API
-            console.log(name, email, subject, message);
+            submitForm(name, email, subject, message);
             // Show confirmation message
             setSubmitted(true);
         } else {
             // Show validation errors
             setErrors(errors);
         }
+    };
+
+    const submitForm = async (name: string, email: string, subject: string, message: string) => {
+        console.log(name, email, subject, message);
     };
 
     const validateForm = () => {
