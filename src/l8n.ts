@@ -84,7 +84,15 @@ export const strings = new LocalizedStrings({
         "emailFormLabel": "Email:",
         "subjectFormLabel": "Subject:",
         "messageFormLabel": "Message:",
-        "submitFormLabel": "Send Feedback"
+        "submitFormLabel": "Send Feedback",
+        "nameRequiredErrorText": "Name is required",
+        "emailRequiredErrorText": "Email is required",
+        "emailInvalidErrorText": "Email is invalid",
+        "subjectRequiredErrorText": "Subject is required",
+        "messageRequiredErrorText": "Message is required",
+        "feedbackThankYouMessage": "Thank you for your feedback!",
+        "feedbackGetBackMessage": "We will get back to you as soon as possible.",
+        "feedbackSubmitAnotherMessage": "Submit another message"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -151,6 +159,14 @@ export const strings = new LocalizedStrings({
         "emailFormLabel": "البريد الإلكتروني:",
         "subjectFormLabel": "عنوان:",
         "messageFormLabel": "رسالة:",
-        "submitFormLabel": "ارسل رأيك"
+        "submitFormLabel": "ارسل رأيك",
+        "nameRequiredErrorText": "مطلوب الاسم",
+        "emailRequiredErrorText": "مطلوب البريد الإلكتروني",
+        "emailInvalidErrorText": "البريد الإلكتروني غير صالح",
+        "subjectRequiredErrorText": "مطلوب العنوان",
+        "messageRequiredErrorText": "مطلوب الرسالة",
+        "feedbackThankYouMessage": "شكرا لتواصلك معنا!",
+        "feedbackGetBackMessage": "سوف نعاود الاتصال بك في أقرب وقت ممكن.",
+        "feedbackSubmitAnotherMessage": "أرسل رسالة أخرى"
     }
 });

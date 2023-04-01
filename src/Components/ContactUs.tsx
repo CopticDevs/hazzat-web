@@ -6,6 +6,13 @@ import MainPaper, { Size } from "./MainPaper";
 import "./ContactUs.css";
 import { LanguageContext } from "../LanguageContext";
 
+interface IFormErrors {
+    name?: string;
+    email?: string;
+    subject?: string;
+    message?: string;
+}
+
 function ContactUs() {
     const { languageProperties } = useContext(LanguageContext);
     const [name, setName] = useState("");
@@ -13,14 +20,41 @@ function ContactUs() {
     const [subject, setSubject] = useState("");
     const [message, setMessage] = useState("");
     const [submitted, setSubmitted] = useState(false);
+    const [errors, setErrors] = useState<IFormErrors>({});
     const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
     const handleSubmit = (e: any) => {
         e.preventDefault();
-        // Send form data to server or email using a library or API
-        console.log(name, email, subject, message);
-        // Show confirmation message
-        setSubmitted(true);
+        // Validate form data
+        const errors = validateForm();
+        if (Object.keys(errors).length === 0) {
+            // Send form data to server or email using a library or API
+            console.log(name, email, subject, message);
+            // Show confirmation message
+            setSubmitted(true);
+        } else {
+            // Show validation errors
+            setErrors(errors);
+        }
+    };
+
+    const validateForm = () => {
+        let errors: IFormErrors = {};
+        if (name.trim() === '') {
+            errors.name = strings.nameRequiredErrorText;
+        }
+        if (email.trim() === '') {
+            errors.email = strings.emailRequiredErrorText;
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            errors.email = strings.emailInvalidErrorText;
+        }
+        if (subject.trim() === '') {
+            errors.subject = strings.subjectRequiredErrorText;
+        }
+        if (message.trim() === '') {
+            errors.message = strings.messageRequiredErrorText;
+        }
+        return errors;
     };
 
     const resetForm = () => {
@@ -29,6 +63,7 @@ function ContactUs() {
         setSubject('');
         setMessage('');
         setSubmitted(false);
+        setErrors({});
     };
 
     if (submitted) {
@@ -36,9 +71,9 @@ function ContactUs() {
             <MainPaper size={Size.Wide}>
                 <div className="pageTitle"><LocalizedMessage of="contactUs" /></div>
                 <div>
-                    <h2>Thank you for your feedback!</h2>
-                    <p>We will get back to you as soon as possible.</p>
-                    <button onClick={resetForm}>Submit another message</button>
+                    <h2><LocalizedMessage of="feedbackThankYouMessage" /></h2>
+                    <p><LocalizedMessage of="feedbackGetBackMessage" /></p>
+                    <button className="btn btn-primary" onClick={resetForm}><LocalizedMessage of="feedbackSubmitAnotherMessage" /></button>
                 </div>
         </MainPaper>
         );
@@ -62,7 +97,8 @@ function ContactUs() {
                                 <LocalizedMessage of="nameFormLabel" />
                             </div>
                             <div className="col-9 col-md-8">
-                                <input className="form-control" type="text" value={name} onChange={(e) => setName(e.target.value)} />
+                                <input className={errors.name ? 'form-control is-invalid' : 'form-control'} type="text" value={name} onChange={(e) => setName(e.target.value)} />
+                                {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                             </div>
                         </label>
                     </div>
@@ -72,13 +108,14 @@ function ContactUs() {
                                 <LocalizedMessage of="emailFormLabel" />
                             </div>
                             <div className="col-9 col-md-8">
-                                <input className="form-control" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                <input className={errors.email ? 'form-control is-invalid' : 'form-control'} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                             </div>
                         </label>
                     </div>
                 </div>
 
-                <div className="container">
+                <div className="container" style={{ paddingTop: "33px" }}>
                     <div className={langClassName} style={{ paddingBottom: "20px", paddingTop: "20px" }}>
                         <HymnTitle content={strings.yourFeedback} />
                     </div>
@@ -89,7 +126,8 @@ function ContactUs() {
                                 <LocalizedMessage of="subjectFormLabel" />
                             </div>
                             <div className="col-9 col-md-8">
-                                <input className="form-control" type="text" value={subject} onChange={(e) => setSubject(e.target.value)} />
+                                <input className={errors.subject ? 'form-control is-invalid' : 'form-control'} type="text" value={subject} onChange={(e) => setSubject(e.target.value)} />
+                                {errors.subject && <div className="invalid-feedback">{errors.subject}</div>}
                             </div>
                         </label>
                     </div>
@@ -100,12 +138,17 @@ function ContactUs() {
                                 <LocalizedMessage of="messageFormLabel" />
                             </div>
                             <div className="col-9 col-md-8">
-                                <textarea className="form-control" value={message} onChange={(e) => setMessage(e.target.value)} />
+                                <textarea className={errors.message ? 'form-control is-invalid' : 'form-control'} value={message} onChange={(e) => setMessage(e.target.value)} />
+                                {errors.message && <div className="invalid-feedback">{errors.message}</div>}
                             </div>
                         </label>
                     </div>
+                    <div className="row" style={{ paddingTop: "33px" }}>
+                        <div className="col-3 col-md-4" >
+                            <button className="btn btn-primary" type="submit"><LocalizedMessage of="submitFormLabel" /></button>
+                        </div>
+                    </div>
                 </div>
-                <button className="btn btn-primary" type="submit"><LocalizedMessage of="submitFormLabel" /></button>
             </form>
         </MainPaper>
     );
