@@ -5,12 +5,12 @@ import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import FontInstall7 from "./FontInstall7";
 import FontInstallXP from "./FontInstallXP";
-import "./Help.css";
+import "./HelpPage.css";
 import MainPaper, { Size } from "./MainPaper";
 import MyNavLink from "./MyNavLink";
 import UsingHazzatFont from "./UsingHazzatFont";
 
-function Help() {
+function HelpPage() {
     const { languageProperties } = useContext(LanguageContext);
     const langClassName = languageProperties.isRtl ? "padRight" : "padLeft";
 
@@ -58,4 +58,4 @@ function Help() {
     );
 }
 
-export default Help;
+export default HelpPage;

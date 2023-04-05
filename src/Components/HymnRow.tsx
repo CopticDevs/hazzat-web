@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import space from "../images/space.gif";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { StringMap } from "../Types/StringMap";
-import FormatLink from "./FormatLink";
+import FormatOptionLinks from "./FormatOptionLinks";
 import "./HymnRow.css";
 
 interface IProps {
@@ -10,6 +9,7 @@ interface IProps {
     isAlternate: boolean;
     getFormatsCallback: () => Promise<IFormatInfo[]>;
     parseFormatIdCallback: (fullFormatId: string) => string;
+    handleFoundFormat?: (formatId: string) => void;
 }
 
 function HymnRow(props: IProps) {
@@ -20,11 +20,16 @@ function HymnRow(props: IProps) {
     const fetchFromBackend = React.useCallback(async () => {
         const formatsResponse = await props.getFormatsCallback();
         
+        
         const resultFormatMap: StringMap<string | undefined> = {};
         // update formats map
         formatsResponse.forEach((formatInfo) => {
             const formatId = props.parseFormatIdCallback(formatInfo.id);
             resultFormatMap[formatId] = formatInfo.id;
+
+            if (!!props.handleFoundFormat) {
+                props.handleFoundFormat(formatId);
+            }
         });
 
         if (isMounted.current) {
@@ -47,17 +52,7 @@ function HymnRow(props: IProps) {
 
     return (
         <div className={props.isAlternate ? `alternate contentLinksDiv` : "contentLinksDiv"} style={{ padding: "6px" }}>
-            <div className="contentLinksDiv">
-                <img src={space} style={{ height: "25px", width: "10px", padding: "6px" }} alt="" />
-                <FormatLink formatId="1" title={props.hymnName} fullFormatId={formatsMap["1"]} />
-                <FormatLink formatId="2" title={props.hymnName} fullFormatId={formatsMap["2"]} />
-                <FormatLink formatId="3" title={props.hymnName} fullFormatId={formatsMap["3"]} />
-                <FormatLink formatId="4" title={props.hymnName} fullFormatId={formatsMap["4"]} />
-                <FormatLink formatId="5" title={props.hymnName} fullFormatId={formatsMap["5"]} />
-                <FormatLink formatId="6" title={props.hymnName} fullFormatId={formatsMap["6"]} />
-                <FormatLink formatId="7" title={props.hymnName} fullFormatId={formatsMap["7"]} />
-                <img src={space} style={{ height: "25px", width: "10px", padding: "6px" }} alt="" />
-            </div>
+            <FormatOptionLinks title={props.hymnName} formatsMap={formatsMap} />
             <div>{props.hymnName}</div>
         </div >
     );

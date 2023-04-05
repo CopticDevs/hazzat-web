@@ -1,19 +1,19 @@
 import { Route, Routes } from "react-router-dom";
 import MainPaper, { Size } from "./MainPaper";
-import SeasonDetails from "./SeasonDetails";
-import "./Seasons.css";
+import SeasonRouter from "./SeasonRouter";
+import "./SeasonsPage.css";
 import SeasonsMenu from "./SeasonsMenu";
 
-function Seasons() {
+function SeasonsPage() {
 
     return (
         <MainPaper size={Size.Wide}>
             <Routes>
                 <Route path="/" element={<SeasonsMenu />} />
-                <Route path={`/:seasonId/*`} element={<SeasonDetails />} />
+                <Route path={`/:seasonId/*`} element={<SeasonRouter />} />
             </Routes>
         </MainPaper>
     );
 }
 
-export default Seasons;
+export default SeasonsPage;

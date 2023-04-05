@@ -6,12 +6,13 @@ import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvi
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { stringFormat } from "../stringFormat";
-import HymnContentFromSeason from "./HymnContentFromSeason";
+import HymnContentFromSeasonService from "./HymnContentFromSeasonService";
+import HymnContentFromService from "./HymnContentFromService";
 import LoadingSpinner from "./LoadingSpinner";
 import "./SeasonDetails.css";
 import ServicesMenu from "./ServicesMenu";
 
-function SeasonDetails() {
+function SeasonRouter() {
     let { seasonId } = useParams();
     const seasonIdParam: string = seasonId || "";
     const { languageProperties } = useContext(LanguageContext);
@@ -55,7 +56,8 @@ function SeasonDetails() {
 
                             <Routes>
                                 <Route path="/" element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.name} />} />
-                                <Route path={`/Services/:serviceId/hymns/:hymnId/formats/:formatId`} element={<HymnContentFromSeason seasonInfo={seasonInfo} />} />
+                                <Route path={`/Services/:serviceId/hymns/:hymnId/formats/:formatId`} element={<HymnContentFromSeasonService seasonInfo={seasonInfo} />} />
+                                <Route path={`/Services/:serviceId/formats/:formatId`} element={<HymnContentFromService seasonInfo={seasonInfo} />} />
                             </Routes>
                         </div>
                         : null
@@ -64,4 +66,4 @@ function SeasonDetails() {
     );
 }
 
-export default SeasonDetails;
+export default SeasonRouter;

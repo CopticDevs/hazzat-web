@@ -166,7 +166,7 @@ export const strings = new LocalizedStrings({
         "fourthVibrated": "fourth note vibrated (in place after character)",
         "fifthVibrated": "fifth note vibrated (in place after character)",
         "sixthVibrated": "sixth note vibrated (in place after character)",
-        "abrubtNote": "change abruptly to next character",
+        "abruptNote": "change abruptly to next character",
         "fastUnderscore": "chant fast underscore (in place after character)",
         "fastArrow": "chant fast arrowhead (in place after character)",
         "pauseMark": "pause / breath mark",
@@ -199,7 +199,13 @@ export const strings = new LocalizedStrings({
         "twoLongOneReg": "2 long notes then a regular note",
         "oneLongThreeReg": "1 long note then 3 regular notes",
         "shortDesc1": "Also, there are up to seven consecutive short notes that could be obtained by pressing:",
-        "shortTip": "The locations of the 7 short notes are similar to the regular notes, but they are located on the top row. The notes start from \"q\" for 1 short note, and ending with \"u\" for 7 short notes."
+        "shortTip": "The locations of the 7 short notes are similar to the regular notes, but they are located on the top row. The notes start from \"q\" for 1 short note, and ending with \"u\" for 7 short notes.",
+        "highDesc1": "There are up to seven consecutive high notes that could be obtained by pressing:",
+        "highTip": "Note that the high notes could be obtained by using the shift key plus the usual key for the regular notes. As for the 7th high note, you would use the same key as the 7 regular since seven notes are the maximum number of consecutive notes you could have. So you would use the small letter \"m\" for that.",
+        "highDesc2": "Again, the same idea with the regular notes, you could combine 2 consecutive notes to get the effect of different note lengths, for example:",
+        "extendDesc1": "Regular note extenders are used to extend any specific note in order to make it longer.",
+        "extendTip1": "For the first note extender, use the same key as 1 note \"z\". As for the 7th note extender, use \"Z\" which is the key for 1 high note.",
+        "extendTip2": "To extend any note, press the key above it. For example, press \"c\" for 3 notes, then the key right above it which is \"d\" to extend the 3rd note. Easy? 1st and 7th note extenders are an exception, see previous tip."
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -381,6 +387,12 @@ export const strings = new LocalizedStrings({
         "twoLongOneReg": "2 نوتة طويلة ثم نوتة عادية",
         "oneLongThreeReg": "1 نوتة طويلة ثم 3 نوتة عادية",
         "shortDesc1": "أيضًا ، هناك ما يصل إلى سبع نوتات قصيرة متتالية يمكن الحصول عليها بالضغط على:",
-        "shortTip": "تتشابه مواقع النوتات القصيرة السبعة مع النوتات العادية ، لكنها تقع في الصف العلوي. تبدأ النوتات من \"q\" لنوتة قصيرة واحدة ، وتنتهي بـ \"u\" لـ 7 نوتات قصيرة."
+        "shortTip": "تتشابه مواقع النوتات القصيرة السبعة مع النوتات العادية ، لكنها تقع في الصف العلوي. تبدأ النوتات من \"q\" لنوتة قصيرة واحدة ، وتنتهي بـ \"u\" لـ 7 نوتات قصيرة.",
+        "highDesc1": "هناك ما يصل إلى سبع نوتات عالية متتالية يمكن الحصول عليها بالضغط على:",
+        "highTip": "لاحظ أنه يمكن الحصول على النوتات العالية باستخدام مفتاح Shift بالإضافة إلى المفتاح المعتاد للنوتات العادية. بالنسبة للنغمة السابعة العالية ، يمكنك استخدام نفس المفتاح مثل الرقم 7 العادي لأن سبع ملاحظات هي الحد الأقصى لعدد النوتات المتتالية التي يمكن أن تحصل عليها. لذلك يمكنك استخدام الحرف الصغير \"m\" لذلك.",
+        "highDesc2": "مرة أخرى ، نفس الفكرة مع النوتات العادية ، يمكنك دمج نوتاتين متتاليتين للحصول على تطويل نوتة معينة ، على سبيل المثال:",
+        "extendDesc1": "تستخدم الاستمدادات لتطويل أي نوتة معينة.",
+        "extendTip1": "بالنسبة لاستمداد النوتة الأولة ، استخدم نفس مفتاح نوتة واحدة \"z\". أما بالنسبة لاستمداد النوتة السابعة ، فاستخدم الحرف \"Z\" وهو المفتاح للحصول على نوتة واحدة عالية.",
+        "extendTip2": "لاستمداد أي نوتة ، اضغط على المفتاح أعلاه. على سبيل المثال ، اضغط على \"c\" لثلاث نوتات ، ثم اضغط على المفتاح الموجود فوقها مباشرة وهو \"d\" لاستمداد النوتة الثالثة. سهل؟ استمداد النوتة الأولى والسابعة استثناء ، انظر النصيحة السابقة."
     }
 });

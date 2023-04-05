@@ -8,7 +8,6 @@ import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
-import { IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
 import LoadingSpinner from "./LoadingSpinner";
@@ -17,7 +16,7 @@ interface IProps {
     seasonInfo: ISeasonInfo;
 }
 
-function HymnContentFromSeason(props: IProps) {
+function HymnContentFromSeasonService(props: IProps) {
     let { seasonId, serviceId, hymnId, formatId } = useParams();
     const seasonIdParam: string = seasonId || "";
     const serviceIdParam: string = serviceId || "";
@@ -27,10 +26,14 @@ function HymnContentFromSeason(props: IProps) {
     const [serviceInfo, setServiceInfo] = useState<IServiceInfo | undefined>();
     const [hymnInfo, setHymnInfo] = useState<IHymnInfo | undefined>();
     const [formatInfo, setFormatInfo] = useState<IFormatInfo | undefined>();
-    const [variations, setVariations] = useState<IVariationInfo<any>[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const isMounted = useRef(true);
+
+    const fetchVariationsCallback = () => {
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        return hymnsDataProvider.getServiceHymnsFormatVariationList(seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam);
+    };
 
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
@@ -38,14 +41,12 @@ function HymnContentFromSeason(props: IProps) {
         const servicePromise = hymnsDataProvider.getService(seasonIdParam, serviceIdParam);
         const hymnPromise = hymnsDataProvider.getServiceHymn(seasonIdParam, serviceIdParam, hymnIdParam);
         const formatPromise = hymnsDataProvider.getServiceHymnFormat(seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam);
-        const variationsPromise = hymnsDataProvider.getServiceHymnsFormatVariationList(seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam);
-        const [serviceResponse, hymnResponse, formatResponse, variationsResponse] = await Promise.all([servicePromise, hymnPromise, formatPromise, variationsPromise]);
+        const [serviceResponse, hymnResponse, formatResponse] = await Promise.all([servicePromise, hymnPromise, formatPromise]);
 
         if (isMounted.current) {
             setServiceInfo(serviceResponse);
             setHymnInfo(hymnResponse);
             setFormatInfo(formatResponse);
-            setVariations(variationsResponse);
             setIsLoading(false);
         }
     }, [seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam, languageProperties, isMounted]);
@@ -63,7 +64,7 @@ function HymnContentFromSeason(props: IProps) {
         document.title = isLoading ? "hazzat.com" : `${props.seasonInfo.name} - ${serviceInfo?.name}: ${hymnInfo?.name} (${formatInfo?.name}) - hazzat.com`;
     }, [isLoading, props.seasonInfo, serviceInfo?.name, hymnInfo?.name, formatInfo?.name]);
 
-    if (isLoading || !serviceInfo || !hymnInfo || !formatInfo || !variations) {
+    if (isLoading || !serviceInfo || !hymnInfo || !formatInfo) {
         return (<div />)
     }
     
@@ -77,11 +78,11 @@ function HymnContentFromSeason(props: IProps) {
                             { title: props.seasonInfo.name, path: `/Seasons/${seasonIdParam}` },
                             { title: `${serviceInfo.name}: ${hymnInfo.name}` }]} />
 
-                        <Content formatId={formatIdParam} variations={variations} />
+                        <Content formatId={formatIdParam} variationsCallback={fetchVariationsCallback} />
                     </div>
             }
         </>
     );
 }
 
-export default HymnContentFromSeason;
+export default HymnContentFromSeasonService;
