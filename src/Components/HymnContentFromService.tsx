@@ -61,6 +61,24 @@ function HymnContentFromService(props: IProps) {
             case "1":
                 formatName = strings.textFormatName;
                 break;
+            case "2":
+                formatName = strings.hazzatFormatName;
+                break;
+            case "3":
+                formatName = strings.verticalHazzatFormatName;
+                break;
+            case "4":
+                formatName = strings.musicFormatName;
+                break;
+            case "5":
+                formatName = strings.audioFormatName;
+                break;
+            case "6":
+                formatName = strings.videoFormatName;
+                break;
+            case "7":
+                formatName = strings.informationFormatName;
+                break;
         }
         document.title = isLoading ? "hazzat.com" : `${props.seasonInfo.name} - ${serviceInfo?.name} (${formatName}) - hazzat.com`;
     }, [isLoading, props.seasonInfo, serviceInfo?.name, formatIdParam]);
