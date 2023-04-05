@@ -2,16 +2,17 @@ import { useContext } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { AppSettings } from "./AppSettings";
-import Booklets from "./Components/Booklets";
-import ContactUs from "./Components/ContactUs";
-import Fonts from "./Components/Fonts";
+import BookletsPage from "./Components/BookletsPage";
+import ContactUsPage from "./Components/ContactUsPage";
+import FontsPage from "./Components/FontsPage";
 import Footer from "./Components/Footer";
 import Header from "./Components/Header";
-import Help from "./Components/Help";
+import HelpPage from "./Components/HelpPage";
 import Home from './Components/Home';
-import Seasons from './Components/Seasons';
-import Tunes from "./Components/Tunes";
-import Types from "./Components/Types";
+import MainPaper, { Size } from "./Components/MainPaper";
+import SeasonsPage from './Components/SeasonsPage';
+import TunesPage from "./Components/TunesPage";
+import TypesPage from "./Components/TypesPage";
 import "./css/hazzat.css";
 import "./fonts/fonts.css";
 import { LanguageContext } from "./LanguageContext";
@@ -29,17 +30,17 @@ function App() {
                         <div className="rightleftmain clearfix">
                             <Routes>
                                 <Route path="/" element={<Home navItems={AppSettings.navigationMenuItems} />} />
-                                <Route path="/Seasons/*" element={<Seasons />} />
-                                <Route path="/Types/*" element={<Types />} />
-                                <Route path="/Tunes/*" element={<Tunes />} />
-                                <Route path="/Booklets/*" element={<Booklets />} />
-                                <Route path="/Fonts/*" element={<Fonts />} />
-                                <Route path="/Help/*" element={<Help /> } />
-                                <Route path="/ContactUs" element={<ContactUs />} />
+                                <Route path="/Seasons/*" element={<SeasonsPage />} />
+                                <Route path="/Types/*" element={<TypesPage />} />
+                                <Route path="/Tunes/*" element={<TunesPage />} />
+                                <Route path="/Booklets/*" element={<BookletsPage />} />
+                                <Route path="/Fonts/*" element={<FontsPage />} />
+                                <Route path="/Help/*" element={<HelpPage /> } />
+                                <Route path="/ContactUs" element={<ContactUsPage />} />
                                 <Route path="*" element={
-                                    <main style={{ padding: "1rem" }}>
+                                    <MainPaper size={Size.Wide}>
                                         <p><LocalizedMessage of="noContent" /></p>
-                                    </main>} />
+                                    </MainPaper>} />
                             </Routes>
                         </div>
                     </div>

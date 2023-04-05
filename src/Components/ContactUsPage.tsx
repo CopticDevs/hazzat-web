@@ -3,7 +3,7 @@ import { strings } from "../l8n";
 import LocalizedMessage from "../LocalizedMessage";
 import HymnTitle from "./HymnTitle";
 import MainPaper, { Size } from "./MainPaper";
-import "./ContactUs.css";
+import "./ContactUsPage.css";
 import { LanguageContext } from "../LanguageContext";
 
 interface IFormErrors {
@@ -13,7 +13,7 @@ interface IFormErrors {
     message?: string;
 }
 
-function ContactUs() {
+function ContactUsPage() {
     const { languageProperties } = useContext(LanguageContext);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -158,4 +158,4 @@ function ContactUs() {
     );
 }
 
-export default ContactUs;
+export default ContactUsPage;

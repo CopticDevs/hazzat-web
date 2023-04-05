@@ -45,35 +45,37 @@ function SeasonsMenu() {
             isMounted.current = false;
         };
     }, [fetchSeasons]);
+
+    if (!isMounted.current) {
+        return <LoadingSpinner />;
+    }
     
     return (
         <div>
             <div className="pageTitle"><LocalizedMessage of="seasons" /></div>
             {
-                !isMounted.current ? <LoadingSpinner /> :
-                    dateSpecificSeasons && dateSpecificSeasons.length > 0 ?
-                        dateSpecificSeasons.map((season) => {
-                            return (
-                                <div key={season.id}>
-                                    <MyNavLink to={`${season.id}`}>{season.name}</MyNavLink>
-                                </div>
-                            )
-                        })
-                        :
-                        <div><LocalizedMessage of="noSeasons" /></div>
+                dateSpecificSeasons && dateSpecificSeasons.length > 0 ?
+                    dateSpecificSeasons.map((season) => {
+                        return (
+                            <div key={season.id}>
+                                <MyNavLink to={`${season.id}`}>{season.name}</MyNavLink>
+                            </div>
+                        )
+                    })
+                    :
+                    <div><LocalizedMessage of="noSeasons" /></div>
             }
             <div className="otherServicesTitle"><LocalizedMessage of="otherServices" /></div>
             {
-                !isMounted.current ? <LoadingSpinner /> :
-                    nonDateSpecificSeasons && nonDateSpecificSeasons.length > 0 ?
-                        nonDateSpecificSeasons.map((season) => {
-                            return (
-                                <div key={season.id}>
-                                    <MyNavLink to={`${season.id}`} key={season.id}>{season.name}</MyNavLink>
-                                </div>
-                            )
-                        }) :
-                        <div><LocalizedMessage of="noSeasons" /></div>
+                nonDateSpecificSeasons && nonDateSpecificSeasons.length > 0 ?
+                    nonDateSpecificSeasons.map((season) => {
+                        return (
+                            <div key={season.id}>
+                                <MyNavLink to={`${season.id}`} key={season.id}>{season.name}</MyNavLink>
+                            </div>
+                        )
+                    }) :
+                    <div><LocalizedMessage of="noSeasons" /></div>
             }
         </div>
     );

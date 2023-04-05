@@ -3,17 +3,17 @@ import { Route, Routes, useParams } from "react-router-dom";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
-import { ITypeInfo } from "../Providers/HymnsDataProvider/Models/ITypeInfo";
-import HymnContentFromType from "./HymnContentFromType";
+import { ITuneInfo } from "../Providers/HymnsDataProvider/Models/ITuneInfo";
+import HymnContentFromTune from "./HymnContentFromTune";
 import LoadingSpinner from "./LoadingSpinner";
 import "./SeasonDetails.css";
-import TypeSeasonsMenu from "./TypeSeasonsMenu";
+import TuneSeasonsMenu from "./TuneSeasonsMenu";
 
-function TypeDetails() {
-    let { typeId } = useParams();
-    const typeIdParam: string = typeId || "";
+function TuneRouter() {
+    let { tuneId } = useParams();
+    const tuneIdParam: string = tuneId || "";
     const { languageProperties } = useContext(LanguageContext);
-    const [typeInfo, setTypeInfo] = useState<ITypeInfo | undefined>();
+    const [tuneInfo, setTuneInfo] = useState<ITuneInfo | undefined>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const isMounted = useRef(true);
@@ -21,13 +21,13 @@ function TypeDetails() {
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
-        const typeResponse = await hymnsDataProvider.getType(typeIdParam);
+        const tuneResponse = await hymnsDataProvider.getTune(tuneIdParam);
 
         if (isMounted.current) {
-            setTypeInfo(typeResponse);
+            setTuneInfo(tuneResponse);
             setIsLoading(false);
         }
-    }, [typeIdParam, languageProperties, isMounted]);
+    }, [tuneIdParam, languageProperties, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;
@@ -39,20 +39,20 @@ function TypeDetails() {
     }, [fetchFromBackend]);
 
     useEffect(() => {
-        document.title = isLoading ? "hazzat.com" : `${typeInfo?.name} - hazzat.com`;
-    }, [isLoading, typeInfo]);
+        document.title = isLoading ? "hazzat.com" : `${tuneInfo?.name} - hazzat.com`;
+    }, [isLoading, tuneInfo]);
 
     return (
         <>
             {
                 isLoading ? <LoadingSpinner /> :
-                    !!typeInfo ?
+                    !!tuneInfo ?
                         <div>
-                            <div className="pageTitle">{typeInfo.name}</div>
+                            <div className="pageTitle">{tuneInfo.name}</div>
 
                             <Routes>
-                                <Route path="/" element={<TypeSeasonsMenu typeId={typeIdParam} typeName={typeInfo.name} />} />
-                                <Route path={`/seasons/:seasonId/hymns/:hymnId/formats/:formatId`} element={<HymnContentFromType typeInfo={typeInfo} />} />
+                                <Route path="/" element={<TuneSeasonsMenu tuneId={tuneIdParam} tuneName={tuneInfo.name} />} />
+                                <Route path={`/seasons/:seasonId/hymns/:hymnId/formats/:formatId`} element={<HymnContentFromTune tuneInfo={tuneInfo} />} />
                             </Routes>
                         </div>
                         : null
@@ -61,4 +61,4 @@ function TypeDetails() {
     );
 }
 
-export default TypeDetails;
+export default TuneRouter;

@@ -1,3 +1,4 @@
+import React, { useEffect, useRef, useState } from "react";
 import LocalizedMessage from "../LocalizedMessage";
 import { IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import ContentAudio from "./ContentAudio";
@@ -11,34 +12,63 @@ import MyNavLink from "./MyNavLink";
 
 interface IProps {
     formatId: string;
-    variations: IVariationInfo<any>[];
+    variationsCallback: () => Promise<IVariationInfo<any>[]>;
 }
 
 function Content(props: IProps) {
+    const [variations, setVariations] = useState<IVariationInfo<any>[]>([]);
+    const isMounted = useRef(true);
+
+    const fetchFromBackend = React.useCallback(async () => {
+        // get variations
+        if (!props.variationsCallback) {
+            return;
+        }
+
+        const variationsResponse: IVariationInfo<any>[] = await props.variationsCallback();
+
+        if (isMounted.current) {
+            setVariations(variationsResponse);
+        }
+
+    }, [props, isMounted]);
+
+    useEffect(() => {
+        isMounted.current = true;
+        fetchFromBackend();
+
+        return () => {
+            isMounted.current = false;
+        };
+    }, [fetchFromBackend]);
+
+    if (!isMounted.current) {
+        return (<div />)
+    }
 
     let contentControl: JSX.Element;
 
     switch (props.formatId) {
         case "1":
-            contentControl = <ContentText variations={props.variations} />;
+            contentControl = <ContentText variations={variations} />;
             break;
         case "2":
-            contentControl = <ContentHazzat variations={props.variations} />;
+            contentControl = <ContentHazzat variations={variations} />;
             break;
         case "3":
-            contentControl = <ContentVerticalHazzat variations={props.variations} />;
+            contentControl = <ContentVerticalHazzat variations={variations} />;
             break;
         case "4":
-            contentControl = <ContentMusicalNotes variations={props.variations} />;
+            contentControl = <ContentMusicalNotes variations={variations} />;
             break;
         case "5":
-            contentControl = <ContentAudio variations={props.variations} />;
+            contentControl = <ContentAudio variations={variations} />;
             break;
         case "6":
-            contentControl = <ContentVideo variations={props.variations} />;
+            contentControl = <ContentVideo variations={variations} />;
             break;
         case "7":
-            contentControl = <ContentInformation variations={props.variations} />;
+            contentControl = <ContentInformation variations={variations} />;
             break;
         default:
             contentControl = <>
@@ -49,6 +79,10 @@ function Content(props: IProps) {
                     </MyNavLink>
                 </div>
             </>
+    }
+
+    if (!isMounted.current) {
+        return (<div />)
     }
     
     return (contentControl);

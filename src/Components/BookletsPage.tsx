@@ -3,7 +3,7 @@ import BookletDetails from "./BookletDetails";
 import BookletsMenu from "./BookletsMenu";
 import MainPaper, { Size } from "./MainPaper";
 
-function Booklets() {
+function BookletsPage() {
 
     return (
         <MainPaper size={Size.Wide}>
@@ -15,4 +15,4 @@ function Booklets() {
     );
 }
 
-export default Booklets;
+export default BookletsPage;

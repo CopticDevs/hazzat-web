@@ -7,7 +7,7 @@ import HazzatFont from "./HazzatFont";
 import MainPaper, { Size } from "./MainPaper";
 import MyNavLink from "./MyNavLink";
 
-function Fonts() {
+function FontsPage() {
 
     useEffect(() => {
         document.title = strings.fonts + " - hazzat.com";
@@ -33,4 +33,4 @@ function Fonts() {
     );
 }
 
-export default Fonts;
+export default FontsPage;
