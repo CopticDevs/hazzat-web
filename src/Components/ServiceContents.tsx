@@ -6,6 +6,7 @@ import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import { StringMap } from "../Types/StringMap";
 import { getFormatNumberFromId, getHymnNumberFromId } from "../Utils/ParserUtils";
+import CrossDivider from "./CrossDivider";
 import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
 import HymnRow from "./HymnRow";
 import "./HymnRow.css";
@@ -105,6 +106,7 @@ function ServiceContents(props: IProps) {
                                 formatsMap={serviceFormatsMap}
                             />
                         </div>
+                        <div className="clearfix" />
                         <div className="contentLinksDiv"><HymnTitle content={props.serviceName} /></div>
                         
                         {hymns.map((hymn) => {
@@ -125,6 +127,8 @@ function ServiceContents(props: IProps) {
                                 handleFoundFormat={handleFoundFormat}
                             />
                         })}
+
+                        <CrossDivider />
                     </div>
             }
         </>
