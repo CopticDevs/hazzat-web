@@ -8,8 +8,11 @@ import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfoWithServiceDetails } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { ITuneInfo } from "../Providers/HymnsDataProvider/Models/ITuneInfo";
+import { StringMap } from "../Types/StringMap";
+import { getTuneSeasonHymnFormatNumberFromId } from "../Utils/ParserUtils";
 import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
+import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
 import LoadingSpinner from "./LoadingSpinner";
 
 interface IProps {
@@ -25,8 +28,10 @@ function HymnContentFromTune(props: IProps) {
     const { languageProperties } = useContext(LanguageContext);
     const [seasonInfo, setSeasonInfo] = useState<ISeasonInfo | undefined>();
     const [hymnInfo, setHymnInfo] = useState<IHymnInfoWithServiceDetails | undefined>();
+    const [formatsMap, setFormatsMap] = useState<StringMap<string | undefined>>({});
     const [formatInfo, setFormatInfo] = useState<IFormatInfo | undefined>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const langClassName = languageProperties.isRtl ? "fLeft" : "fRight";
 
     const isMounted = useRef(true);
 
@@ -40,13 +45,22 @@ function HymnContentFromTune(props: IProps) {
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
         const seasonPromise = hymnsDataProvider.getTuneSeason(tuneIdParam, seasonIdParam);
         const hymnPromise = hymnsDataProvider.getTuneSeasonServiceHymn(tuneIdParam, seasonIdParam, hymnIdParam);
+        const formatListPromise = hymnsDataProvider.getTuneSeasonServiceHymnFormatList(tuneIdParam, seasonIdParam, hymnIdParam);
         const formatPromise = hymnsDataProvider.getTuneSeasonServiceHymnFormat(tuneIdParam, seasonIdParam, hymnIdParam, formatIdParam);
         
-        const [seasonResponse, hymnResponse, formatResponse] = await Promise.all([seasonPromise, hymnPromise, formatPromise]);
+        const [seasonResponse, hymnResponse, formatListResponse, formatResponse] = await Promise.all([seasonPromise, hymnPromise, formatListPromise, formatPromise]);
+
+        const resultFormatsMap: StringMap<string | undefined> = {};
+        // update formats map
+        formatListResponse.forEach((formatInfo) => {
+            const formatId = getTuneSeasonHymnFormatNumberFromId(formatInfo.id);
+            resultFormatsMap[formatId] = formatInfo.id;
+        });
 
         if (isMounted.current) {
             setSeasonInfo(seasonResponse);
             setHymnInfo(hymnResponse);
+            setFormatsMap(resultFormatsMap);
             setFormatInfo(formatResponse);
             setIsLoading(false);
         }
@@ -78,6 +92,15 @@ function HymnContentFromTune(props: IProps) {
                             { title: strings.tunes, path: "/Tunes" },
                             { title: props.tuneInfo.name, path: `/Tunes/${tuneIdParam}` },
                             { title: `${hymnInfo.serviceName}: ${hymnInfo.name}` }]} />
+
+                        <div className={langClassName}>
+                            <FormatOptionLinks
+                                title={props.tuneInfo.name}
+                                display={DisplayType.Full}
+                                formatsMap={formatsMap}
+                                activeFormatId={formatIdParam}
+                            />
+                        </div>
 
                         <Content formatId={formatIdParam} variationsCallback={fetchVariationsCallback} />
                     </div>
