@@ -61,7 +61,13 @@ function TuneSeasonsContents(props: IProps) {
                                 return hymnsDataProvider.getTuneSeasonServiceHymnFormatList(props.tuneId, props.seasonId, hymnId);
                             };
 
-                            return <HymnRow key={hymn.id} hymnName={`${hymn.serviceName}: ${hymn.name}`} isAlternate={alternateHymn} getFormatsCallback={getFormatsCallback} parseFormatIdCallback={getTuneSeasonHymnFormatNumberFromId} />
+                            return <HymnRow
+                                key={hymn.id}
+                                hymnName={`${hymn.serviceName}: ${hymn.name}`}
+                                isAlternate={alternateHymn}
+                                getFormatsCallback={getFormatsCallback}
+                                parseFormatIdCallback={getTuneSeasonHymnFormatNumberFromId}
+                            />
                         })}
                     </div>
             }

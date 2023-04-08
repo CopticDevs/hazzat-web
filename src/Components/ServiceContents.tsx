@@ -6,7 +6,7 @@ import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import { StringMap } from "../Types/StringMap";
 import { getFormatNumberFromId, getHymnNumberFromId } from "../Utils/ParserUtils";
-import FormatOptionLinks from "./FormatOptionLinks";
+import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
 import HymnRow from "./HymnRow";
 import "./HymnRow.css";
 import HymnTitle from "./HymnTitle";
@@ -100,7 +100,7 @@ function ServiceContents(props: IProps) {
                         <div className="container">
                             <div className="row">
                                 <div className="col contentLinksDiv"><HymnTitle content={props.serviceName} /></div>
-                                <div className="col-md-3"><FormatOptionLinks title={props.serviceName} formatsMap={serviceFormatsMap} /></div>
+                                <div className="col-md-3"><FormatOptionLinks title={props.serviceName} display={DisplayType.Minimum} formatsMap={serviceFormatsMap} /></div>
                             </div>
                         </div>
                         

@@ -4,6 +4,11 @@ import { StringMap } from "../Types/StringMap";
 import FormatLink from "./FormatLink";
 import "./HymnRow.css";
 
+export enum DisplayType {
+    Minimum,
+    Full
+};
+
 export interface IFormatItem {
     id: string;
     navLink: string | undefined;
@@ -11,7 +16,9 @@ export interface IFormatItem {
 
 export interface IProps {
     title: string;
+    display: DisplayType;
     formatsMap: StringMap<string | undefined>;
+    activeFormatId?: string;
 }
 
 function FormatOptionLinks(props: IProps) {
@@ -34,8 +41,15 @@ function FormatOptionLinks(props: IProps) {
     return (
         <div className="contentLinksDiv">
             <img src={space} style={{ height: "25px", width: "10px", padding: "6px" }} alt="" />
-            {formatList.map((item) => 
-                <FormatLink key={item.id} formatId={item.id} title={props.title} fullFormatId={item.navLink} />
+            {formatList.map((item) =>
+                <FormatLink
+                    key={item.id}
+                    formatId={item.id}
+                    title={props.title}
+                    display={props.display}
+                    fullFormatId={item.navLink}
+                    isActive={props.activeFormatId === item.id ? true : false}
+                />
             )}
             <img src={space} style={{ height: "25px", width: "10px", padding: "6px" }} alt="" />
         </div>

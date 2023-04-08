@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { StringMap } from "../Types/StringMap";
-import FormatOptionLinks from "./FormatOptionLinks";
+import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
 import "./HymnRow.css";
 
 interface IProps {
@@ -13,7 +13,7 @@ interface IProps {
 }
 
 function HymnRow(props: IProps) {
-    const [formatsMap, setformatsMap] = useState<StringMap<string | undefined>>({});
+    const [formatsMap, setFormatsMap] = useState<StringMap<string | undefined>>({});
 
     const isMounted = useRef(true);
 
@@ -21,11 +21,11 @@ function HymnRow(props: IProps) {
         const formatsResponse = await props.getFormatsCallback();
         
         
-        const resultFormatMap: StringMap<string | undefined> = {};
+        const resultFormatsMap: StringMap<string | undefined> = {};
         // update formats map
         formatsResponse.forEach((formatInfo) => {
             const formatId = props.parseFormatIdCallback(formatInfo.id);
-            resultFormatMap[formatId] = formatInfo.id;
+            resultFormatsMap[formatId] = formatInfo.id;
 
             if (!!props.handleFoundFormat) {
                 props.handleFoundFormat(formatId);
@@ -33,7 +33,7 @@ function HymnRow(props: IProps) {
         });
 
         if (isMounted.current) {
-            setformatsMap(resultFormatMap);
+            setFormatsMap(resultFormatsMap);
         }
     }, [props, isMounted]);
 
@@ -52,7 +52,7 @@ function HymnRow(props: IProps) {
 
     return (
         <div className={props.isAlternate ? `alternate contentLinksDiv` : "contentLinksDiv"} style={{ padding: "6px" }}>
-            <FormatOptionLinks title={props.hymnName} formatsMap={formatsMap} />
+            <FormatOptionLinks title={props.hymnName} display={DisplayType.Minimum} formatsMap={formatsMap} />
             <div>{props.hymnName}</div>
         </div >
     );

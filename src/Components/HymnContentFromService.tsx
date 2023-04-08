@@ -8,9 +8,11 @@ import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
-import { getHymnNumberFromId } from "../Utils/ParserUtils";
+import { StringMap } from "../Types/StringMap";
+import { getFormatNumberFromId, getHymnNumberFromId } from "../Utils/ParserUtils";
 import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
+import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
 import LoadingSpinner from "./LoadingSpinner";
 
 interface IProps {
@@ -25,9 +27,59 @@ function HymnContentFromService(props: IProps) {
     const { languageProperties } = useContext(LanguageContext);
     const [serviceInfo, setServiceInfo] = useState<IServiceInfo | undefined>();
     const [hymnList, setHymnList] = useState<IHymnInfo[]>([]);
+    const [hasText, setHasText] = useState<boolean>(false);
+    const [hasHazzat, setHasHazzat] = useState<boolean>(false);
+    const [hasVerticalHazzat, setHasVerticalHazzat] = useState<boolean>(false);
+    const [hasMusicalNotes, setHasMusicalNotes] = useState<boolean>(false);
+    const [hasAudio, setHasAudio] = useState<boolean>(false);
+    const [hasVideo, setHasVideo] = useState<boolean>(false);
+    const [hasInformation, setHasInformation] = useState<boolean>(false);
+    const [serviceFormatsMap, setServiceFormatsMap] = useState<StringMap<string | undefined>>({});
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const langClassName = languageProperties.isRtl ? "fLeft" : "fRight";
 
     const isMounted = useRef(true);
+
+    const handleFoundFormat = (fullFormatId: string) => {
+        const formatId = getFormatNumberFromId(fullFormatId);
+        switch (formatId) {
+            case "1":
+                setHasText(true);
+                break;
+            case "2":
+                setHasHazzat(true);
+                break;
+            case "3":
+                setHasVerticalHazzat(true);
+                break;
+            case "4":
+                setHasMusicalNotes(true);
+                break;
+            case "5":
+                setHasAudio(true);
+                break;
+            case "6":
+                setHasVideo(true);
+                break;
+            case "7":
+                setHasInformation(true);
+                break;
+        }
+    };
+
+    useEffect(() => {
+        const resultMap: StringMap<string | undefined> = {};
+
+        resultMap["1"] = hasText ? `/seasons/${seasonIdParam}/services/${serviceIdParam}/formats/1` : undefined;
+        resultMap["2"] = hasHazzat ? `/seasons/${seasonIdParam}/services/${serviceIdParam}/formats/2` : undefined;
+        resultMap["3"] = hasVerticalHazzat ? `/seasons/${seasonIdParam}/services/${serviceIdParam}/formats/3` : undefined;
+        resultMap["4"] = hasMusicalNotes ? `/seasons/${seasonIdParam}/services/${serviceIdParam}/formats/4` : undefined;
+        resultMap["5"] = hasAudio ? `/seasons/${seasonIdParam}/services/${serviceIdParam}/formats/5` : undefined;
+        resultMap["6"] = hasVideo ? `/seasons/${seasonIdParam}/services/${serviceIdParam}/formats/6` : undefined;
+        resultMap["7"] = hasInformation ? `/seasons/${seasonIdParam}/services/${serviceIdParam}/formats/7` : undefined;
+
+        setServiceFormatsMap(resultMap);
+    }, [seasonIdParam, serviceIdParam, hasText, hasHazzat, hasVerticalHazzat, hasMusicalNotes, hasAudio, hasVideo, hasInformation, setServiceFormatsMap]);
 
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
@@ -97,15 +149,32 @@ function HymnContentFromService(props: IProps) {
                             { title: props.seasonInfo.name, path: `/Seasons/${seasonIdParam}` },
                             { title: `${serviceInfo.name}` }]} />
 
-                        {hymnList.map((hymn) => {
+                        <div className={langClassName}>
+                            <FormatOptionLinks
+                                title={serviceInfo.name}
+                                display={DisplayType.Full}
+                                formatsMap={serviceFormatsMap}
+                                activeFormatId={formatIdParam}
+                            />
+                        </div>
 
-                            const variationsCallback = () => {
-                                const hymnId = getHymnNumberFromId(hymn.id);
-                                const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+                        {hymnList.map((hymn) => {
+                            const hymnId = getHymnNumberFromId(hymn.id);
+                            const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+
+                            const variationsCallback = () => {        
                                 return hymnsDataProvider.getServiceHymnsFormatVariationList(seasonIdParam, serviceIdParam, hymnId, formatIdParam);
                             };
 
-                            return <Content formatId={formatIdParam} variationsCallback={variationsCallback} />
+                            const formatListCallback = () => {
+                                return hymnsDataProvider.getServiceHymnFormatList(seasonIdParam, serviceIdParam, hymnId);
+                            };
+
+                            return <Content
+                                key={hymn.id}
+                                formatId={formatIdParam}
+                                variationsCallback={variationsCallback}
+                                formatCallbackInfo={{ formatListCallback, handleFoundFormat }} />
                         })}
                     </div>
             }

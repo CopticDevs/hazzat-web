@@ -17,12 +17,15 @@ import videoOut from "../images/video_mouseout.gif";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import "./FormatLink.css";
+import { DisplayType } from "./FormatOptionLinks";
 import MyNavLink from "./MyNavLink";
 
 interface IProps {
     formatId: string;
     title: string;
     fullFormatId?: string;
+    display: DisplayType;
+    isActive?: boolean;
 }
 
 interface IFormatImage {
@@ -36,6 +39,28 @@ function FormatLink(props: IProps) {
     const { languageProperties } = useContext(LanguageContext);
     const [hovering, setHovering] = useState(false);
     const [formatImages, setFormatImages] = useState<IFormatImage | undefined>();
+    const langClassName = languageProperties.isRtl ? "paddingLeft" : "paddingRight";
+
+    const getFormatName = (formatId: string): string => {
+        switch (formatId) {
+            case "1":
+                return strings.textFormatName;
+            case "2":
+                return strings.hazzatFormatName;
+            case "3":
+                return strings.verticalHazzatFormatName;
+            case "4":
+                return strings.musicFormatName;
+            case "5":
+                return strings.audioFormatName;
+            case "6":
+                return strings.videoFormatName;
+            case "7":
+                return strings.informationFormatName;
+            default:
+                return "";
+        }
+    }
 
     const getFormatImages = (formatId: string, title: string, lang: string): IFormatImage | undefined => {
         switch (formatId) {
@@ -103,6 +128,21 @@ function FormatLink(props: IProps) {
         setImages();
     }, [setImages]);
 
+    if (!props.fullFormatId) {
+        return props.display === DisplayType.Minimum ? <img src={space} alt="" className="formatImage" /> : <></>;
+    }
+
+    if (props.isActive) {
+        return (
+            <>
+                <img
+                    src={formatImages?.mouseOn}
+                    alt={formatImages?.altString}
+                    className={formatImages?.cssClass}
+                />{props.display === DisplayType.Full ? <span className={langClassName}><strong>{getFormatName(props.formatId)}</strong></span> : null}
+            </>
+        );
+    }
 
     return (
         <>
@@ -115,7 +155,7 @@ function FormatLink(props: IProps) {
                             className={formatImages?.cssClass}
                             onMouseEnter={() => setHovering(true)}
                             onMouseLeave={() => setHovering(false)}
-                        /></MyNavLink>
+                        />{props.display === DisplayType.Full ? <span className={langClassName}>{getFormatName(props.formatId)}</span> : null}</MyNavLink>
                     : <img src={space} alt="" className="formatImage" />
             }
         </>

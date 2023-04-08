@@ -139,7 +139,7 @@ function ContentText(props: IProps) {
     };
 
     const generateContentTables = (paragraphs: TextParagraph[]) => {
-        paragraphs.forEach((paragraph) => {
+        paragraphs && paragraphs.forEach((paragraph) => {
             // get current mask
             const currentMask = getTableMask(paragraph.columns);
 
