@@ -29,6 +29,7 @@ function ServiceContents(props: IProps) {
     const [hasVideo, setHasVideo] = useState<boolean>(false);
     const [hasInformation, setHasInformation] = useState<boolean>(false);
     const [serviceFormatsMap, setServiceFormatsMap] = useState<StringMap<string | undefined>>({});
+    const langClassName = languageProperties.isRtl ? "fLeft" : "fRight";
     const isMounted = useRef(true);
 
     const handleFoundFormat = (formatId: string) => {
@@ -96,15 +97,16 @@ function ServiceContents(props: IProps) {
             {
                 !isMounted.current ? <LoadingSpinner /> :
                     <div style={{ padding: "7px 3px 7px 3px", marginTop: "30px" }}>
-                        
-                        <div className="container">
-                            <div className="row">
-                                <div className="col contentLinksDiv"><HymnTitle content={props.serviceName} /></div>
-                                <div className="col-md-3"><FormatOptionLinks title={props.serviceName} display={DisplayType.Minimum} formatsMap={serviceFormatsMap} /></div>
-                            </div>
+
+                        <div className={langClassName}>
+                            <FormatOptionLinks
+                                title={props.serviceName}
+                                display={DisplayType.Full}
+                                formatsMap={serviceFormatsMap}
+                            />
                         </div>
+                        <div className="contentLinksDiv"><HymnTitle content={props.serviceName} /></div>
                         
-                        <div className="clear" />
                         {hymns.map((hymn) => {
                             alternateHymn = !alternateHymn;
                             const hymnId = getHymnNumberFromId(hymn.id);
@@ -114,7 +116,14 @@ function ServiceContents(props: IProps) {
                                 return hymnsDataProvider.getServiceHymnFormatList(props.seasonId, props.serviceId, hymnId);
                             };
 
-                            return <HymnRow key={hymn.id} hymnName={hymn.name} isAlternate={alternateHymn} getFormatsCallback={getFormatsCallback} parseFormatIdCallback={getFormatNumberFromId} handleFoundFormat={handleFoundFormat} />
+                            return <HymnRow
+                                key={hymn.id}
+                                hymnName={hymn.name}
+                                isAlternate={alternateHymn}
+                                getFormatsCallback={getFormatsCallback}
+                                parseFormatIdCallback={getFormatNumberFromId}
+                                handleFoundFormat={handleFoundFormat}
+                            />
                         })}
                     </div>
             }
