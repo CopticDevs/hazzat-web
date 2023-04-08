@@ -213,7 +213,11 @@ export const strings = new LocalizedStrings({
         "red": "Red",
         "navy": "Navy",
         "blue": "Blue",
-        "size": "Size"
+        "size": "Size",
+        "sample": "Sample",
+        "sampleEnglish": "<font class=\"EnglishFont\">Re</font><font class=\"HazzatFont\">x x </font><font class=\"EnglishFont\">jo</font><font class=\"HazzatFont\">xx v.x x </font><font class=\"EnglishFont\">ice O</font><font class=\"HazzatFont\">x </font><font class=\"EnglishFont\">&nbsp;Ma</font><font class=\"HazzatFont\">x </font><font class=\"EnglishFont\">ry</font><font class=\"HazzatFont\">xx...</font>",
+        "sampleCoptic": "<font class=\"CopticFont\">Ou</font><font class=\"HazzatFont\">z</font><font class=\"CopticFont\">no</font><font class=\"HazzatFont\">x </font><font class=\"CopticFont\">f `</font><font class=\"HazzatFont\">x</font><font class=\"CopticFont\">mmo</font><font class=\"HazzatFont\">xx.v.x x x </font><font class=\"CopticFont\">&nbsp;Ma</font><font class=\"HazzatFont\">x</font><font class=\"CopticFont\">ri</font><font class=\"HazzatFont\">xx...</font>",
+        "sampleArabic": "<span class=\"ArabicFont\">إ</span><span class=\"HazzatAFont\">ن </span><span class=\"ArabicFont\">فرَ</span><span class=\"HazzatAFont\">ن </span><span class=\"ArabicFont\">حي</span><span class=\"HazzatAFont\">نن ازن ن </span><span class=\"ArabicFont\">&nbsp;يا</span><span class=\"HazzatAFont\">ن </span><span class=\"ArabicFont\">&nbsp;مَـ</span><span class=\"HazzatAFont\">ن </span><span class=\"ArabicFont\">ريَـ</span><span class=\"HazzatAFont\">ننز...</span>"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -409,6 +413,10 @@ export const strings = new LocalizedStrings({
         "red": "أحمر",
         "navy": "أزرق داكن",
         "blue": "أزرق",
-        "size": "حجم"
+        "size": "حجم",
+        "sample": "نموذج",
+        "sampleEnglish": "<font class=\"EnglishFont\">Re</font><font class=\"HazzatFont\">x x </font><font class=\"EnglishFont\">jo</font><font class=\"HazzatFont\">xx v.x x </font><font class=\"EnglishFont\">ice O</font><font class=\"HazzatFont\">x </font><font class=\"EnglishFont\">&nbsp;Ma</font><font class=\"HazzatFont\">x </font><font class=\"EnglishFont\">ry</font><font class=\"HazzatFont\">xx...</font>",
+        "sampleCoptic": "<font class=\"CopticFont\">Ou</font><font class=\"HazzatFont\">z</font><font class=\"CopticFont\">no</font><font class=\"HazzatFont\">x </font><font class=\"CopticFont\">f `</font><font class=\"HazzatFont\">x</font><font class=\"CopticFont\">mmo</font><font class=\"HazzatFont\">xx.v.x x x </font><font class=\"CopticFont\">&nbsp;Ma</font><font class=\"HazzatFont\">x</font><font class=\"CopticFont\">ri</font><font class=\"HazzatFont\">xx...</font>",
+        "sampleArabic": "<span class=\"ArabicFont\">إ</span><span class=\"HazzatAFont\">ن </span><span class=\"ArabicFont\">فرَ</span><span class=\"HazzatAFont\">ن </span><span class=\"ArabicFont\">حي</span><span class=\"HazzatAFont\">نن ازن ن </span><span class=\"ArabicFont\">&nbsp;يا</span><span class=\"HazzatAFont\">ن </span><span class=\"ArabicFont\">&nbsp;مَـ</span><span class=\"HazzatAFont\">ن </span><span class=\"ArabicFont\">ريَـ</span><span class=\"HazzatAFont\">ننز...</span>"
     }
 });

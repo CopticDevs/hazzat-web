@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { UserSettingsContext } from "../Contexts/UserSettingsContext";
 import { LanguageContext } from "../LanguageContext";
 import { IHazzatContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
@@ -12,20 +12,15 @@ interface IProps {
 function ContentHazzat(props: IProps) {
     const { languageProperties } = useContext(LanguageContext);
     const { userSettings } = useContext(UserSettingsContext);
-    const [overrideEnglishStyle, setOverrideEnglishStyle] = useState<any>({});
     const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
-    useEffect(() => {
-        const newOverrideEnglishStyle = {
-            '--english-font-size': userSettings.englishFontSize,
-            '--content-font-color': userSettings.contentFontColor,
-            '--hazzat-font-color': userSettings.hazzatFontColor,
-            direction: 'ltr',
-            textAlign: 'left'
-        } as React.CSSProperties & { '--english-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
-
-        setOverrideEnglishStyle(newOverrideEnglishStyle);
-    }, [userSettings]);
+    const overrideEnglishStyle = {
+        '--english-font-size': userSettings.englishFontSize,
+        '--content-font-color': userSettings.contentFontColor,
+        '--hazzat-font-color': userSettings.hazzatFontColor,
+        direction: 'ltr',
+        textAlign: 'left'
+    } as React.CSSProperties & { '--english-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
 
     const overrideArabicStyle = {
         '--arabic-font-size': userSettings.arabicFontSize,
