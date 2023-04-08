@@ -42,6 +42,7 @@
     <TypeScriptCompile Include="src\Components\FontInstall7.tsx" />
     <TypeScriptCompile Include="src\Components\FormatOptionLinks.tsx" />
     <TypeScriptCompile Include="src\Components\HymnContentFromService.tsx" />
+    <TypeScriptCompile Include="src\Components\UserSettingsChanger.tsx" />
     <TypeScriptCompile Include="src\Components\UsingHazzatFont.tsx" />
     <TypeScriptCompile Include="src\Components\FontInstallXP.tsx" />
     <TypeScriptCompile Include="src\Components\HelpPage.tsx" />
@@ -124,6 +125,7 @@
     <Content Include="public\robots.txt" />
     <Content Include="src\App.css" />
     <Content Include="src\Components\ContactUsPage.css" />
+    <Content Include="src\Components\UserSettingsChanger.css" />
     <Content Include="src\Components\Content.css" />
     <Content Include="src\Components\BookletsMenu.css" />
     <Content Include="src\Components\FormatLink.css" />
