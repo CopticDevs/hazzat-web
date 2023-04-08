@@ -14,6 +14,7 @@ import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
 import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
 import LoadingSpinner from "./LoadingSpinner";
+import UserSettingsChanger from "./UserSettingsChanger";
 
 interface IProps {
     seasonInfo: ISeasonInfo;
@@ -176,6 +177,7 @@ function HymnContentFromService(props: IProps) {
                                 variationsCallback={variationsCallback}
                                 formatCallbackInfo={{ formatListCallback, handleFoundFormat }} />
                         })}
+                        <UserSettingsChanger />
                     </div>
             }
         </>

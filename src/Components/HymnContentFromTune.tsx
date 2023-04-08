@@ -14,6 +14,7 @@ import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
 import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
 import LoadingSpinner from "./LoadingSpinner";
+import UserSettingsChanger from "./UserSettingsChanger";
 
 interface IProps {
     tuneInfo: ITuneInfo;
@@ -103,6 +104,7 @@ function HymnContentFromTune(props: IProps) {
                         </div>
 
                         <Content formatId={formatIdParam} variationsCallback={fetchVariationsCallback} />
+                        <UserSettingsChanger />
                     </div>
             }
         </>

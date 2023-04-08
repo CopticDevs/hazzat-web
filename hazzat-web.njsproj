@@ -90,6 +90,7 @@
     <TypeScriptCompile Include="src\App.tsx" />
     <TypeScriptCompile Include="src\Components\MainPaper.tsx" />
     <TypeScriptCompile Include="src\Components\SidePaper.tsx" />
+    <TypeScriptCompile Include="src\Contexts\UserSettingsContext.tsx" />
     <TypeScriptCompile Include="src\index.tsx" />
     <TypeScriptCompile Include="src\Components\SeasonRouter.tsx" />
     <TypeScriptCompile Include="src\Components\SeasonsPage.tsx" />
@@ -228,6 +229,7 @@
     <Folder Include="public\downloads\" />
     <Folder Include="src\" />
     <Folder Include="src\Components\" />
+    <Folder Include="src\Contexts\" />
     <Folder Include="src\css\" />
     <Folder Include="src\fonts\" />
     <Folder Include="src\images\" />

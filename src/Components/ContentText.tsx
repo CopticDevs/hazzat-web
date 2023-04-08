@@ -1,4 +1,5 @@
 import { useContext } from "react";
+import { UserSettingsContext } from "../Contexts/UserSettingsContext";
 import { LanguageContext } from "../LanguageContext";
 import { ITextContent, IVariationInfo, TextColumn, TextParagraph } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
@@ -16,6 +17,7 @@ interface IContentTable {
 
 function ContentText(props: IProps) {
     const { languageProperties } = useContext(LanguageContext);
+    const { userSettings } = useContext(UserSettingsContext);
     const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
     const englishMask: number = 0x100;
@@ -25,6 +27,22 @@ function ContentText(props: IProps) {
     const englishColWidth: string = "32%";
     const copticColWidth: string = "44%";
     const arabicColWidth: string = "24%";
+
+    const overrideEnglishStyle = {
+        '--english-font-size': userSettings.englishFontSize,
+        '--content-font-color': userSettings.contentFontColor,
+        '--hazzat-font-color': userSettings.hazzatFontColor,
+        direction: 'ltr',
+        textAlign: 'left'
+    } as React.CSSProperties & { '--english-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
+
+    const overrideArabicStyle = {
+        '--arabic-font-size': userSettings.arabicFontSize,
+        '--content-font-color': userSettings.contentFontColor,
+        '--hazzat-font-color': userSettings.hazzatFontColor,
+        direction: 'rtl',
+        textAlign: 'right'
+    } as React.CSSProperties & { '--arabic-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
 
     const getLanguageMask = (language: string): number => {
         if (language.toUpperCase() === "ENGLISH") {
@@ -90,6 +108,7 @@ function ContentText(props: IProps) {
         const rowHasCoptic = (currentMask & copticMask) !== 0;
         const rowHasArabic = (currentMask & arabicMask) !== 0;
         const lang: string = langMask === arabicMask ? "ar" : "en";
+        const overrideStyle = langMask === arabicMask ? overrideArabicStyle : overrideEnglishStyle;
 
         // add padding class
         cssClasses.push("p-2");
@@ -124,7 +143,7 @@ function ContentText(props: IProps) {
             stringSuffix = (langMask === copticMask) ? "@" : ":";
         }
 
-        const cell = <td key={currCelId++} lang={lang} className={className} dangerouslySetInnerHTML={{ __html: `${col.content}${stringSuffix}` }} />
+        const cell = <td key={currCelId++} lang={lang} className={className} style={overrideStyle} dangerouslySetInnerHTML={{ __html: `${col.content}${stringSuffix}` }} />
         return cell;
     };
 
