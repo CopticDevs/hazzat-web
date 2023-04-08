@@ -205,7 +205,15 @@ export const strings = new LocalizedStrings({
         "highDesc2": "Again, the same idea with the regular notes, you could combine 2 consecutive notes to get the effect of different note lengths, for example:",
         "extendDesc1": "Regular note extenders are used to extend any specific note in order to make it longer.",
         "extendTip1": "For the first note extender, use the same key as 1 note \"z\". As for the 7th note extender, use \"Z\" which is the key for 1 high note.",
-        "extendTip2": "To extend any note, press the key above it. For example, press \"c\" for 3 notes, then the key right above it which is \"d\" to extend the 3rd note. Easy? 1st and 7th note extenders are an exception, see previous tip."
+        "extendTip2": "To extend any note, press the key above it. For example, press \"c\" for 3 notes, then the key right above it which is \"d\" to extend the 3rd note. Easy? 1st and 7th note extenders are an exception, see previous tip.",
+        "settings": "Settings",
+        "black": "Black",
+        "gray": "Gray",
+        "maroon": "Maroon",
+        "red": "Red",
+        "navy": "Navy",
+        "blue": "Blue",
+        "size": "Size"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -393,6 +401,14 @@ export const strings = new LocalizedStrings({
         "highDesc2": "مرة أخرى ، نفس الفكرة مع النوتات العادية ، يمكنك دمج نوتاتين متتاليتين للحصول على تطويل نوتة معينة ، على سبيل المثال:",
         "extendDesc1": "تستخدم الاستمدادات لتطويل أي نوتة معينة.",
         "extendTip1": "بالنسبة لاستمداد النوتة الأولة ، استخدم نفس مفتاح نوتة واحدة \"z\". أما بالنسبة لاستمداد النوتة السابعة ، فاستخدم الحرف \"Z\" وهو المفتاح للحصول على نوتة واحدة عالية.",
-        "extendTip2": "لاستمداد أي نوتة ، اضغط على المفتاح أعلاه. على سبيل المثال ، اضغط على \"c\" لثلاث نوتات ، ثم اضغط على المفتاح الموجود فوقها مباشرة وهو \"d\" لاستمداد النوتة الثالثة. سهل؟ استمداد النوتة الأولى والسابعة استثناء ، انظر النصيحة السابقة."
+        "extendTip2": "لاستمداد أي نوتة ، اضغط على المفتاح أعلاه. على سبيل المثال ، اضغط على \"c\" لثلاث نوتات ، ثم اضغط على المفتاح الموجود فوقها مباشرة وهو \"d\" لاستمداد النوتة الثالثة. سهل؟ استمداد النوتة الأولى والسابعة استثناء ، انظر النصيحة السابقة.",
+        "settings": "إعدادات",
+        "black": "أسود",
+        "gray": "رمادي",
+        "maroon": "أحمر داكن",
+        "red": "أحمر",
+        "navy": "أزرق داكن",
+        "blue": "أزرق",
+        "size": "حجم"
     }
 });

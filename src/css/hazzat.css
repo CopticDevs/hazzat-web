@@ -50,14 +50,61 @@ Hymn text Styles
 
 .HymnTitle { padding:0px 0px 22px; font-family: "Trajan Pro"; font-size:22px; font-weight:700; padding-bottom:10px; }
 
+:root {
+    --english-font-size: 18px;
+    --arabic-font-size: 22px;
+    --content-font-color: BLACK;
+    --hazzat-font-color: BLACK;
+}
 
-.CopticFont   { COLOR: BLACK; text-decoration: none; font-family: 'CS Avva Shenouda', 'CS New Athanasius'; FONT-SIZE:18px;}
-.HazzatFont   { COLOR: BLACK; text-decoration: none; font-family: 'Hazzat'; FONT-SIZE:18px;}
-.HazzatVFont  { COLOR: BLACK; text-decoration: none; font-family: 'Hazzat Vertical'; FONT-SIZE:18px;}
-.HazzatAFont  { COLOR: BLACK; text-decoration: none; font-family: 'Hazzat Arabic'; FONT-SIZE:22px;text-align:right;direction:rtl;}
-.HazzatVAFont { COLOR: BLACK; text-decoration: none; font-family: 'Hazzat Vertical Arabic'; FONT-SIZE:22px;text-align:right;direction:rtl;}
-.EnglishFont  { COLOR: BLACK; text-decoration: none; font-family: ARIAL,verdana; FONT-SIZE:18px;}
-.ArabicFont   { COLOR: BLACK; text-decoration: none; font-family: 'Arabic Transparent'; FONT-SIZE:22px;text-align:right;direction:rtl;}
+.CopticFont {
+    COLOR: var(--content-font-color);
+    text-decoration: none;
+    font-family: 'CS Avva Shenouda', 'CS New Athanasius';
+    font-size: var(--english-font-size);
+}
+.HazzatFont {
+    COLOR: var(--hazzat-font-color);
+    text-decoration: none;
+    font-family: 'Hazzat';
+    font-size: var(--english-font-size);
+}
+.HazzatVFont {
+    COLOR: var(--hazzat-font-color);
+    text-decoration: none;
+    font-family: 'Hazzat Vertical';
+    font-size: var(--english-font-size);
+}
+.HazzatAFont {
+    COLOR: var(--hazzat-font-color);
+    text-decoration: none;
+    font-family: 'Hazzat Arabic';
+    font-size: var(--arabic-font-size);
+    text-align: right;
+    direction: rtl;
+}
+.HazzatVAFont {
+    COLOR: var(--hazzat-font-color);
+    text-decoration: none;
+    font-family: 'Hazzat Vertical Arabic';
+    font-size: var(--arabic-font-size);
+    text-align: right;
+    direction: rtl;
+}
+.EnglishFont {
+    COLOR: var(--content-font-color);
+    text-decoration: none;
+    font-family: ARIAL,verdana;
+    font-size: var(--english-font-size);
+}
+.ArabicFont {
+    COLOR: var(--content-font-color);
+    text-decoration: none;
+    font-family: 'Arabic Transparent';
+    font-size: var(--arabic-font-size);
+    text-align: right;
+    direction: rtl;
+}
 .EnglishComment  { COLOR: RED; text-decoration: none; font-family: ARIAL,verdana; FONT-SIZE:14px; font-style:italic;}
 .CopticComment   { COLOR: RED; text-decoration: none; font-family: 'CS Avva Shenouda', 'CS New Athanasius'; FONT-SIZE:14px; font-style: italic;}
 .ArabicComment   { COLOR: RED; text-decoration: none; font-family: 'Arabic Transparent'; FONT-SIZE:16px; font-style: italic;text-align:right;direction:rtl;}
