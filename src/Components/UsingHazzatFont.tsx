@@ -364,6 +364,56 @@ function UsingHazzatFont() {
 
             <section id="vibratedNotes">
                 <p><u><LocalizedMessage of="vibratedNotes" /></u></p>
+                <p><LocalizedMessage of="vibratedDesc1" /></p>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>A</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> A</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="secondVibrated" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>S</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> S</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="thirdVibrated" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>D</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> D</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="fourthVibrated" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>F</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> F</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="fifthVibrated" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>G</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> G</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="sixthVibrated" />)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><LocalizedMessage of="vibratedDesc2" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xS</span>&nbsp; &nbsp;(<LocalizedMessage of="twoRegOneVib" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>cDcD</span>&nbsp; &nbsp;(<LocalizedMessage of="threeLongOneLongVib" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xS S</span>&nbsp; &nbsp;(<LocalizedMessage of="twoRegOneLongVib" />)</p>
+                <p>&nbsp; &nbsp;(<LocalizedMessage of="spaceBeforeTheSecondVib" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xS D</span>&nbsp; &nbsp;(<LocalizedMessage of="twoRegOneVibHigher" />)</p>
+                <p>&nbsp; &nbsp;(<LocalizedMessage of="spaceBeforeTheSecondVib" />)</p>
+                <HelpTip content={strings.vibratedTip1} />
+                <p><LocalizedMessage of="vibratedDesc3" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}> AS</span>&nbsp; &nbsp;(<LocalizedMessage of="twoVib" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}> ASD ASD</span>&nbsp; &nbsp;(<LocalizedMessage of="threeLongVib" />)</p>
+                <p>&nbsp; &nbsp;(<LocalizedMessage of="spaceBeforeSecondSet" />)</p>
+                <p><LocalizedMessage of="vibratedDesc4" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xSD</span>&nbsp; &nbsp;(<LocalizedMessage of="twoRegTwoVib" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xSDxSD</span>&nbsp; &nbsp;(<LocalizedMessage of="twoLongTwoLongVib" />)</p>
             </section>
 
             <section id="specialChars">
