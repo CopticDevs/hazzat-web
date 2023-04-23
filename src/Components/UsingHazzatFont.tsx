@@ -6,6 +6,7 @@ import BreadCrumb from "./BreadCrumb";
 import HelpTip from "./HelpTip";
 import HymnTitle from "./HymnTitle";
 import MyNavLink from "./MyNavLink";
+import "./UsingHazzatFont.css";
 
 interface IMappingGridItem {
     key: string;
@@ -113,7 +114,7 @@ function UsingHazzatFont() {
                 <a href="#helpfulTip"><LocalizedMessage of="helpfulTip" /></a><br />
             </p>
 
-            <section id="aboutHelp">
+            <section id="aboutHelp" className="helpSection">
                 <div className={langClassName} style={{ paddingBottom: "33px", paddingTop: "33px" }}>
                     <HymnTitle content={strings.aboutHelp} />
                 </div>
@@ -121,7 +122,7 @@ function UsingHazzatFont() {
                 <p><LocalizedMessage of="aboutHelpContent" /></p>
             </section>
 
-            <section id="aboutHazzat">
+            <section id="aboutHazzat" className="helpSection">
                 <div className={langClassName} style={{ paddingBottom: "33px", paddingTop: "33px" }}>
                     <HymnTitle content={strings.aboutHazzat} />
                 </div>
@@ -131,7 +132,7 @@ function UsingHazzatFont() {
                 <p dangerouslySetInnerHTML={{ __html: strings.hazzatDescSummary }} />
             </section>
 
-            <section id="keymappings">
+            <section id="keymappings" className="helpSection">
                 <div className={langClassName} style={{ paddingBottom: "33px", paddingTop: "33px" }}>
                     <HymnTitle content={strings.keyMappings} />
                 </div>
@@ -156,14 +157,14 @@ function UsingHazzatFont() {
                 </table>
             </section>
 
-            <section id="usage">
+            <section id="usage" className="helpSection">
                 <div className={langClassName} style={{ paddingBottom: "33px", paddingTop: "33px" }}>
                     <HymnTitle content={strings.usage} />
                 </div>
                 <div className="clear" />
             </section>
 
-            <section id="regularNotes">
+            <section id="regularNotes" className="helpSection">
                 <p><u><LocalizedMessage of="regularNotes" /></u></p>
                 <p><LocalizedMessage of="regularDesc1" /></p>
                 <table>
@@ -221,7 +222,7 @@ function UsingHazzatFont() {
                 <p>&nbsp;</p>
             </section>
 
-            <section id="shortNotes">
+            <section id="shortNotes" className="helpSection">
                 <p><u><LocalizedMessage of="shortNotes" /></u></p>
                 <p><LocalizedMessage of="shortDesc1" /></p>
                 <table>
@@ -273,7 +274,7 @@ function UsingHazzatFont() {
                 <HelpTip content={strings.shortTip} />
             </section>
 
-            <section id="highNotes">
+            <section id="highNotes" className="helpSection">
                 <p><u><LocalizedMessage of="highNotes" /></u></p>
                 <p><LocalizedMessage of="highDesc1" /></p>
                 <table>
@@ -322,7 +323,7 @@ function UsingHazzatFont() {
                 <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>ZV</span>&nbsp; &nbsp;(<LocalizedMessage of="oneLongThreeReg" />)</p>
             </section>
 
-            <section id="regularExtend">
+            <section id="regularExtend" className="helpSection">
                 <p><u><LocalizedMessage of="regularExtend" /></u></p>
                 <table>
                     <tbody>
@@ -362,7 +363,7 @@ function UsingHazzatFont() {
                 <HelpTip content={strings.extendTip2} />
             </section>
 
-            <section id="vibratedNotes">
+            <section id="vibratedNotes" className="helpSection">
                 <p><u><LocalizedMessage of="vibratedNotes" /></u></p>
                 <p><LocalizedMessage of="vibratedDesc1" /></p>
                 <table>
@@ -420,7 +421,7 @@ function UsingHazzatFont() {
                 <p><u><LocalizedMessage of="specialChars" /></u></p>
             </section>
 
-            <section id="abrupt">
+            <section id="abrupt" className="helpSection">
                 <p><u><LocalizedMessage of="abrupt" /></u></p>
                 <table>
                     <tbody>
@@ -437,7 +438,7 @@ function UsingHazzatFont() {
                 <p><span className="CopticFont" style={{ fontSize: "29pt" }}>ebo</span><span className="HazzatFont" style={{ fontSize: "29pt" }}>ca</span><span className="CopticFont" style={{ fontSize: "29pt" }}>l qen</span>&nbsp; &nbsp;(<LocalizedMessage of="threeRegularAbruptHymn" />)</p>
             </section>
 
-            <section id="fastChant">
+            <section id="fastChant" className="helpSection">
                 <p><u><LocalizedMessage of="fastChant" /></u></p>
                 <table>
                     <tbody>
@@ -459,23 +460,33 @@ function UsingHazzatFont() {
                 <p><span className="CopticFont" style={{ fontSize: "29pt" }}>ebol q</span><span className="HazzatFont" style={{ fontSize: "29pt" }}>j</span><span className="CopticFont" style={{ fontSize: "29pt" }}>e</span><span className="HazzatFont" style={{ fontSize: "29pt" }}>j</span><span className="CopticFont" style={{ fontSize: "29pt" }}>n</span><span className="HazzatFont" style={{ fontSize: "29pt" }}>J</span>&nbsp; &nbsp;(<LocalizedMessage of="fastExample" />)</p>
             </section>
 
-            <section id="breathMark">
+            <section id="breathMark" className="helpSection">
                 <p><u><LocalizedMessage of="breathMark" /></u></p>
+                <tbody>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>.</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>.</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="pauseMark" />)</span></td>
+                    </tr>
+                </tbody>
+                <p><LocalizedMessage of="example" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>cd.v c</span>&nbsp; &nbsp;(<LocalizedMessage of="pauseExample" />)</p>
             </section>
 
-            <section id="lowerOrHigher">
+            <section id="lowerOrHigher" className="helpSection">
                 <p><u><LocalizedMessage of="lowerOrHigher" /></u></p>
             </section>
 
-            <section id="repeatMark">
+            <section id="repeatMark" className="helpSection">
                 <p><u><LocalizedMessage of="repeatMark" /></u></p>
             </section>
 
-            <section id="markingChars">
+            <section id="markingChars" className="helpSection">
                 <p><u><LocalizedMessage of="markingChars" /></u></p>
             </section>
 
-            <section id="exampleHymn">
+            <section id="exampleHymn" className="helpSection">
                 <div className={langClassName} style={{ paddingBottom: "33px", paddingTop: "33px" }}>
                     <HymnTitle content={strings.exampleHymn} />
                 </div>
@@ -487,7 +498,7 @@ function UsingHazzatFont() {
                 </div>
             </section>
 
-            <section id="helpfulTip">
+            <section id="helpfulTip" className="helpSection">
                 <div className={langClassName} style={{ paddingBottom: "33px", paddingTop: "33px" }}>
                     <HymnTitle content={strings.helpfulTip} />
                 </div>
