@@ -168,6 +168,7 @@
     <Content Include="src\images\bg.png" />
     <Content Include="src\images\bookletFormat.png" />
     <Content Include="src\images\caps.jpg" />
+    <Content Include="src\images\circle.svg" />
     <Content Include="src\images\contentBg.png" />
     <Content Include="src\images\crossline.gif" />
     <Content Include="src\images\displayFormat.png" />

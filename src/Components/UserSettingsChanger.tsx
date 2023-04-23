@@ -1,12 +1,13 @@
+import { faCog } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useState } from "react";
+import { Button, Modal } from 'react-bootstrap';
 import { UserSettingsContext } from "../Contexts/UserSettingsContext";
+import { ReactComponent as CircleSvg } from "../images/circle.svg";
 import { strings } from "../l8n";
+import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import "./UserSettingsChanger.css";
-import { Button, Modal } from 'react-bootstrap';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCog } from "@fortawesome/free-solid-svg-icons";
-import { LanguageContext } from "../LanguageContext";
 
 interface IRadioOption {
     value: string;
@@ -43,21 +44,18 @@ function UserSettingsChanger() {
 
     const options: IRadioOption[] = [
         { value: 'BLACK', label: strings.black },
-        { value: 'GRAY', label: strings.gray },
         { value: 'MAROON', label: strings.maroon },
-        { value: 'RED', label: strings.red },
         { value: 'NAVY', label: strings.navy },
-        { value: 'BLUE', label: strings.blue },
     ];
 
-    const handleHazzatColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSelectedHazzatColor(event.target.value);
-        setHazzatFontColor(event.target.value);
+    const handleHazzatColorChange = (color: string) => {
+        setSelectedHazzatColor(color);
+        setHazzatFontColor(color);
     };
 
-    const handleContentColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSelectedContentColor(event.target.value);
-        setContentFontColor(event.target.value);
+    const handleContentColorChange = (color: string) => {
+        setSelectedContentColor(color);
+        setContentFontColor(color);
     };
 
     const handleTextSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,20 +86,11 @@ function UserSettingsChanger() {
                             </div>
                             <div className="row">
                                 {options.map((option) => (
-                                    <div key={`content${option.value}`} className="col-6 col-md-2">
-                                        <label className="form-check-label" htmlFor={`content${option.value}`}>
-                                            <input
-                                                className="form-check-input"
-                                                name="contentFontColor"
-                                                id={`content${option.value}`}
-                                                type="radio"
-                                                value={option.value}
-                                                checked={selectedContentColor === option.value}
-                                                onChange={handleContentColorChange}
-                                            />
-                                            {option.label}
-                                        </label>
-                                    </div>
+                                    <CircleSvg
+                                        fill={option.value}
+                                        className={`color-option ${selectedContentColor === option.value ? 'selected' : ''}`}
+                                        onClick={() => handleContentColorChange(option.value)}
+                                    />
                                 ))}
                             </div>
 
@@ -110,20 +99,11 @@ function UserSettingsChanger() {
                             </div>
                             <div className="row">
                                 {options.map((option) => (
-                                    <div key={`hazzat${option.value}`} className="col-6 col-md-2">
-                                        <label className="form-check-label" htmlFor={`hazzat${option.value}`}>
-                                            <input
-                                                className="form-check-input"
-                                                name="hazzatFontColor"
-                                                id={`hazzat${option.value}`}
-                                                type="radio"
-                                                value={option.value}
-                                                checked={selectedHazzatColor === option.value}
-                                                onChange={handleHazzatColorChange}
-                                            />
-                                            {option.label}
-                                        </label>
-                                    </div>
+                                    <CircleSvg
+                                        fill={option.value}
+                                        className={`color-option ${selectedHazzatColor === option.value ? 'selected' : ''}`}
+                                        onClick={() => handleHazzatColorChange(option.value)}
+                                    />
                                 ))}
                             </div>
                             <div className="row" style={{ paddingTop: "10px" }}>
