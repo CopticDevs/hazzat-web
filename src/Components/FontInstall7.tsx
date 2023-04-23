@@ -19,11 +19,11 @@ function FontInstall() {
                 { title: strings.help, path: "/Help" },
                 { title: strings.instructionsForWin7 }]} />
             <p><LocalizedMessage of="downloadAndSaveZip" /></p>
-            <p><img src={win7_1Img} alt={strings.downloadAndSaveZip} /></p>
+            <p><img src={win7_1Img} alt={strings.downloadAndSaveZip} style={{ maxWidth: "90%" }} /></p>
             <p><LocalizedMessage of="extractZip" /></p>
             <p><LocalizedMessage of="browseAndSelect" /></p>
             <p><LocalizedMessage of="clickAndInstall" /></p>
-            <p><img src={win7_2Img} alt={strings.clickAndInstall} /></p>
+            <p><img src={win7_2Img} alt={strings.clickAndInstall} style={{ maxWidth: "90%" }} /></p>
             <div style={{ textAlign: "center", paddingTop: "30px", paddingBottom: "30px" }}>
                 <MyNavLink to="#" onClick={() => window.history.back()}>
                     <LocalizedMessage of="goBack" />
