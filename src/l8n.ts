@@ -233,6 +233,9 @@ export const strings = new LocalizedStrings({
         "vibratedDesc4": "Finally, here are some examples where vibrated notes are combined with both regular and other vibrated notes:",
         "twoRegTwoVib": "2 regular notes, and 2 vibrated notes",
         "twoLongTwoLongVib": "2 long notes, and 2 long vibrated notes",
+        "example": "Example:",
+        "twoAbruptFour": "2 regular notes going abruptly to 4 regular notes",
+        "threeRegularAbruptHymn": "3 regular notes going abruptly to rest of Coptic hymn"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -448,5 +451,8 @@ export const strings = new LocalizedStrings({
         "vibratedDesc4": "أخيرًا ، فيما يلي بعض الأمثلة حيث يتم دمج النوتات الاهتزازية مع كل من النوتات العادية ونوتات مهتزة أخرى:",
         "twoRegTwoVib": "٢ نوتات عادية ، و٢ نوتات اهتزازية",
         "twoLongTwoLongVib": "نوتتان طويلتان ونوتتان اهتزاز طويلتان",
+        "example": "مثال:",
+        "twoAbruptFour": "٢ نوتات عادية تنتقل فجأة إلى ٤ نوتات عادية",
+        "threeRegularAbruptHymn": "٣ نوتات منتظمة تنتقل فجأة إلى بقية اللحن القبطي"
     }
 });

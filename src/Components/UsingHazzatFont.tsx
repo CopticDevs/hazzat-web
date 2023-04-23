@@ -422,6 +422,19 @@ function UsingHazzatFont() {
 
             <section id="abrupt">
                 <p><u><LocalizedMessage of="abrupt" /></u></p>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>a</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>a</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="abruptNote" />)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><LocalizedMessage of="example" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xav</span>&nbsp; &nbsp;(<LocalizedMessage of="twoAbruptFour" />)</p>
+                <p><span className="CopticFont" style={{ fontSize: "29pt" }}>ebo</span><span className="HazzatFont" style={{ fontSize: "29pt" }}>ca</span><span className="CopticFont" style={{ fontSize: "29pt" }}>l qen</span>&nbsp; &nbsp;(<LocalizedMessage of="threeRegularAbruptHymn" />)</p>
             </section>
 
             <section id="fastChant">
