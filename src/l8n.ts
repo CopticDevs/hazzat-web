@@ -240,7 +240,10 @@ export const strings = new LocalizedStrings({
         "fastExample": "The notation here is to chant the second word fast",
         "pauseExample": "a pause or a breath mark between the first 2 set of notes",
         "highExample": "The arrow notates for the 2nd set of notes to be higher in tone",
-        "lowExample": "The arrow notates for the 2nd set of notes to be lower in tone"
+        "lowExample": "The arrow notates for the 2nd set of notes to be lower in tone",
+        "repeatExample1": "repeat the notes between the paranthesis 3 times",
+        "repeatExample2": "repeat the notes between the paranthesis 7 times",
+        "repeatExample3": "repeat the notes between the paranthesis 10 times"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -464,5 +467,8 @@ export const strings = new LocalizedStrings({
         "pauseExample": "وقفة أو علامة نفَس بين أول مجموعتين من النوتات",
         "highExample": "يشير السهم إلى أن المجموعة الثانية من النغمات تكون أعلى نغمة",
         "lowExample": "يشير السهم إلى أن المجموعة الثانية من النغمات تكون أقل في النغمة",
+        "repeatExample1": "كرر النوتات بين الأقواس ٣ مرات",
+        "repeatExample2": "كرر النوتات بين الأقواس ٧ مرات",
+        "repeatExample3": "كرر النوتات بين الأقواس ١٠ مرات",
     }
 });
