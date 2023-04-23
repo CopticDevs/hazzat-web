@@ -235,7 +235,9 @@ export const strings = new LocalizedStrings({
         "twoLongTwoLongVib": "2 long notes, and 2 long vibrated notes",
         "example": "Example:",
         "twoAbruptFour": "2 regular notes going abruptly to 4 regular notes",
-        "threeRegularAbruptHymn": "3 regular notes going abruptly to rest of Coptic hymn"
+        "threeRegularAbruptHymn": "3 regular notes going abruptly to rest of Coptic hymn",
+        "fastDesc1": "Place a lower case \"j\" after every letter of the word(s) to be chanted fast, then a capital letter \"J\" after the last letter to put the arrowhead. For example:",
+        "fastExample": "The notation here is to chant the second word fast"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -453,6 +455,8 @@ export const strings = new LocalizedStrings({
         "twoLongTwoLongVib": "نوتتان طويلتان ونوتتان اهتزاز طويلتان",
         "example": "مثال:",
         "twoAbruptFour": "٢ نوتات عادية تنتقل فجأة إلى ٤ نوتات عادية",
-        "threeRegularAbruptHymn": "٣ نوتات منتظمة تنتقل فجأة إلى بقية اللحن القبطي"
+        "threeRegularAbruptHymn": "٣ نوتات منتظمة تنتقل فجأة إلى بقية اللحن القبطي",
+        "fastDesc1": "ضع حرفًا صغيرًا \"j\" بعد كل حرف من الكلمة (الكلمات) المراد ترديدها بسرعة ، ثم ضع حرفًا كبيرًا \"J\" بعد الحرف الأخير لوضع رأس السهم. على سبيل المثال:",
+        "fastExample": "التدوين هنا هو ترديد الكلمة الثانية بسرعة"
     }
 });

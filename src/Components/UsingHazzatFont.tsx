@@ -439,6 +439,24 @@ function UsingHazzatFont() {
 
             <section id="fastChant">
                 <p><u><LocalizedMessage of="fastChant" /></u></p>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>j</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> j</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="fastUnderscore" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>J</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> J</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="fastArrow" />)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><LocalizedMessage of="fastDesc1" /></p>
+                <p><span className="CopticFont" style={{ fontSize: "29pt" }}>ebol q</span><span className="HazzatFont" style={{ fontSize: "29pt" }}>j</span><span className="CopticFont" style={{ fontSize: "29pt" }}>e</span><span className="HazzatFont" style={{ fontSize: "29pt" }}>j</span><span className="CopticFont" style={{ fontSize: "29pt" }}>n</span><span className="HazzatFont" style={{ fontSize: "29pt" }}>J</span>&nbsp; &nbsp;(<LocalizedMessage of="fastExample" />)</p>
             </section>
 
             <section id="breathMark">
