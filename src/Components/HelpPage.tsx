@@ -58,9 +58,9 @@ function HelpPage() {
                 <Route path={`/InstallFontWin7`} element={<FontInstall7 />} />
                 <Route path={`/UsingHazzatFont`} element={<UsingHazzatFont />} />
                 <Route path={`/UsingVerticalHazzatFont`} element={<UsingVerticalHazzatFont />} />
-                <Route path={`/SmallLetters`} element={<img src={mapSmallImg} alt={strings.smallLetters} style={{ width: "90%" }} />} />
-                <Route path={`/CapitalLetters`} element={<img src={mapCapsImg} alt={strings.capitalLetters} style={{ width: "90%" }} />} />
-                <Route path={`/HazzatKeyboardMap`} element={<img src={mapImg} alt={strings.hazzatKeybdMap} style={{ width: "90%" }} />} />
+                <Route path={`/SmallLetters`} element={<img src={mapSmallImg} alt={strings.smallLetters} style={{ maxWidth: "90%" }} />} />
+                <Route path={`/CapitalLetters`} element={<img src={mapCapsImg} alt={strings.capitalLetters} style={{ maxWidth: "90%" }} />} />
+                <Route path={`/HazzatKeyboardMap`} element={<img src={mapImg} alt={strings.hazzatKeybdMap} style={{ maxWidth: "90%" }} />} />
             </Routes>
         </MainPaper >
     );

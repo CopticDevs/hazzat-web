@@ -22,14 +22,14 @@ function FontInstallXP() {
                 { title: strings.help, path: "/Help" },
                 { title: strings.instructionsForWinXP }]} />
             <p><LocalizedMessage of="downloadAndSaveZip" /></p>
-            <p><img src={winxp1Img} alt={strings.downloadAndSaveZip} /></p>
+            <p><img src={winxp1Img} alt={strings.downloadAndSaveZip} style={{ maxWidth: "90%" }} /></p>
             <p><LocalizedMessage of="extractZip" /></p>
             <p><LocalizedMessage of="ctrPanelFonts" /></p>
-            <p><img src={winxp2Img} alt={strings.ctrPanelFonts} /><img src={winxp3Img} alt={strings.fonts} /></p>
+            <p><img src={winxp2Img} alt={strings.ctrPanelFonts} style={{ maxWidth: "90%" }} /><img src={winxp3Img} alt={strings.fonts} style={{ maxWidth: "90%" }} /></p>
             <p><LocalizedMessage of="fileInstallFont" /></p>
-            <p><img src={winxp4Img} alt={strings.fileInstallFont} /></p>
+            <p><img src={winxp4Img} alt={strings.fileInstallFont} style={{ maxWidth: "90%" }} /></p>
             <p><LocalizedMessage of="browseAndOK" /></p>
-            <p><img src={winxp5Img} alt={strings.browseAndOK} /></p>
+            <p><img src={winxp5Img} alt={strings.browseAndOK} style={{ maxWidth: "90%" }} /></p>
             <div style={{ textAlign: "center", paddingTop: "30px", paddingBottom: "30px" }}>
                 <MyNavLink to="#" onClick={() => window.history.back()}>
                     <LocalizedMessage of="goBack" />
