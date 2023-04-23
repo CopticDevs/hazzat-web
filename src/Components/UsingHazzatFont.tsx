@@ -219,7 +219,6 @@ function UsingHazzatFont() {
                 <p><LocalizedMessage of="regularDesc3" /></p>
                 <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xc</span>&nbsp; &nbsp;(<LocalizedMessage of="twoLongOneReg" />)</p>
                 <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>zv</span>&nbsp; &nbsp;(<LocalizedMessage of="oneLongThreeReg" />)</p>
-                <p>&nbsp;</p>
             </section>
 
             <section id="shortNotes" className="helpSection">

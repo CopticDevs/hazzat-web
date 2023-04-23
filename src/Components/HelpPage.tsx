@@ -9,6 +9,10 @@ import "./HelpPage.css";
 import MainPaper, { Size } from "./MainPaper";
 import MyNavLink from "./MyNavLink";
 import UsingHazzatFont from "./UsingHazzatFont";
+import mapImg from "../images/map.jpg";
+import mapSmallImg from "../images/small.jpg";
+import mapCapsImg from "../images/caps.jpg";
+import UsingVerticalHazzatFont from "./UsingVerticalHazzatFont";
 
 function HelpPage() {
     const { languageProperties } = useContext(LanguageContext);
@@ -38,7 +42,7 @@ function HelpPage() {
                         <div className={langClassName}>
                             <strong><MyNavLink to="UsingVerticalHazzatFont"><LocalizedMessage of="usingTheVerticalHazzatFont" /></MyNavLink></strong>
                         </div>
-                        <div><strong><MyNavLink to="HazzatKeyboardMap"><LocalizedMessage of="hazzatKeybdMap" /></MyNavLink></strong></div>
+                        <div><LocalizedMessage of="hazzatKeybdMap" /></div>
                         <div className={langClassName}>
                             <strong><MyNavLink to="SmallLetters"><LocalizedMessage of="smallLetters" /></MyNavLink></strong>
                         </div>
@@ -46,13 +50,17 @@ function HelpPage() {
                             <strong><MyNavLink to="CapitalLetters"><LocalizedMessage of="capitalLetters" /></MyNavLink></strong>
                         </div>
                         <div className={langClassName}>
-                            <strong><MyNavLink to="KeyboardMap"><LocalizedMessage of="keyboardMap" /></MyNavLink></strong>
+                            <strong><MyNavLink to="HazzatKeyboardMap"><LocalizedMessage of="keyboardMap" /></MyNavLink></strong>
                         </div>
                     </>
                 } />
                 <Route path={`/InstallFontWinXP`} element={<FontInstallXP />} />
                 <Route path={`/InstallFontWin7`} element={<FontInstall7 />} />
                 <Route path={`/UsingHazzatFont`} element={<UsingHazzatFont />} />
+                <Route path={`/UsingVerticalHazzatFont`} element={<UsingVerticalHazzatFont />} />
+                <Route path={`/SmallLetters`} element={<img src={mapSmallImg} alt={strings.smallLetters} />} />
+                <Route path={`/CapitalLetters`} element={<img src={mapCapsImg} alt={strings.capitalLetters} />} />
+                <Route path={`/HazzatKeyboardMap`} element={<img src={mapImg} alt={strings.hazzatKeybdMap} />} />
             </Routes>
         </MainPaper >
     );
