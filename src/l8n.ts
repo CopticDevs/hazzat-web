@@ -243,7 +243,11 @@ export const strings = new LocalizedStrings({
         "lowExample": "The arrow notates for the 2nd set of notes to be lower in tone",
         "repeatExample1": "repeat the notes between the paranthesis 3 times",
         "repeatExample2": "repeat the notes between the paranthesis 7 times",
-        "repeatExample3": "repeat the notes between the paranthesis 10 times"
+        "repeatExample3": "repeat the notes between the paranthesis 10 times",
+        "markTip1": "Note that to mark a certain part you hold down the shift key plus the number you want to mark it with. For example you want to mark number four, you hold down the shift key + \"4\".",
+        "markExample1": "mark this part as number 3",
+        "referenceExample1": "a reference to number 3",
+        "markDesc1": "Then, this is how you reference it later instead of typing it again:"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -470,5 +474,9 @@ export const strings = new LocalizedStrings({
         "repeatExample1": "كرر النوتات بين الأقواس ٣ مرات",
         "repeatExample2": "كرر النوتات بين الأقواس ٧ مرات",
         "repeatExample3": "كرر النوتات بين الأقواس ١٠ مرات",
+        "markTip1": "لاحظ أنه لتحديد جزء معين ، تضغط على مفتاح Shift بالإضافة إلى الرقم الذي تريد وضع علامة عليه. على سبيل المثال ، إذا كنت تريد تحديد الرقم أربعة ، فاضغط على مفتاح Shift + \"4\".",
+        "markExample1": "حدد هذا الجزء برقم ٣",
+        "referenceExample1": "اشارة الى رقم ٣",
+        "markDesc1": "بعد ذلك ، هذه هي الطريقة التي تشير إليها لاحقًا بدلاً من كتابتها مرة أخرى:"
     }
 });
