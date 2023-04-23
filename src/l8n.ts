@@ -238,7 +238,9 @@ export const strings = new LocalizedStrings({
         "threeRegularAbruptHymn": "3 regular notes going abruptly to rest of Coptic hymn",
         "fastDesc1": "Place a lower case \"j\" after every letter of the word(s) to be chanted fast, then a capital letter \"J\" after the last letter to put the arrowhead. For example:",
         "fastExample": "The notation here is to chant the second word fast",
-        "pauseExample": "a pause or a breath mark between the first 2 set of notes"
+        "pauseExample": "a pause or a breath mark between the first 2 set of notes",
+        "highExample": "The arrow notates for the 2nd set of notes to be higher in tone",
+        "lowExample": "The arrow notates for the 2nd set of notes to be lower in tone"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -459,6 +461,8 @@ export const strings = new LocalizedStrings({
         "threeRegularAbruptHymn": "٣ نوتات منتظمة تنتقل فجأة إلى بقية اللحن القبطي",
         "fastDesc1": "ضع حرفًا صغيرًا \"j\" بعد كل حرف من الكلمة (الكلمات) المراد ترديدها بسرعة ، ثم ضع حرفًا كبيرًا \"J\" بعد الحرف الأخير لوضع رأس السهم. على سبيل المثال:",
         "fastExample": "التدوين هنا هو ترديد الكلمة الثانية بسرعة",
-        "pauseExample": "وقفة أو علامة نفَس بين أول مجموعتين من النوتات"
+        "pauseExample": "وقفة أو علامة نفَس بين أول مجموعتين من النوتات",
+        "highExample": "يشير السهم إلى أن المجموعة الثانية من النغمات تكون أعلى نغمة",
+        "lowExample": "يشير السهم إلى أن المجموعة الثانية من النغمات تكون أقل في النغمة",
     }
 });

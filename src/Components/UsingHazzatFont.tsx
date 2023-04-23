@@ -476,6 +476,23 @@ function UsingHazzatFont() {
 
             <section id="lowerOrHigher" className="helpSection">
                 <p><u><LocalizedMessage of="lowerOrHigher" /></u></p>
+                <tbody>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>+</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>+</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="higherTone" />)</span></td>
+                    </tr>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>-</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>-</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="lowerTone" />)</span></td>
+                    </tr>
+                </tbody>
+                <p><LocalizedMessage of="example" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>cd.+v c</span>&nbsp; &nbsp;(<LocalizedMessage of="highExample" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>cd.-v c</span>&nbsp; &nbsp;(<LocalizedMessage of="lowExample" />)</p>
             </section>
 
             <section id="repeatMark" className="helpSection">
