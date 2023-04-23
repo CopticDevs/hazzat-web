@@ -43,6 +43,7 @@
     <TypeScriptCompile Include="src\Components\FormatOptionLinks.tsx" />
     <TypeScriptCompile Include="src\Components\HymnContentFromService.tsx" />
     <TypeScriptCompile Include="src\Components\UserSettingsChanger.tsx" />
+    <TypeScriptCompile Include="src\Components\UsingVerticalHazzatFont.tsx" />
     <TypeScriptCompile Include="src\Components\UsingHazzatFont.tsx" />
     <TypeScriptCompile Include="src\Components\FontInstallXP.tsx" />
     <TypeScriptCompile Include="src\Components\HelpPage.tsx" />
@@ -166,6 +167,7 @@
     <Content Include="src\images\audio_mouseout.gif" />
     <Content Include="src\images\bg.png" />
     <Content Include="src\images\bookletFormat.png" />
+    <Content Include="src\images\caps.jpg" />
     <Content Include="src\images\contentBg.png" />
     <Content Include="src\images\crossline.gif" />
     <Content Include="src\images\displayFormat.png" />
@@ -184,6 +186,7 @@
     <Content Include="src\images\information_mouseout.gif" />
     <Content Include="src\images\Instrumental.png" />
     <Content Include="src\images\logo.png" />
+    <Content Include="src\images\map.jpg" />
     <Content Include="src\images\Music.png" />
     <Content Include="src\images\music_mouseon.gif" />
     <Content Include="src\images\music_mouseout.gif" />
@@ -193,6 +196,7 @@
     <Content Include="src\images\navBgNew.png" />
     <Content Include="src\images\pattern.jpg" />
     <Content Include="src\images\save.gif" />
+    <Content Include="src\images\small.jpg" />
     <Content Include="src\images\space.gif" />
     <Content Include="src\images\text_mouseon.gif" />
     <Content Include="src\images\text_mouseout.gif" />

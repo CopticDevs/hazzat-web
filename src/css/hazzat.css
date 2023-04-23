@@ -72,7 +72,7 @@ Hymn text Styles
 .HazzatVFont {
     COLOR: var(--hazzat-font-color);
     text-decoration: none;
-    font-family: 'Hazzat Vertical';
+    font-family: "Hazzat Vertical";
     font-size: var(--english-font-size);
 }
 .HazzatAFont {
