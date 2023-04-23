@@ -6,6 +6,7 @@ import BreadCrumb from "./BreadCrumb";
 import HelpTip from "./HelpTip";
 import HymnTitle from "./HymnTitle";
 import MyNavLink from "./MyNavLink";
+import "./UsingHazzatFont.css";
 
 interface IMappingGridItem {
     key: string;
@@ -113,7 +114,7 @@ function UsingHazzatFont() {
                 <a href="#helpfulTip"><LocalizedMessage of="helpfulTip" /></a><br />
             </p>
 
-            <section id="aboutHelp">
+            <section id="aboutHelp" className="helpSection">
                 <div className={langClassName} style={{ paddingBottom: "33px", paddingTop: "33px" }}>
                     <HymnTitle content={strings.aboutHelp} />
                 </div>
@@ -121,7 +122,7 @@ function UsingHazzatFont() {
                 <p><LocalizedMessage of="aboutHelpContent" /></p>
             </section>
 
-            <section id="aboutHazzat">
+            <section id="aboutHazzat" className="helpSection">
                 <div className={langClassName} style={{ paddingBottom: "33px", paddingTop: "33px" }}>
                     <HymnTitle content={strings.aboutHazzat} />
                 </div>
@@ -131,7 +132,7 @@ function UsingHazzatFont() {
                 <p dangerouslySetInnerHTML={{ __html: strings.hazzatDescSummary }} />
             </section>
 
-            <section id="keymappings">
+            <section id="keymappings" className="helpSection">
                 <div className={langClassName} style={{ paddingBottom: "33px", paddingTop: "33px" }}>
                     <HymnTitle content={strings.keyMappings} />
                 </div>
@@ -143,27 +144,27 @@ function UsingHazzatFont() {
                         <th className="border" style={{ width: "300px" }}><LocalizedMessage of="description" /></th>
                     </thead>
                     <tbody>
-                    {mappings.map((item) => {
-                        return (
-                            <tr>
-                                <td className="border p-2"><span style={{ fontSize: "29pt" }}>{item.key}</span></td>
-                                <td className="border p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>{item.isInplace ? <>&nbsp;</> : ""}{item.key}</span></td>
-                                <td className="border p-2" dangerouslySetInnerHTML={{ __html: item.description }} />
-                            </tr>
-                        );
-                    })}
+                        {mappings.map((item) => {
+                            return (
+                                <tr>
+                                    <td className="border p-2"><span style={{ fontSize: "29pt" }}>{item.key}</span></td>
+                                    <td className="border p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>{item.isInplace ? <>&nbsp;</> : ""}{item.key}</span></td>
+                                    <td className="border p-2" dangerouslySetInnerHTML={{ __html: item.description }} />
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </section>
 
-            <section id="usage">
+            <section id="usage" className="helpSection">
                 <div className={langClassName} style={{ paddingBottom: "33px", paddingTop: "33px" }}>
                     <HymnTitle content={strings.usage} />
                 </div>
                 <div className="clear" />
             </section>
 
-            <section id="regularNotes">
+            <section id="regularNotes" className="helpSection">
                 <p><u><LocalizedMessage of="regularNotes" /></u></p>
                 <p><LocalizedMessage of="regularDesc1" /></p>
                 <table>
@@ -221,7 +222,7 @@ function UsingHazzatFont() {
                 <p>&nbsp;</p>
             </section>
 
-            <section id="shortNotes">
+            <section id="shortNotes" className="helpSection">
                 <p><u><LocalizedMessage of="shortNotes" /></u></p>
                 <p><LocalizedMessage of="shortDesc1" /></p>
                 <table>
@@ -273,7 +274,7 @@ function UsingHazzatFont() {
                 <HelpTip content={strings.shortTip} />
             </section>
 
-            <section id="highNotes">
+            <section id="highNotes" className="helpSection">
                 <p><u><LocalizedMessage of="highNotes" /></u></p>
                 <p><LocalizedMessage of="highDesc1" /></p>
                 <table>
@@ -322,7 +323,7 @@ function UsingHazzatFont() {
                 <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>ZV</span>&nbsp; &nbsp;(<LocalizedMessage of="oneLongThreeReg" />)</p>
             </section>
 
-            <section id="regularExtend">
+            <section id="regularExtend" className="helpSection">
                 <p><u><LocalizedMessage of="regularExtend" /></u></p>
                 <table>
                     <tbody>
@@ -362,39 +363,264 @@ function UsingHazzatFont() {
                 <HelpTip content={strings.extendTip2} />
             </section>
 
-            <section id="vibratedNotes">
+            <section id="vibratedNotes" className="helpSection">
                 <p><u><LocalizedMessage of="vibratedNotes" /></u></p>
+                <p><LocalizedMessage of="vibratedDesc1" /></p>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>A</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> A</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="secondVibrated" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>S</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> S</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="thirdVibrated" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>D</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> D</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="fourthVibrated" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>F</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> F</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="fifthVibrated" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>G</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> G</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="sixthVibrated" />)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><LocalizedMessage of="vibratedDesc2" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xS</span>&nbsp; &nbsp;(<LocalizedMessage of="twoRegOneVib" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>cDcD</span>&nbsp; &nbsp;(<LocalizedMessage of="threeLongOneLongVib" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xS S</span>&nbsp; &nbsp;(<LocalizedMessage of="twoRegOneLongVib" />)</p>
+                <p>&nbsp; &nbsp;(<LocalizedMessage of="spaceBeforeTheSecondVib" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xS D</span>&nbsp; &nbsp;(<LocalizedMessage of="twoRegOneVibHigher" />)</p>
+                <p>&nbsp; &nbsp;(<LocalizedMessage of="spaceBeforeTheSecondVib" />)</p>
+                <HelpTip content={strings.vibratedTip1} />
+                <p><LocalizedMessage of="vibratedDesc3" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}> AS</span>&nbsp; &nbsp;(<LocalizedMessage of="twoVib" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}> ASD ASD</span>&nbsp; &nbsp;(<LocalizedMessage of="threeLongVib" />)</p>
+                <p>&nbsp; &nbsp;(<LocalizedMessage of="spaceBeforeSecondSet" />)</p>
+                <p><LocalizedMessage of="vibratedDesc4" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xSD</span>&nbsp; &nbsp;(<LocalizedMessage of="twoRegTwoVib" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xSDxSD</span>&nbsp; &nbsp;(<LocalizedMessage of="twoLongTwoLongVib" />)</p>
             </section>
 
             <section id="specialChars">
                 <p><u><LocalizedMessage of="specialChars" /></u></p>
             </section>
 
-            <section id="abrupt">
+            <section id="abrupt" className="helpSection">
                 <p><u><LocalizedMessage of="abrupt" /></u></p>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>a</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>a</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="abruptNote" />)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><LocalizedMessage of="example" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>xav</span>&nbsp; &nbsp;(<LocalizedMessage of="twoAbruptFour" />)</p>
+                <p><span className="CopticFont" style={{ fontSize: "29pt" }}>ebo</span><span className="HazzatFont" style={{ fontSize: "29pt" }}>ca</span><span className="CopticFont" style={{ fontSize: "29pt" }}>l qen</span>&nbsp; &nbsp;(<LocalizedMessage of="threeRegularAbruptHymn" />)</p>
             </section>
 
-            <section id="fastChant">
+            <section id="fastChant" className="helpSection">
                 <p><u><LocalizedMessage of="fastChant" /></u></p>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>j</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> j</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="fastUnderscore" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>J</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}> J</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="fastArrow" />)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><LocalizedMessage of="fastDesc1" /></p>
+                <p><span className="CopticFont" style={{ fontSize: "29pt" }}>ebol q</span><span className="HazzatFont" style={{ fontSize: "29pt" }}>j</span><span className="CopticFont" style={{ fontSize: "29pt" }}>e</span><span className="HazzatFont" style={{ fontSize: "29pt" }}>j</span><span className="CopticFont" style={{ fontSize: "29pt" }}>n</span><span className="HazzatFont" style={{ fontSize: "29pt" }}>J</span>&nbsp; &nbsp;(<LocalizedMessage of="fastExample" />)</p>
             </section>
 
-            <section id="breathMark">
+            <section id="breathMark" className="helpSection">
                 <p><u><LocalizedMessage of="breathMark" /></u></p>
+                <tbody>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>.</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>.</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="pauseMark" />)</span></td>
+                    </tr>
+                </tbody>
+                <p><LocalizedMessage of="example" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>cd.v c</span>&nbsp; &nbsp;(<LocalizedMessage of="pauseExample" />)</p>
             </section>
 
-            <section id="lowerOrHigher">
+            <section id="lowerOrHigher" className="helpSection">
                 <p><u><LocalizedMessage of="lowerOrHigher" /></u></p>
+                <tbody>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>+</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>+</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="higherTone" />)</span></td>
+                    </tr>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>-</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>-</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="lowerTone" />)</span></td>
+                    </tr>
+                </tbody>
+                <p><LocalizedMessage of="example" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>cd.+v c</span>&nbsp; &nbsp;(<LocalizedMessage of="highExample" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>cd.-v c</span>&nbsp; &nbsp;(<LocalizedMessage of="lowExample" />)</p>
             </section>
 
-            <section id="repeatMark">
+            <section id="repeatMark" className="helpSection">
                 <p><u><LocalizedMessage of="repeatMark" /></u></p>
+                <tbody>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>1</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>1</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="repeatOne" />)</span></td>
+                    </tr>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>2</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>2</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="repeatTwo" />)</span></td>
+                    </tr>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>3</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>3</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="repeatThree" />)</span></td>
+                    </tr>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>4</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>4</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="repeatFour" />)</span></td>
+                    </tr>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>5</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>5</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="repeatFive" />)</span></td>
+                    </tr>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>6</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>6</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="repeatSix" />)</span></td>
+                    </tr>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>7</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>7</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="repeatSeven" />)</span></td>
+                    </tr>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>8</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>8</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="repeatEight" />)</span></td>
+                    </tr>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>9</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>9</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="repeatNine" />)</span></td>
+                    </tr>
+                    <tr>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}>0</span></td>
+                        <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                        <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>0</span></td>
+                        <td className="p-2"><span>(<LocalizedMessage of="zeroNote" />)</span></td>
+                    </tr>
+                </tbody>
+                <p><LocalizedMessage of="example" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>(cd.v c )3</span>&nbsp; &nbsp;(<LocalizedMessage of="repeatExample1" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>(cd.v c )7</span>&nbsp; &nbsp;(<LocalizedMessage of="repeatExample2" />)</p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>(cd.v c )10</span>&nbsp; &nbsp;(<LocalizedMessage of="repeatExample3" />)</p>
             </section>
 
-            <section id="markingChars">
+            <section id="markingChars" className="helpSection">
                 <p><u><LocalizedMessage of="markingChars" /></u></p>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>!</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>!</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="markOne" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>@</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>@</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="markTwo" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>#</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>#</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="markThree" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>$</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>$</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="markFour" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>%</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>%</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="markFive" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>^</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>^</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="markSix" />)</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}>&</span></td>
+                            <td className="p-2"><span style={{ fontSize: "29pt" }}><LocalizedMessage of="for" /></span></td>
+                            <td className="p-2 dirLtr"><span className="HazzatFont" style={{ fontSize: "29pt" }}>&</span></td>
+                            <td className="p-2"><span>(<LocalizedMessage of="markSeven" />)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <HelpTip content={strings.markTip1} />
+                <p><LocalizedMessage of="example" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>(cd.v c )#</span>&nbsp; &nbsp;(<LocalizedMessage of="markExample1" />)</p>
+                <p><LocalizedMessage of="markDesc1" /></p>
+                <p><span className="HazzatFont" style={{ fontSize: "29pt" }}>(...)#</span>&nbsp; &nbsp;(<LocalizedMessage of="referenceExample1" />)</p>
             </section>
 
-            <section id="exampleHymn">
+            <section id="exampleHymn" className="helpSection">
                 <div className={langClassName} style={{ paddingBottom: "33px", paddingTop: "33px" }}>
                     <HymnTitle content={strings.exampleHymn} />
                 </div>
@@ -406,11 +632,12 @@ function UsingHazzatFont() {
                 </div>
             </section>
 
-            <section id="helpfulTip">
+            <section id="helpfulTip" className="helpSection">
                 <div className={langClassName} style={{ paddingBottom: "33px", paddingTop: "33px" }}>
                     <HymnTitle content={strings.helpfulTip} />
                 </div>
                 <div className="clear" />
+                <p dangerouslySetInnerHTML={{ __html: strings.helpfulTipDesc1 }}></p>
             </section>
 
             <div style={{ textAlign: "center", paddingTop: "30px", paddingBottom: "30px" }}>
