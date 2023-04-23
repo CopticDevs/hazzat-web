@@ -637,6 +637,7 @@ function UsingHazzatFont() {
                     <HymnTitle content={strings.helpfulTip} />
                 </div>
                 <div className="clear" />
+                <p dangerouslySetInnerHTML={{ __html: strings.helpfulTipDesc1 }}></p>
             </section>
 
             <div style={{ textAlign: "center", paddingTop: "30px", paddingBottom: "30px" }}>

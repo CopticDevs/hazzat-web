@@ -247,7 +247,8 @@ export const strings = new LocalizedStrings({
         "markTip1": "Note that to mark a certain part you hold down the shift key plus the number you want to mark it with. For example you want to mark number four, you hold down the shift key + \"4\".",
         "markExample1": "mark this part as number 3",
         "referenceExample1": "a reference to number 3",
-        "markDesc1": "Then, this is how you reference it later instead of typing it again:"
+        "markDesc1": "Then, this is how you reference it later instead of typing it again:",
+        "helpfulTipDesc1": "Other than <span style=\"color: red\">disabling the Autocorrect and the Grammar and Spelling check</span> on your MS word, here's another helpful tip: When typing the notes for a certain hymn that you have, I understand it's a hassle to switch back and forth between the Coptic or English font and the Hazzat font. So here's the best way to do it:<br /><br />1. Type the words for the whole hymn first.<br /><br />2. Copy a certain letter from the Hazzat font that you know you'll be using a lot. This will place it in your clipboard. Lets say you copy this: <span class=\"HazzatFont\" style=\"font-size: 29pt\">x</span><br /><br />3. Paste the copied Hazzat character wherever you want to place a note.This will make MS Word have the Hazzat font automatically selected.< br /><br />4. If you don't want to use the <span class=\"HazzatFont\" style=\"font-size: 29pt\">x </span> character where you pasted it, then you can hit the \"Backspace\" button and type whatever character you wanted instead. This will work because the Hazzat font will still be selected.<br />"
     },
     ar: {
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
@@ -477,6 +478,7 @@ export const strings = new LocalizedStrings({
         "markTip1": "لاحظ أنه لتحديد جزء معين ، تضغط على مفتاح Shift بالإضافة إلى الرقم الذي تريد وضع علامة عليه. على سبيل المثال ، إذا كنت تريد تحديد الرقم أربعة ، فاضغط على مفتاح Shift + \"4\".",
         "markExample1": "حدد هذا الجزء برقم ٣",
         "referenceExample1": "اشارة الى رقم ٣",
-        "markDesc1": "بعد ذلك ، هذه هي الطريقة التي تشير إليها لاحقًا بدلاً من كتابتها مرة أخرى:"
+        "markDesc1": "بعد ذلك ، هذه هي الطريقة التي تشير إليها لاحقًا بدلاً من كتابتها مرة أخرى:",
+        "helpfulTipDesc1": "بخلاف <span style=\"color: red\">إبطال التصحيح التلقائي والتدقيق النحوي والإملائي</span> على MS Word ، إليك نصيحة أخرى مفيدة: عند كتابة النوتات لترنيمة معينة لديك ، أعلم أنه من الصعب التبديل بين الخط القبطي أو الإنجليزي و خط هزات. إذن هناك طريقة أفضل للقيام بذلك:<br /><br />١. اكتب كلمات اللحن بأكمله أولاً.<br /><br />٢. انسخ حرفًا معينًا من خط الهزات تعلم أنك ستستخدمه كثيرًا. هذا سيضعه في الحافظة الخاصة بك. لنفترض أنك قمت بنسخ : <span class=\"HazzatFont\" style=\"font-size: 29pt\"> x </span><br /><br />٣. الصق حرف الهزات المنسوخ حيثما تريد وضع هزات. هذا سيجعل MS Word لديه خط Hazzat محددًا تلقائيًا.<br /><br />٤. إذا كنت لا ترغب في استخدام <span class=\"HazzatFont\" style=\"font-size: 29pt\"> x </span> حيث لصقته ، يمكنك الضغط على زر \"Backspace\" واكتب أي حرف تريده بدلاً من ذلك.  هذا سيعمل لأن خط Hazzat سيظل محددًا.<br />"
     }
 });
