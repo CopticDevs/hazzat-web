@@ -38,6 +38,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="src\AppSettings.ts" />
     <TypeScriptCompile Include="src\Components\ContactUsPage.tsx" />
+    <TypeScriptCompile Include="src\Components\CircleButton.tsx" />
     <TypeScriptCompile Include="src\Components\HelpTip.tsx" />
     <TypeScriptCompile Include="src\Components\FontInstall7.tsx" />
     <TypeScriptCompile Include="src\Components\FormatOptionLinks.tsx" />
@@ -168,7 +169,6 @@
     <Content Include="src\images\bg.png" />
     <Content Include="src\images\bookletFormat.png" />
     <Content Include="src\images\caps.jpg" />
-    <Content Include="src\images\circle.svg" />
     <Content Include="src\images\contentBg.png" />
     <Content Include="src\images\crossline.gif" />
     <Content Include="src\images\displayFormat.png" />

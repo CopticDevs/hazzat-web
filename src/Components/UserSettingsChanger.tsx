@@ -3,10 +3,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useState } from "react";
 import { Button, Modal } from 'react-bootstrap';
 import { UserSettingsContext } from "../Contexts/UserSettingsContext";
-import { ReactComponent as CircleSvg } from "../images/circle.svg";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
+import CircleButton from "./CircleButton";
 import "./UserSettingsChanger.css";
 
 interface IRadioOption {
@@ -86,10 +86,11 @@ function UserSettingsChanger() {
                             </div>
                             <div className="row">
                                 {options.map((option) => (
-                                    <CircleSvg
+                                    <CircleButton
+                                        key={option.value}
                                         fill={option.value}
-                                        className={`color-option ${selectedContentColor === option.value ? 'selected' : ''}`}
-                                        onClick={() => handleContentColorChange(option.value)}
+                                        active={selectedContentColor === option.value}
+                                        setActive={() => handleContentColorChange(option.value)}
                                     />
                                 ))}
                             </div>
@@ -99,10 +100,11 @@ function UserSettingsChanger() {
                             </div>
                             <div className="row">
                                 {options.map((option) => (
-                                    <CircleSvg
+                                    <CircleButton
+                                        key={option.value}
                                         fill={option.value}
-                                        className={`color-option ${selectedHazzatColor === option.value ? 'selected' : ''}`}
-                                        onClick={() => handleHazzatColorChange(option.value)}
+                                        active={selectedHazzatColor === option.value}
+                                        setActive={() => handleHazzatColorChange(option.value)}
                                     />
                                 ))}
                             </div>
