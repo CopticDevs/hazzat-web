@@ -4,8 +4,10 @@ import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvi
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
+import { StringMap } from "../Types/StringMap";
 import { getFormatNumberFromId, getHymnNumberFromId } from "../Utils/ParserUtils";
 import CrossDivider from "./CrossDivider";
+import FormatOptionsContextMenu from "./FormatOptionsContextMenu";
 import HymnRow from "./HymnRow";
 import "./HymnRow.css";
 import HymnTitle from "./HymnTitle";
@@ -28,6 +30,7 @@ function ServiceContents(props: IProps) {
     const [hasAudio, setHasAudio] = useState<boolean>(false);
     const [hasVideo, setHasVideo] = useState<boolean>(false);
     const [hasInformation, setHasInformation] = useState<boolean>(false);
+    const [serviceFormatsMap, setServiceFormatsMap] = useState<StringMap<string | undefined>>({});
     const [serviceFormatLink, setServiceFormatLink] = useState<string | undefined>(undefined);
     const isMounted = useRef(true);
 
@@ -58,6 +61,18 @@ function ServiceContents(props: IProps) {
     };
 
     useEffect(() => {
+        const resultMap: StringMap<string | undefined> = {};
+
+        resultMap["1"] = hasText ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/1` : undefined;
+        resultMap["2"] = hasHazzat ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/2` : undefined;
+        resultMap["3"] = hasVerticalHazzat ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/3` : undefined;
+        resultMap["4"] = hasMusicalNotes ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/4` : undefined;
+        resultMap["5"] = hasAudio ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/5` : undefined;
+        resultMap["6"] = hasVideo ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/6` : undefined;
+        resultMap["7"] = hasInformation ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/7` : undefined;
+        
+        setServiceFormatsMap(resultMap);
+
         const initialFormatIdStr =
             hasText ? "1" :
                 hasHazzat ? "2" :
@@ -99,7 +114,11 @@ function ServiceContents(props: IProps) {
                     <div style={{ padding: "7px 3px 7px 3px", marginTop: "30px" }}>
                         <div className="contentLinksDiv">
                             {
-                                !!serviceFormatLink ? <MyNavLink to={serviceFormatLink}><HymnTitle content={props.serviceName} /></MyNavLink> : <HymnTitle content={props.serviceName} />
+                                !!serviceFormatLink ?
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'auto auto' }}>
+                                        <MyNavLink to={serviceFormatLink}><HymnTitle content={props.serviceName} /></MyNavLink>
+                                        <FormatOptionsContextMenu title={props.serviceName} formatsMap={serviceFormatsMap} />
+                                    </div> : <HymnTitle content={props.serviceName} />
                             }
                             
                         </div>
