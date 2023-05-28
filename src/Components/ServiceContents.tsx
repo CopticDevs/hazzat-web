@@ -4,14 +4,13 @@ import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvi
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
-import { StringMap } from "../Types/StringMap";
 import { getFormatNumberFromId, getHymnNumberFromId } from "../Utils/ParserUtils";
 import CrossDivider from "./CrossDivider";
-import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
 import HymnRow from "./HymnRow";
 import "./HymnRow.css";
 import HymnTitle from "./HymnTitle";
 import LoadingSpinner from "./LoadingSpinner";
+import MyNavLink from "./MyNavLink";
 
 interface IProps {
     seasonId: string;
@@ -29,8 +28,7 @@ function ServiceContents(props: IProps) {
     const [hasAudio, setHasAudio] = useState<boolean>(false);
     const [hasVideo, setHasVideo] = useState<boolean>(false);
     const [hasInformation, setHasInformation] = useState<boolean>(false);
-    const [serviceFormatsMap, setServiceFormatsMap] = useState<StringMap<string | undefined>>({});
-    const langClassName = languageProperties.isRtl ? "fLeft" : "fRight";
+    const [serviceFormatLink, setServiceFormatLink] = useState<string | undefined>(undefined);
     const isMounted = useRef(true);
 
     const handleFoundFormat = (formatId: string) => {
@@ -60,18 +58,19 @@ function ServiceContents(props: IProps) {
     };
 
     useEffect(() => {
-        const resultMap: StringMap<string | undefined> = {};
+        const initialFormatIdStr =
+            hasText ? "1" :
+                hasHazzat ? "2" :
+                    hasVerticalHazzat ? "3" :
+                        hasMusicalNotes ? "4" :
+                            hasAudio ? "5" :
+                                hasVideo ? "6" :
+                                    hasInformation ? "7" : undefined;
 
-        resultMap["1"] = hasText ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/1` : undefined;
-        resultMap["2"] = hasHazzat ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/2` : undefined;
-        resultMap["3"] = hasVerticalHazzat ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/3` : undefined;
-        resultMap["4"] = hasMusicalNotes ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/4` : undefined;
-        resultMap["5"] = hasAudio ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/5` : undefined;
-        resultMap["6"] = hasVideo ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/6` : undefined;
-        resultMap["7"] = hasInformation ? `/seasons/${props.seasonId}/services/${props.serviceId}/formats/7` : undefined;
-
-        setServiceFormatsMap(resultMap);
-    }, [props.seasonId, props.serviceId, hasText, hasHazzat, hasVerticalHazzat, hasMusicalNotes, hasAudio, hasVideo, hasInformation, setServiceFormatsMap]);
+        if (initialFormatIdStr) {
+            setServiceFormatLink(`/seasons/${props.seasonId}/services/${props.serviceId}/formats/${initialFormatIdStr}`);
+        }
+    }, [props.seasonId, props.serviceId, hasText, hasHazzat, hasVerticalHazzat, hasMusicalNotes, hasAudio, hasVideo, hasInformation]);
 
     const fetchFromBackend = React.useCallback(async () => {
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
@@ -98,16 +97,12 @@ function ServiceContents(props: IProps) {
             {
                 !isMounted.current ? <LoadingSpinner /> :
                     <div style={{ padding: "7px 3px 7px 3px", marginTop: "30px" }}>
-
-                        <div className={langClassName}>
-                            <FormatOptionLinks
-                                title={props.serviceName}
-                                display={DisplayType.Full}
-                                formatsMap={serviceFormatsMap}
-                            />
+                        <div className="contentLinksDiv">
+                            {
+                                !!serviceFormatLink ? <MyNavLink to={serviceFormatLink}><HymnTitle content={props.serviceName} /></MyNavLink> : <HymnTitle content={props.serviceName} />
+                            }
+                            
                         </div>
-                        <div className="clearfix" />
-                        <div className="contentLinksDiv"><HymnTitle content={props.serviceName} /></div>
                         
                         {hymns.map((hymn) => {
                             alternateHymn = !alternateHymn;

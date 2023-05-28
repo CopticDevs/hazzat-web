@@ -129,7 +129,7 @@ function FormatLink(props: IProps) {
     }, [setImages]);
 
     if (!props.fullFormatId) {
-        return props.display === DisplayType.Minimum ? <img src={space} alt="" className="formatImage" /> : <></>;
+        return <></>;
     }
 
     if (props.isActive) {

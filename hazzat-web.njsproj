@@ -43,6 +43,7 @@
     <TypeScriptCompile Include="src\Components\FontInstall7.tsx" />
     <TypeScriptCompile Include="src\Components\FormatOptionLinks.tsx" />
     <TypeScriptCompile Include="src\Components\HymnContentFromService.tsx" />
+    <TypeScriptCompile Include="src\Components\ExpandableDiv.tsx" />
     <TypeScriptCompile Include="src\Components\UserSettingsChanger.tsx" />
     <TypeScriptCompile Include="src\Components\UsingVerticalHazzatFont.tsx" />
     <TypeScriptCompile Include="src\Components\UsingHazzatFont.tsx" />
