@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { StringMap } from "../Types/StringMap";
+import ExpandableDiv from "./ExpandableDiv";
 import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
 import "./HymnRow.css";
+import MyNavLink from "./MyNavLink";
 
 interface IProps {
     hymnName: string;
@@ -14,6 +16,7 @@ interface IProps {
 
 function HymnRow(props: IProps) {
     const [formatsMap, setFormatsMap] = useState<StringMap<string | undefined>>({});
+    const [hymnFormatLink, setHymnFormatLink] = useState<string | undefined>(undefined);
 
     const isMounted = useRef(true);
 
@@ -32,8 +35,18 @@ function HymnRow(props: IProps) {
             }
         });
 
+        const initialFormatLink = resultFormatsMap["1"]
+            || resultFormatsMap["2"]
+            || resultFormatsMap["3"]
+            || resultFormatsMap["4"]
+            || resultFormatsMap["5"]
+            || resultFormatsMap["6"]
+            || resultFormatsMap["7"]
+            || undefined;
+
         if (isMounted.current) {
             setFormatsMap(resultFormatsMap);
+            setHymnFormatLink(initialFormatLink);
         }
     }, [props, isMounted]);
 
@@ -52,8 +65,14 @@ function HymnRow(props: IProps) {
 
     return (
         <div className={props.isAlternate ? `alternate contentLinksDiv` : "contentLinksDiv"} style={{ padding: "6px" }}>
-            <FormatOptionLinks title={props.hymnName} display={DisplayType.Minimum} formatsMap={formatsMap} />
-            <div>{props.hymnName}</div>
+            <ExpandableDiv>
+                <FormatOptionLinks title={props.hymnName} display={DisplayType.Minimum} formatsMap={formatsMap} />
+            </ExpandableDiv>
+            <div style={{ paddingLeft: "20px" }}>
+                {
+                    !!hymnFormatLink ? <MyNavLink to={hymnFormatLink}>{props.hymnName}</MyNavLink> : props.hymnName
+                }
+            </div>
         </div >
     );
 }
