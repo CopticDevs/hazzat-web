@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { StringMap } from "../Types/StringMap";
-import ExpandableDiv from "./ExpandableDiv";
-import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
+import FormatOptionsContextMenu from "./FormatOptionsContextMenu";
 import "./HymnRow.css";
 import MyNavLink from "./MyNavLink";
 
@@ -65,15 +64,13 @@ function HymnRow(props: IProps) {
 
     return (
         <div className={props.isAlternate ? `alternate contentLinksDiv` : "contentLinksDiv"} style={{ padding: "6px" }}>
-            <ExpandableDiv>
-                <FormatOptionLinks title={props.hymnName} display={DisplayType.Minimum} formatsMap={formatsMap} />
-            </ExpandableDiv>
-            <div style={{ paddingLeft: "20px" }}>
+            <FormatOptionsContextMenu title={props.hymnName} formatsMap={formatsMap} />
+            <div>
                 {
                     !!hymnFormatLink ? <MyNavLink to={hymnFormatLink}>{props.hymnName}</MyNavLink> : props.hymnName
                 }
             </div>
-        </div >
+        </div>
     );
 }
 
