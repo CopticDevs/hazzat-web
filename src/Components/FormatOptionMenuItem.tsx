@@ -1,6 +1,4 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Dropdown } from 'react-bootstrap';
-import { useLocation, useNavigate } from "react-router-dom";
 import audioOn from "../images/audio_mouseon.gif";
 import audioOut from "../images/audio_mouseout.gif";
 import hazzatOn from "../images/hazzat_mouseon.gif";
@@ -17,11 +15,13 @@ import videoOn from "../images/video_mouseon.gif";
 import videoOut from "../images/video_mouseout.gif";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
+import "./FormatOptionMenuItem.css";
 
 interface IProps {
     formatId: string;
     title: string;
     fullFormatId: string;
+    isActive?: boolean;
 }
 
 interface IFormatImage {
@@ -37,9 +37,6 @@ function FormatOptionMenuItem(props: IProps) {
     const [formatImages, setFormatImages] = useState<IFormatImage | undefined>();
     const langClassName = languageProperties.isRtl ? "paddingLeft" : "paddingRight";
     const alignDirection = languageProperties.isRtl ? "right" : "left";
-    const location = useLocation();
-    const searchParams = new URLSearchParams(location.search);
-    const navigate = useNavigate();
 
     const getFormatName = (formatId: string): string => {
         switch (formatId) {
@@ -128,24 +125,31 @@ function FormatOptionMenuItem(props: IProps) {
         setImages();
     }, [setImages]);
 
-    const handleOptionClick = (url: string) => {
-        // Navigate to the specified URL
-        const navTo = `${url}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-        navigate(navTo);
-    };
-
-    return (
-        <Dropdown.Item onClick={() => handleOptionClick(props.fullFormatId)}>
+    if (props.isActive) {
+        return (
             <div style={{ textAlign: alignDirection }}>
                 <img
-                    src={hovering ? formatImages?.mouseOn : formatImages?.mouseOut}
+                    src={formatImages?.mouseOn}
                     alt={formatImages?.altString}
                     className={formatImages?.cssClass}
-                    onMouseEnter={() => setHovering(true)}
-                    onMouseLeave={() => setHovering(false)}
-                /><span className={langClassName}>{getFormatName(props.formatId)}</span>
+                /><span className={langClassName}><strong>{getFormatName(props.formatId)}</strong></span>
             </div>
-        </Dropdown.Item>
+        );
+    }
+
+    return (
+        <div style={{ textAlign: alignDirection }}>
+            <img
+                src={hovering ? formatImages?.mouseOn : formatImages?.mouseOut}
+                alt={formatImages?.altString}
+                className={formatImages?.cssClass}
+                onMouseEnter={() => setHovering(true)}
+                onMouseLeave={() => setHovering(false)}
+            /><span
+                onMouseEnter={() => setHovering(true)}
+                onMouseLeave={() => setHovering(false)}
+                className={langClassName}>{getFormatName(props.formatId)}</span>
+        </div>
     );
 }
 

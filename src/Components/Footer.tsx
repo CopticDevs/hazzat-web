@@ -1,3 +1,5 @@
+import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useState } from "react";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
@@ -33,7 +35,14 @@ function Footer(props: IProps) {
             </ul>
 
             <div className="mobile-footer">
-                <div className="menu-toggle-footer" onClick={toggleMenu}><LocalizedMessage of="menu" /></div>
+                <div className="menu-toggle-footer" onClick={toggleMenu}>
+                    <FontAwesomeIcon
+                        icon={faBars}
+                        fontSize="16"
+                        style={{ paddingRight: "7px", paddingLeft: "7px" }}
+                    />
+                    <LocalizedMessage of="menu" />
+                </div>
                 {showMenu ? <ul onClick={toggleMenu}>
                     {
                         props.navItems.map((item) => {

@@ -12,8 +12,9 @@ import { StringMap } from "../Types/StringMap";
 import { getFormatNumberFromId } from "../Utils/ParserUtils";
 import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
-import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
+import FormatBar from "./FormatBar";
 import LoadingSpinner from "./LoadingSpinner";
+import ToTopButton from "./ToTopButton";
 import UserSettingsChanger from "./UserSettingsChanger";
 
 interface IProps {
@@ -32,7 +33,6 @@ function HymnContentFromSeasonService(props: IProps) {
     const [formatsMap, setFormatsMap] = useState<StringMap<string | undefined>>({});
     const [formatInfo, setFormatInfo] = useState<IFormatInfo | undefined>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const langClassName = languageProperties.isRtl ? "fLeft" : "fRight";
 
     const isMounted = useRef(true);
 
@@ -93,17 +93,15 @@ function HymnContentFromSeasonService(props: IProps) {
                             { title: props.seasonInfo.name, path: `/Seasons/${seasonIdParam}` },
                             { title: `${serviceInfo.name}: ${hymnInfo.name}` }]} />
 
-                        <div className={langClassName}>
-                            <FormatOptionLinks
-                                title={serviceInfo.name}
-                                display={DisplayType.Full}
-                                formatsMap={formatsMap}
-                                activeFormatId={formatIdParam}
+                        <FormatBar
+                            title={hymnInfo.name}
+                            formatsMap={formatsMap}
+                            activeFormatId={formatIdParam}
                             />
-                        </div>
 
                         <Content formatId={formatIdParam} variationsCallback={fetchVariationsCallback} />
                         <UserSettingsChanger />
+                        <ToTopButton />
                     </div>
             }
         </>

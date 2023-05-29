@@ -70,7 +70,7 @@ function UserSettingsChanger() {
                 <Button
                     onClick={handleToggleModal}
                     className={langClassName}
-                    style={{ zIndex: 100, top: '20%' }}
+                    style={{ zIndex: 100, top: '20%', width: "45px" }}
                 >
                     <FontAwesomeIcon icon={faCog} className="text-dark" />
                 </Button>}
