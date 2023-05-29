@@ -2,6 +2,7 @@ import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef, useState } from "react";
 import { Dropdown } from 'react-bootstrap';
+import { useLocation, useNavigate } from "react-router-dom";
 import { StringMap } from "../Types/StringMap";
 import FormatOptionMenuItem from "./FormatOptionMenuItem";
 import "./FormatOptionsContextMenu.css";
@@ -20,7 +21,10 @@ function FormatOptionsContextMenu(props: IProps) {
     const [showMenu, setShowMenu] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [formatList, setFormatsList] = useState<IFormatItem[]>([]);
+    const location = useLocation();
     const menuRef = useRef<HTMLDivElement>(null);
+    const searchParams = new URLSearchParams(location.search);
+    const navigate = useNavigate();
 
     const handleMouseEnter = () => {
         setIsHovered(true);
@@ -66,9 +70,15 @@ function FormatOptionsContextMenu(props: IProps) {
         setShowMenu(!showMenu);
         const menu = document.getElementById('context-menu');
         if (menu) {
-            menu.style.top = `${event.pageY}px`;
-            menu.style.left = `${event.pageX}px`;
+            menu.style.top = `${event.clientY}px`;
+            menu.style.left = `${event.clientX}px`;
         }
+    };
+
+    const handleOptionClick = (url: string) => {
+        // Navigate to the specified URL
+        const navTo = `${url}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+        navigate(navTo);
     };
 
     return (
@@ -85,10 +95,12 @@ function FormatOptionsContextMenu(props: IProps) {
                 <Dropdown id="context-menu" show={true}>
                     <Dropdown.Menu>
                         {formatList.map((option) => (
-                            <FormatOptionMenuItem key={option.id}
-                                formatId={option.id}
-                                title={props.title}
-                                fullFormatId={option.navLink} />
+                            <Dropdown.Item key={option.id} onClick={() => handleOptionClick(option.navLink)}>
+                                <FormatOptionMenuItem key={option.id}
+                                    formatId={option.id}
+                                    title={props.title}
+                                    fullFormatId={option.navLink} />
+                            </Dropdown.Item>
                         ))}
                     </Dropdown.Menu>
                 </Dropdown>

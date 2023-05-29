@@ -12,8 +12,9 @@ import { StringMap } from "../Types/StringMap";
 import { getTypeSeasonHymnFormatNumberFromId } from "../Utils/ParserUtils";
 import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
-import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
+import FormatBar from "./FormatBar";
 import LoadingSpinner from "./LoadingSpinner";
+import ToTopButton from "./ToTopButton";
 import UserSettingsChanger from "./UserSettingsChanger";
 
 interface IProps {
@@ -32,7 +33,6 @@ function HymnContentFromType(props: IProps) {
     const [formatsMap, setFormatsMap] = useState<StringMap<string | undefined>>({});
     const [formatInfo, setFormatInfo] = useState<IFormatInfo | undefined>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const langClassName = languageProperties.isRtl ? "fLeft" : "fRight";
 
     const isMounted = useRef(true);
 
@@ -94,17 +94,15 @@ function HymnContentFromType(props: IProps) {
                             { title: props.typeInfo.name, path: `/Types/${typeIdParam}` },
                             { title: `${hymnInfo.serviceName}: ${hymnInfo.name}` }]} />
 
-                        <div className={langClassName}>
-                            <FormatOptionLinks
-                                title={props.typeInfo.name}
-                                display={DisplayType.Full}
-                                formatsMap={formatsMap}
-                                activeFormatId={formatIdParam}
-                            />
-                        </div>
+                        <FormatBar
+                            title={props.typeInfo.name}
+                            formatsMap={formatsMap}
+                            activeFormatId={formatIdParam}
+                        />
 
                         <Content formatId={formatIdParam} variationsCallback={fetchVariationsCallback} />
                         <UserSettingsChanger />
+                        <ToTopButton />
                     </div>
             }
         </>

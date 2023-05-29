@@ -12,8 +12,9 @@ import { StringMap } from "../Types/StringMap";
 import { getFormatNumberFromId, getHymnNumberFromId } from "../Utils/ParserUtils";
 import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
-import FormatOptionLinks, { DisplayType } from "./FormatOptionLinks";
+import FormatBar from "./FormatBar";
 import LoadingSpinner from "./LoadingSpinner";
+import ToTopButton from "./ToTopButton";
 import UserSettingsChanger from "./UserSettingsChanger";
 
 interface IProps {
@@ -37,7 +38,6 @@ function HymnContentFromService(props: IProps) {
     const [hasInformation, setHasInformation] = useState<boolean>(false);
     const [serviceFormatsMap, setServiceFormatsMap] = useState<StringMap<string | undefined>>({});
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const langClassName = languageProperties.isRtl ? "fLeft" : "fRight";
 
     const isMounted = useRef(true);
 
@@ -150,14 +150,11 @@ function HymnContentFromService(props: IProps) {
                             { title: props.seasonInfo.name, path: `/Seasons/${seasonIdParam}` },
                             { title: `${serviceInfo.name}` }]} />
 
-                        <div className={langClassName}>
-                            <FormatOptionLinks
-                                title={serviceInfo.name}
-                                display={DisplayType.Full}
-                                formatsMap={serviceFormatsMap}
-                                activeFormatId={formatIdParam}
-                            />
-                        </div>
+                        <FormatBar
+                            title={serviceInfo.name}
+                            formatsMap={serviceFormatsMap}
+                            activeFormatId={formatIdParam}
+                        />
 
                         {hymnList.map((hymn) => {
                             const hymnId = getHymnNumberFromId(hymn.id);
@@ -178,6 +175,7 @@ function HymnContentFromService(props: IProps) {
                                 formatCallbackInfo={{ formatListCallback, handleFoundFormat }} />
                         })}
                         <UserSettingsChanger />
+                        <ToTopButton />
                     </div>
             }
         </>

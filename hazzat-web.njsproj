@@ -37,14 +37,16 @@
   </PropertyGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\AppSettings.ts" />
+    <TypeScriptCompile Include="src\Components\FormatBar.tsx" />
     <TypeScriptCompile Include="src\Components\ContactUsPage.tsx" />
     <TypeScriptCompile Include="src\Components\CircleButton.tsx" />
     <TypeScriptCompile Include="src\Components\FormatOptionMenuItem.tsx" />
+    <TypeScriptCompile Include="src\Components\BottomFormatBar.tsx" />
     <TypeScriptCompile Include="src\Components\HelpTip.tsx" />
     <TypeScriptCompile Include="src\Components\FontInstall7.tsx" />
-    <TypeScriptCompile Include="src\Components\FormatOptionLinks.tsx" />
     <TypeScriptCompile Include="src\Components\HymnContentFromService.tsx" />
     <TypeScriptCompile Include="src\Components\FormatOptionsContextMenu.tsx" />
+    <TypeScriptCompile Include="src\Components\ToTopButton.tsx" />
     <TypeScriptCompile Include="src\Components\UserSettingsChanger.tsx" />
     <TypeScriptCompile Include="src\Components\UsingVerticalHazzatFont.tsx" />
     <TypeScriptCompile Include="src\Components\UsingHazzatFont.tsx" />
@@ -84,7 +86,6 @@
     <TypeScriptCompile Include="src\Components\ContentHazzat.tsx" />
     <TypeScriptCompile Include="src\Components\BreadCrumb.tsx" />
     <TypeScriptCompile Include="src\Components\HymnContentFromSeasonService.tsx" />
-    <TypeScriptCompile Include="src\Components\FormatLink.tsx" />
     <TypeScriptCompile Include="src\Components\ServiceContents.tsx" />
     <TypeScriptCompile Include="src\Components\HymnRow.tsx" />
     <TypeScriptCompile Include="src\Components\HymnTitle.tsx" />
@@ -128,13 +129,15 @@
     <Content Include="public\manifest.json" />
     <Content Include="public\robots.txt" />
     <Content Include="src\App.css" />
+    <Content Include="src\Components\FormatBar.css" />
+    <Content Include="src\Components\BottomFormatBar.css" />
     <Content Include="src\Components\ContactUsPage.css" />
+    <Content Include="src\Components\FormatOptionMenuItem.css" />
     <Content Include="src\Components\FormatOptionsContextMenu.css" />
     <Content Include="src\Components\UsingHazzatFont.css" />
     <Content Include="src\Components\UserSettingsChanger.css" />
     <Content Include="src\Components\Content.css" />
     <Content Include="src\Components\BookletsMenu.css" />
-    <Content Include="src\Components\FormatLink.css" />
     <Content Include="src\Components\HelpPage.css" />
     <Content Include="src\Components\LoadingSpinner.css" />
     <Content Include="src\Components\HymnRow.css" />
