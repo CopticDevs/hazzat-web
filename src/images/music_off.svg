@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="20"
+   height="25"
+   viewBox="0 0 5.2916669 6.6145836"
+   version="1.1">
+  <defs
+     id="defs2" />
+  <g id="layer1">
+    <g
+       id="g1095"
+       transform="matrix(1.1802891,0,0,1.1936117,-114.20096,-131.02096)">
+      <rect
+         style="fill:none;stroke:#343434;stroke-width:0.25;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect18071"
+         width="4.2333331"
+         height="5.2916665"
+         x="96.883331"
+         y="109.89204" />
+      <g
+         id="g53343">
+        <path
+           id="path18111"
+           style="fill:#343434;fill-opacity:1;stroke:#343434;stroke-width:0.25;stroke-linecap:square;stroke-opacity:1"
+           d="m 98.317878,113.84786 a 0.19605745,0.32676244 59.828506 0 1 -0.183962,0.33372 0.19605745,0.32676244 59.828506 0 1 -0.381026,-0.005 0.19605745,0.32676244 59.828506 0 1 0.183956,-0.33373 0.19605745,0.32676244 59.828506 0 1 0.381032,0.005 z" />
+        <path
+           style="fill:none;stroke:#343434;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           d="m 98.317878,113.84786 v -1.67274 l 1.101924,-0.6362 v 1.75804"
+           id="path18248" />
+        <path
+           id="ellipse18339"
+           style="fill:#343434;fill-opacity:1;stroke:#343434;stroke-width:0.25;stroke-linecap:square;stroke-opacity:1"
+           d="m 99.433797,113.25796 a 0.19605745,0.32676244 59.828506 0 1 -0.183957,0.33373 0.19605745,0.32676244 59.828506 0 1 -0.381032,-0.005 0.19605745,0.32676244 59.828506 0 1 0.183956,-0.33373 0.19605745,0.32676244 59.828506 0 1 0.381033,0.005 z" />
+      </g>
+    </g>
+  </g>
+</svg>

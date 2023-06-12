@@ -69,7 +69,7 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 .hymnRep { background:url(images/hymnRep.png) no-repeat left 28px; background-size:100% 100%; padding:0 58px 60px 23px;  }
 
 .hymnData { padding:0px 0px 22px; }
-.hymnData h2 { font-family: "Trajan Pro"; font-size:22px; font-weight:700;  background:url(images/headingBottom.png) no-repeat left bottom; padding-bottom:10px; }
+.hymnData h2 { font-family: "Trajan Pro"; font-size:22px; font-weight:700; }
 .hymnData p { padding-top:5px; padding-left:10px; }
 
 .TitleH2 { text-align: center; }

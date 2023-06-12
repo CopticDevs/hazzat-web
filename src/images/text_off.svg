@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="20"
+   height="25"
+   viewBox="0 0 5.2916669 6.6145836"
+   version="1.1">
+  <g id="layer1">
+    <g
+       id="g1169"
+       transform="matrix(1.1802891,0,0,1.1936117,-114.20096,-139.23201)">
+      <rect
+         style="fill:none;stroke:#343434;stroke-width:0.25;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect18582"
+         width="4.2333331"
+         height="5.2916665"
+         x="96.883331"
+         y="116.77119" />
+      <g
+         id="g41942">
+        <path
+           style="fill:none;stroke:#343434;stroke-width:0.165;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 97.637927,118.00397 h 1.510112"
+           id="path18621" />
+        <path
+           style="fill:none;stroke:#343434;stroke-width:0.165;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 97.637927,118.51807 h 1.510112"
+           id="path21079" />
+        <path
+           style="fill:none;stroke:#343434;stroke-width:0.165;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 97.637927,119.03217 h 2.587563"
+           id="path21081" />
+        <path
+           style="fill:none;stroke:#343434;stroke-width:0.165;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 97.637927,119.54627 h 1.510112"
+           id="path21083" />
+        <path
+           style="fill:none;stroke:#343434;stroke-width:0.165;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 98.114965,120.06037 h 2.110525"
+           id="path21085" />
+        <path
+           style="fill:none;stroke:#343434;stroke-width:0.165;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 97.637927,120.57447 h 2.587563"
+           id="path21087" />
+        <path
+           style="fill:none;stroke:#343434;stroke-width:0.165;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 97.637927,121.08857 h 1.510112"
+           id="path21089" />
+      </g>
+    </g>
+  </g>
+</svg>
