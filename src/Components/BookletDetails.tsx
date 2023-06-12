@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import BookletFormatImg from "../images/bookletFormat.png";
-import DisplayFormatImg from "../images/displayFormat.png";
+import { ReactComponent as BookletFormatImg } from "../images/bookletFormat.svg";
+import { ReactComponent as DisplayFormatImg } from "../images/displayFormat.svg";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
@@ -70,14 +70,14 @@ function BookletDetails() {
                                 <div className="row">
                                     <div className="col-sm-6 bookletLinkDiv">
                                         <a href={bookletInfo.printPath} target="_blank" rel="noreferrer">
-                                            <img src={BookletFormatImg} alt={`${strings.forPrinting}`} /><br />
+                                            <BookletFormatImg title={strings.forPrinting} /><br />
                                             <strong><LocalizedMessage of="forPrinting" /></strong><br />
                                         </a>
                                         <LocalizedMessage of="forPrintingDesc" />
                                     </div>
                                     <div className="col-sm-6 bookletLinkDiv">
                                         <a href={bookletInfo.displayPath} target="_blank" rel="noreferrer">
-                                            <img src={DisplayFormatImg} alt={`${strings.forDevices}`} /><br />
+                                            <DisplayFormatImg title={strings.forDevices} /><br />
                                             <strong><LocalizedMessage of="forDevices" /></strong><br />
                                         </a>
                                         <LocalizedMessage of="forDevicesDesc" />

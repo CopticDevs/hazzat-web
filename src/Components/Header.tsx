@@ -1,7 +1,7 @@
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useState } from "react";
-import logo from "../images/logo.png";
+import { ReactComponent as Logo } from "../images/logo.svg";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { INavMenuItem } from "../Types/INavMenuItem";
@@ -28,7 +28,7 @@ function Header(props: IProps) {
 
                 <div className="logo clearfix">
                     <MyNavLink to="/" aria-label="logo">
-                        <img src={logo} alt="logo" />
+                        <Logo title="logo" />
                     </MyNavLink>
                 </div>
 

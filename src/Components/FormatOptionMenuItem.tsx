@@ -1,18 +1,18 @@
 import React, { useContext, useEffect, useState } from "react";
-import audioOn from "../images/audio_mouseon.gif";
-import audioOut from "../images/audio_mouseout.gif";
-import hazzatOn from "../images/hazzat_mouseon.gif";
-import hazzatOut from "../images/hazzat_mouseout.gif";
-import informationOn from "../images/information_mouseon.gif";
-import informationOut from "../images/information_mouseout.gif";
-import musicOn from "../images/music_mouseon.gif";
-import musicOut from "../images/music_mouseout.gif";
-import textOn from "../images/text_mouseon.gif";
-import textOut from "../images/text_mouseout.gif";
-import verticalHazzatOn from "../images/verticalhazzat_mouseon.gif";
-import verticalHazzatOut from "../images/verticalhazzat_mouseout.gif";
-import videoOn from "../images/video_mouseon.gif";
-import videoOut from "../images/video_mouseout.gif";
+import { ReactComponent as AudioOff } from "../images/audio_off.svg";
+import { ReactComponent as AudioOn } from "../images/audio_on.svg";
+import { ReactComponent as HazzatOff } from "../images/hazzat_off.svg";
+import { ReactComponent as HazzatOn } from "../images/hazzat_on.svg";
+import { ReactComponent as InfoOff } from "../images/info_off.svg";
+import { ReactComponent as InfoOn } from "../images/info_on.svg";
+import { ReactComponent as MusicOff } from "../images/music_off.svg";
+import { ReactComponent as MusicOn } from "../images/music_on.svg";
+import { ReactComponent as TextOff } from "../images/text_off.svg";
+import { ReactComponent as TextOn } from "../images/text_on.svg";
+import { ReactComponent as VHazzatOff } from "../images/vhazzat_off.svg";
+import { ReactComponent as VHazzatOn } from "../images/vhazzat_on.svg";
+import { ReactComponent as VideoOff } from "../images/video_off.svg";
+import { ReactComponent as VideoOn } from "../images/video_on.svg";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import "./FormatOptionMenuItem.css";
@@ -25,10 +25,8 @@ interface IProps {
 }
 
 interface IFormatImage {
-    mouseOn: string;
-    mouseOut: string;
-    altString: string;
-    cssClass: string;
+    mouseOnSvg?: React.SVGProps<SVGSVGElement>;
+    mouseOffSvg?: React.SVGProps<SVGSVGElement>;
 }
 
 function FormatOptionMenuItem(props: IProps) {
@@ -63,53 +61,39 @@ function FormatOptionMenuItem(props: IProps) {
         switch (formatId) {
             case "1":
                 return {
-                    mouseOn: textOn,
-                    mouseOut: textOut,
-                    altString: `${title} ${strings.textFormatName}`,
-                    cssClass: lang === "ar" ? "flipRtl formatImage" : "formatImage"
+                    mouseOnSvg: <TextOn title={`${title} ${strings.textFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />,
+                    mouseOffSvg: <TextOff title={`${title} ${strings.textFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />
 
                 };
             case "2":
                 return {
-                    mouseOn: hazzatOn,
-                    mouseOut: hazzatOut,
-                    altString: `${title} ${strings.hazzatFormatName}`,
-                    cssClass: lang === "ar" ? "flipRtl formatImage" : "formatImage"
+                    mouseOnSvg: <HazzatOn title={`${title} ${strings.hazzatFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />,
+                    mouseOffSvg: <HazzatOff title={`${title} ${strings.hazzatFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />
                 };
             case "3":
                 return {
-                    mouseOn: verticalHazzatOn,
-                    mouseOut: verticalHazzatOut,
-                    altString: `${title} ${strings.verticalHazzatFormatName}`,
-                    cssClass: lang === "ar" ? "flipRtl formatImage" : "formatImage"
+                    mouseOnSvg: <VHazzatOn title={`${title} ${strings.verticalHazzatFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />,
+                    mouseOffSvg: <VHazzatOff title={`${title} ${strings.verticalHazzatFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />
                 };
             case "4":
                 return {
-                    mouseOn: musicOn,
-                    mouseOut: musicOut,
-                    altString: `${title} ${strings.musicFormatName}`,
-                    cssClass: lang === "ar" ? "flipRtl formatImage" : "formatImage"
+                    mouseOnSvg: <MusicOn title={`${title} ${strings.musicFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />,
+                    mouseOffSvg: <MusicOff title={`${title} ${strings.musicFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />
                 };
             case "5":
                 return {
-                    mouseOn: audioOn,
-                    mouseOut: audioOut,
-                    altString: `${title} ${strings.audioFormatName}`,
-                    cssClass: lang === "ar" ? "flipRtl formatImage" : "formatImage"
+                    mouseOnSvg: <AudioOn title={`${title} ${strings.audioFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />,
+                    mouseOffSvg: <AudioOff title={`${title} ${strings.audioFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />
                 };
             case "6":
                 return {
-                    mouseOn: videoOn,
-                    mouseOut: videoOut,
-                    altString: `${title} ${strings.videoFormatName}`,
-                    cssClass: lang === "ar" ? "flipRtl formatImage" : "formatImage"
+                    mouseOnSvg: <VideoOn title={`${title} ${strings.verticalHazzatFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />,
+                    mouseOffSvg: <VideoOff title={`${title} ${strings.verticalHazzatFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />
                 };
             case "7":
                 return {
-                    mouseOn: informationOn,
-                    mouseOut: informationOut,
-                    altString: `${title} ${strings.informationFormatName}`,
-                    cssClass: lang === "ar" ? "flipRtl formatImage" : "formatImage"
+                    mouseOnSvg: <InfoOn title={`${title} ${strings.informationFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />,
+                    mouseOffSvg: <InfoOff title={`${title} ${strings.informationFormatName}`} className={lang === "ar" ? "flipRtl formatImage" : "formatImage"} />
                 };
             default:
                 return undefined;
@@ -128,24 +112,19 @@ function FormatOptionMenuItem(props: IProps) {
     if (props.isActive) {
         return (
             <div style={{ textAlign: alignDirection }}>
-                <img
-                    src={formatImages?.mouseOn}
-                    alt={formatImages?.altString}
-                    className={formatImages?.cssClass}
-                /><span className={langClassName}><strong>{getFormatName(props.formatId)}</strong></span>
+                {formatImages?.mouseOnSvg}
+                <span className={langClassName}><strong>{getFormatName(props.formatId)}</strong></span>
             </div>
         );
     }
 
     return (
-        <div style={{ textAlign: alignDirection }}>
-            <img
-                src={hovering ? formatImages?.mouseOn : formatImages?.mouseOut}
-                alt={formatImages?.altString}
-                className={formatImages?.cssClass}
-                onMouseEnter={() => setHovering(true)}
-                onMouseLeave={() => setHovering(false)}
-            /><span
+        <div
+            style={{ textAlign: alignDirection }}
+            onMouseEnter={() => setHovering(true)}
+            onMouseLeave={() => setHovering(false)}>
+            {hovering ? formatImages?.mouseOnSvg : formatImages?.mouseOffSvg}
+            <span
                 onMouseEnter={() => setHovering(true)}
                 onMouseLeave={() => setHovering(false)}
                 className={langClassName}>{getFormatName(props.formatId)}</span>

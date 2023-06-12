@@ -1,10 +1,10 @@
-import crossLine from "../images/crossline.gif";
+import { ReactComponent as CrossLine } from "../images/crossline.svg";
 
 function CrossDivider() {
 
     return (
         <div style={{ textAlign: "center" }}>
-            <img src={crossLine} alt="cross" style={{ width: "70%", maxWidth: "508px" }} />
+            <CrossLine style={{ width: "70%", maxWidth: "508px", marginTop: "10px", marginBottom: "10px" }} />
         </div>
     );
 }
