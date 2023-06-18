@@ -1,3 +1,5 @@
+import { faCross } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
@@ -56,8 +58,8 @@ function SeasonsMenu() {
     useEffect(() => {
         const theNodes = dateSpecificSeasons.map((season) => {
             return (
-                <div key={season.id}>
-                    <MyNavLink to={`${season.id}`}>{season.name}</MyNavLink>
+                <div key={season.id} style={{ fontSize: "20px" }}>
+                    <MyNavLink to={`${season.id}`}><FontAwesomeIcon icon={faCross} style={{paddingRight: "5px"} } /> {season.name}</MyNavLink>
                 </div>
             )
         });
@@ -72,8 +74,8 @@ function SeasonsMenu() {
     useEffect(() => {
         const theNodes = nonDateSpecificSeasons.map((season) => {
             return (
-                <div key={season.id}>
-                    <MyNavLink to={`${season.id}`}>{season.name}</MyNavLink>
+                <div key={season.id} style={{ fontSize: "20px" }}>
+                    <MyNavLink to={`${season.id}`}><FontAwesomeIcon icon={faCross} style={{ paddingRight: "5px" }} /> {season.name}</MyNavLink>
                 </div>
             )
         });
