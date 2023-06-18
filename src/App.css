@@ -37,6 +37,7 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 
 .logo { width:287px; margin:0px auto 0px auto; z-index:999; position:relative; }
 .logo img { width:287px; }
+.logo svg { width:287px; }
 
 .topNav {background: url("images/topNavBg.png"); background-position:center top; background-size: 100% 100%; background-repeat:no-repeat; height: auto; min-width: 119px; position: absolute;  right: 48px; top: 42px; }
 .topNav ul { padding:0px 15px 0px 15px; }
@@ -103,7 +104,8 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
    .mainContainer .nav{ background:none;}
     .footer{ margin-left: 3%;  margin-right: 0;  padding-left: 4%;  width: 90%; }
     .logo img{ width:100%}
-    .logo{ width:28.5%}
+    .logo svg{ width:100%}
+    .logo{ width:32%}
     .nav{background:url("images/navBg2.jpg"); background-repeat:no-repeat; background-size:100%;}
     .header .innerHeader { width:100%; margin:auto; padding:0; max-width:100%; background:url("images/headerBgNew.png"); background-position:center top; background-repeat:no-repeat; background-size:cover}
     .header { width:94%; margin: 0 3%}
@@ -132,7 +134,7 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 @media screen and (max-width:767px){
      .leftMain{ width: 92%; margin:0 4%;}
      .hymnLeft{ width: 92%; margin:0 4%;}
-     .logo{ width:27%}
+     .logo{ width:32%}
      .hymnRep{ padding-left:45px;}
      .md img{display:none}
 }

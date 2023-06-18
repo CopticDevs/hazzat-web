@@ -1,6 +1,6 @@
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { ReactComponent as Logo } from "../images/logo.svg";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
@@ -15,10 +15,25 @@ interface IProps {
 function Header(props: IProps) {
     const [showMenu, setShowMenu] = useState<boolean>(false);
     const { languageProperties } = useContext(LanguageContext);
+    const menuRef = useRef<HTMLDivElement>(null);
 
     const toggleMenu = () => {
         setShowMenu(!showMenu);   
     }
+
+    useEffect(() => {
+        const handleDocumentClick = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowMenu(false);
+            }
+        };
+
+        document.addEventListener('click', handleDocumentClick);
+
+        return () => {
+            document.removeEventListener('click', handleDocumentClick);
+        };
+    }, []);
 
     return (
         
@@ -47,7 +62,7 @@ function Header(props: IProps) {
                     <LanguageSwitcher />
                 </ul>
             
-                <div className="mobile">
+                <div className="mobile" ref={menuRef}>
                     <div className="menu-toggle" onClick={toggleMenu}>
                         <FontAwesomeIcon
                             icon={faBars}
