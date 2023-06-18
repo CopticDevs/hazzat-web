@@ -38,22 +38,25 @@ function ServicesMenu(props: IProps) {
         };
     }, [fetchFromBackend]);
 
+    if (!isMounted.current) {
+        return <LoadingSpinner />;
+    }
+
     return (
         <>
             {
-                !isMounted.current ? <LoadingSpinner /> :
-                    !!services ?
-                        <div>
-                            <BreadCrumb items={[
-                                { title: strings.seasons, path: "/Seasons" },
-                                { title: props.seasonName }]} />
+                !!services ?
+                    <div>
+                        <BreadCrumb items={[
+                            { title: strings.seasons, path: "/Seasons" },
+                            { title: props.seasonName }]} />
 
-                            {services.map((service) => {
-                                const serviceId = getServiceNumberFromId(service.id);
-                                return <ServiceContents key={service.id} seasonId={props.seasonId} serviceId={serviceId} serviceName={service.name} />
-                            })}
-                        </div>
-                        : null
+                        {services.map((service) => {
+                            const serviceId = getServiceNumberFromId(service.id);
+                            return <ServiceContents key={service.id} seasonId={props.seasonId} serviceId={serviceId} serviceName={service.name} />
+                        })}
+                    </div>
+                    : null
             }
         </>
     );
