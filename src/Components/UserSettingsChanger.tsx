@@ -118,7 +118,7 @@ function UserSettingsChanger() {
                         <Modal.Title as="h5"><LocalizedMessage of="sample" /></Modal.Title>
                         <div className="container">
                             <div className="row">
-                                <div style={{ textAlign: "right", width: "10%", padding: "0px" }}>
+                                <div style={{ textAlign: languageProperties.isRtl ? "left" : "right", width: "10%", padding: "0px" }}>
                                     <Button
                                         variant="light"
                                         className={selectedFontSize === AppSettings.minContentTextSize ? "rounded-circle size-button disabled" : "rounded-circle size-button"}
@@ -129,7 +129,7 @@ function UserSettingsChanger() {
                                 <div className="border" style={{ width: "60%" }}>
                                     <div style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: strings.sampleCopticShort }} />
                                 </div>
-                                <div style={{ textAlign: "left", width: "10%", padding: "0px" }}>
+                                <div style={{ textAlign: languageProperties.isRtl ? "right" : "left", width: "10%", padding: "0px" }}>
                                     <Button
                                         variant="light"
                                         className={selectedFontSize === AppSettings.maxContentTextSize ? "rounded-circle size-button disabled" : "rounded-circle size-button"}
