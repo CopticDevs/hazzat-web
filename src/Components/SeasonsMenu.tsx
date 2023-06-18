@@ -13,6 +13,8 @@ function SeasonsMenu() {
     const { languageProperties } = useContext(LanguageContext);
     const [dateSpecificSeasons, setDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [nonDateSpecificSeasons, setNonDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
+    const [dsSeasonNodes, setDsSeasonNodes] = useState<React.ReactNode[]>([<LoadingSpinner />]);
+    const [ndsSeasonNodes, setNdsSeasonNodes] = useState<React.ReactNode[]>([<LoadingSpinner />]);
     const isMounted = useRef(true);
 
     const fetchSeasons = React.useCallback(async () => {
@@ -46,6 +48,38 @@ function SeasonsMenu() {
         };
     }, [fetchSeasons]);
 
+    useEffect(() => {
+        const theNodes = dateSpecificSeasons.map((season) => {
+            return (
+                <div key={season.id}>
+                    <MyNavLink to={`${season.id}`}>{season.name}</MyNavLink>
+                </div>
+            )
+        });
+
+        if (theNodes.length === 0) {
+            setDsSeasonNodes([<LoadingSpinner />]);
+        } else {
+            setDsSeasonNodes(theNodes);
+        }
+    }, [dateSpecificSeasons]);
+
+    useEffect(() => {
+        const theNodes = nonDateSpecificSeasons.map((season) => {
+            return (
+                <div key={season.id}>
+                    <MyNavLink to={`${season.id}`}>{season.name}</MyNavLink>
+                </div>
+            )
+        });
+
+        if (theNodes.length === 0) {
+            setNdsSeasonNodes([<LoadingSpinner />]);
+        } else {
+            setNdsSeasonNodes(theNodes);
+        }
+    }, [nonDateSpecificSeasons]);
+
     if (!isMounted.current) {
         return <LoadingSpinner />;
     }
@@ -53,30 +87,9 @@ function SeasonsMenu() {
     return (
         <div>
             <div className="pageTitle"><LocalizedMessage of="seasons" /></div>
-            {
-                dateSpecificSeasons && dateSpecificSeasons.length > 0 ?
-                    dateSpecificSeasons.map((season) => {
-                        return (
-                            <div key={season.id}>
-                                <MyNavLink to={`${season.id}`}>{season.name}</MyNavLink>
-                            </div>
-                        )
-                    })
-                    :
-                    <div><LocalizedMessage of="noSeasons" /></div>
-            }
+            { dsSeasonNodes }
             <div className="otherServicesTitle"><LocalizedMessage of="otherServices" /></div>
-            {
-                nonDateSpecificSeasons && nonDateSpecificSeasons.length > 0 ?
-                    nonDateSpecificSeasons.map((season) => {
-                        return (
-                            <div key={season.id}>
-                                <MyNavLink to={`${season.id}`} key={season.id}>{season.name}</MyNavLink>
-                            </div>
-                        )
-                    }) :
-                    <div><LocalizedMessage of="noSeasons" /></div>
-            }
+            { ndsSeasonNodes }
         </div>
     );
 }
