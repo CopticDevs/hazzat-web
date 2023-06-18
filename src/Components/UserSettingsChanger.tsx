@@ -1,7 +1,8 @@
-import { faCog } from "@fortawesome/free-solid-svg-icons";
+import { faCog, faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useState } from "react";
 import { Button, Modal } from 'react-bootstrap';
+import { AppSettings } from "../AppSettings";
 import { UserSettingsContext } from "../Contexts/UserSettingsContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
@@ -34,13 +35,6 @@ function UserSettingsChanger() {
         direction: 'ltr',
     } as React.CSSProperties & { '--english-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
 
-    const overrideArabicStyle = {
-        '--arabic-font-size': userSettings.arabicFontSize,
-        '--content-font-color': userSettings.contentFontColor,
-        '--hazzat-font-color': userSettings.hazzatFontColor,
-        direction: 'rtl',
-    } as React.CSSProperties & { '--arabic-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
-
     const options: IRadioOption[] = [
         { value: 'BLACK', label: strings.black },
         { value: 'MAROON', label: strings.maroon },
@@ -57,8 +51,16 @@ function UserSettingsChanger() {
         setContentFontColor(color);
     };
 
-    const handleTextSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const num = +event.target.value;
+    const handleIncrementTextSize = () => {
+        let num = selectedFontSize + 2;
+        num = num > AppSettings.maxContentTextSize ? AppSettings.maxContentTextSize : num;
+        setSelectedFontSize(num);
+        setContentFontSize(num);
+    };
+
+    const handleDecrementTextSize = () => {
+        let num = selectedFontSize - 2;
+        num = num < AppSettings.minContentTextSize ? AppSettings.minContentTextSize : num;
         setSelectedFontSize(num);
         setContentFontSize(num);
     };
@@ -110,27 +112,32 @@ function UserSettingsChanger() {
                             <div className="row" style={{ paddingTop: "10px" }}>
                                 <div><strong><LocalizedMessage of="size" /></strong></div>
                             </div>
-                            <div className="row">
-                                <input
-                                    type="range"
-                                    className="form-range"
-                                    id="sizeRange"
-                                    name="range-control"
-                                    min="10"
-                                    max="26"
-                                    step="2"
-                                    value={selectedFontSize}
-                                    onChange={handleTextSizeChange}
-                                />
-                            </div>
                         </div>
                     </form>                    
                     <div className="m-4">
                         <Modal.Title as="h5"><LocalizedMessage of="sample" /></Modal.Title>
-                        <div className="border p-4 m-4">
-                            <div style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: strings.sampleCoptic }} />
-                            <div style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: strings.sampleEnglish }} />
-                            <div style={overrideArabicStyle} dangerouslySetInnerHTML={{ __html: strings.sampleArabic }} />
+                        <div className="container">
+                            <div className="row">
+                                <div style={{ textAlign: "right", width: "10%", padding: "0px" }}>
+                                    <Button
+                                        variant="light"
+                                        className={selectedFontSize === AppSettings.minContentTextSize ? "rounded-circle size-button disabled" : "rounded-circle size-button"}
+                                        onClick={handleDecrementTextSize}>
+                                        <FontAwesomeIcon icon={faMinus} />
+                                    </Button>
+                                </div>
+                                <div className="border" style={{ width: "60%" }}>
+                                    <div style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: strings.sampleCopticShort }} />
+                                </div>
+                                <div style={{ textAlign: "left", width: "10%", padding: "0px" }}>
+                                    <Button
+                                        variant="light"
+                                        className={selectedFontSize === AppSettings.maxContentTextSize ? "rounded-circle size-button disabled" : "rounded-circle size-button"}
+                                        onClick={handleIncrementTextSize}>
+                                        <FontAwesomeIcon icon={faPlus} />
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </Modal.Body>
