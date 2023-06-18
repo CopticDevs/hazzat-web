@@ -135,7 +135,6 @@
     <Content Include="src\Components\ContactUsPage.css" />
     <Content Include="src\Components\FormatOptionMenuItem.css" />
     <Content Include="src\Components\FormatOptionsContextMenu.css" />
-    <Content Include="src\Components\HymnTitle.css" />
     <Content Include="src\Components\UsingHazzatFont.css" />
     <Content Include="src\Components\UserSettingsChanger.css" />
     <Content Include="src\Components\Content.css" />
