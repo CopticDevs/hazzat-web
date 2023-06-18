@@ -204,12 +204,10 @@
     <Content Include="src\images\navBgBottom.jpg" />
     <Content Include="src\images\navBgNew.png" />
     <Content Include="src\images\pattern.jpg" />
-    <Content Include="src\images\save.gif" />
     <Content Include="src\images\small.jpg" />
     <Content Include="src\images\space.gif" />
     <Content Include="src\images\text_off.svg" />
     <Content Include="src\images\text_on.svg" />
-    <Content Include="src\images\tip.gif" />
     <Content Include="src\images\topNavBg.png" />
     <Content Include="src\images\topSep.jpg" />
     <Content Include="src\images\twitter.svg" />
