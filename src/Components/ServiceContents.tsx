@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
@@ -21,8 +21,14 @@ interface IProps {
 }
 
 function ServiceContents(props: IProps) {
+    const getLoadingSpinnerDiv = () => {
+        return <div key="loading"><LoadingSpinner /></div>;
+    };
+
+    const loadingDiv = useMemo(() => getLoadingSpinnerDiv(), []);
     const { languageProperties } = useContext(LanguageContext);
     const [hymns, setHymnsInfo] = useState<IHymnInfo[]>([]);
+    const [hymnsNodes, setHymnsNodes] = useState<React.ReactNode[]>([loadingDiv]);
     const [hasText, setHasText] = useState<boolean>(false);
     const [hasHazzat, setHasHazzat] = useState<boolean>(false);
     const [hasVerticalHazzat, setHasVerticalHazzat] = useState<boolean>(false);
@@ -97,6 +103,34 @@ function ServiceContents(props: IProps) {
     }, [languageProperties, props.seasonId, props.serviceId, isMounted]);
 
     useEffect(() => {
+        let alternateHymn = true;
+        const theNodes = hymns.map((hymn) => {
+            alternateHymn = !alternateHymn;
+            const hymnId = getHymnNumberFromId(hymn.id);
+
+            const getFormatsCallback = () => {
+                const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+                return hymnsDataProvider.getServiceHymnFormatList(props.seasonId, props.serviceId, hymnId);
+            };
+
+            return <HymnRow
+                key={hymn.id}
+                hymnName={hymn.name}
+                isAlternate={alternateHymn}
+                getFormatsCallback={getFormatsCallback}
+                parseFormatIdCallback={getFormatNumberFromId}
+                handleFoundFormat={handleFoundFormat}
+            />
+        });
+
+        if (theNodes.length === 0) {
+            setHymnsNodes([loadingDiv]);
+        } else {
+            setHymnsNodes(theNodes);
+        }
+    }, [hymns, loadingDiv, languageProperties.localeName, props.serviceId, props.seasonId]);
+
+    useEffect(() => {
         isMounted.current = true;
         fetchFromBackend();
 
@@ -104,8 +138,6 @@ function ServiceContents(props: IProps) {
             isMounted.current = false;
         };
     }, [fetchFromBackend]);
-
-    let alternateHymn = true;
 
     return (
         <>
@@ -123,24 +155,7 @@ function ServiceContents(props: IProps) {
                             
                         </div>
                         
-                        {hymns.map((hymn) => {
-                            alternateHymn = !alternateHymn;
-                            const hymnId = getHymnNumberFromId(hymn.id);
-
-                            const getFormatsCallback = () => {
-                                const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
-                                return hymnsDataProvider.getServiceHymnFormatList(props.seasonId, props.serviceId, hymnId);
-                            };
-
-                            return <HymnRow
-                                key={hymn.id}
-                                hymnName={hymn.name}
-                                isAlternate={alternateHymn}
-                                getFormatsCallback={getFormatsCallback}
-                                parseFormatIdCallback={getFormatNumberFromId}
-                                handleFoundFormat={handleFoundFormat}
-                            />
-                        })}
+                        {hymnsNodes}
 
                         <CrossDivider />
                     </div>

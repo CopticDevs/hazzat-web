@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
@@ -16,8 +16,14 @@ interface IProps {
     seasonId: string;
 }
 function ServicesMenu(props: IProps) {
+    const getLoadingSpinnerDiv = () => {
+        return <div key="loading"><LoadingSpinner /></div>;
+    };
+
+    const loadingDiv = useMemo(() => getLoadingSpinnerDiv(), []);
     const { languageProperties } = useContext(LanguageContext);
     const [services, setServices] = useState<IServiceInfo[]>([]);
+    const [servicesNodes, setServicesNodes] = useState<React.ReactNode[]>([loadingDiv]);
     const isMounted = useRef(true);
 
     const fetchFromBackend = React.useCallback(async () => {
@@ -38,6 +44,19 @@ function ServicesMenu(props: IProps) {
         };
     }, [fetchFromBackend]);
 
+    useEffect(() => {
+        const theNodes = services.map((service) => {
+            const serviceId = getServiceNumberFromId(service.id);
+            return <ServiceContents key={service.id} seasonId={props.seasonId} serviceId={serviceId} serviceName={service.name} />
+        });
+
+        if (theNodes.length === 0) {
+            setServicesNodes([loadingDiv]);
+        } else {
+            setServicesNodes(theNodes);
+        }
+    }, [services, loadingDiv, props.seasonId]);
+
     if (!isMounted.current) {
         return <LoadingSpinner />;
     }
@@ -51,10 +70,7 @@ function ServicesMenu(props: IProps) {
                             { title: strings.seasons, path: "/Seasons" },
                             { title: props.seasonName }]} />
 
-                        {services.map((service) => {
-                            const serviceId = getServiceNumberFromId(service.id);
-                            return <ServiceContents key={service.id} seasonId={props.seasonId} serviceId={serviceId} serviceName={service.name} />
-                        })}
+                        {servicesNodes}
                     </div>
                     : null
             }
