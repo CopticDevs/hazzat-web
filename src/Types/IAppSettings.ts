@@ -7,4 +7,6 @@ export interface IAppSettings {
     defaultLanguage: ILanguageProperties;
     showMusicAudio: boolean;
     autoPlayVideo: boolean;
+    minContentTextSize: number;
+    maxContentTextSize: number;
 }

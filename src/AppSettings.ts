@@ -15,5 +15,7 @@ export const AppSettings: IAppSettings = {
     supportedLanguages: [EnglishLanguageProperties, ArabicLanguageProperties],
     defaultLanguage: EnglishLanguageProperties,
     showMusicAudio: false,
-    autoPlayVideo: false
+    autoPlayVideo: false,
+    minContentTextSize: 12,
+    maxContentTextSize: 26
 };
