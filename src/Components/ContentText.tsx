@@ -136,6 +136,8 @@ function ContentText(props: IProps) {
         // Add rtl for Arabic
         if (langMask === arabicMask) cssClasses.push("dirRtl");
 
+        cssClasses.push("break-word");
+
         const className = cssClasses.join(" ");
         let stringSuffix = "";
 
