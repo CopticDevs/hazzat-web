@@ -34,6 +34,10 @@ function Footer(props: IProps) {
         };
     }, []);
 
+    useEffect(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }, [showMenu]);
+
     return (
         <div className={languageProperties.isRtl ? "footer footerRtl clearfix" : "footer clearfix"}>
             
