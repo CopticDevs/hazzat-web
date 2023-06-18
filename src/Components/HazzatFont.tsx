@@ -1,6 +1,7 @@
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect } from "react";
 import hazzatImg from "../images/hazzat.jpg";
-import saveImg from "../images/save.gif";
 import { strings } from "../l8n";
 import LocalizedMessage from "../LocalizedMessage";
 import MainPaper, { Size } from "./MainPaper";
@@ -28,7 +29,9 @@ function HazzatFont() {
                 </a>
             </p>
             <div style={{ textAlign: "center", paddingTop: "33px" }}>
-                <a href="/downloads/Hazzat_v1_10a.zip" rel="noopener noreferrer"><img src={saveImg} alt={strings.save} /> <LocalizedMessage of="downloadHazzatFont" /></a>
+                <a href="/downloads/Hazzat_v1_10a.zip" rel="noopener noreferrer">
+                    <FontAwesomeIcon icon={faDownload} className="text-dark" />  <LocalizedMessage of="downloadHazzatFont" />
+                </a>
             </div>
         </MainPaper>
     );
