@@ -12,10 +12,9 @@ import { StringMap } from "../Types/StringMap";
 import { getFormatNumberFromId } from "../Utils/ParserUtils";
 import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
+import ContentPageSettingPane from "./ContentPageSettingPane";
 import FormatBar from "./FormatBar";
 import LoadingSpinner from "./LoadingSpinner";
-import ToTopButton from "./ToTopButton";
-import UserSettingsChanger from "./UserSettingsChanger";
 
 interface IProps {
     seasonInfo: ISeasonInfo;
@@ -100,8 +99,7 @@ function HymnContentFromSeasonService(props: IProps) {
                             />
 
                         <Content formatId={formatIdParam} variationsCallback={fetchVariationsCallback} />
-                        <UserSettingsChanger />
-                        <ToTopButton />
+                        <ContentPageSettingPane />
                     </div>
             }
         </>

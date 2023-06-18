@@ -21,7 +21,6 @@ function UserSettingsChanger() {
     const [selectedContentColor, setSelectedContentColor] = useState(userSettings.contentFontColor);
     const [expanded, setExpanded] = useState(false);
     const [selectedFontSize, setSelectedFontSize] = useState<number>(18);
-    const langClassName = languageProperties.isRtl ? "position-fixed start-0 modal-toggle" : "position-fixed end-0 modal-toggle";
     const langDirName = languageProperties.isRtl ? "dirRtl" : "dirLtr";
 
     const handleToggleModal = () => {
@@ -69,8 +68,8 @@ function UserSettingsChanger() {
             {!expanded &&
                 <Button
                     onClick={handleToggleModal}
-                    className={langClassName}
-                    style={{ zIndex: 100, top: '20%', width: "45px" }}
+                    className="modal-toggle"
+                    style={{ width: "45px" }}
                 >
                     <FontAwesomeIcon icon={faCog} className="text-dark" />
                 </Button>}

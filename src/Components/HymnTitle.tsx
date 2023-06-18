@@ -19,7 +19,6 @@ function HymnTitle(props: IProps) {
     useEffect(() => {
         const handleResize = () => {
             if (textRef.current) {
-                console.log(textRef.current.offsetWidth);
                 setSvgWidth(textRef.current.offsetWidth);
             }
         };
