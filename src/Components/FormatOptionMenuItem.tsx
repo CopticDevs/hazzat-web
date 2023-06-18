@@ -111,7 +111,7 @@ function FormatOptionMenuItem(props: IProps) {
 
     if (props.isActive) {
         return (
-            <div style={{ textAlign: alignDirection }}>
+            <div style={{ textAlign: alignDirection, marginTop: "5px", marginBottom: "5px" }}>
                 {formatImages?.mouseOnSvg}
                 <span className={langClassName}><strong>{getFormatName(props.formatId)}</strong></span>
             </div>
@@ -120,7 +120,7 @@ function FormatOptionMenuItem(props: IProps) {
 
     return (
         <div
-            style={{ textAlign: alignDirection }}
+            style={{ textAlign: alignDirection, marginTop: "5px", marginBottom: "5px" }}
             onMouseEnter={() => setHovering(true)}
             onMouseLeave={() => setHovering(false)}>
             {hovering ? formatImages?.mouseOnSvg : formatImages?.mouseOffSvg}

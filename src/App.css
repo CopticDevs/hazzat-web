@@ -105,7 +105,7 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
     .footer{ margin-left: 3%;  margin-right: 0;  padding-left: 4%;  width: 90%; }
     .logo img{ width:100%}
     .logo svg{ width:100%}
-    .logo{ width:32%}
+    .logo{ width:62%}
     .nav{background:url("images/navBg2.jpg"); background-repeat:no-repeat; background-size:100%;}
     .header .innerHeader { width:100%; margin:auto; padding:0; max-width:100%; background:url("images/headerBgNew.png"); background-position:center top; background-repeat:no-repeat; background-size:cover}
     .header { width:94%; margin: 0 3%}
@@ -134,7 +134,7 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 @media screen and (max-width:767px){
      .leftMain{ width: 92%; margin:0 4%;}
      .hymnLeft{ width: 92%; margin:0 4%;}
-     .logo{ width:32%}
+     .logo{ width:61%}
      .hymnRep{ padding-left:45px;}
      .md img{display:none}
 }

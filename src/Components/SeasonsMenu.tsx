@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
@@ -10,11 +10,16 @@ import LoadingSpinner from "./LoadingSpinner";
 import MyNavLink from "./MyNavLink";
 
 function SeasonsMenu() {
+    const getLoadingSpinnerDiv = () => {
+        return <div key="loading"><LoadingSpinner /></div>;
+    };
+
+    const loadingDiv = useMemo(() => getLoadingSpinnerDiv(), []);
     const { languageProperties } = useContext(LanguageContext);
     const [dateSpecificSeasons, setDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [nonDateSpecificSeasons, setNonDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
-    const [dsSeasonNodes, setDsSeasonNodes] = useState<React.ReactNode[]>([<LoadingSpinner />]);
-    const [ndsSeasonNodes, setNdsSeasonNodes] = useState<React.ReactNode[]>([<LoadingSpinner />]);
+    const [dsSeasonNodes, setDsSeasonNodes] = useState<React.ReactNode[]>([loadingDiv]);
+    const [ndsSeasonNodes, setNdsSeasonNodes] = useState<React.ReactNode[]>([loadingDiv]);
     const isMounted = useRef(true);
 
     const fetchSeasons = React.useCallback(async () => {
@@ -58,11 +63,11 @@ function SeasonsMenu() {
         });
 
         if (theNodes.length === 0) {
-            setDsSeasonNodes([<LoadingSpinner />]);
+            setDsSeasonNodes([loadingDiv]);
         } else {
             setDsSeasonNodes(theNodes);
         }
-    }, [dateSpecificSeasons]);
+    }, [dateSpecificSeasons, loadingDiv]);
 
     useEffect(() => {
         const theNodes = nonDateSpecificSeasons.map((season) => {
@@ -74,11 +79,11 @@ function SeasonsMenu() {
         });
 
         if (theNodes.length === 0) {
-            setNdsSeasonNodes([<LoadingSpinner />]);
+            setNdsSeasonNodes([loadingDiv]);
         } else {
             setNdsSeasonNodes(theNodes);
         }
-    }, [nonDateSpecificSeasons]);
+    }, [nonDateSpecificSeasons, loadingDiv]);
 
     if (!isMounted.current) {
         return <LoadingSpinner />;
