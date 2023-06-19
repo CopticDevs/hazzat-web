@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\AppSettings.ts" />
+    <TypeScriptCompile Include="src\Components\InvalidAddressMessage.tsx" />
     <TypeScriptCompile Include="src\Components\ContentPageSettingPane.tsx" />
     <TypeScriptCompile Include="src\Components\FormatBar.tsx" />
     <TypeScriptCompile Include="src\Components\ContactUsPage.tsx" />

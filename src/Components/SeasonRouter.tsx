@@ -8,6 +8,7 @@ import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { stringFormat } from "../stringFormat";
 import HymnContentFromSeasonService from "./HymnContentFromSeasonService";
 import HymnContentFromService from "./HymnContentFromService";
+import InvalidAddressMessage from "./InvalidAddressMessage";
 import LoadingSpinner from "./LoadingSpinner";
 import "./SeasonDetails.css";
 import ServicesMenu from "./ServicesMenu";
@@ -42,7 +43,7 @@ function SeasonRouter() {
     }, [fetchFromBackend]);
 
     useEffect(() => {
-        document.title = isLoading ? "hazzat.com" : `${seasonInfo?.name} - hazzat.com`;
+        document.title = isLoading ? "hazzat.com" : `${seasonInfo?.name || strings.seasons} - hazzat.com`;
     }, [isLoading, seasonInfo]);
 
     return (
@@ -60,7 +61,7 @@ function SeasonRouter() {
                                 <Route path={`/Services/:serviceId/formats/:formatId`} element={<HymnContentFromService seasonInfo={seasonInfo} />} />
                             </Routes>
                         </div>
-                        : null
+                        : <InvalidAddressMessage />
             }
         </>
     );

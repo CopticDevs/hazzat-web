@@ -14,6 +14,7 @@ import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
 import ContentPageSettingPane from "./ContentPageSettingPane";
 import FormatBar from "./FormatBar";
+import InvalidAddressMessage from "./InvalidAddressMessage";
 import LoadingSpinner from "./LoadingSpinner";
 
 interface IProps {
@@ -27,6 +28,7 @@ function HymnContentFromService(props: IProps) {
     const formatIdParam: string = formatId || "";
     const { languageProperties } = useContext(LanguageContext);
     const [serviceInfo, setServiceInfo] = useState<IServiceInfo | undefined>();
+    const [formatName, setformatName] = useState<string | undefined>("");
     const [hymnList, setHymnList] = useState<IHymnInfo[]>([]);
     const [hasText, setHasText] = useState<boolean>(false);
     const [hasHazzat, setHasHazzat] = useState<boolean>(false);
@@ -108,35 +110,44 @@ function HymnContentFromService(props: IProps) {
     }, [fetchFromBackend]);
 
     useEffect(() => {
-        let formatName = "";
+        let formatNameTmp = undefined;
         switch (formatIdParam) {
             case "1":
-                formatName = strings.textFormatName;
+                formatNameTmp = strings.textFormatName;
                 break;
             case "2":
-                formatName = strings.hazzatFormatName;
+                formatNameTmp = strings.hazzatFormatName;
                 break;
             case "3":
-                formatName = strings.verticalHazzatFormatName;
+                formatNameTmp = strings.verticalHazzatFormatName;
                 break;
             case "4":
-                formatName = strings.musicFormatName;
+                formatNameTmp = strings.musicFormatName;
                 break;
             case "5":
-                formatName = strings.audioFormatName;
+                formatNameTmp = strings.audioFormatName;
                 break;
             case "6":
-                formatName = strings.videoFormatName;
+                formatNameTmp = strings.videoFormatName;
                 break;
             case "7":
-                formatName = strings.informationFormatName;
+                formatNameTmp = strings.informationFormatName;
                 break;
         }
-        document.title = isLoading ? "hazzat.com" : `${props.seasonInfo.name} - ${serviceInfo?.name} (${formatName}) - hazzat.com`;
-    }, [isLoading, props.seasonInfo, serviceInfo?.name, formatIdParam]);
 
-    if (!serviceInfo || !hymnList) {
-        return (<div />)
+        setformatName(formatNameTmp);
+        document.title = isLoading || !serviceInfo ? "hazzat.com" : `${props.seasonInfo.name} - ${serviceInfo?.name} (${formatName}) - hazzat.com`;
+    }, [isLoading, props.seasonInfo, serviceInfo, serviceInfo?.name, formatIdParam, formatName]);
+
+    if (isLoading) {
+        return (<LoadingSpinner />);
+    }
+
+    if (!serviceInfo || formatName === undefined) {
+        return (<InvalidAddressMessage />);
+    }
+    if (!hymnList) {
+        return (<div />);
     }
 
     return (
