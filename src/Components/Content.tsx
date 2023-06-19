@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import LocalizedMessage from "../LocalizedMessage";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import ContentAudio from "./ContentAudio";
@@ -9,7 +8,7 @@ import ContentMusicalNotes from "./ContentMusicalNotes";
 import ContentText from "./ContentText";
 import ContentVerticalHazzat from "./ContentVerticalHazzat";
 import ContentVideo from "./ContentVideo";
-import MyNavLink from "./MyNavLink";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface IProps {
     formatId: string;
@@ -22,6 +21,7 @@ interface IProps {
 
 function Content(props: IProps) {
     const [variations, setVariations] = useState<IVariationInfo<any>[]>([]);
+    const [contentControl, setContentControl] = useState<JSX.Element>(<LoadingSpinner />);
     const isMounted = useRef(true);
 
     const fetchFromBackend = React.useCallback(async () => {
@@ -55,47 +55,42 @@ function Content(props: IProps) {
         };
     }, [fetchFromBackend]);
 
-    if (!isMounted.current) {
-        return (<div />)
-    }
+    useEffect(() => {
 
-    let contentControl: JSX.Element;
+        let theControl: JSX.Element;
 
-    switch (props.formatId) {
-        case "1":
-            contentControl = <ContentText variations={variations} />;
-            break;
-        case "2":
-            contentControl = <ContentHazzat variations={variations} />;
-            break;
-        case "3":
-            contentControl = <ContentVerticalHazzat variations={variations} />;
-            break;
-        case "4":
-            contentControl = <ContentMusicalNotes variations={variations} />;
-            break;
-        case "5":
-            contentControl = <ContentAudio variations={variations} />;
-            break;
-        case "6":
-            contentControl = <ContentVideo variations={variations} />;
-            break;
-        case "7":
-            contentControl = <ContentInformation variations={variations} />;
-            break;
-        default:
-            contentControl = <>
-                <div style={{ textAlign: "center", paddingTop: "30px", paddingBottom: "30px" }}>
-                    <LocalizedMessage of="contentNotFoundMessage" /><br /><br />
-                    <MyNavLink to="#" onClick={() => window.history.back()}>
-                        <LocalizedMessage of="goBack" />
-                    </MyNavLink>
-                </div>
-            </>
-    }
+        switch (props.formatId) {
+            case "1":
+                theControl = <ContentText variations={variations} />;
+                break;
+            case "2":
+                theControl = <ContentHazzat variations={variations} />;
+                break;
+            case "3":
+                theControl = <ContentVerticalHazzat variations={variations} />;
+                break;
+            case "4":
+                theControl = <ContentMusicalNotes variations={variations} />;
+                break;
+            case "5":
+                theControl = <ContentAudio variations={variations} />;
+                break;
+            case "6":
+                theControl = <ContentVideo variations={variations} />;
+                break;
+            case "7":
+                theControl = <ContentInformation variations={variations} />;
+                break;
+            default:
+                theControl = <div />
+        }
+
+        setContentControl(theControl);
+
+    }, [variations, props.formatId]);
 
     if (!isMounted.current) {
-        return (<div />)
+        return (<LoadingSpinner />)
     }
     
     return (contentControl);

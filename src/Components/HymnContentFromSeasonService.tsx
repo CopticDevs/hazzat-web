@@ -14,6 +14,7 @@ import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
 import ContentPageSettingPane from "./ContentPageSettingPane";
 import FormatBar from "./FormatBar";
+import InvalidAddressMessage from "./InvalidAddressMessage";
 import LoadingSpinner from "./LoadingSpinner";
 
 interface IProps {
@@ -75,10 +76,18 @@ function HymnContentFromSeasonService(props: IProps) {
     }, [fetchFromBackend]);
 
     useEffect(() => {
-        document.title = isLoading ? "hazzat.com" : `${props.seasonInfo.name} - ${serviceInfo?.name}: ${hymnInfo?.name} (${formatInfo?.name}) - hazzat.com`;
-    }, [isLoading, props.seasonInfo, serviceInfo?.name, hymnInfo?.name, formatInfo?.name]);
+        document.title = isLoading || !serviceInfo ? "hazzat.com" : `${props.seasonInfo.name} - ${serviceInfo?.name}: ${hymnInfo?.name} (${formatInfo?.name}) - hazzat.com`;
+    }, [isLoading, props.seasonInfo, serviceInfo, serviceInfo?.name, hymnInfo?.name, formatInfo?.name]);
 
-    if (isLoading || !serviceInfo || !hymnInfo || !formatInfo) {
+    if (isLoading) {
+        return (<LoadingSpinner />);
+    }
+
+    if (!serviceInfo || !formatInfo) {
+        return (<InvalidAddressMessage />);
+    }
+
+    if (!serviceInfo || !hymnInfo || !formatInfo) {
         return (<div />)
     }
     

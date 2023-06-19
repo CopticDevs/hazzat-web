@@ -32,13 +32,13 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         }
     }
 
-    public async getSeason(seasonId: string): Promise<ISeasonInfo> {
+    public async getSeason(seasonId: string): Promise<ISeasonInfo | undefined> {
         try {
             const response = await this.httpClient.get<ISeasonInfo>(`/seasons/${seasonId}`);
             return response.data;
         } catch (ex) {
             console.log(ex);
-            throw ex;
+            return undefined;
         }
     }
 
@@ -52,13 +52,13 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         }
     }
 
-    public async getService(seasonId: string, serviceId: string): Promise<IServiceInfo> {
+    public async getService(seasonId: string, serviceId: string): Promise<IServiceInfo | undefined> {
         try {
             const response = await this.httpClient.get<IServiceInfo>(`/seasons/${seasonId}/services/${serviceId}`);
             return response.data;
         } catch (ex) {
             console.log(ex);
-            throw ex;
+            return undefined;
         }
     }
 
@@ -68,7 +68,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
             return response.data;
         } catch (ex) {
             console.log(ex);
-            throw ex;
+            return [];
         }
     }
 
@@ -88,17 +88,17 @@ export class HymnsDataProvider implements IHymnsDataProvider {
             return response.data;
         } catch (ex) {
             console.log(ex);
-            throw ex;
+            return [];
         }
     }
 
-    public async getServiceHymnFormat(seasonId: string, serviceId: string, hymnId: string, formatId: string): Promise<IFormatInfo> {
+    public async getServiceHymnFormat(seasonId: string, serviceId: string, hymnId: string, formatId: string): Promise<IFormatInfo | undefined> {
         try {
             const response = await this.httpClient.get<IFormatInfo>(`/seasons/${seasonId}/services/${serviceId}/hymns/${hymnId}/formats/${formatId}`);
             return response.data;
         } catch (ex) {
             console.log(ex);
-            throw ex;
+            return undefined;
         }
     }
 
@@ -108,7 +108,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
             return response.data;
         } catch (ex) {
             console.log(ex);
-            throw ex;
+            return [];
         }
     }
 
