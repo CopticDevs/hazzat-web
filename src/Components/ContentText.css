@@ -1,0 +1,14 @@
+.english-text-content { width: 32%; }
+.coptic-text-content { width: 44%; }
+.arabic-text-content { width: 24%; }
+.separator-text-content { display: none; }
+@media screen and (max-width:600px) {
+    .text-content { display: block; }
+    .english-text-content { width: 100%; text-align: center; }
+    .coptic-text-content { width: 100%; text-align: center; }
+    .arabic-text-content { width: 100%; text-align: center; }
+    .separator-text-content { display: block; text-align: center; }
+    .contentRBorder { border-right: 0px; }
+    .contentLBorder { border-left: 0px; }
+    
+}

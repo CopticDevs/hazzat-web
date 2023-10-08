@@ -131,6 +131,7 @@
     <Content Include="public\manifest.json" />
     <Content Include="public\robots.txt" />
     <Content Include="src\App.css" />
+    <Content Include="src\Components\ContentText.css" />
     <Content Include="src\Components\FormatBar.css" />
     <Content Include="src\Components\BottomFormatBar.css" />
     <Content Include="src\Components\ContactUsPage.css" />
@@ -178,6 +179,7 @@
     <Content Include="src\images\bookletFormat.svg" />
     <Content Include="src\images\caps.jpg" />
     <Content Include="src\images\contentBg.png" />
+    <Content Include="src\images\crossesDivider.svg" />
     <Content Include="src\images\crossline.svg" />
     <Content Include="src\images\displayFormat.svg" />
     <Content Include="src\images\facebook.svg" />
