@@ -151,7 +151,11 @@ function ContentText(props: IProps) {
             return getColCell(col, isComment, currentMask);
         });
 
-        cells.push(<td className="separator-text-content"><CrossDivider isMini={true} /></td>);
+        if (isComment) {
+            cells.push(<td key="sep" style={{display: "none"}}></td>);
+        } else {
+            cells.push(<td key="sep" className="separator-text-content"><CrossDivider isMini={true} /></td>);
+        }
 
         const row = <tr key={currRowId++}>{cells}</tr>;
 

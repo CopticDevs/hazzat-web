@@ -80,7 +80,6 @@ Hymn text Styles
     text-decoration: none;
     font-family: 'Hazzat Arabic';
     font-size: var(--arabic-font-size);
-    text-align: right;
     direction: rtl;
 }
 .HazzatVAFont {
@@ -88,7 +87,6 @@ Hymn text Styles
     text-decoration: none;
     font-family: 'Hazzat Vertical Arabic';
     font-size: var(--arabic-font-size);
-    text-align: right;
     direction: rtl;
 }
 .EnglishFont {
@@ -102,10 +100,9 @@ Hymn text Styles
     text-decoration: none;
     font-family: 'Arabic Transparent';
     font-size: var(--arabic-font-size);
-    text-align: right;
     direction: rtl;
 }
 .EnglishComment  { COLOR: RED; text-decoration: none; font-family: ARIAL,verdana; FONT-SIZE:14px; font-style:italic;}
 .CopticComment   { COLOR: RED; text-decoration: none; font-family: 'CS Avva Shenouda', 'CS New Athanasius'; FONT-SIZE:14px; font-style: italic;}
-.ArabicComment   { COLOR: RED; text-decoration: none; font-family: 'Arabic Transparent'; FONT-SIZE:16px; font-style: italic;text-align:right;direction:rtl;}
+.ArabicComment   { COLOR: RED; text-decoration: none; font-family: 'Arabic Transparent'; FONT-SIZE:16px; font-style: italic;direction:rtl;}
 .HymnList { width: 16px; border: 0px none transparent; }
