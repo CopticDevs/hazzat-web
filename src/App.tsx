@@ -9,6 +9,7 @@ import Footer from "./Components/Footer";
 import Header from "./Components/Header";
 import HelpPage from "./Components/HelpPage";
 import Home from './Components/Home';
+import InvalidAddressMessage from "./Components/InvalidAddressMessage";
 import MainPaper, { Size } from "./Components/MainPaper";
 import SeasonsPage from './Components/SeasonsPage';
 import TunesPage from "./Components/TunesPage";
@@ -16,7 +17,6 @@ import TypesPage from "./Components/TypesPage";
 import "./css/hazzat.css";
 import "./fonts/fonts.css";
 import { LanguageContext } from "./LanguageContext";
-import LocalizedMessage from "./LocalizedMessage";
 
 function App() {
     const { languageProperties } = useContext(LanguageContext);
@@ -39,7 +39,7 @@ function App() {
                                 <Route path="/ContactUs" element={<ContactUsPage />} />
                                 <Route path="*" element={
                                     <MainPaper size={Size.Wide}>
-                                        <p><LocalizedMessage of="noContent" /></p>
+                                        <p><InvalidAddressMessage /></p>
                                     </MainPaper>} />
                             </Routes>
                         </div>

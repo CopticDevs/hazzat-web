@@ -3,6 +3,7 @@ import { UserSettingsContext } from "../Contexts/UserSettingsContext";
 import { LanguageContext } from "../LanguageContext";
 import { ITextContent, IVariationInfo, TextColumn, TextParagraph } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
+import "./ContentText.css";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
 
@@ -24,24 +25,18 @@ function ContentText(props: IProps) {
     const copticMask: number = 0x010;
     const arabicMask: number = 0x001;
 
-    const englishColWidth: string = "32%";
-    const copticColWidth: string = "44%";
-    const arabicColWidth: string = "24%";
-
     const overrideEnglishStyle = {
         '--english-font-size': userSettings.englishFontSize,
         '--content-font-color': userSettings.contentFontColor,
         '--hazzat-font-color': userSettings.hazzatFontColor,
-        direction: 'ltr',
-        textAlign: 'left'
+        direction: 'ltr'
     } as React.CSSProperties & { '--english-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
 
     const overrideArabicStyle = {
         '--arabic-font-size': userSettings.arabicFontSize,
         '--content-font-color': userSettings.contentFontColor,
         '--hazzat-font-color': userSettings.hazzatFontColor,
-        direction: 'rtl',
-        textAlign: 'right'
+        direction: 'rtl'
     } as React.CSSProperties & { '--arabic-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
 
     const getLanguageMask = (language: string): number => {
@@ -83,16 +78,18 @@ function ContentText(props: IProps) {
         const colDefs: React.DetailedHTMLProps<React.ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>[] = [];
 
         if ((currentMask & englishMask) !== 0) {
-            colDefs.push(<col key={colDefId++} style={{ width: englishColWidth }} />);
+            colDefs.push(<col key={colDefId++} className="english-text-content" />);
         }
 
         if ((currentMask & copticMask) !== 0) {
-            colDefs.push(<col key={colDefId++} style={{ width: copticColWidth }} />);
+            colDefs.push(<col key={colDefId++} className="coptic-text-content" />);
         }
 
         if ((currentMask & arabicMask) !== 0) {
-            colDefs.push(<col key={colDefId++} style={{ width: arabicColWidth }} />);
+            colDefs.push(<col key={colDefId++} className="arabic-text-content" />);
         }
+
+        colDefs.push(<col key={colDefId++} className="separator-text-content" />)
 
         const colGroup = <colgroup>{colDefs}</colgroup>;
 
@@ -110,18 +107,18 @@ function ContentText(props: IProps) {
         const lang: string = langMask === arabicMask ? "ar" : "en";
         const overrideStyle = langMask === arabicMask ? overrideArabicStyle : overrideEnglishStyle;
 
-        // add padding class
-        cssClasses.push("p-2");
+        // add padding and textContent classes
+        cssClasses.push("p-2 text-content");
 
         // add lang class
         if (isComment) {
-            if (langMask === englishMask) cssClasses.push("EnglishComment");
-            if (langMask === copticMask) cssClasses.push("CopticComment");
-            if (langMask === arabicMask) cssClasses.push("ArabicComment");
+            if (langMask === englishMask) cssClasses.push("english-text-content EnglishComment");
+            if (langMask === copticMask) cssClasses.push("coptic-text-content CopticComment");
+            if (langMask === arabicMask) cssClasses.push("arabic-text-content ArabicComment");
         } else {
-            if (langMask === englishMask) cssClasses.push("EnglishFont");
-            if (langMask === copticMask) cssClasses.push("CopticFont");
-            if (langMask === arabicMask) cssClasses.push("ArabicFont");
+            if (langMask === englishMask) cssClasses.push("english-text-content EnglishFont");
+            if (langMask === copticMask) cssClasses.push("coptic-text-content CopticFont");
+            if (langMask === arabicMask) cssClasses.push("arabic-text-content ArabicFont");
         }
 
         // align text to top
@@ -153,6 +150,8 @@ function ContentText(props: IProps) {
         const cells = columns.map((col) => {
             return getColCell(col, isComment, currentMask);
         });
+
+        cells.push(<td className="separator-text-content"><CrossDivider isMini={true} /></td>);
 
         const row = <tr key={currRowId++}>{cells}</tr>;
 
