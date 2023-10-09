@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="20"
+   height="25"
+   viewBox="0 0 5.2916669 6.6145836"
+   version="1.1">
+  <g id="layer1">
+    <g
+       id="g829"
+       transform="matrix(0.99964669,0,0,1.0003443,5.2381767e-5,-3.9251753e-5)">
+      <path
+         id="path4877"
+         style="fill:#c2e7eb;fill-opacity:1;stroke:#343434;stroke-width:0.313114px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="M 4.0787977,0.11240235 5.1829272,1.0389933 M 0.15026792,0.14902673 H 4.0265153 V 1.0756177 H 5.1306449 V 6.4483158 H 0.15026792 Z" />
+      <g
+         id="g81655"
+         transform="matrix(1.1764707,0,0,1.1904172,-120.39412,-106.10132)">
+        <path
+           id="rect1200-0"
+           style="fill:#343434;fill-opacity:1;stroke:#343434;stroke-width:0.25;stroke-linecap:square;stroke-opacity:1"
+           d="m 103.44957,92.082974 h 0.54778 v 0.821671 h -0.54778 z" />
+        <path
+           id="rect1202-1"
+           style="fill:#343434;fill-opacity:1;stroke:#343434;stroke-width:0.25;stroke-linecap:square;stroke-opacity:1"
+           d="m 104.34268,92.082974 0.85581,-0.529167 v 1.880008 l -0.85581,-0.529167 z" />
+      </g>
+    </g>
+  </g>
+</svg>

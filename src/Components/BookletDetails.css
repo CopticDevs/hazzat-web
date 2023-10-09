@@ -1,0 +1,10 @@
+.bookletLinkDiv {
+    align-content: center;
+    text-align: center;
+}
+
+.bookletFullImgDiv {
+    display: flex;
+    align-items: center;
+    min-width: 215px;
+}

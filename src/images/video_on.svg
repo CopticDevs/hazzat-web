@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="20"
+   height="25"
+   viewBox="0 0 5.2916669 6.6145836"
+   version="1.1">
+  <g id="layer1">
+    <g
+       id="g868"
+       transform="matrix(0.99964688,0,0,1.0003434,5.2292061e-5,-3.9181804e-5)">
+      <path
+         id="path21849"
+         style="fill:#c2e7eb;fill-opacity:1;stroke:#343434;stroke-width:0.313113px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="M 4.0787977,0.11238033 5.1829272,1.0389638 M 0.15026792,0.14899751 H 4.0265153 V 1.0755929 H 5.1306449 V 6.4482938 H 0.15026792 Z" />
+      <g
+         id="g862">
+        <path
+           id="path31591"
+           style="fill:none;stroke:#343434;stroke-width:0.313607;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+           d="M 1.2096745,3.1140751 H 4.1358477 V 5.3347113 H 1.2096745 Z" />
+        <path
+           style="fill:#343434;fill-opacity:1;stroke:#343434;stroke-width:0.281433px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           d="M 2.1276675,3.837169 V 4.7088625 L 3.142917,4.2730157 Z"
+           id="path31593" />
+      </g>
+    </g>
+  </g>
+</svg>

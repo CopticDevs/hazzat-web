@@ -10,8 +10,12 @@ export const AppSettings: IAppSettings = {
         { id: "booklets", location: "/Booklets" },
         { id: "fonts", location: "/Fonts" },
         { id: "help", location: "/Help" },
-        { id: "contactUs", location: "/ContactUs" }
+        { id: "contactUs", location: "/ContactUs", disabled: true }
     ],
     supportedLanguages: [EnglishLanguageProperties, ArabicLanguageProperties],
-    defaultLanguage: EnglishLanguageProperties
+    defaultLanguage: EnglishLanguageProperties,
+    showMusicAudio: false,
+    autoPlayVideo: false,
+    minContentTextSize: 12,
+    maxContentTextSize: 26
 };

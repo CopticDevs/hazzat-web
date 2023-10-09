@@ -1,0 +1,18 @@
+.mainPaper {
+    width: 55%;
+    border: 20px solid;
+    border-image: url(../images/mainPage.svg);
+    border-image-slice: 100;
+    background-color: #ffffff;
+    margin:10px 10px 40px 50px;
+}
+
+.widePaper {
+    width: 90%;
+}
+
+@media screen and (max-width:800px) {
+    .mainPaper {
+        margin: 10px 10px 40px 20px;
+    }
+}

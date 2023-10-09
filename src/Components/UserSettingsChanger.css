@@ -1,0 +1,27 @@
+.modal-toggle {
+    opacity: 0.5;
+    background-color: #fff;
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    transition: opacity 0.2s ease-in-out;
+}
+
+    .modal-toggle:hover {
+        opacity: 1;
+        background-color: #6c757d;
+        border: 2px solid #6c757d;
+        color: #fff;
+    }
+
+    .modal-toggle:focus {
+        opacity: 0.5;
+        background-color: #fff;
+        border: 2px solid #6c757d;
+        color: #6c757d;
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    .size-button {
+        border: 1px solid;
+        border-radius: 50%;
+    }
