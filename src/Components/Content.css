@@ -1,0 +1,17 @@
+.contentImage {
+    border-color: #000;
+    border-width: 3px;
+    border-style: solid;
+}
+
+.contentLBorder {
+    border-left: 1px solid black;
+}
+
+.contentRBorder {
+    border-right: 1px solid black;
+}
+
+.textAlignTop {
+    vertical-align: text-top;
+}

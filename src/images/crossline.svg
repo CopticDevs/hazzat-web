@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="135mm"
+   height="5mm"
+   viewBox="0 0 135 5"
+   version="1.1"
+   id="svg5">
+  <g id="layer1">
+    <path
+       style="fill:#000000;fill-opacity:0.503497;stroke:none;stroke-width:0.264583"
+       id="path854"
+       d="" />
+    <path
+       style="color:#000000;fill:#000000;fill-opacity:0.503497;stroke:none;stroke-width:0.264583px;-inkscape-stroke:none"
+       d="m 4.739361,2.5 h 59.45954"
+       id="path3156" />
+    <path
+       style="color:#000000;fill:#000000;fill-opacity:0.503497;stroke:none;-inkscape-stroke:none"
+       d="M 4.739669,2.36809 V 2.63176 H 64.198653 V 2.36809 Z"
+       id="path3158" />
+    <path
+       style="color:#000000;fill:#000000;fill-opacity:0.503497;stroke:none;stroke-width:0.264583px;-inkscape-stroke:none"
+       d="M 70.801094,2.5 H 130.26064"
+       id="path3148" />
+    <path
+       style="color:#000000;fill:#000000;fill-opacity:0.503497;stroke:none;-inkscape-stroke:none"
+       d="M 70.800216,2.36809 V 2.63176 H 130.26115 V 2.36809 Z"
+       id="path3150" />
+    <path
+       style="color:#000000;fill:#000000;fill-opacity:0.503497;stroke:none;stroke-width:0.743789;-inkscape-stroke:none;paint-order:stroke fill markers"
+       d="m 67.500056,0.0523473 0.999998,0.9999975 -1,0.9999996 -0.999997,-0.9999975 z"
+       id="rect1229-7" />
+    <path
+       style="color:#000000;fill:#000000;fill-opacity:0.503497;stroke:none;stroke-width:0.743789;-inkscape-stroke:none;paint-order:stroke fill markers"
+       d="m 68.947652,1.4999434 0.999998,0.9999975 -1,0.9999996 -0.999997,-0.9999975 z"
+       id="rect1229-7-4" />
+    <path
+       style="color:#000000;fill:#000000;fill-opacity:0.503497;stroke:none;stroke-width:0.743789;-inkscape-stroke:none;paint-order:stroke fill markers"
+       d="m 66.052352,1.5000516 0.999997,0.9999974 -1,1.0000003 -0.999997,-0.9999974 z"
+       id="rect1229-7-0" />
+    <path
+       style="color:#000000;fill:#000000;fill-opacity:0.503497;stroke:none;stroke-width:0.743789;-inkscape-stroke:none;paint-order:stroke fill markers"
+       d="M 67.499948,2.9476476 68.499946,3.9476451 67.499945,4.9476454 66.499948,3.9476479 Z"
+       id="rect1229-7-4-8" />
+    <path
+       style="color:#000000;fill:#000000;fill-opacity:0.503497;stroke:none;stroke-width:1.065;-inkscape-stroke:none;paint-order:stroke fill markers"
+       d="M 3.2006029,1.7928899 3.9077097,2.4999967 3.2006029,3.2071035 2.4934961,2.4999967 Z"
+       id="rect2360" />
+    <path
+       style="color:#000000;fill:#000000;fill-opacity:0.503497;stroke:none;stroke-width:1.065;-inkscape-stroke:none;paint-order:stroke fill markers"
+       d="M 131.7994,1.7928864 132.50651,2.4999932 131.7994,3.2071 131.09229,2.4999932 Z"
+       id="rect2360-8" />
+  </g>
+</svg>

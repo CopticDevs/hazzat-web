@@ -2,16 +2,21 @@ import { useContext } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { AppSettings } from "./AppSettings";
+import BookletsPage from "./Components/BookletsPage";
+import ContactUsPage from "./Components/ContactUsPage";
+import FontsPage from "./Components/FontsPage";
 import Footer from "./Components/Footer";
 import Header from "./Components/Header";
+import HelpPage from "./Components/HelpPage";
 import Home from './Components/Home';
-import SeasonDetails from './Components/SeasonDetails';
-import Seasons from './Components/Seasons';
-import Services from './Components/Services';
+import InvalidAddressMessage from "./Components/InvalidAddressMessage";
+import MainPaper, { Size } from "./Components/MainPaper";
+import SeasonsPage from './Components/SeasonsPage';
+import TunesPage from "./Components/TunesPage";
+import TypesPage from "./Components/TypesPage";
 import "./css/hazzat.css";
 import "./fonts/fonts.css";
 import { LanguageContext } from "./LanguageContext";
-import LocalizedMessage from "./LocalizedMessage";
 
 function App() {
     const { languageProperties } = useContext(LanguageContext);
@@ -25,13 +30,17 @@ function App() {
                         <div className="rightleftmain clearfix">
                             <Routes>
                                 <Route path="/" element={<Home navItems={AppSettings.navigationMenuItems} />} />
-                                <Route path="/Seasons" element={<Seasons />} />
-                                <Route path={`/Seasons/:seasonId`} element={<SeasonDetails />} />
-                                <Route path={`/Seasons/:seasonId/Services`} element={<Services />} />
+                                <Route path="/Seasons/*" element={<SeasonsPage />} />
+                                <Route path="/Types/*" element={<TypesPage />} />
+                                <Route path="/Tunes/*" element={<TunesPage />} />
+                                <Route path="/Booklets/*" element={<BookletsPage />} />
+                                <Route path="/Fonts/*" element={<FontsPage />} />
+                                <Route path="/Help/*" element={<HelpPage /> } />
+                                <Route path="/ContactUs" element={<ContactUsPage />} />
                                 <Route path="*" element={
-                                    <main style={{ padding: "1rem" }}>
-                                        <p><LocalizedMessage of="noContent" /></p>
-                                    </main>} />
+                                    <MainPaper size={Size.Wide}>
+                                        <p><InvalidAddressMessage /></p>
+                                    </MainPaper>} />
                             </Routes>
                         </div>
                     </div>

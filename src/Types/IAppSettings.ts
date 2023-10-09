@@ -5,4 +5,8 @@ export interface IAppSettings {
     navigationMenuItems: INavMenuItem[];
     supportedLanguages: ILanguageProperties[];
     defaultLanguage: ILanguageProperties;
+    showMusicAudio: boolean;
+    autoPlayVideo: boolean;
+    minContentTextSize: number;
+    maxContentTextSize: number;
 }

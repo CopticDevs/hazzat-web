@@ -1,0 +1,21 @@
+.formatImage {
+    border: 0px;
+    width: 20px;
+    height: 25px;
+    margin-right: 4px;
+}
+
+.flipRtl {
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+}
+
+.paddingRight {
+    padding-right: 20px;
+    padding-left: 5px;
+}
+
+.paddingLeft {
+    padding-left: 20px;
+    padding-right: 5px;
+}
