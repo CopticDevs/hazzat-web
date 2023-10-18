@@ -124,7 +124,6 @@
     <TypeScriptCompile Include="src\reportWebVitals.ts" />
     <TypeScriptCompile Include="src\setupTests.ts" />
     <Content Include="public\downloads\Hazzat_v1_10a.zip" />
-    <Content Include="public\favicon.ico" />
     <Content Include="public\index.html" />
     <Content Include="public\logo192.png" />
     <Content Include="public\logo512.png" />
