@@ -35,12 +35,30 @@ interface IProps {
 export const UserSettingProvider: React.FC = (props: IProps) => {
     const [userSettings, setUserSettings] = useState<UserSettings>(defaultUserSettings);
 
+    const collectColorChangeAnalytics = (fontType: string, newColor: string) => {
+        // Track Hazzat color change
+        window.gtag('event', `change_${fontType}_color`, {
+            event_category: 'Customization',
+            event_label: `${newColor} Color Selected`,
+        });
+    };
+
+    const collectFontSizeChangeAnalytics = (newSize: number) => {
+        // Track Text size change
+        window.gtag('event', `change_text_size`, {
+            event_category: 'Customization',
+            event_label: `${newSize} Size Selected`,
+        });
+    };
+
     const setContentFontColor = (newColor: string) => {
         setUserSettings({ ...userSettings, contentFontColor: newColor });
+        collectColorChangeAnalytics("text", newColor);
     };
 
     const setHazzatFontColor = (newColor: string) => {
         setUserSettings({ ...userSettings, hazzatFontColor: newColor });
+        collectColorChangeAnalytics("hazzat", newColor);
     };
 
     const setContentFontSize = (newSize: number) => {
@@ -49,6 +67,7 @@ export const UserSettingProvider: React.FC = (props: IProps) => {
             englishFontSize: `${newSize}px`,
             arabicFontSize: `${newSize + 4}px`
         });
+        collectFontSizeChangeAnalytics(newSize);
     };
 
     const contextValue: UserSettingContextType = {
