@@ -113,6 +113,7 @@
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IFormatInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IServiceInfo.ts" />
     <TypeScriptCompile Include="src\Utils\LangUtils.ts" />
+    <TypeScriptCompile Include="src\ga.ts" />
     <TypeScriptCompile Include="src\youtube.d.ts" />
     <TypeScriptCompile Include="src\stringFormat.ts" />
     <TypeScriptCompile Include="src\LocalizedMessage.tsx" />

@@ -24,8 +24,17 @@ function UserSettingsChanger() {
     const [selectedFontSize, setSelectedFontSize] = useState<number>(18);
     const langDirName = languageProperties.isRtl ? "dirRtl" : "dirLtr";
 
+    const collectAnalytics = () => {
+        // Track button click
+        window.gtag('event', 'button_click', {
+            event_category: 'Engagement',
+            event_label: 'Customization Button Clicked',
+        });
+    };
+
     const handleToggleModal = () => {
         setExpanded(!expanded);
+        collectAnalytics();
     };
 
     const overrideEnglishStyle = {
