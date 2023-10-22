@@ -5,8 +5,17 @@ import "./UserSettingsChanger.css";
 
 function ToTopButton() {
 
+    const collectAnalytics = () => {
+        // Track button click
+        window.gtag('event', 'button_click', {
+            event_category: 'Engagement',
+            event_label: 'ToTop Button Clicked',
+        });
+    };
+
     const goToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        collectAnalytics();
     };
 
     return (

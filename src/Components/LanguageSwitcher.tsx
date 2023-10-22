@@ -11,11 +11,20 @@ function LanguageSwitcher() {
     // Get the current language from the query parameters
     const searchParams = new URLSearchParams(location.search);
 
+    const collectLangChangeAnalytics = (langCode: string) => {
+        // Track Language change
+        window.gtag('event', `change_nav_lang`, {
+            event_category: 'Customization',
+            event_label: `${langCode} Color Selected`,
+        });
+    };
+
     // Update the lang query parameter in the URL with the new language code
     const handleLanguageClick = (langCode: string) => {
         searchParams.set('lang', langCode);
         const url = `${location.pathname}?${searchParams.toString()}`;
         window.location.href = url;
+        collectLangChangeAnalytics(langCode);
     };
     
     return (
