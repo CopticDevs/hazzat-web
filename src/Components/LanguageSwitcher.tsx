@@ -15,7 +15,7 @@ function LanguageSwitcher() {
         // Track Language change
         window.gtag('event', `change_nav_lang`, {
             event_category: 'Customization',
-            event_label: `${langCode} Color Selected`,
+            event_label: `${langCode} Language Selected`,
         });
     };
 
