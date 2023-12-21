@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
@@ -28,6 +29,7 @@ function HymnContentFromSeasonService(props: IProps) {
     const hymnIdParam: string = hymnId || "";
     const formatIdParam: string = formatId || "";
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [serviceInfo, setServiceInfo] = useState<IServiceInfo | undefined>();
     const [hymnInfo, setHymnInfo] = useState<IHymnInfo | undefined>();
     const [formatsMap, setFormatsMap] = useState<StringMap<string | undefined>>({});
@@ -37,13 +39,13 @@ function HymnContentFromSeasonService(props: IProps) {
     const isMounted = useRef(true);
 
     const fetchVariationsCallback = () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         return hymnsDataProvider.getServiceHymnsFormatVariationList(seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam);
     };
 
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const servicePromise = hymnsDataProvider.getService(seasonIdParam, serviceIdParam);
         const hymnPromise = hymnsDataProvider.getServiceHymn(seasonIdParam, serviceIdParam, hymnIdParam);
         const formatListPromise = hymnsDataProvider.getServiceHymnFormatList(seasonIdParam, serviceIdParam, hymnIdParam);
@@ -64,7 +66,7 @@ function HymnContentFromSeasonService(props: IProps) {
             setFormatInfo(formatResponse);
             setIsLoading(false);
         }
-    }, [seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam, languageProperties, isMounted]);
+    }, [seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam, languageProperties, environmentProperties, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;

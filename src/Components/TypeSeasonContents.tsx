@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
@@ -18,19 +19,20 @@ interface IProps {
 
 function TypeSeasonsContents(props: IProps) {
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [hymns, setHymnsInfo] = useState<IHymnInfoWithServiceDetails[]>([]);
     const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
     const isMounted = useRef(true);
 
     const fetchFromBackend = React.useCallback(async () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const hymnsResponse = await hymnsDataProvider.getTypeSeasonServiceHymnList(props.typeId, props.seasonId);
 
         if (isMounted.current) {
             setHymnsInfo(hymnsResponse.sort(HymnUtils.hymnInfoWithServiceDetailsComparer));
         }
-    }, [languageProperties, props.typeId, props.seasonId, isMounted]);
+    }, [languageProperties, environmentProperties, props.typeId, props.seasonId, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;
@@ -57,7 +59,7 @@ function TypeSeasonsContents(props: IProps) {
                             const hymnId = getTypeSeasonHymnNumberFromId(hymn.id);
 
                             const getFormatsCallback = () => {
-                                const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+                                const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
                                 return hymnsDataProvider.getTypeSeasonServiceHymnFormatList(props.typeId, props.seasonId, hymnId);
                             };
 

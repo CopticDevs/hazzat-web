@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
@@ -12,6 +13,7 @@ import MyNavLink from "./MyNavLink";
 
 function BookletsMenu() {
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [bookletList, setBookletList] = useState<IBookletInfo[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -19,14 +21,14 @@ function BookletsMenu() {
 
     const fetchBooklets = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const booklets = await hymnsDataProvider.getBookletList();
 
         if (isMounted.current) {
             setBookletList(booklets.sort(HymnUtils.bookletInfoComparer));
             setIsLoading(false);
         }
-    }, [languageProperties, isMounted]);
+    }, [languageProperties, environmentProperties, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;

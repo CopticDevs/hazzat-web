@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Route, Routes, useParams } from "react-router-dom";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
@@ -13,6 +14,7 @@ function TuneRouter() {
     let { tuneId } = useParams();
     const tuneIdParam: string = tuneId || "";
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [tuneInfo, setTuneInfo] = useState<ITuneInfo | undefined>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -20,14 +22,14 @@ function TuneRouter() {
 
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const tuneResponse = await hymnsDataProvider.getTune(tuneIdParam);
 
         if (isMounted.current) {
             setTuneInfo(tuneResponse);
             setIsLoading(false);
         }
-    }, [tuneIdParam, languageProperties, isMounted]);
+    }, [tuneIdParam, languageProperties, environmentProperties, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;

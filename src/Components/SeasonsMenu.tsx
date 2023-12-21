@@ -1,6 +1,7 @@
 import { faCross } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
@@ -18,6 +19,7 @@ function SeasonsMenu() {
 
     const loadingDiv = useMemo(() => getLoadingSpinnerDiv(), []);
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [dateSpecificSeasons, setDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [nonDateSpecificSeasons, setNonDateSpecificSeasons] = useState<ISeasonInfo[]>([]);
     const [dsSeasonNodes, setDsSeasonNodes] = useState<React.ReactNode[]>([loadingDiv]);
@@ -25,7 +27,7 @@ function SeasonsMenu() {
     const isMounted = useRef(true);
 
     const fetchSeasons = React.useCallback(async () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const seasons = await hymnsDataProvider.getSeasonList();
         const dsSeasons: ISeasonInfo[] = [];
         const ndsSeasons: ISeasonInfo[] = [];
@@ -43,7 +45,7 @@ function SeasonsMenu() {
             setDateSpecificSeasons(dsSeasons.sort(HymnUtils.seasonInfoComparer));
             setNonDateSpecificSeasons(ndsSeasons.sort(HymnUtils.seasonInfoComparer));
         }
-    }, [languageProperties, isMounted]);
+    }, [languageProperties, environmentProperties, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;
