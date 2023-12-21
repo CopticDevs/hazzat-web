@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
@@ -27,6 +28,7 @@ function HymnContentFromService(props: IProps) {
     const serviceIdParam: string = serviceId || "";
     const formatIdParam: string = formatId || "";
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [serviceInfo, setServiceInfo] = useState<IServiceInfo | undefined>();
     const [formatName, setformatName] = useState<string | undefined>("");
     const [hymnList, setHymnList] = useState<IHymnInfo[]>([]);
@@ -85,7 +87,7 @@ function HymnContentFromService(props: IProps) {
 
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const servicePromise = hymnsDataProvider.getService(seasonIdParam, serviceIdParam);
         const hymnListPromise = hymnsDataProvider.getServiceHymnList(seasonIdParam, serviceIdParam);
         const [serviceResponse, hymnListResponse] = await Promise.all([servicePromise, hymnListPromise]);
@@ -98,7 +100,7 @@ function HymnContentFromService(props: IProps) {
             setIsLoading(false);
         }
 
-    }, [seasonIdParam, serviceIdParam, languageProperties, isMounted]);
+    }, [seasonIdParam, serviceIdParam, languageProperties, environmentProperties, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;
@@ -168,7 +170,7 @@ function HymnContentFromService(props: IProps) {
 
                         {hymnList.map((hymn) => {
                             const hymnId = getHymnNumberFromId(hymn.id);
-                            const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+                            const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
 
                             const variationsCallback = () => {        
                                 return hymnsDataProvider.getServiceHymnsFormatVariationList(seasonIdParam, serviceIdParam, hymnId, formatIdParam);

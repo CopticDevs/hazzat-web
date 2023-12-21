@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
@@ -17,17 +18,18 @@ interface IProps {
 }
 function TuneSeasonsMenu(props: IProps) {
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [seasons, setSeasons] = useState<ISeasonInfo[]>([]);
     const isMounted = useRef(true);
 
     const fetchFromBackend = React.useCallback(async () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const seasonsResponse = await hymnsDataProvider.getTuneSeasonList(props.tuneId);
 
         if (isMounted.current) {
             setSeasons(seasonsResponse.sort(HymnUtils.seasonInfoComparer));
         }
-    }, [languageProperties, props.tuneId, isMounted]);
+    }, [languageProperties, environmentProperties, props.tuneId, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;

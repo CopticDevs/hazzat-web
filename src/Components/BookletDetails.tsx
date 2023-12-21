@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { ReactComponent as BookletFormatImg } from "../images/bookletFormat.svg";
 import { ReactComponent as DisplayFormatImg } from "../images/displayFormat.svg";
 import { strings } from "../l8n";
@@ -16,6 +17,7 @@ function BookletDetails() {
     let { bookletId } = useParams();
     const bookletIdParam: string = bookletId || "";
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [bookletInfo, setBookletInfo] = useState<IBookletInfo | undefined>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -23,14 +25,14 @@ function BookletDetails() {
 
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const bookletResponse = await hymnsDataProvider.getBooklet(bookletIdParam);
 
         if (isMounted.current) {
             setBookletInfo(bookletResponse);
             setIsLoading(false);
         }
-    }, [bookletIdParam, languageProperties, isMounted]);
+    }, [bookletIdParam, languageProperties, environmentProperties, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;
