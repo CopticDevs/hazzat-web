@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
@@ -27,6 +28,7 @@ function ServiceContents(props: IProps) {
 
     const loadingDiv = useMemo(() => getLoadingSpinnerDiv(), []);
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [hymns, setHymnsInfo] = useState<IHymnInfo[]>([]);
     const [hymnsNodes, setHymnsNodes] = useState<React.ReactNode[]>([loadingDiv]);
     const [hasText, setHasText] = useState<boolean>(false);
@@ -94,13 +96,13 @@ function ServiceContents(props: IProps) {
     }, [props.seasonId, props.serviceId, hasText, hasHazzat, hasVerticalHazzat, hasMusicalNotes, hasAudio, hasVideo, hasInformation]);
 
     const fetchFromBackend = React.useCallback(async () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const hymnsResponse = await hymnsDataProvider.getServiceHymnList(props.seasonId, props.serviceId);
 
         if (isMounted.current) {
             setHymnsInfo(hymnsResponse.sort(HymnUtils.hymnInfoComparer));
         }
-    }, [languageProperties, props.seasonId, props.serviceId, isMounted]);
+    }, [languageProperties, environmentProperties, props.seasonId, props.serviceId, isMounted]);
 
     useEffect(() => {
         let alternateHymn = true;
@@ -109,7 +111,7 @@ function ServiceContents(props: IProps) {
             const hymnId = getHymnNumberFromId(hymn.id);
 
             const getFormatsCallback = () => {
-                const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+                const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
                 return hymnsDataProvider.getServiceHymnFormatList(props.seasonId, props.serviceId, hymnId);
             };
 
@@ -128,7 +130,7 @@ function ServiceContents(props: IProps) {
         } else {
             setHymnsNodes(theNodes);
         }
-    }, [hymns, loadingDiv, languageProperties.localeName, props.serviceId, props.seasonId]);
+    }, [hymns, loadingDiv, languageProperties, environmentProperties, props.serviceId, props.seasonId]);
 
     useEffect(() => {
         isMounted.current = true;

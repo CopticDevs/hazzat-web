@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
@@ -12,6 +13,7 @@ import MyNavLink from "./MyNavLink";
 
 function TunesMenu() {
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [tuneList, setTuneList] = useState<ITuneInfo[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -19,14 +21,14 @@ function TunesMenu() {
 
     const fetchTunes = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const tunes = await hymnsDataProvider.getTuneList();
 
         if (isMounted.current) {
             setTuneList(tunes.sort(HymnUtils.tuneInfoComparer));
             setIsLoading(false);
         }
-    }, [languageProperties, isMounted]);
+    }, [languageProperties, environmentProperties, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;

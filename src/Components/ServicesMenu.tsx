@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
@@ -22,18 +23,19 @@ function ServicesMenu(props: IProps) {
 
     const loadingDiv = useMemo(() => getLoadingSpinnerDiv(), []);
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [services, setServices] = useState<IServiceInfo[]>([]);
     const [servicesNodes, setServicesNodes] = useState<React.ReactNode[]>([loadingDiv]);
     const isMounted = useRef(true);
 
     const fetchFromBackend = React.useCallback(async () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const servicesResponse = await hymnsDataProvider.getServiceList(props.seasonId);
 
         if (isMounted.current) {
             setServices(servicesResponse.sort(HymnUtils.serviceInfoComparer));
         }
-    }, [languageProperties, props.seasonId, isMounted]);
+    }, [languageProperties, environmentProperties, props.seasonId, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;

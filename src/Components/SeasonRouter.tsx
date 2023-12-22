@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Route, Routes, useParams } from "react-router-dom";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
@@ -17,6 +18,7 @@ function SeasonRouter() {
     let { seasonId } = useParams();
     const seasonIdParam: string = seasonId || "";
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [seasonInfo, setSeasonInfo] = useState<ISeasonInfo | undefined>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -24,14 +26,14 @@ function SeasonRouter() {
 
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const seasonResponse = await hymnsDataProvider.getSeason(seasonIdParam);
 
         if (isMounted.current) {
             setSeasonInfo(seasonResponse);
             setIsLoading(false);
         }
-    }, [seasonIdParam, languageProperties, isMounted]);
+    }, [seasonIdParam, languageProperties, environmentProperties, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;

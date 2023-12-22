@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Route, Routes, useParams } from "react-router-dom";
+import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
@@ -13,6 +14,7 @@ function TypeRouter() {
     let { typeId } = useParams();
     const typeIdParam: string = typeId || "";
     const { languageProperties } = useContext(LanguageContext);
+    const { environmentProperties } = useContext(EnvironmentContext);
     const [typeInfo, setTypeInfo] = useState<ITypeInfo | undefined>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -20,14 +22,14 @@ function TypeRouter() {
 
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
         const typeResponse = await hymnsDataProvider.getType(typeIdParam);
 
         if (isMounted.current) {
             setTypeInfo(typeResponse);
             setIsLoading(false);
         }
-    }, [typeIdParam, languageProperties, isMounted]);
+    }, [typeIdParam, languageProperties, environmentProperties, isMounted]);
 
     useEffect(() => {
         isMounted.current = true;

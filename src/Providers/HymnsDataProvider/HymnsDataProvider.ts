@@ -10,12 +10,11 @@ import { ITypeInfo } from "./Models/ITypeInfo";
 import { IHymnContent, IVariationInfo } from "./Models/IVariationInfo";
 
 export class HymnsDataProvider implements IHymnsDataProvider {
-    private hazzatApiBaseUrl = "https://api.hazzat.com";
     private httpClient: AxiosInstance;
 
-    constructor(language: string) {
+    constructor(language: string, envBaseUrl: string) {
         this.httpClient = axios.create({
-            baseURL: this.hazzatApiBaseUrl,
+            baseURL: envBaseUrl,
             headers: {
                 "Accept-Language": language
             }
