@@ -92,6 +92,39 @@ function UserSettingsChanger() {
                     <form>
                         <div className="container-fluid">
                             <div className="row">
+                                <div className="row" style={{ paddingTop: "10px" }}>
+                                    <div><strong><LocalizedMessage of="size" /></strong></div>
+                                </div>
+                            </div>
+
+                            <div className="m-4">
+                                <Modal.Title as="h5"><LocalizedMessage of="sample" /></Modal.Title>
+                                <div className="container">
+                                    <div className="row">
+                                        <div style={{ textAlign: languageProperties.isRtl ? "left" : "right", width: "10%", minWidth: "41px", padding: "0px" }}>
+                                            <Button
+                                                variant="light"
+                                                className={selectedFontSize === AppSettings.minContentTextSize ? "rounded-circle size-button disabled" : "rounded-circle size-button"}
+                                                onClick={handleDecrementTextSize}>
+                                                <FontAwesomeIcon icon={faMinus} />
+                                            </Button>
+                                        </div>
+                                        <div className="border" style={{ width: "60%" }}>
+                                            <div style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: strings.sampleCopticShort }} />
+                                        </div>
+                                        <div style={{ textAlign: languageProperties.isRtl ? "right" : "left", width: "10%", minWidth: "41px", padding: "0px" }}>
+                                            <Button
+                                                variant="light"
+                                                className={selectedFontSize === AppSettings.maxContentTextSize ? "rounded-circle size-button disabled" : "rounded-circle size-button"}
+                                                onClick={handleIncrementTextSize}>
+                                                <FontAwesomeIcon icon={faPlus} />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="row">
                                 <div><strong><LocalizedMessage of="textFormatName" /></strong></div>
                             </div>
                             <div className="row">
@@ -118,37 +151,11 @@ function UserSettingsChanger() {
                                     />
                                 ))}
                             </div>
-                            <div className="row" style={{ paddingTop: "10px" }}>
-                                <div><strong><LocalizedMessage of="size" /></strong></div>
-                            </div>
+                            
                         </div>
-                    </form>                    
-                    <div className="m-4">
-                        <Modal.Title as="h5"><LocalizedMessage of="sample" /></Modal.Title>
-                        <div className="container">
-                            <div className="row">
-                                <div style={{ textAlign: languageProperties.isRtl ? "left" : "right", width: "10%", minWidth: "41px", padding: "0px" }}>
-                                    <Button
-                                        variant="light"
-                                        className={selectedFontSize === AppSettings.minContentTextSize ? "rounded-circle size-button disabled" : "rounded-circle size-button"}
-                                        onClick={handleDecrementTextSize}>
-                                        <FontAwesomeIcon icon={faMinus} />
-                                    </Button>
-                                </div>
-                                <div className="border" style={{ width: "60%" }}>
-                                    <div style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: strings.sampleCopticShort }} />
-                                </div>
-                                <div style={{ textAlign: languageProperties.isRtl ? "right" : "left", width: "10%", minWidth: "41px", padding: "0px" }}>
-                                    <Button
-                                        variant="light"
-                                        className={selectedFontSize === AppSettings.maxContentTextSize ? "rounded-circle size-button disabled" : "rounded-circle size-button"}
-                                        onClick={handleIncrementTextSize}>
-                                        <FontAwesomeIcon icon={faPlus} />
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
+                        
+                    </form>
                 </Modal.Body>
             </Modal>
         </>
