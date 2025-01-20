@@ -55,10 +55,9 @@ function SeasonRouter() {
                     !!seasonInfo ?
                         <div>
                             <div className="pageTitle">{stringFormat(strings.seasonTitle, seasonInfo.name)}</div>
-                            <div className="seasonVerse" dangerouslySetInnerHTML={{ __html: seasonInfo.verse }} />
 
                             <Routes>
-                                <Route path="/" element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.name} />} />
+                                <Route path="/" element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.name} seasonVerse={seasonInfo.verse} />} />
                                 <Route path={`/Services/:serviceId/hymns/:hymnId/formats/:formatId`} element={<HymnContentFromSeasonService seasonInfo={seasonInfo} />} />
                                 <Route path={`/Services/:serviceId/formats/:formatId`} element={<HymnContentFromService seasonInfo={seasonInfo} />} />
                             </Routes>
