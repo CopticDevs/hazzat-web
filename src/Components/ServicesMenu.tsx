@@ -15,6 +15,7 @@ import ServiceContents from "./ServiceContents";
 interface IProps {
     seasonName: string;
     seasonId: string;
+    seasonVerse: string;
 }
 function ServicesMenu(props: IProps) {
     const getLoadingSpinnerDiv = () => {
@@ -68,6 +69,9 @@ function ServicesMenu(props: IProps) {
             {
                 !!services ?
                     <div>
+                        <div>
+                            <div className="seasonVerse" dangerouslySetInnerHTML={{ __html: props.seasonVerse }} />
+                        </div>
                         <BreadCrumb items={[
                             { title: strings.seasons, path: "/Seasons" },
                             { title: props.seasonName }]} />
