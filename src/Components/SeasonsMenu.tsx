@@ -8,7 +8,6 @@ import LocalizedMessage from "../LocalizedMessage";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
-import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import LoadingSpinner from "./LoadingSpinner";
 import MyNavLink from "./MyNavLink";
 
@@ -27,23 +26,37 @@ function SeasonsMenu() {
     const isMounted = useRef(true);
 
     const fetchSeasons = React.useCallback(async () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
         const seasons = await hymnsDataProvider.getSeasonList();
-        const dsSeasons: ISeasonInfo[] = [];
-        const ndsSeasons: ISeasonInfo[] = [];
-
-        // Place seasons into buckets
-        seasons.forEach((season) => {
-            if (season.isDateSpecific) {
-                dsSeasons.push(season);
-            } else {
-                ndsSeasons.push(season);
-            }
+        
+        // Separate Annual season
+        const annual = seasons.find(s => s.name.toLowerCase().includes('annual'));
+        const nonAnnualSeasons = seasons.filter(s => !s.name.toLowerCase().includes('annual'));
+        
+        // Separate date-specific and non-date-specific seasons
+        const dateSpecific = nonAnnualSeasons.filter(s => s.isDateSpecific);
+        const nonDateSpecific = nonAnnualSeasons.filter(s => !s.isDateSpecific);
+        
+        // Sort date-specific seasons by date (January to December order)
+        const currentYear = new Date().getFullYear();
+        const sortedDateSpecific = dateSpecific.sort((a, b) => {
+            const aRange = a.dateRanges?.find(r => r.year === currentYear);
+            const bRange = b.dateRanges?.find(r => r.year === currentYear);
+            
+            if (!aRange && !bRange) return a.order - b.order;
+            if (!aRange) return 1;
+            if (!bRange) return -1;
+            
+            return aRange.dateStart.localeCompare(bRange.dateStart);
         });
+        
+        // Combine: Annual first, then date-specific, then non-date-specific
+        const dsSeasons: ISeasonInfo[] = annual ? [annual, ...sortedDateSpecific] : sortedDateSpecific;
+        const ndsSeasons: ISeasonInfo[] = nonDateSpecific.sort((a, b) => a.order - b.order);
 
         if (isMounted.current) {
-            setDateSpecificSeasons(dsSeasons.sort(HymnUtils.seasonInfoComparer));
-            setNonDateSpecificSeasons(ndsSeasons.sort(HymnUtils.seasonInfoComparer));
+            setDateSpecificSeasons(dsSeasons);
+            setNonDateSpecificSeasons(ndsSeasons);
         }
     }, [languageProperties, environmentProperties, isMounted]);
 
@@ -61,7 +74,7 @@ function SeasonsMenu() {
         const theNodes = dateSpecificSeasons.map((season) => {
             return (
                 <div key={season.id} style={{ fontSize: "20px" }}>
-                    <MyNavLink to={`${season.id}`}><FontAwesomeIcon icon={faCross} style={{paddingRight: "5px"} } /> {season.name}</MyNavLink>
+                    <MyNavLink to={`${season.id}`}><FontAwesomeIcon icon={faCross} style={{paddingRight: "5px"} } /> {season.displayName}</MyNavLink>
                 </div>
             )
         });
@@ -77,7 +90,7 @@ function SeasonsMenu() {
         const theNodes = nonDateSpecificSeasons.map((season) => {
             return (
                 <div key={season.id} style={{ fontSize: "20px" }}>
-                    <MyNavLink to={`${season.id}`}><FontAwesomeIcon icon={faCross} style={{ paddingRight: "5px" }} /> {season.name}</MyNavLink>
+                    <MyNavLink to={`${season.id}`}><FontAwesomeIcon icon={faCross} style={{ paddingRight: "5px" }} /> {season.displayName}</MyNavLink>
                 </div>
             )
         });

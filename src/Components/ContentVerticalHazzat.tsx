@@ -35,7 +35,7 @@ function ContentVerticalHazzat(props: IProps) {
             {props.variations.map((variation) => {
                 return <div key={variation.id}>
                     <div className={langClassName} style={{ paddingBottom: "20px", paddingTop: "20px" }}>
-                        <HymnTitle content={variation.name} />
+                        <HymnTitle content={variation.displayName} />
                     </div>
                     <div className="clear" />
                     {variation.content.copticVerticalHazzat ?

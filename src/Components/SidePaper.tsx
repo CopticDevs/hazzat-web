@@ -25,7 +25,7 @@ function SidePaper(props: IProps) {
             <div className="hymnRep clearfix">
 
                 <HymnTitle content={strings.followUs} />
-                <div className="socialMedia clearfix" style={{paddingBottom: "40px"}}>
+                <div className="socialMedia clearfix" style={{paddingBottom: "20px"}}>
 
                     <a href="http://www.facebook.com/hazzat.com" target="_blank" rel="noreferrer">
                         <FacebookIcon />
@@ -39,6 +39,35 @@ function SidePaper(props: IProps) {
                         <YoutubeIcon />
                     </a>
 
+                </div>
+
+                {/* Mobile App Links */}
+                <div className="mobile-app-links" style={{ paddingBottom: "30px" }}>
+                    <HymnTitle content={strings.downloadTheApp} />
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "center", marginTop: "15px" }}>
+                        <a 
+                            href="https://apps.apple.com/us/app/hazzat-app/id6753879416"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <img 
+                                src="/images/app-store-badge.svg" 
+                                alt="Download on the App Store"
+                                style={{ height: "50px", width: "auto" }}
+                            />
+                        </a>
+                        <a 
+                            href="https://play.google.com/store/apps/details?id=com.hazzat.hazzatandroidapp&pcampaignid=web_share"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <img 
+                                src="/images/google-play-badge.png" 
+                                alt="Get it on Google Play"
+                                style={{ height: "50px", width: "auto" }}
+                            />
+                        </a>
+                    </div>
                 </div>
 
                 <div className="hymnData clearfix">

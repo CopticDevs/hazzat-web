@@ -1,35 +1,41 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
+import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { StringMap } from "../Types/StringMap";
+import Content from "./Content";
+import FormatBar from "./FormatBar";
 import FormatOptionsContextMenu from "./FormatOptionsContextMenu";
 import "./HymnRow.css";
 import MyNavLink from "./MyNavLink";
 
 interface IProps {
-    hymnName: string;
+    hymn: IHymnInfo;
+    seasonId: string;
+    serviceId: string;
     isAlternate: boolean;
-    getFormatsCallback: () => Promise<IFormatInfo[]>;
-    parseFormatIdCallback: (fullFormatId: string) => string;
     handleFoundFormat?: (formatId: string) => void;
+    isExpanded?: boolean;
+    selectedFormatId?: string;
 }
 
 function HymnRow(props: IProps) {
     const [formatsMap, setFormatsMap] = useState<StringMap<string | undefined>>({});
     const [hymnFormatLink, setHymnFormatLink] = useState<string | undefined>(undefined);
+    const [activeFormatId, setActiveFormatId] = useState<string | undefined>(props.selectedFormatId);
 
     const isMounted = useRef(true);
 
-    const fetchFromBackend = React.useCallback(async () => {
-        const formatsResponse = await props.getFormatsCallback();
+    useEffect(() => {
+        isMounted.current = true;
         
-        
+        // Process embedded formats from hymn data
         const resultFormatsMap: StringMap<string | undefined> = {};
-        // update formats map
-        formatsResponse.forEach((formatInfo) => {
-            const formatId = props.parseFormatIdCallback(formatInfo.id);
-            resultFormatsMap[formatId] = formatInfo.id;
+        const formats = props.hymn.formats || [];
+        
+        formats.forEach((formatInfo) => {
+            const formatId = formatInfo.id;
+            resultFormatsMap[formatId] = `/seasons/${props.seasonId}/services/${props.serviceId}/hymns/${props.hymn.id}/formats/${formatId}`;
 
-            if (!!props.handleFoundFormat) {
+            if (props.handleFoundFormat) {
                 props.handleFoundFormat(formatId);
             }
         });
@@ -46,28 +52,56 @@ function HymnRow(props: IProps) {
         if (isMounted.current) {
             setFormatsMap(resultFormatsMap);
             setHymnFormatLink(initialFormatLink);
+            
+            // Set active format if not already set
+            if (!activeFormatId && formats.length > 0) {
+                setActiveFormatId(formats[0].id);
+            }
         }
-    }, [props, isMounted]);
-
-    useEffect(() => {
-        isMounted.current = true;
-        fetchFromBackend();
 
         return () => {
             isMounted.current = false;
         };
-    }, [fetchFromBackend]);
+    }, [props.hymn, props.seasonId, props.serviceId, props.handleFoundFormat, activeFormatId]);
+
+    // Update active format when selectedFormatId changes
+    useEffect(() => {
+        if (props.selectedFormatId) {
+            setActiveFormatId(props.selectedFormatId);
+        }
+    }, [props.selectedFormatId]);
 
     if (!isMounted.current) {
         return (<div />)
     }
 
+    // If expanded, show the hymn content with format bar
+    if (props.isExpanded && activeFormatId) {
+        const activeFormat = props.hymn.formats?.find(f => f.id === activeFormatId);
+        
+        return (
+            <div className="hymn-expanded">
+                <FormatBar
+                    title={props.hymn.displayName}
+                    formatsMap={formatsMap}
+                    activeFormatId={activeFormatId}
+                />
+                {activeFormat && (
+                    <Content 
+                        formatId={activeFormatId} 
+                        variationsCallback={async () => activeFormat.variations || []}
+                    />
+                )}
+            </div>
+        );
+    }
+
     return (
         <div className={props.isAlternate ? `alternate contentLinksDiv` : "contentLinksDiv"} style={{ padding: "6px" }}>
-            <FormatOptionsContextMenu title={props.hymnName} formatsMap={formatsMap} />
+            <FormatOptionsContextMenu title={props.hymn.displayName} formatsMap={formatsMap} />
             <div>
                 {
-                    !!hymnFormatLink ? <MyNavLink to={hymnFormatLink}>{props.hymnName}</MyNavLink> : props.hymnName
+                    !!hymnFormatLink ? <MyNavLink to={hymnFormatLink}>{props.hymn.displayName}</MyNavLink> : props.hymn.displayName
                 }
             </div>
         </div>

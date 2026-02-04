@@ -21,7 +21,7 @@ function BookletsMenu() {
 
     const fetchBooklets = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
         const booklets = await hymnsDataProvider.getBookletList();
 
         if (isMounted.current) {
