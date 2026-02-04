@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import ContentAudio from "./ContentAudio";
 import ContentHazzat from "./ContentHazzat";
@@ -13,10 +12,6 @@ import LoadingSpinner from "./LoadingSpinner";
 interface IProps {
     formatId: string;
     variationsCallback: () => Promise<IVariationInfo<any>[]>;
-    formatCallbackInfo?: {
-        formatListCallback: () => Promise<IFormatInfo[]>;
-        handleFoundFormat: (formatId: string) => void;
-    }
 }
 
 function Content(props: IProps) {
@@ -31,14 +26,6 @@ function Content(props: IProps) {
         }
 
         const variationsResponse: IVariationInfo<any>[] = await props.variationsCallback();
-        if (props.formatCallbackInfo) {
-
-            const formatListResponse = await props.formatCallbackInfo.formatListCallback();
-
-            formatListResponse.forEach((formatInfo) => {
-                props.formatCallbackInfo?.handleFoundFormat(formatInfo.id);
-            });
-        }
 
         if (isMounted.current) {
             setVariations(variationsResponse);

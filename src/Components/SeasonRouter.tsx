@@ -26,8 +26,11 @@ function SeasonRouter() {
 
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
-        const seasonResponse = await hymnsDataProvider.getSeason(seasonIdParam);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
+        
+        // Fetch season from the seasons list (S3 backend)
+        const seasons = await hymnsDataProvider.getSeasonList();
+        const seasonResponse = seasons.find(s => s.id === seasonIdParam);
 
         if (isMounted.current) {
             setSeasonInfo(seasonResponse);
@@ -45,7 +48,7 @@ function SeasonRouter() {
     }, [fetchFromBackend]);
 
     useEffect(() => {
-        document.title = isLoading ? "hazzat.com" : `${seasonInfo?.name || strings.seasons} - hazzat.com`;
+        document.title = isLoading ? "hazzat.com" : `${seasonInfo?.displayName || strings.seasons} - hazzat.com`;
     }, [isLoading, seasonInfo]);
 
     return (
@@ -54,12 +57,14 @@ function SeasonRouter() {
                 isLoading ? <LoadingSpinner /> :
                     !!seasonInfo ?
                         <div>
-                            <div className="pageTitle">{stringFormat(strings.seasonTitle, seasonInfo.name)}</div>
+                            <div className="pageTitle">{stringFormat(strings.seasonTitle, seasonInfo.displayName)}</div>
 
                             <Routes>
-                                <Route path="/" element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.name} seasonVerse={seasonInfo.verse} />} />
-                                <Route path={`/Services/:serviceId/hymns/:hymnId/formats/:formatId`} element={<HymnContentFromSeasonService seasonInfo={seasonInfo} />} />
-                                <Route path={`/Services/:serviceId/formats/:formatId`} element={<HymnContentFromService seasonInfo={seasonInfo} />} />
+                                <Route path="/" element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.displayName} seasonVerse={seasonInfo.displayVerse} />} />
+                                <Route path={`/services/:serviceId`} element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.displayName} seasonVerse={seasonInfo.displayVerse} />} />
+                                <Route path={`/services/:serviceId/hymns/:hymnId`} element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.displayName} seasonVerse={seasonInfo.displayVerse} />} />
+                                <Route path={`/services/:serviceId/hymns/:hymnId/formats/:formatId`} element={<HymnContentFromSeasonService seasonInfo={seasonInfo} />} />
+                                <Route path={`/services/:serviceId/formats/:formatId`} element={<HymnContentFromService seasonInfo={seasonInfo} />} />
                             </Routes>
                         </div>
                         : <InvalidAddressMessage />

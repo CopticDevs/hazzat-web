@@ -10,7 +10,6 @@ import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { StringMap } from "../Types/StringMap";
-import { getFormatNumberFromId } from "../Utils/ParserUtils";
 import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
 import ContentPageSettingPane from "./ContentPageSettingPane";
@@ -39,31 +38,38 @@ function HymnContentFromSeasonService(props: IProps) {
     const isMounted = useRef(true);
 
     const fetchVariationsCallback = () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
-        return hymnsDataProvider.getServiceHymnsFormatVariationList(seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam);
+        // Find the hymn and format from embedded data
+        const hymn = serviceInfo?.hymns?.find(h => h.id === hymnIdParam);
+        const format = hymn?.formats?.find(f => f.id === formatIdParam);
+        
+        return Promise.resolve(format?.variations || []);
     };
 
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
-        const servicePromise = hymnsDataProvider.getService(seasonIdParam, serviceIdParam);
-        const hymnPromise = hymnsDataProvider.getServiceHymn(seasonIdParam, serviceIdParam, hymnIdParam);
-        const formatListPromise = hymnsDataProvider.getServiceHymnFormatList(seasonIdParam, serviceIdParam, hymnIdParam);
-        const formatPromise = hymnsDataProvider.getServiceHymnFormat(seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam);
-        const [serviceResponse, hymnResponse, formatListResponse, formatResponse] = await Promise.all([servicePromise, hymnPromise, formatListPromise, formatPromise]);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
+        
+        // Fetch service with embedded hymns from S3
+        const serviceResponse = await hymnsDataProvider.getService(seasonIdParam, serviceIdParam);
 
-        const resultFormatsMap: StringMap<string | undefined> = {};
-        // update formats map
-        formatListResponse.forEach((formatInfo) => {
-            const formatId = getFormatNumberFromId(formatInfo.id);
-            resultFormatsMap[formatId] = formatInfo.id;
-        });
-
-        if (isMounted.current) {
+        if (isMounted.current && serviceResponse) {
             setServiceInfo(serviceResponse);
-            setHymnInfo(hymnResponse);
+            
+            // Find the specific hymn and format from embedded data
+            const hymn = serviceResponse.hymns?.find(h => h.id === hymnIdParam);
+            const formatList = hymn?.formats || [];
+            const format = formatList.find(f => f.id === formatIdParam);
+            
+            const resultFormatsMap: StringMap<string | undefined> = {};
+            // update formats map with full URLs
+            formatList.forEach((formatInfo) => {
+                const formatId = formatInfo.id;
+                resultFormatsMap[formatId] = `/seasons/${seasonIdParam}/services/${serviceIdParam}/hymns/${hymnIdParam}/formats/${formatId}`;
+            });
+
+            setHymnInfo(hymn);
             setFormatsMap(resultFormatsMap);
-            setFormatInfo(formatResponse);
+            setFormatInfo(format);
             setIsLoading(false);
         }
     }, [seasonIdParam, serviceIdParam, hymnIdParam, formatIdParam, languageProperties, environmentProperties, isMounted]);
@@ -78,8 +84,8 @@ function HymnContentFromSeasonService(props: IProps) {
     }, [fetchFromBackend]);
 
     useEffect(() => {
-        document.title = isLoading || !serviceInfo ? "hazzat.com" : `${props.seasonInfo.name} - ${serviceInfo?.name}: ${hymnInfo?.name} (${formatInfo?.name}) - hazzat.com`;
-    }, [isLoading, props.seasonInfo, serviceInfo, serviceInfo?.name, hymnInfo?.name, formatInfo?.name]);
+        document.title = isLoading || !serviceInfo ? "hazzat.com" : `${props.seasonInfo.displayName} - ${serviceInfo.displayName}: ${hymnInfo?.displayName || ''} (${formatInfo?.name || ''}) - hazzat.com`;
+    }, [isLoading, props.seasonInfo, serviceInfo, hymnInfo, formatInfo]);
 
     if (isLoading) {
         return (<LoadingSpinner />);
@@ -100,11 +106,11 @@ function HymnContentFromSeasonService(props: IProps) {
                     <div>
                         <BreadCrumb items={[
                             { title: strings.seasons, path: "/Seasons" },
-                            { title: props.seasonInfo.name, path: `/Seasons/${seasonIdParam}` },
-                            { title: `${serviceInfo.name}: ${hymnInfo.name}` }]} />
+                            { title: props.seasonInfo.displayName, path: `/Seasons/${seasonIdParam}` },
+                            { title: `${serviceInfo.displayName}: ${hymnInfo.displayName}` }]} />
 
                         <FormatBar
-                            title={hymnInfo.name}
+                            title={hymnInfo.displayName}
                             formatsMap={formatsMap}
                             activeFormatId={formatIdParam}
                             />

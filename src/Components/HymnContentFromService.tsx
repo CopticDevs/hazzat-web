@@ -10,7 +10,6 @@ import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import { StringMap } from "../Types/StringMap";
-import { getFormatNumberFromId, getHymnNumberFromId } from "../Utils/ParserUtils";
 import BreadCrumb from "./BreadCrumb";
 import Content from "./Content";
 import ContentPageSettingPane from "./ContentPageSettingPane";
@@ -23,9 +22,10 @@ interface IProps {
 }
 
 function HymnContentFromService(props: IProps) {
-    let { seasonId, serviceId, formatId } = useParams();
+    let { seasonId, serviceId, hymnId, formatId } = useParams();
     const seasonIdParam: string = seasonId || "";
     const serviceIdParam: string = serviceId || "";
+    const hymnIdParam: string | undefined = hymnId;
     const formatIdParam: string = formatId || "";
     const { languageProperties } = useContext(LanguageContext);
     const { environmentProperties } = useContext(EnvironmentContext);
@@ -45,7 +45,7 @@ function HymnContentFromService(props: IProps) {
     const isMounted = useRef(true);
 
     const handleFoundFormat = (fullFormatId: string) => {
-        const formatId = getFormatNumberFromId(fullFormatId);
+        const formatId = fullFormatId;
         switch (formatId) {
             case "1":
                 setHasText(true);
@@ -87,16 +87,33 @@ function HymnContentFromService(props: IProps) {
 
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
-        const servicePromise = hymnsDataProvider.getService(seasonIdParam, serviceIdParam);
-        const hymnListPromise = hymnsDataProvider.getServiceHymnList(seasonIdParam, serviceIdParam);
-        const [serviceResponse, hymnListResponse] = await Promise.all([servicePromise, hymnListPromise]);
-
-        const hymnListResponseSorted = hymnListResponse.sort(HymnUtils.hymnInfoComparer);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
         
-        if (isMounted.current) {
+        // Fetch service with embedded hymns from S3
+        const serviceResponse = await hymnsDataProvider.getService(seasonIdParam, serviceIdParam);
+
+        if (isMounted.current && serviceResponse) {
             setServiceInfo(serviceResponse);
+            
+            // Extract hymns from embedded service data
+            const embeddedHymns = serviceResponse.hymns || [];
+            const hymnListResponseSorted = embeddedHymns.sort(HymnUtils.hymnInfoComparer);
+            
             setHymnList(hymnListResponseSorted);
+            
+            // Scan all hymns to find available formats
+            const availableFormats = new Set<string>();
+            hymnListResponseSorted.forEach(hymn => {
+                hymn.formats?.forEach(format => {
+                    availableFormats.add(format.id);
+                });
+            });
+            
+            // Update format flags
+            availableFormats.forEach(formatId => {
+                handleFoundFormat(formatId);
+            });
+            
             setIsLoading(false);
         }
 
@@ -138,8 +155,9 @@ function HymnContentFromService(props: IProps) {
         }
 
         setformatName(formatNameTmp);
-        document.title = isLoading || !serviceInfo ? "hazzat.com" : `${props.seasonInfo.name} - ${serviceInfo?.name} (${formatName}) - hazzat.com`;
-    }, [isLoading, props.seasonInfo, serviceInfo, serviceInfo?.name, formatIdParam, formatName]);
+        
+        document.title = isLoading || !serviceInfo ? "hazzat.com" : `${props.seasonInfo.displayName} - ${serviceInfo.displayName} (${formatName}) - hazzat.com`;
+    }, [isLoading, props.seasonInfo, serviceInfo, formatIdParam, formatName]);
 
     if (isLoading) {
         return (<LoadingSpinner />);
@@ -159,33 +177,34 @@ function HymnContentFromService(props: IProps) {
                     <div>
                         <BreadCrumb items={[
                             { title: strings.seasons, path: "/Seasons" },
-                            { title: props.seasonInfo.name, path: `/Seasons/${seasonIdParam}` },
-                            { title: `${serviceInfo.name}` }]} />
+                            { title: props.seasonInfo.displayName, path: `/Seasons/${seasonIdParam}` },
+                            { title: serviceInfo.displayName }]} />
 
                         <FormatBar
-                            title={serviceInfo.name}
+                            title={serviceInfo.displayName}
                             formatsMap={serviceFormatsMap}
                             activeFormatId={formatIdParam}
                         />
 
-                        {hymnList.map((hymn) => {
-                            const hymnId = getHymnNumberFromId(hymn.id);
-                            const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
+                        {hymnList
+                            .filter(hymn => !hymnIdParam || hymn.id === hymnIdParam)
+                            .map((hymn) => {
+                                const format = hymn.formats?.find(f => f.id === formatIdParam);
+                                
+                                if (!format) {
+                                    return null;
+                                }
 
-                            const variationsCallback = () => {        
-                                return hymnsDataProvider.getServiceHymnsFormatVariationList(seasonIdParam, serviceIdParam, hymnId, formatIdParam);
-                            };
+                                const variationsCallback = async () => {
+                                    return format.variations || [];
+                                };
 
-                            const formatListCallback = () => {
-                                return hymnsDataProvider.getServiceHymnFormatList(seasonIdParam, serviceIdParam, hymnId);
-                            };
-
-                            return <Content
-                                key={hymn.id}
-                                formatId={formatIdParam}
-                                variationsCallback={variationsCallback}
-                                formatCallbackInfo={{ formatListCallback, handleFoundFormat }} />
-                        })}
+                                return <Content
+                                    key={hymn.id}
+                                    formatId={formatIdParam}
+                                    variationsCallback={variationsCallback}
+                                />
+                            })}
                         <ContentPageSettingPane />
                     </div>
             }
