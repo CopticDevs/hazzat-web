@@ -52,7 +52,7 @@ function Home(props: IProps) {
     }, [languageProperties, environmentProperties]);
 
     return (
-        <div className={languageProperties.isRtl ? "row dirRtl" : "row"} style={languageProperties.isRtl ? { marginRight: "43px" } : {}}>
+        <div className={languageProperties.isRtl ? "row dirRtl home-page" : "row home-page"}>
             <MainPaper>
                 {isLoading ? (
                     <LoadingSpinner />
@@ -60,25 +60,23 @@ function Home(props: IProps) {
                     <>
                         {/* Current Season(s) Section */}
                         <div className="current-seasons-section mb-4">
-                            <h3 style={{ fontFamily: "Trajan Pro", marginBottom: "20px" }}>
+                            <h3 className="section-title">
                                 {currentSeasons.length > 1 ? strings.currentSeasons : strings.currentSeason}
                             </h3>
                             {currentSeasons.map((season) => (
-                                <MyNavLink key={season.id} to={`/Seasons/${season.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                                    <div className="season-card mb-3" style={{ cursor: "pointer", padding: "15px", border: "1px solid #ddd", borderRadius: "5px", transition: "background-color 0.2s" }}
-                                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f5f5"}
-                                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
-                                        <p className="navLink" style={{ marginBottom: "5px", fontSize: "18px" }}>
+                                <MyNavLink key={season.id} to={`/Seasons/${season.id}`} className="season-link">
+                                    <div className="season-card mb-3">
+                                        <p className="navLink season-card-title">
                                             {season.displayName}
                                         </p>
                                         {season.dateStart && season.dateEnd && (
-                                            <p style={{ fontSize: "14px", color: "#666", marginBottom: "5px" }}>
+                                            <p className="season-card-date">
                                                 {formatDateRange(season.dateStart, season.dateEnd, languageProperties.localeName)}
                                             </p>
                                         )}
                                         {season.verse && (
                                             <div 
-                                                style={{ fontSize: "14px", fontStyle: "italic", color: "#888" }}
+                                                className="season-card-verse"
                                                 dangerouslySetInnerHTML={{ __html: season.displayVerse }}
                                             />
                                         )}
@@ -90,25 +88,23 @@ function Home(props: IProps) {
                         {/* Upcoming Seasons Section */}
                         {upcomingSeasons.length > 0 && (
                             <div className="upcoming-seasons-section mb-4">
-                                <h3 style={{ fontFamily: "Trajan Pro", marginBottom: "20px" }}>
+                                <h3 className="section-title">
                                     {strings.upcomingSeasons}
                                 </h3>
                                 {upcomingSeasons.map((season) => (
-                                    <MyNavLink key={season.id} to={`/Seasons/${season.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                                        <div className="season-card mb-3" style={{ cursor: "pointer", padding: "15px", border: "1px solid #ddd", borderRadius: "5px", transition: "background-color 0.2s" }}
-                                             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f5f5f5"}
-                                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
-                                            <p className="navLink" style={{ marginBottom: "5px", fontSize: "18px" }}>
+                                    <MyNavLink key={season.id} to={`/Seasons/${season.id}`} className="season-link">
+                                        <div className="season-card mb-3">
+                                            <p className="navLink season-card-title">
                                                 {season.displayName}
                                             </p>
                                             {season.dateStart && season.dateEnd && (
-                                                <p style={{ fontSize: "14px", color: "#666", marginBottom: "5px" }}>
+                                                <p className="season-card-date">
                                                     {formatDateRange(season.dateStart, season.dateEnd, languageProperties.localeName)}
                                                 </p>
                                             )}
                                             {season.verse && (
                                                 <div 
-                                                    style={{ fontSize: "14px", fontStyle: "italic", color: "#888" }}
+                                                    className="season-card-verse"
                                                     dangerouslySetInnerHTML={{ __html: season.displayVerse }}
                                                 />
                                             )}
@@ -119,8 +115,8 @@ function Home(props: IProps) {
                         )}
 
                         {/* Other Services Section */}
-                        <div className="other-links-section" style={{ marginTop: "40px", paddingTop: "20px", borderTop: "1px solid #ddd" }}>
-                            <h3 style={{ fontFamily: "Trajan Pro", marginBottom: "20px" }}>
+                        <div className="other-links-section">
+                            <h3 className="section-title">
                                 <LocalizedMessage of="otherServices" />
                             </h3>
                             
