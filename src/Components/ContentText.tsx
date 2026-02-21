@@ -178,14 +178,17 @@ function ContentText(props: IProps) {
 
     const generateContentTables = (paragraphs: TextParagraph[]) => {
         paragraphs && paragraphs.forEach((paragraph) => {
-            // get current mask
-            const currentMask = getTableMask(paragraph.columns);
+            // Filter out empty columns first
+            const nonEmptyColumns = paragraph.columns.filter(col => col.content && col.content.trim() !== "");
+            
+            // get current mask based on non-empty columns
+            const currentMask = getTableMask(nonEmptyColumns);
 
             // ensure table instantiated
             ensureTableInstantiated(currentMask);
 
-            // add a new row
-            addContentRow(paragraph.columns, !!paragraph.isComment, currentMask);
+            // add a new row with only non-empty columns
+            addContentRow(nonEmptyColumns, !!paragraph.isComment, currentMask);
 
             // update mask
             prevMask = currentMask;

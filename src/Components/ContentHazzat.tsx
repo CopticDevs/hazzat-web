@@ -54,17 +54,17 @@ function ContentHazzat(props: IProps) {
                     )}
                     {variation.content.copticHazzat ?
                         <>
-                            <div lang="en" className="EnglishFont" style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: variation.content.copticHazzat }} />
+                            <div lang="en" style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: variation.content.copticHazzat }} />
                             <CrossDivider />
                         </> : ""}
                     {variation.content.englishHazzat ?
                         <>
-                            <div lang="en" className="EnglishFont" style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: variation.content.englishHazzat }} />
+                            <div lang="en" style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: variation.content.englishHazzat }} />
                             <CrossDivider />
                         </> : ""}
                     {variation.content.arabicHazzat ?
                         <>
-                            <div lang="ar" className="ArabicFont" style={overrideArabicStyle} dangerouslySetInnerHTML={{ __html: variation.content.arabicHazzat }} />
+                            <div lang="ar" style={overrideArabicStyle} dangerouslySetInnerHTML={{ __html: variation.content.arabicHazzat }} />
                             <CrossDivider />
                         </> : ""}
                     
