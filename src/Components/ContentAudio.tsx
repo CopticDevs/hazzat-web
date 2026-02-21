@@ -6,9 +6,11 @@ import { IAudioContent, IVariationInfo } from "../Providers/HymnsDataProvider/Mo
 import "./Content.css";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
+import VariationTitle from "./VariationTitle";
 
 interface IProps {
     variations: IVariationInfo<IAudioContent>[];
+    hymnTitle?: string;
 }
 
 function ContentAudio(props: IProps) {
@@ -19,10 +21,20 @@ function ContentAudio(props: IProps) {
         <>
             {props.variations.map((variation) => {
                 return <div key={variation.id}>
-                    <div className={langClassName} style={{ paddingBottom: "20px", paddingTop: "20px" }}>
-                        <HymnTitle content={variation.displayName} />
-                    </div>
+                    {props.hymnTitle && (
+                        <div className={langClassName}>
+                            <HymnTitle content={props.hymnTitle} />
+                        </div>
+                    )}
                     <div className="clear" />
+                    {props.variations.length > 1 && (
+                        <>
+                            <div className={langClassName}>
+                                <VariationTitle content={variation.displayName} />
+                            </div>
+                            <div className="clear" />
+                        </>
+                    )}
                     {variation.content.audioFilePath ?
                         <div style={{ textAlign: "center" }}>
                             <a href={variation.content.audioFilePath} target="_blank" rel="noreferrer">

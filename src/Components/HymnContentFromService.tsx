@@ -202,6 +202,7 @@ function HymnContentFromService(props: IProps) {
                                 return <Content
                                     key={hymn.id}
                                     formatId={formatIdParam}
+                                    hymnTitle={hymn.displayName}
                                     variationsCallback={variationsCallback}
                                 />
                             })}

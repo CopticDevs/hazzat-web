@@ -23,20 +23,22 @@ function HymnRow(props: IProps) {
     const [activeFormatId, setActiveFormatId] = useState<string | undefined>(props.selectedFormatId);
 
     const isMounted = useRef(true);
+    
+    const { hymn, seasonId, serviceId, handleFoundFormat, selectedFormatId } = props;
 
     useEffect(() => {
         isMounted.current = true;
         
         // Process embedded formats from hymn data
         const resultFormatsMap: StringMap<string | undefined> = {};
-        const formats = props.hymn.formats || [];
+        const formats = hymn.formats || [];
         
         formats.forEach((formatInfo) => {
             const formatId = formatInfo.id;
-            resultFormatsMap[formatId] = `/seasons/${props.seasonId}/services/${props.serviceId}/hymns/${props.hymn.id}/formats/${formatId}`;
+            resultFormatsMap[formatId] = `/seasons/${seasonId}/services/${serviceId}/hymns/${hymn.id}/formats/${formatId}`;
 
-            if (props.handleFoundFormat) {
-                props.handleFoundFormat(formatId);
+            if (handleFoundFormat) {
+                handleFoundFormat(formatId);
             }
         });
 
@@ -62,14 +64,14 @@ function HymnRow(props: IProps) {
         return () => {
             isMounted.current = false;
         };
-    }, [props.hymn, props.seasonId, props.serviceId, props.handleFoundFormat, activeFormatId]);
+    }, [hymn, seasonId, serviceId, handleFoundFormat, activeFormatId]);
 
     // Update active format when selectedFormatId changes
     useEffect(() => {
-        if (props.selectedFormatId) {
-            setActiveFormatId(props.selectedFormatId);
+        if (selectedFormatId) {
+            setActiveFormatId(selectedFormatId);
         }
-    }, [props.selectedFormatId]);
+    }, [selectedFormatId]);
 
     if (!isMounted.current) {
         return (<div />)
@@ -88,7 +90,8 @@ function HymnRow(props: IProps) {
                 />
                 {activeFormat && (
                     <Content 
-                        formatId={activeFormatId} 
+                        formatId={activeFormatId}
+                        hymnTitle={props.hymn.displayName}
                         variationsCallback={async () => activeFormat.variations || []}
                     />
                 )}

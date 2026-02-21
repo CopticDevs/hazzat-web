@@ -73,6 +73,9 @@ h1, h2, h3, h4, h5, ol, li, ul, form, img, input, textarea, font { padding:0px; 
 .hymnData h2 { font-family: "Trajan Pro"; font-size:22px; font-weight:700; }
 .hymnData p { padding-top:5px; padding-left:10px; }
 
+.variationData { padding:0px 0px 22px; }
+.variationData h3 { font-family: "Trajan Pro"; font-size:16px; font-weight:700; }
+
 .TitleH2 { text-align: center; }
 
 .socialMedia { padding:0px 0px 0px 10px; }

@@ -11,6 +11,7 @@ import LoadingSpinner from "./LoadingSpinner";
 
 interface IProps {
     formatId: string;
+    hymnTitle?: string;
     variationsCallback: () => Promise<IVariationInfo<any>[]>;
 }
 
@@ -48,25 +49,25 @@ function Content(props: IProps) {
 
         switch (props.formatId) {
             case "1":
-                theControl = <ContentText variations={variations} />;
+                theControl = <ContentText variations={variations} hymnTitle={props.hymnTitle} />;
                 break;
             case "2":
-                theControl = <ContentHazzat variations={variations} />;
+                theControl = <ContentHazzat variations={variations} hymnTitle={props.hymnTitle} />;
                 break;
             case "3":
-                theControl = <ContentVerticalHazzat variations={variations} />;
+                theControl = <ContentVerticalHazzat variations={variations} hymnTitle={props.hymnTitle} />;
                 break;
             case "4":
-                theControl = <ContentMusicalNotes variations={variations} />;
+                theControl = <ContentMusicalNotes variations={variations} hymnTitle={props.hymnTitle} />;
                 break;
             case "5":
-                theControl = <ContentAudio variations={variations} />;
+                theControl = <ContentAudio variations={variations} hymnTitle={props.hymnTitle} />;
                 break;
             case "6":
-                theControl = <ContentVideo variations={variations} />;
+                theControl = <ContentVideo variations={variations} hymnTitle={props.hymnTitle} />;
                 break;
             case "7":
-                theControl = <ContentInformation variations={variations} />;
+                theControl = <ContentInformation variations={variations} hymnTitle={props.hymnTitle} />;
                 break;
             default:
                 theControl = <div />
@@ -74,7 +75,7 @@ function Content(props: IProps) {
 
         setContentControl(theControl);
 
-    }, [variations, props.formatId]);
+    }, [variations, props.formatId, props.hymnTitle]);
 
     if (!isMounted.current) {
         return (<LoadingSpinner />)

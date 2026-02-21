@@ -6,9 +6,11 @@ import "./Content.css";
 import "./ContentText.css";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
+import VariationTitle from "./VariationTitle";
 
 interface IProps {
     variations: IVariationInfo<ITextContent>[];
+    hymnTitle?: string;
 }
 
 interface IContentTable {
@@ -147,7 +149,19 @@ function ContentText(props: IProps) {
     };
 
     const addContentRow = (columns: TextColumn[], isComment: boolean, currentMask: number) => {
-        const cells = columns.map((col) => {
+        // Sort columns to ensure correct order: English, Coptic, Arabic
+        const sortedColumns = [...columns].sort((a, b) => {
+            const orderMap: { [key: string]: number } = {
+                'ENGLISH': 1,
+                'COPTIC': 2,
+                'ARABIC': 3
+            };
+            const orderA = orderMap[a.language.toUpperCase()] || 999;
+            const orderB = orderMap[b.language.toUpperCase()] || 999;
+            return orderA - orderB;
+        });
+
+        const cells = sortedColumns.map((col) => {
             return getColCell(col, isComment, currentMask);
         });
 
@@ -193,10 +207,20 @@ function ContentText(props: IProps) {
         <>
             {props.variations.map((variation) => {
                 return <div key={variation.id}>
-                    <div className={langClassName} style={{ paddingBottom: "20px", paddingTop: "20px" }}>
-                        <HymnTitle content={variation.displayName} />
-                    </div>
+                    {props.hymnTitle && (
+                        <div className={langClassName}>
+                            <HymnTitle content={props.hymnTitle} />
+                        </div>
+                    )}
                     <div className="clear" />
+                    {props.variations.length > 1 && (
+                        <>
+                            <div className={langClassName}>
+                                <VariationTitle content={variation.displayName} />
+                            </div>
+                            <div className="clear" />
+                        </>
+                    )}
                     <div className="table-responsive dirLtr">
                         {
                             generateContentTables(variation.content.paragraphs)
