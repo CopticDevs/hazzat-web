@@ -19,14 +19,16 @@ function ContentAudio(props: IProps) {
 
     return (
         <>
+            {props.hymnTitle && (
+                <>
+                    <div className={langClassName}>
+                        <HymnTitle content={props.hymnTitle} />
+                    </div>
+                    <div className="clear" />
+                </>
+            )}
             {props.variations.map((variation) => {
                 return <div key={variation.id}>
-                    {props.hymnTitle && (
-                        <div className={langClassName}>
-                            <HymnTitle content={props.hymnTitle} />
-                        </div>
-                    )}
-                    <div className="clear" />
                     {props.variations.length > 1 && (
                         <>
                             <div className={langClassName}>
