@@ -1,4 +1,4 @@
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useRef, useState } from "react";
 import { ReactComponent as Logo } from "../images/logo.svg";
@@ -59,6 +59,11 @@ function Header(props: IProps) {
                             );
                         })
                     }
+                    <li>
+                        <MyNavLink to="/Search" aria-label="search">
+                            <FontAwesomeIcon icon={faSearch} /> <LocalizedMessage of="search" />
+                        </MyNavLink>
+                    </li>
                     <LanguageSwitcher />
                 </ul>
             
@@ -80,6 +85,11 @@ function Header(props: IProps) {
                                 );
                             })
                         }
+                        <li>
+                            <MyNavLink to="/Search">
+                                <FontAwesomeIcon icon={faSearch} /> <LocalizedMessage of="search" />
+                            </MyNavLink>
+                        </li>
                         <LanguageSwitcher />
                     </ul> : null }
                     

@@ -1,12 +1,14 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
+import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import { StringMap } from "../Types/StringMap";
-import { getFormatNumberFromId, getHymnNumberFromId } from "../Utils/ParserUtils";
+import { getFormatNumberFromId } from "../Utils/ParserUtils";
 import CrossDivider from "./CrossDivider";
 import FormatOptionsContextMenu from "./FormatOptionsContextMenu";
 import HymnRow from "./HymnRow";
@@ -22,6 +24,11 @@ interface IProps {
 }
 
 function ServiceContents(props: IProps) {
+    // Parse URL parameters for deep linking
+    let { hymnId, formatId } = useParams();
+    const hymnIdParam: string | undefined = hymnId;
+    const formatIdParam: string | undefined = formatId;
+
     const getLoadingSpinnerDiv = () => {
         return <div key="loading"><LoadingSpinner /></div>;
     };
@@ -29,6 +36,7 @@ function ServiceContents(props: IProps) {
     const loadingDiv = useMemo(() => getLoadingSpinnerDiv(), []);
     const { languageProperties } = useContext(LanguageContext);
     const { environmentProperties } = useContext(EnvironmentContext);
+    const [serviceInfo, setServiceInfo] = useState<IServiceInfo | undefined>();
     const [hymns, setHymnsInfo] = useState<IHymnInfo[]>([]);
     const [hymnsNodes, setHymnsNodes] = useState<React.ReactNode[]>([loadingDiv]);
     const [hasText, setHasText] = useState<boolean>(false);
@@ -96,32 +104,40 @@ function ServiceContents(props: IProps) {
     }, [props.seasonId, props.serviceId, hasText, hasHazzat, hasVerticalHazzat, hasMusicalNotes, hasAudio, hasVideo, hasInformation]);
 
     const fetchFromBackend = React.useCallback(async () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
-        const hymnsResponse = await hymnsDataProvider.getServiceHymnList(props.seasonId, props.serviceId);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
+        
+        // Fetch service with embedded hymns from S3
+        const serviceResponse = await hymnsDataProvider.getService(props.seasonId, props.serviceId);
 
-        if (isMounted.current) {
-            setHymnsInfo(hymnsResponse.sort(HymnUtils.hymnInfoComparer));
+        if (isMounted.current && serviceResponse) {
+            setServiceInfo(serviceResponse);
+            
+            // Extract hymns from embedded service data
+            const embeddedHymns = serviceResponse.hymns || [];
+            setHymnsInfo(embeddedHymns.sort(HymnUtils.hymnInfoComparer));
         }
     }, [languageProperties, environmentProperties, props.seasonId, props.serviceId, isMounted]);
 
     useEffect(() => {
         let alternateHymn = true;
-        const theNodes = hymns.map((hymn) => {
+        
+        // If hymnId is specified in URL, only show that hymn
+        const hymnsToDisplay = hymnIdParam 
+            ? hymns.filter(h => h.id === hymnIdParam)
+            : hymns;
+        
+        const theNodes = hymnsToDisplay.map((hymn) => {
             alternateHymn = !alternateHymn;
-            const hymnId = getHymnNumberFromId(hymn.id);
-
-            const getFormatsCallback = () => {
-                const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
-                return hymnsDataProvider.getServiceHymnFormatList(props.seasonId, props.serviceId, hymnId);
-            };
 
             return <HymnRow
                 key={hymn.id}
-                hymnName={hymn.name}
+                hymn={hymn}
+                seasonId={props.seasonId}
+                serviceId={props.serviceId}
                 isAlternate={alternateHymn}
-                getFormatsCallback={getFormatsCallback}
-                parseFormatIdCallback={getFormatNumberFromId}
                 handleFoundFormat={handleFoundFormat}
+                isExpanded={hymnIdParam === hymn.id}
+                selectedFormatId={formatIdParam}
             />
         });
 
@@ -130,7 +146,7 @@ function ServiceContents(props: IProps) {
         } else {
             setHymnsNodes(theNodes);
         }
-    }, [hymns, loadingDiv, languageProperties, environmentProperties, props.serviceId, props.seasonId]);
+    }, [hymns, hymnIdParam, formatIdParam, loadingDiv, props.serviceId, props.seasonId]);
 
     useEffect(() => {
         isMounted.current = true;

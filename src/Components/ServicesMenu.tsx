@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
@@ -6,7 +7,6 @@ import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvi
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
-import { getServiceNumberFromId } from "../Utils/ParserUtils";
 import BreadCrumb from "./BreadCrumb";
 import LoadingSpinner from "./LoadingSpinner";
 import "./SeasonDetails.css";
@@ -18,6 +18,9 @@ interface IProps {
     seasonVerse: string;
 }
 function ServicesMenu(props: IProps) {
+    // Get serviceId from URL if present
+    const { serviceId: serviceIdParam } = useParams();
+    
     const getLoadingSpinnerDiv = () => {
         return <div key="loading"><LoadingSpinner /></div>;
     };
@@ -30,7 +33,7 @@ function ServicesMenu(props: IProps) {
     const isMounted = useRef(true);
 
     const fetchFromBackend = React.useCallback(async () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
         const servicesResponse = await hymnsDataProvider.getServiceList(props.seasonId);
 
         if (isMounted.current) {
@@ -48,9 +51,13 @@ function ServicesMenu(props: IProps) {
     }, [fetchFromBackend]);
 
     useEffect(() => {
-        const theNodes = services.map((service) => {
-            const serviceId = getServiceNumberFromId(service.id);
-            return <ServiceContents key={service.id} seasonId={props.seasonId} serviceId={serviceId} serviceName={service.name} />
+        // If serviceId is specified in URL, only render that service
+        const servicesToRender = serviceIdParam 
+            ? services.filter(s => s.id === serviceIdParam)
+            : services;
+            
+        const theNodes = servicesToRender.map((service) => {
+            return <ServiceContents key={service.id} seasonId={props.seasonId} serviceId={service.id} serviceName={service.displayName} />
         });
 
         if (theNodes.length === 0) {
@@ -58,7 +65,7 @@ function ServicesMenu(props: IProps) {
         } else {
             setServicesNodes(theNodes);
         }
-    }, [services, loadingDiv, props.seasonId]);
+    }, [services, serviceIdParam, loadingDiv, props.seasonId]);
 
     if (!isMounted.current) {
         return <LoadingSpinner />;

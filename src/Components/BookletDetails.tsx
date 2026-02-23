@@ -25,7 +25,7 @@ function BookletDetails() {
 
     const fetchFromBackend = React.useCallback(async () => {
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
+        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
         const bookletResponse = await hymnsDataProvider.getBooklet(bookletIdParam);
 
         if (isMounted.current) {

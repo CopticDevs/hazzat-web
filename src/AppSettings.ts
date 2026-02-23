@@ -5,8 +5,6 @@ export const AppSettings: IAppSettings = {
     navigationMenuItems: [
         { id: "home", location: "/" },
         { id: "seasons", location: "/Seasons" },
-        { id: "types", location: "/Types" },
-        { id: "tunes", location: "/Tunes" },
         { id: "booklets", location: "/Booklets" },
         { id: "fonts", location: "/Fonts" },
         { id: "help", location: "/Help" },
