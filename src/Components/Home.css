@@ -3,3 +3,55 @@
     font-size: 18px;
     font-weight: 700;
 }
+
+/* Make MainPaper wider on narrow displays so content takes full width */
+@media screen and (max-width: 999px) {
+    .home-page .mainPaper {
+        width: 90%;
+    }
+}
+
+.section-title {
+    font-family: "Trajan Pro";
+    margin-bottom: 20px;
+}
+
+.season-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.season-card {
+    cursor: pointer;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.season-card:hover {
+    background-color: #f5f5f5;
+}
+
+.season-card-title {
+    margin-bottom: 5px;
+    font-size: 18px;
+}
+
+.season-card-date {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.season-card-verse {
+    font-size: 14px;
+    font-style: italic;
+    color: #888;
+}
+
+.other-links-section {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}

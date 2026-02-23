@@ -115,7 +115,7 @@ function HymnContentFromSeasonService(props: IProps) {
                             activeFormatId={formatIdParam}
                             />
 
-                        <Content formatId={formatIdParam} variationsCallback={fetchVariationsCallback} />
+                        <Content formatId={formatIdParam} hymnTitle={hymnInfo.displayName} variationsCallback={fetchVariationsCallback} />
                         <ContentPageSettingPane />
                     </div>
             }

@@ -29,30 +29,18 @@ function SeasonsMenu() {
         const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
         const seasons = await hymnsDataProvider.getSeasonList();
         
-        // Separate Annual season
+        // Separate Annual season (always first)
         const annual = seasons.find(s => s.name.toLowerCase().includes('annual'));
         const nonAnnualSeasons = seasons.filter(s => !s.name.toLowerCase().includes('annual'));
         
         // Separate date-specific and non-date-specific seasons
-        const dateSpecific = nonAnnualSeasons.filter(s => s.isDateSpecific);
-        const nonDateSpecific = nonAnnualSeasons.filter(s => !s.isDateSpecific);
+        // Use order from metadata file (no date-based sorting)
+        const dateSpecific = nonAnnualSeasons.filter(s => s.isDateSpecific).sort((a, b) => a.order - b.order);
+        const nonDateSpecific = nonAnnualSeasons.filter(s => !s.isDateSpecific).sort((a, b) => a.order - b.order);
         
-        // Sort date-specific seasons by date (January to December order)
-        const currentYear = new Date().getFullYear();
-        const sortedDateSpecific = dateSpecific.sort((a, b) => {
-            const aRange = a.dateRanges?.find(r => r.year === currentYear);
-            const bRange = b.dateRanges?.find(r => r.year === currentYear);
-            
-            if (!aRange && !bRange) return a.order - b.order;
-            if (!aRange) return 1;
-            if (!bRange) return -1;
-            
-            return aRange.dateStart.localeCompare(bRange.dateStart);
-        });
-        
-        // Combine: Annual first, then date-specific, then non-date-specific
-        const dsSeasons: ISeasonInfo[] = annual ? [annual, ...sortedDateSpecific] : sortedDateSpecific;
-        const ndsSeasons: ISeasonInfo[] = nonDateSpecific.sort((a, b) => a.order - b.order);
+        // Combine: Annual first (even though not date-specific), then date-specific seasons
+        const dsSeasons: ISeasonInfo[] = annual ? [annual, ...dateSpecific] : dateSpecific;
+        const ndsSeasons: ISeasonInfo[] = nonDateSpecific;
 
         if (isMounted.current) {
             setDateSpecificSeasons(dsSeasons);

@@ -5,11 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
-import { IHymnReference, IHymnSearchResult, ISearchResult } from "../Providers/HymnsDataProvider/Models/ISearchResult";
+import { IHymnReference, ISearchResult } from "../Providers/HymnsDataProvider/Models/ISearchResult";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { getHymnDisplayName } from "../Utils/DisplayNameUtils";
 import LoadingSpinner from "./LoadingSpinner";
 import MainPaper, { Size } from "./MainPaper";
+import MyNavLink from "./MyNavLink";
 
 interface GlobalSearchProps {
     dataProvider: IHymnsDataProvider;
@@ -125,11 +126,6 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
         navigate(`/Seasons/${season.id}`);
     };
 
-    const handleHymnClick = (hymn: IHymnSearchResult, reference: IHymnReference) => {
-        // Navigate to service and highlight hymn
-        navigate(`/Seasons/${reference.seasonId}/services/${reference.serviceId}/hymns/${hymn.id}`);
-    };
-
     return (
         <MainPaper size={Size.Wide}>
             <div className="global-search">
@@ -201,12 +197,11 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                                                 <ul className="list-unstyled ms-3 mt-1">
                                                     {result.hymn!.references.map((ref, idx) => (
                                                         <li key={idx}>
-                                                            <button
-                                                                className="btn btn-link btn-sm p-0"
-                                                                onClick={() => handleHymnClick(result.hymn!, ref)}
+                                                            <MyNavLink
+                                                                to={`/Seasons/${ref.seasonId}/services/${ref.serviceId}/hymns/${result.hymn!.id}`}
                                                             >
                                                                 {ref.seasonName} → {ref.serviceName}
-                                                            </button>
+                                                            </MyNavLink>
                                                         </li>
                                                     ))}
                                                 </ul>
