@@ -1,136 +1,94 @@
-import { HymnsDataProvider } from './HymnsDataProvider';
-import { IBookletInfo } from './Models/IBookletInfo';
-import axios from 'axios';
+import axios, { AxiosInstance } from "axios";
+import { HymnsDataProvider } from "./HymnsDataProvider";
+import { ISeasonInfo } from "./Models/ISeasonInfo";
+import { IServiceInfo } from "./Models/IServiceInfo";
 
-// Mock axios module
-jest.mock('axios', () => ({
-  create: jest.fn()
+jest.mock("axios", () => ({
+    create: jest.fn()
 }));
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-describe('HymnsDataProvider - Booklets Functionality', () => {
-  let provider: HymnsDataProvider;
-  const mockCloudFrontClient = {
-    get: jest.fn(),
-  };
-  const mockHttpClient = {
-    get: jest.fn(),
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockedAxios.create = jest.fn()
-      .mockReturnValueOnce(mockHttpClient as any)
-      .mockReturnValueOnce(mockCloudFrontClient as any);
-    
-    provider = new HymnsDataProvider('en', 'https://api.hazzat.com', 'https://d1zhmhuei1bwco.cloudfront.net');
-  });
-
-  it('should fetch booklets from Azure API (not S3)', async () => {
-    const mockBooklets: IBookletInfo[] = [
-      {
-        id: 'booklet-1',
-        name: 'Holy Week Booklet',
-        summary: '',
-        order: 1,
-        sourcePath: '',
-        displayPath: '',
-        printPath: '',
-        thumbnailPath: '',
-        fullPicturePath: '',
-        releaseDate: ''
-      },
-      {
-        id: 'booklet-2',
-        name: 'Nativity Booklet',
-        summary: '',
-        order: 2,
-        sourcePath: '',
-        displayPath: '',
-        printPath: '',
-        thumbnailPath: '',
-        fullPicturePath: '',
-        releaseDate: ''
-      }
-    ];
-
-    mockHttpClient.get.mockResolvedValue({ data: mockBooklets });
-
-    const result = await provider.getBookletList();
-
-    // Should use Azure API client (httpClient), not CloudFront client
-    expect(mockHttpClient.get).toHaveBeenCalledWith('/booklets');
-    expect(mockCloudFrontClient.get).not.toHaveBeenCalled();
-    expect(result).toEqual(mockBooklets);
-    expect(result).toHaveLength(2);
-  });
-
-  it('should fetch individual booklet from Azure API', async () => {
-    const mockBooklet: IBookletInfo = {
-      id: 'booklet-1',
-      name: 'Holy Week Booklet',
-      order: 1,
-      summary: 'Complete Holy Week services',
-      sourcePath: '',
-      displayPath: '',
-      printPath: '',
-      thumbnailPath: '',
-      fullPicturePath: '',
-      releaseDate: ''
+describe("HymnsDataProvider - season booklet data", () => {
+    let provider: HymnsDataProvider;
+    const mockCloudFrontClient = {
+        get: jest.fn()
+    };
+    const mockHttpClient = {
+        get: jest.fn()
     };
 
-    mockHttpClient.get.mockResolvedValue({ data: mockBooklet });
+    beforeEach(() => {
+        jest.clearAllMocks();
+        mockedAxios.create = jest.fn()
+            .mockReturnValueOnce(mockHttpClient as unknown as AxiosInstance)
+            .mockReturnValueOnce(mockCloudFrontClient as unknown as AxiosInstance);
 
-    const result = await provider.getBooklet('booklet-1');
+        provider = new HymnsDataProvider("en", "https://api.hazzat.com", "https://d1zhmhuei1bwco.cloudfront.net");
+    });
 
-    expect(mockHttpClient.get).toHaveBeenCalledWith('/booklets/booklet-1');
-    expect(mockCloudFrontClient.get).not.toHaveBeenCalled();
-    expect(result).toEqual(mockBooklet);
-  });
+    it("loads booklet seasons from S3 metadata without the old Azure booklets API", async () => {
+        const seasons: ISeasonInfo[] = [
+            {
+                id: "nativity",
+                name: "Nativity",
+                displayName: "Nativity",
+                verse: "",
+                displayVerse: "",
+                order: 1,
+                isDateSpecific: false,
+                serviceIds: ["vespers"]
+            }
+        ];
 
-  it('should ensure no regressions in booklets functionality', async () => {
-    const mockBooklets: IBookletInfo[] = [
-      {
-        id: 'booklet-1',
-        name: 'Holy Week Booklet',
-        order: 1,
-        summary: '',
-        sourcePath: '',
-        displayPath: '',
-        printPath: '',
-        thumbnailPath: '',
-        fullPicturePath: '',
-        releaseDate: ''
-      }
-    ];
+        mockCloudFrontClient.get.mockResolvedValueOnce({ data: seasons });
 
-    mockHttpClient.get.mockResolvedValue({ data: mockBooklets });
+        const result = await provider.getSeasonList();
 
-    const result = await provider.getBookletList();
+        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v2/metadata/seasons.json");
+        expect(mockHttpClient.get).not.toHaveBeenCalled();
+        expect(result).toEqual(seasons);
+    });
 
-    // Verify all expected properties are present
-    expect(result[0]).toHaveProperty('id');
-    expect(result[0]).toHaveProperty('name');
-    expect(result[0]).toHaveProperty('order');
-    
-    // Verify structure matches expected interface
-    expect(typeof result[0].id).toBe('string');
-    expect(typeof result[0].name).toBe('string');
-    expect(typeof result[0].order).toBe('number');
-  });
+    it("loads booklet service files from S3 without calling /booklets", async () => {
+        const seasons: ISeasonInfo[] = [
+            {
+                id: "nativity",
+                name: "Nativity",
+                displayName: "Nativity",
+                verse: "",
+                displayVerse: "",
+                order: 1,
+                isDateSpecific: false,
+                serviceIds: ["vespers"]
+            }
+        ];
+        const service: IServiceInfo = {
+            id: "vespers",
+            name: "Vespers",
+            displayName: "Vespers",
+            verse: "",
+            order: 1,
+            isDateSpecific: false,
+            seasonId: "nativity",
+            hymns: []
+        };
 
-  it('should return empty array on booklets error', async () => {
-    mockHttpClient.get.mockRejectedValue(new Error('Network error'));
+        mockCloudFrontClient.get
+            .mockResolvedValueOnce({ data: seasons })
+            .mockResolvedValueOnce({ data: service });
 
-    const result = await provider.getBookletList();
+        const result = await provider.getServiceList("nativity");
 
-    expect(result).toEqual([]);
-  });
+        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v2/metadata/seasons.json");
+        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v2/seasons/nativity/services/vespers.json");
+        expect(mockHttpClient.get).not.toHaveBeenCalled();
+        expect(JSON.stringify(mockCloudFrontClient.get.mock.calls)).not.toContain("/booklets");
+        expect(result).toEqual([service]);
+    });
 
-  it('should throw error on individual booklet not found', async () => {
-    mockHttpClient.get.mockRejectedValue(new Error('404 Not Found'));
-
-    await expect(provider.getBooklet('invalid-id')).rejects.toThrow();
-  });
+    it("does not expose legacy booklet endpoints on the provider", () => {
+        expect("getBookletList" in provider).toBe(false);
+        expect("getBooklet" in provider).toBe(false);
+    });
 });

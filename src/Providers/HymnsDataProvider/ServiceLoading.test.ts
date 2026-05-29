@@ -1,7 +1,8 @@
 import { HymnsDataProvider } from './HymnsDataProvider';
 import { IServiceInfo } from './Models/IServiceInfo';
 import { IHymnInfo } from './Models/IHymnInfo';
-import axios from 'axios';
+import type { ContentLanguage, ContentType, ITextContent, IVariationInfo } from './Models/IVariationInfo';
+import axios, { AxiosInstance } from 'axios';
 
 // Mock axios module
 jest.mock('axios', () => ({
@@ -22,9 +23,9 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedAxios.create = jest.fn()
-      .mockReturnValueOnce(mockHttpClient as any)
-      .mockReturnValueOnce(mockCloudFrontClient as any);
-    
+      .mockReturnValueOnce(mockHttpClient as unknown as AxiosInstance)
+      .mockReturnValueOnce(mockCloudFrontClient as unknown as AxiosInstance);
+
     provider = new HymnsDataProvider('en', 'https://api.hazzat.com', 'https://d1zhmhuei1bwco.cloudfront.net');
   });
 
@@ -182,18 +183,18 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
   });
 
   it('should test multi-language display', async () => {
-    const mockVariation = {
+    const mockVariation: IVariationInfo<ITextContent> = {
       id: '1',
       name: 'Standard',
       displayName: 'Standard',
-      order: 1,
       content: {
+        contentType: 'TextContent' as ContentType,
         paragraphs: [
           {
             columns: [
-              { content: 'Glory to God', language: 'English' },
-              { content: 'Ⲇⲟⲝⲁ Ⲡⲁⲧⲣⲓ', language: 'Coptic' },
-              { content: 'المجد للآب', language: 'Arabic' }
+              { content: 'Glory to God', language: 'English' as ContentLanguage },
+              { content: 'Ⲇⲟⲝⲁ Ⲡⲁⲧⲣⲓ', language: 'Coptic' as ContentLanguage },
+              { content: 'المجد للآب', language: 'Arabic' as ContentLanguage }
             ]
           }
         ]
@@ -234,7 +235,8 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
     const result = await provider.getService('nativity', 'vespers');
 
     const variation = result?.hymns?.[0]?.formats?.[0]?.variations?.[0];
-    const paragraph = variation?.content.paragraphs[0];
+    const textContent = variation?.content as ITextContent | undefined;
+    const paragraph = textContent?.paragraphs[0];
     
     expect(paragraph?.columns).toHaveLength(3);
     expect(paragraph?.columns[0].language).toBe('English');

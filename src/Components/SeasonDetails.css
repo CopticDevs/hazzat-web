@@ -9,6 +9,28 @@
     text-align: center;
 }
 
+.seasonDownloadActions {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0 8px;
+}
+
+.seasonDownloadPdfsButton {
+    border: 1px solid #bdb6a6;
+    border-radius: 6px;
+    color: #302c26;
+    display: inline-block;
+    font-size: 14px;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+.seasonDownloadPdfsButton:hover {
+    background-color: #f3f1eb;
+    color: #302c26;
+    text-decoration: none;
+}
+
 .breadcrumbDiv {
     margin-top: 40px;
     margin-bottom: 20px;
