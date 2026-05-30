@@ -45,7 +45,7 @@ describe("HymnsDataProvider - season booklet data", () => {
 
         const result = await provider.getSeasonList();
 
-        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v2/metadata/seasons.json");
+        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v3/metadata/seasons.json");
         expect(mockHttpClient.get).not.toHaveBeenCalled();
         expect(result).toEqual(seasons);
     });
@@ -80,8 +80,8 @@ describe("HymnsDataProvider - season booklet data", () => {
 
         const result = await provider.getServiceList("nativity");
 
-        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v2/metadata/seasons.json");
-        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v2/seasons/nativity/services/vespers.json");
+        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v3/metadata/seasons.json");
+        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v3/seasons/nativity/services/vespers.json");
         expect(mockHttpClient.get).not.toHaveBeenCalled();
         expect(JSON.stringify(mockCloudFrontClient.get.mock.calls)).not.toContain("/booklets");
         expect(result).toEqual([service]);

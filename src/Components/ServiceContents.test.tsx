@@ -110,7 +110,7 @@ describe('ServiceContents - URL Deep Linking', () => {
     );
 
     await waitFor(() => {
-      expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v2/seasons/nativity/services/vespers.json');
+      expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v3/seasons/nativity/services/vespers.json');
     });
   });
 
@@ -131,7 +131,7 @@ describe('ServiceContents - URL Deep Linking', () => {
 
     await waitFor(() => {
       expect(mockCloudFrontClient.get).toHaveBeenCalledTimes(1);
-      expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v2/seasons/nativity/services/vespers.json');
+      expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v3/seasons/nativity/services/vespers.json');
     });
   });
 
@@ -152,7 +152,7 @@ describe('ServiceContents - URL Deep Linking', () => {
 
     await waitFor(() => {
       expect(mockCloudFrontClient.get).toHaveBeenCalledTimes(1);
-      expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v2/seasons/nativity/services/vespers.json');
+      expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v3/seasons/nativity/services/vespers.json');
     });
   });
 
@@ -177,7 +177,7 @@ describe('ServiceContents - URL Deep Linking', () => {
 
     // Service should be loaded once, and specific hymn should be displayed
     // The component filters hymns based on hymnId parameter
-    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v2/seasons/nativity/services/vespers.json');
+    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v3/seasons/nativity/services/vespers.json');
   });
 
   it('should display all hymns when no hymnId is specified', async () => {
@@ -200,6 +200,6 @@ describe('ServiceContents - URL Deep Linking', () => {
     });
 
     // All hymns should be rendered when no hymnId is specified
-    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v2/seasons/nativity/services/vespers.json');
+    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v3/seasons/nativity/services/vespers.json');
   });
 });
