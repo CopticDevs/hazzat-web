@@ -1,4 +1,3 @@
-import { IBookletInfo } from "../Models/IBookletInfo";
 import { IHymnInfo, IHymnInfoWithServiceDetails } from "../Models/IHymnInfo";
 import { ISeasonInfo } from "../Models/ISeasonInfo";
 import { IServiceInfo } from "../Models/IServiceInfo";
@@ -48,13 +47,4 @@ export class HymnUtils {
         return hymnA.serviceOrder - hymnB.serviceOrder || hymnA.order - hymnB.order;
     }
 
-    /**
-     * Comparer method for booklets to sort by booklet order ascendingly.
-     * @param bookletA first type
-     * @param bookletB second type
-     * @returns 1 if A > B, -1 if A < B, 0 if equal
-     */
-    public static bookletInfoComparer(bookletA: IBookletInfo, bookletB: IBookletInfo): number {
-        return bookletA.order - bookletB.order;
-    }
 }

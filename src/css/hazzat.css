@@ -39,6 +39,12 @@ Embedded fonts
     font-weight: normal;
     font-style: normal;
 }
+@font-face {
+    font-family: 'Noto Naskh Arabic';
+    src: url('../fonts/NotoNaskhArabic-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
 
 /*
 ================================
@@ -98,11 +104,11 @@ Hymn text Styles
 .ArabicFont {
     COLOR: var(--content-font-color);
     text-decoration: none;
-    font-family: 'Arabic Transparent';
+    font-family: 'Noto Naskh Arabic', 'Arabic Transparent';
     font-size: var(--arabic-font-size);
     direction: rtl;
 }
 .EnglishComment  { COLOR: RED; text-decoration: none; font-family: ARIAL,verdana; FONT-SIZE:14px; font-style:italic;}
 .CopticComment   { COLOR: RED; text-decoration: none; font-family: 'CS Avva Shenouda', 'CS New Athanasius'; FONT-SIZE:14px; font-style: italic;}
-.ArabicComment   { COLOR: RED; text-decoration: none; font-family: 'Arabic Transparent'; FONT-SIZE:16px; font-style: italic;direction:rtl;}
+.ArabicComment   { COLOR: RED; text-decoration: none; font-family: 'Noto Naskh Arabic', 'Arabic Transparent'; FONT-SIZE:16px; font-style: italic;direction:rtl;}
 .HymnList { width: 16px; border: 0px none transparent; }

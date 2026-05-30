@@ -1,6 +1,5 @@
 import axios, { AxiosInstance } from "axios";
 import { IHymnsDataProvider } from "./IHymnsDataProvider";
-import { IBookletInfo } from "./Models/IBookletInfo";
 import { IFormatInfo } from "./Models/IFormatInfo";
 import { IHymnInfo } from "./Models/IHymnInfo";
 import { IReferenceIndex } from "./Models/IReferenceIndex";
@@ -18,7 +17,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
     constructor(language: string, envBaseUrl: string, cloudFrontUrl: string) {
         this.language = language;
         
-        // Azure API client (for booklets only)
+        // Legacy Azure API client for endpoints not yet served from S3.
         this.httpClient = axios.create({
             baseURL: envBaseUrl,
             headers: {
@@ -271,23 +270,4 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         }
     }
 
-    public async getBookletList(): Promise<IBookletInfo[]> {
-        try {
-            const response = await this.httpClient.get<IBookletInfo[]>("/booklets");
-            return response.data;
-        } catch (ex) {
-            console.log(ex);
-            return [];
-        }
-    }
-
-    public async getBooklet(bookletId: string): Promise<IBookletInfo> {
-        try {
-            const response = await this.httpClient.get<IBookletInfo>(`/booklets/${bookletId}`);
-            return response.data;
-        } catch (ex) {
-            console.log(ex);
-            throw ex;
-        }
-    }
 }

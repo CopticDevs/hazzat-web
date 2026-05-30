@@ -61,6 +61,8 @@
     <TypeScriptCompile Include="src\Components\HymnContentFromType.tsx" />
     <TypeScriptCompile Include="src\Components\BookletsPage.tsx" />
     <TypeScriptCompile Include="src\Components\BookletDetails.tsx" />
+    <TypeScriptCompile Include="src\Booklets\BookletPdfGenerator.ts" />
+    <TypeScriptCompile Include="src\Booklets\BookletPdfGenerator.test.ts" />
     <TypeScriptCompile Include="src\Components\TunesPage.tsx" />
     <TypeScriptCompile Include="src\Components\TuneRouter.tsx" />
     <TypeScriptCompile Include="src\Components\TuneSeasonContents.tsx" />
@@ -107,7 +109,6 @@
     <TypeScriptCompile Include="src\Contexts\Environment\EnvironmentContext.tsx" />
     <TypeScriptCompile Include="src\LanguageProvider.tsx" />
     <TypeScriptCompile Include="src\LanguageContext.tsx" />
-    <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IBookletInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\ITuneInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\ITypeInfo.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\IVariationInfo.ts" />
@@ -124,9 +125,11 @@
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\IHymnsDataProvider.ts" />
     <TypeScriptCompile Include="src\Providers\HymnsDataProvider\Models\ISeasonInfo.ts" />
     <TypeScriptCompile Include="src\react-app-env.d.ts" />
+    <TypeScriptCompile Include="src\fonts.d.ts" />
     <TypeScriptCompile Include="src\reportWebVitals.ts" />
     <TypeScriptCompile Include="src\setupTests.ts" />
     <Content Include="public\downloads\Hazzat_v1_10a.zip" />
+    <Content Include="public\bookletFrontCover.svg" />
     <Content Include="public\index.html" />
     <Content Include="public\logo192.png" />
     <Content Include="public\logo512.png" />
@@ -171,6 +174,7 @@
     <Content Include="src\fonts\HazzatA.ttf" />
     <Content Include="src\fonts\HazzatV.ttf" />
     <Content Include="src\fonts\HazzatVA.ttf" />
+    <Content Include="src\fonts\NotoNaskhArabic-Regular.ttf" />
     <Content Include="src\fonts\TrajanPro-Regular.eot" />
     <Content Include="src\fonts\TrajanPro-Regular.otf" />
     <Content Include="src\fonts\TrajanPro-Regular.ttf" />
@@ -178,6 +182,7 @@
     <Content Include="src\images\audio_off.svg" />
     <Content Include="src\images\audio_on.svg" />
     <Content Include="src\images\bg.png" />
+    <Content Include="src\images\bookletBackCoverBackground.jpg" />
     <Content Include="src\images\bookletFormat.svg" />
     <Content Include="src\images\caps.jpg" />
     <Content Include="src\images\contentBg.png" />
