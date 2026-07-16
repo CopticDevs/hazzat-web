@@ -5,10 +5,8 @@ import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
-import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import { StringMap } from "../Types/StringMap";
-import { getFormatNumberFromId } from "../Utils/ParserUtils";
 import CrossDivider from "./CrossDivider";
 import FormatOptionsContextMenu from "./FormatOptionsContextMenu";
 import HymnRow from "./HymnRow";
@@ -25,9 +23,9 @@ interface IProps {
 
 function ServiceContents(props: IProps) {
     // Parse URL parameters for deep linking
-    let { hymnId, formatId } = useParams();
-    const hymnIdParam: string | undefined = hymnId;
-    const formatIdParam: string | undefined = formatId;
+    const { hymnId, formatId } = useParams();
+    const hymnIdParam = hymnId;
+    const formatIdParam = formatId;
 
     const getLoadingSpinnerDiv = () => {
         return <div key="loading"><LoadingSpinner /></div>;
@@ -36,7 +34,6 @@ function ServiceContents(props: IProps) {
     const loadingDiv = useMemo(() => getLoadingSpinnerDiv(), []);
     const { languageProperties } = useContext(LanguageContext);
     const { environmentProperties } = useContext(EnvironmentContext);
-    const [serviceInfo, setServiceInfo] = useState<IServiceInfo | undefined>();
     const [hymns, setHymnsInfo] = useState<IHymnInfo[]>([]);
     const [hymnsNodes, setHymnsNodes] = useState<React.ReactNode[]>([loadingDiv]);
     const [hasText, setHasText] = useState<boolean>(false);
@@ -110,13 +107,11 @@ function ServiceContents(props: IProps) {
         const serviceResponse = await hymnsDataProvider.getService(props.seasonId, props.serviceId);
 
         if (isMounted.current && serviceResponse) {
-            setServiceInfo(serviceResponse);
-            
             // Extract hymns from embedded service data
             const embeddedHymns = serviceResponse.hymns || [];
-            setHymnsInfo(embeddedHymns.sort(HymnUtils.hymnInfoComparer));
+            setHymnsInfo([...embeddedHymns].sort(HymnUtils.hymnInfoComparer));
         }
-    }, [languageProperties, environmentProperties, props.seasonId, props.serviceId, isMounted]);
+    }, [languageProperties, environmentProperties, props.seasonId, props.serviceId]);
 
     useEffect(() => {
         let alternateHymn = true;

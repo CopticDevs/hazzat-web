@@ -27,7 +27,7 @@
 
 
 @font-face {
-	
+
 	font-family: "Myriad Pro";
 	src: url('507537842-MyriadPro-Regular.eot');
 	src: url('507537842-MyriadPro-Regular.eot?#iefix') format('embedded-opentype'),
@@ -35,5 +35,14 @@
 	url('507537842-MyriadPro-Regular.ttf') format('truetype');
 	font-weight: normal;
 	font-style: normal;
-	
+
+}
+
+@font-face {
+
+	font-family: "Noto Naskh Arabic";
+	src: url('NotoNaskhArabic-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+
 }

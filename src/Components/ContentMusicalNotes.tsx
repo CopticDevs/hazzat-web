@@ -1,13 +1,10 @@
 import { useContext } from "react";
-import { AppSettings } from "../AppSettings";
-import instrumentalImg from "../images/Instrumental.png";
-import musicImg from "../images/Music.png";
 import { LanguageContext } from "../LanguageContext";
-import LocalizedMessage from "../LocalizedMessage";
 import { IMusicalNotesContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
+import MusicXmlScore from "./MusicXmlScore";
 import VariationTitle from "./VariationTitle";
 
 interface IProps {
@@ -39,24 +36,11 @@ function ContentMusicalNotes(props: IProps) {
                             <div className="clear" />
                         </>
                     )}
-                    {variation.content.musicFilePath ?
-                        <div style={{ textAlign: "center" }}>
-                            <a href={variation.content.musicFilePath} target="_blank" rel="noreferrer">
-                                <img className="contentImage" src={musicImg} alt={variation.name} /><br />
-                                {variation.name}<br />
-                                <LocalizedMessage of="musicalNotesLinkSuffix" />
-                            </a>
+                    {variation.content.musicXml ?
+                        <>
+                            <MusicXmlScore musicXml={variation.content.musicXml} />
                             <CrossDivider />
-                        </div> : ""}
-                    {AppSettings.showMusicAudio && variation.content.audioFilePath ?
-                        <div style={{ textAlign: "center" }}>
-                            <a href={variation.content.audioFilePath} target="_blank" rel="noreferrer">
-                                <img className="contentImage" src={instrumentalImg} alt={variation.name} /><br />
-                                {variation.name}<br />
-                                <LocalizedMessage of="musicAudioLinkSuffix" />
-                            </a>
-                            <CrossDivider />
-                        </div> : ""}
+                        </> : ""}
                 </div>
             })}
         </>

@@ -1,6 +1,5 @@
 import axios, { AxiosInstance } from "axios";
 import { IHymnsDataProvider } from "./IHymnsDataProvider";
-import { IBookletInfo } from "./Models/IBookletInfo";
 import { IFormatInfo } from "./Models/IFormatInfo";
 import { IHymnInfo } from "./Models/IHymnInfo";
 import { IReferenceIndex } from "./Models/IReferenceIndex";
@@ -8,6 +7,7 @@ import { ISeasonInfo } from "./Models/ISeasonInfo";
 import { IServiceInfo } from "./Models/IServiceInfo";
 import { IHymnContent, IVariationInfo } from "./Models/IVariationInfo";
 import { ISeasonTranslations } from "./Models/ISeasonTranslations";
+import { ContentPaths } from "./ContentPaths";
 
 export class HymnsDataProvider implements IHymnsDataProvider {
     private httpClient: AxiosInstance;
@@ -18,7 +18,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
     constructor(language: string, envBaseUrl: string, cloudFrontUrl: string) {
         this.language = language;
         
-        // Azure API client (for booklets only)
+        // Legacy Azure API client for endpoints not yet served from S3.
         this.httpClient = axios.create({
             baseURL: envBaseUrl,
             headers: {
@@ -48,7 +48,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         }
 
         try {
-            const response = await this.cloudFrontClient.get<ISeasonTranslations>("/v2/metadata/seasons.ar.json");
+            const response = await this.cloudFrontClient.get<ISeasonTranslations>(ContentPaths.seasonsArabic());
             this.seasonTranslationsCache = response.data;
             return response.data;
         } catch (ex) {
@@ -94,7 +94,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
 
     public async getSeasonList(): Promise<ISeasonInfo[]> {
         try {
-            const response = await this.cloudFrontClient.get<ISeasonInfo[]>("/v2/metadata/seasons.json");
+            const response = await this.cloudFrontClient.get<ISeasonInfo[]>(ContentPaths.seasons());
             const seasons = response.data;
             
             // Load and merge Arabic translations if language is Arabic
@@ -108,8 +108,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
 
     public async getSeason(seasonId: string): Promise<ISeasonInfo | undefined> {
         try {
-            // Fetch season from v2/metadata/seasons.json
-            const response = await this.cloudFrontClient.get<ISeasonInfo[]>('/v2/metadata/seasons.json');
+            const response = await this.cloudFrontClient.get<ISeasonInfo[]>(ContentPaths.seasons());
             const season = response.data.find(s => s.id === seasonId);
             
             if (!season) {
@@ -128,18 +127,16 @@ export class HymnsDataProvider implements IHymnsDataProvider {
 
     public async getServiceList(seasonId: string): Promise<IServiceInfo[]> {
         try {
-            // Get season from v2/metadata to get serviceIds
-            const seasons = await this.cloudFrontClient.get<ISeasonInfo[]>('/v2/metadata/seasons.json');
+            const seasons = await this.cloudFrontClient.get<ISeasonInfo[]>(ContentPaths.seasons());
             const season = seasons.data.find(s => s.id === seasonId);
             
             if (!season || !season.serviceIds || season.serviceIds.length === 0) {
                 return [];
             }
             
-            // Fetch each service from S3 v2 directory
             const servicePromises = season.serviceIds.map(async (serviceId) => {
                 try {
-                    const response = await this.cloudFrontClient.get<IServiceInfo>(`/v2/seasons/${seasonId}/services/${serviceId}.json`);
+                    const response = await this.cloudFrontClient.get<IServiceInfo>(ContentPaths.service(seasonId, serviceId));
                     return response.data;
                 } catch (error) {
                     console.log(`Error fetching service ${serviceId}:`, error);
@@ -161,7 +158,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
 
     public async getService(seasonId: string, serviceId: string): Promise<IServiceInfo | undefined> {
         try {
-            const response = await this.cloudFrontClient.get<IServiceInfo>(`/v2/seasons/${seasonId}/services/${serviceId}.json`);
+            const response = await this.cloudFrontClient.get<IServiceInfo>(ContentPaths.service(seasonId, serviceId));
             const service = response.data;
             
             // Load and merge Arabic translations for service name
@@ -213,7 +210,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
 
     public async getReferenceIndex(): Promise<IReferenceIndex> {
         try {
-            const response = await this.cloudFrontClient.get<IReferenceIndex>("/v2/metadata/hymn-references.json");
+            const response = await this.cloudFrontClient.get<IReferenceIndex>(ContentPaths.hymnReferences());
             return response.data;
         } catch (ex) {
             console.log(ex);
@@ -271,23 +268,4 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         }
     }
 
-    public async getBookletList(): Promise<IBookletInfo[]> {
-        try {
-            const response = await this.httpClient.get<IBookletInfo[]>("/booklets");
-            return response.data;
-        } catch (ex) {
-            console.log(ex);
-            return [];
-        }
-    }
-
-    public async getBooklet(bookletId: string): Promise<IBookletInfo> {
-        try {
-            const response = await this.httpClient.get<IBookletInfo>(`/booklets/${bookletId}`);
-            return response.data;
-        } catch (ex) {
-            console.log(ex);
-            throw ex;
-        }
-    }
 }

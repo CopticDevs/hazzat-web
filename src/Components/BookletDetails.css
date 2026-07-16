@@ -1,10 +1,158 @@
 .bookletLinkDiv {
     align-content: center;
     text-align: center;
+    color: #4f4a40;
+    font-size: 13px;
+    line-height: 1.35;
+    padding: 12px;
 }
 
-.bookletFullImgDiv {
-    display: flex;
+.bookletDetailsIntro {
+    margin: 20px auto 24px;
+    max-width: 760px;
+    text-align: center;
+}
+
+.bookletSeasonVerse {
+    color: #5f584c;
+    font-size: 15px;
+}
+
+.bookletSelectionPanel {
+    border-bottom: 1px solid #d7d2c7;
+    border-top: 1px solid #d7d2c7;
+    color: #302c26;
+    margin-bottom: 28px;
+    padding: 16px 0;
+}
+
+.bookletSelectionHeader {
     align-items: center;
-    min-width: 215px;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.bookletSelectionTitle {
+    font-family: "Trajan Pro";
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.bookletSelectionReset {
+    background: transparent;
+    border: 1px solid #bdb6a6;
+    border-radius: 6px;
+    color: #302c26;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+.bookletSelectionReset:hover {
+    background-color: #f3f1eb;
+}
+
+.bookletSelectionPanel label {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    gap: 8px;
+    margin: 0;
+}
+
+.bookletSelectionPanel input[type="checkbox"] {
+    accent-color: #6d604c;
+    flex: 0 0 auto;
+}
+
+.bookletSelectionPanel input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+}
+
+.bookletServiceSelection {
+    border-top: 1px solid #ece7dd;
+}
+
+.bookletServiceSelector {
+    border-bottom: 1px solid #ece7dd;
+    padding: 10px 0;
+}
+
+.bookletServiceSelector summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.bookletServiceSelector summary label {
+    display: inline-flex;
+}
+
+.bookletHymnSelector {
+    border-left: 2px solid #e2ddd2;
+    margin: 10px 0 0 18px;
+    padding-left: 14px;
+}
+
+.bookletHymnSelector > label {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.bookletVariationSelectorGroup {
+    margin-top: 8px;
+    padding-left: 24px;
+}
+
+.bookletVariationSelector {
+    color: #4f4a40;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.bookletDownloadGroup {
+    margin-bottom: 26px;
+}
+
+.bookletDownloadTitle {
+    border-bottom: 1px solid #d7d2c7;
+    font-family: "Trajan Pro";
+    font-size: 17px;
+    font-weight: bold;
+    margin: 0 12px 8px;
+    padding-bottom: 8px;
+    text-align: center;
+}
+
+.bookletDownloadButton {
+    background: transparent;
+    border: 1px solid #d7d2c7;
+    border-radius: 6px;
+    color: #2c2924;
+    min-height: 136px;
+    padding: 14px 10px;
+    width: 100%;
+}
+
+.bookletDownloadButton:hover:not(:disabled) {
+    background-color: #f3f1eb;
+}
+
+.bookletDownloadButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.bookletDownloadButton svg {
+    height: 70px;
+    margin-bottom: 8px;
+    max-width: 100%;
+}
+
+@media (max-width: 575px) {
+    .bookletSelectionHeader {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }

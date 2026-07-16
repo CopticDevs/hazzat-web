@@ -45,8 +45,7 @@ export interface IVerticalHazzatContent extends ContentCommon {
 }
 
 export interface IMusicalNotesContent extends ContentCommon {
-    musicFilePath: string;
-    audioFilePath: string;
+    musicXml: string;
 }
 
 export interface IAudioContent extends ContentCommon {

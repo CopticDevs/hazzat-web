@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
@@ -37,9 +37,9 @@ function ServicesMenu(props: IProps) {
         const servicesResponse = await hymnsDataProvider.getServiceList(props.seasonId);
 
         if (isMounted.current) {
-            setServices(servicesResponse.sort(HymnUtils.serviceInfoComparer));
+            setServices([...servicesResponse].sort(HymnUtils.serviceInfoComparer));
         }
-    }, [languageProperties, environmentProperties, props.seasonId, isMounted]);
+    }, [languageProperties, environmentProperties, props.seasonId]);
 
     useEffect(() => {
         isMounted.current = true;
@@ -78,6 +78,11 @@ function ServicesMenu(props: IProps) {
                     <div>
                         <div>
                             <div className="seasonVerse" dangerouslySetInnerHTML={{ __html: props.seasonVerse }} />
+                        </div>
+                        <div className="seasonDownloadActions">
+                            <Link className="seasonDownloadPdfsButton" to={`/Booklets/${props.seasonId}`}>
+                                {strings.downloadPdfs}
+                            </Link>
                         </div>
                         <BreadCrumb items={[
                             { title: strings.seasons, path: "/Seasons" },

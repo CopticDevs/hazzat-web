@@ -53,7 +53,7 @@ describe('HymnsDataProvider - Seasons List Loading', () => {
 
     const result = await provider.getSeasonList();
 
-    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v2/metadata/seasons.json');
+    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v3/metadata/seasons.json');
     expect(result).toHaveLength(2);
     expect(result[0].displayName).toBe('Nativity');
     expect(result[0].displayVerse).toBe('Glory to God in the highest');
