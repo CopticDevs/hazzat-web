@@ -57,10 +57,10 @@ The first directory must contain `v4/`; the second must contain the original `v3
 
 1. Keep production on v3 while exercising an isolated v4 rehearsal feed in PPE. Both builds must compile and existing v3 regressions must pass.
 2. Validate the preserved dataset, independent alternatives, contextual titles, English/Arabic/Coptic display, score rendering, external audio links, multiple video embeds, service/hymn dropdowns, and device/print PDF output.
-3. Complete per-service title editing and Arabic title propagation in HazzatApp separately. The web reader supports these fields already; it does not author records or modify the bucket.
+3. Existing service-specific titles are backfilled during migration. The web reader supports these fields already; the admin editor for future title changes can be completed separately and does not block publishing the preserved dataset. The web does not author records or modify the bucket.
 4. If enabling `REACT_APP_HAZZAT_CONTENT_ETAGS=true`, first configure the applicable CloudFront response policy to expose `ETag` and allow `If-None-Match`, then verify browser preflight/304 behavior. Confirm versioned content invalidation is active.
-5. Ensure the existing verified backup has a durable copy outside the cloud workspace before live content rollout. Retain old content and the generated v3 compatibility feed for older clients.
-6. Deploy the verified web build with the v4 flag. Roll back by deploying the v3 build; do not delete or restore bucket content merely to switch the web reader back.
+5. Freeze v3 writes, verify the final backup/restore, and retain a durable copy outside the cloud workspace before live content rollout. The approved cutover updates only v4. The publisher maintains four v4 indexes and invalidates only `/v4/*`; retained v3 objects stay frozen. Older clients show that snapshot until they upgrade.
+6. Deploy the verified web build with the v4 flag after the live feed passes validation. Reverting to the v3 build shows the frozen older dataset. Preserve later v4 edits through v4 backups/version history; do not restore the whole pre-cutover bucket snapshot blindly.
 7. Combining existing duplicate records remains a separate final review phase.
 
 No AWS writes, content conversion, record consolidation, or deployment is performed by this web implementation.
