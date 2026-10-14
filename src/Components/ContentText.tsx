@@ -177,12 +177,20 @@ function ContentText(props: IProps) {
     };
 
     const generateContentTables = (paragraphs: TextParagraph[]) => {
+        // Each alternative owns its own tables and language grouping.
+        contentTables.length = 0;
+        prevMask = 0;
+        currTableId = 0;
+        currRowId = 0;
+        currCelId = 0;
+        colDefId = 0;
         paragraphs && paragraphs.forEach((paragraph) => {
             // Filter out empty columns first
             const nonEmptyColumns = paragraph.columns.filter(col => col.content && col.content.trim() !== "");
             
             // get current mask based on non-empty columns
             const currentMask = getTableMask(nonEmptyColumns);
+            if (currentMask === 0) return;
 
             // ensure table instantiated
             ensureTableInstantiated(currentMask);
