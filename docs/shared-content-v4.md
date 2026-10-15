@@ -65,6 +65,14 @@ The first directory must contain `v4/`; the second must contain the original `v3
 
 No AWS writes, content conversion, record consolidation, or deployment is performed by this web implementation.
 
+## Azure pipeline promotion
+
+The existing `.pipelines/azure-pipelines.ppe.yml` builds `develop` for deployment to `ppe.hazzat.com`. After PPE validation, merging `develop` into `master` runs `.pipelines/azure-pipelines.prod.yml` for deployment to `hazzat.com`. Deployment continues through the existing Azure release setup using the published build artifacts.
+
+The build task in each pipeline explicitly sets `REACT_APP_HAZZAT_CONTENT_VERSION=v4` and `REACT_APP_HAZZAT_CONTENT_BASE_URL=https://d1zhmhuei1bwco.cloudfront.net`. The gated PPE validation and manual development build use the same settings. These are public configuration values. Keep them on promotion so each rebuilt artifact reads the live v4 dataset; the application's unconfigured local default remains v3. Existing triggers, test tasks, artifact names, and deployment credentials are preserved.
+
+Merge the feature PR into `develop` first. Validate the deployed PPE site, including both format menus, contextual hymn titles, language changes, MusicXML, and PDF selection/download, before approving promotion to `master`. This web promotion does not migrate or overwrite AWS content.
+
 ## Implementation validation
 
 Verified on October 14, 2026 with Node 24:
