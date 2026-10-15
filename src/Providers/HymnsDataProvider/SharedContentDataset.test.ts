@@ -21,7 +21,7 @@ datasetTest("preserves all 84 migrated services' titles, content, hymn order, an
     const root = dataset!;
     const get = jest.fn(async (url: string) => ({ data: JSON.parse(fs.readFileSync(path.join(root, url.replace(/^\/+/, "")), "utf8")) }));
     (axios.create as jest.Mock).mockReturnValue({ get });
-    const provider = new HymnsDataProvider("en", "https://unused.example", "https://dataset.example", { version: "v4" });
+    const provider = new HymnsDataProvider("en", "https://unused.example", "https://dataset.example", {});
     let services = 0;
     // Inspect retained files too: two legacy services are absent from the
     // existing metadata list, and the preservation migration keeps them.
@@ -41,7 +41,7 @@ datasetTest("includes every retained service use in contextual search without do
     ContentResourceClient.clear();
     const get = jest.fn(async (url: string) => ({ data: JSON.parse(fs.readFileSync(path.join(dataset!, url.replace(/^\/+/, "")), "utf8")) }));
     (axios.create as jest.Mock).mockReturnValue({ get });
-    const provider = new HymnsDataProvider("en", "https://unused.example", "https://dataset-search.example", { version: "v4" });
+    const provider = new HymnsDataProvider("en", "https://unused.example", "https://dataset-search.example", {});
     const index = await provider.getReferenceIndex();
     const uses = Object.values(index).flatMap(entry => entry.usages ?? []);
     for (const seasonId of fs.readdirSync(path.join(dataset!, "v4/seasons"))) {

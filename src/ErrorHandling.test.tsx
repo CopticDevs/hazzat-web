@@ -13,14 +13,10 @@ describe('Error Handling Tests', () => {
   const mockCloudFrontClient = {
     get: jest.fn(),
   };
-  const mockHttpClient = {
-    get: jest.fn(),
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockedAxios.create = jest.fn()
-      .mockReturnValueOnce(mockHttpClient as any)
       .mockReturnValueOnce(mockCloudFrontClient as any);
     
     provider = new HymnsDataProvider('en', 'https://api.hazzat.com', 'https://d1zhmhuei1bwco.cloudfront.net');
@@ -38,10 +34,7 @@ describe('Error Handling Tests', () => {
   it('should handle invalid season ID (404)', async () => {
     mockCloudFrontClient.get.mockRejectedValue(new Error('404 Not Found'));
 
-    const result = await provider.getService('invalid-season', 'invalid-service');
-
-    // Should return undefined for not found
-    expect(result).toBeUndefined();
+    await expect(provider.getService('invalid-season', 'invalid-service')).rejects.toThrow('404 Not Found');
   });
 
   it('should handle malformed JSON data', async () => {
@@ -67,9 +60,6 @@ describe('Error Handling Tests', () => {
   it('should handle timeout errors', async () => {
     mockCloudFrontClient.get.mockRejectedValue(new Error('Timeout'));
 
-    const result = await provider.getReferenceIndex();
-
-    // Should return empty object for reference index
-    expect(result).toEqual({});
+    await expect(provider.getReferenceIndex()).rejects.toThrow('Timeout');
   });
 });

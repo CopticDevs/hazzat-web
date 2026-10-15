@@ -7,32 +7,21 @@ import { ISeasonInfo } from "./Models/ISeasonInfo";
 import { IServiceInfo } from "./Models/IServiceInfo";
 import { IHymnContent, IVariationInfo } from "./Models/IVariationInfo";
 import { ISeasonTranslations } from "./Models/ISeasonTranslations";
-import { CONTENT_VERSION, ContentVersion, createContentPaths } from "./ContentPaths";
+import { createContentPaths } from "./ContentPaths";
 import { ContentResourceClient } from "./ContentResourceClient";
 import { assignmentTitle, resolveSharedService, SharedService, validateIdentity, validateLibraryRecord, validateService } from "./SharedContent";
 
 export class HymnsDataProvider implements IHymnsDataProvider {
-    private httpClient: AxiosInstance;
     private cloudFrontClient: AxiosInstance;
     private language: string;
-    private readonly version: ContentVersion;
     private readonly paths: ReturnType<typeof createContentPaths>;
     private readonly resources: ContentResourceClient;
     private seasonTranslationsCache: ISeasonTranslations | null = null;
 
-    constructor(language: string, envBaseUrl: string, cloudFrontUrl: string, options: { version?: ContentVersion; useEtags?: boolean } = {}) {
+    constructor(language: string, _envBaseUrl: string, cloudFrontUrl: string, options: { useEtags?: boolean } = {}) {
         this.language = language;
-        this.version = options.version ?? CONTENT_VERSION;
-        this.paths = createContentPaths(this.version);
+        this.paths = createContentPaths();
         
-        // Legacy Azure API client for endpoints not yet served from S3.
-        this.httpClient = axios.create({
-            baseURL: envBaseUrl,
-            headers: {
-                "Accept-Language": language
-            }
-        });
-
         // CloudFront client for S3 content
         this.cloudFrontClient = axios.create({
             baseURL: cloudFrontUrl,
@@ -45,8 +34,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
     }
 
     private async read<T>(path: string, validate: (data: unknown) => T = data => data as T): Promise<T> {
-        if (this.version === "v4") return this.resources.read(path, validate);
-        return validate((await this.cloudFrontClient.get(path)).data);
+        return this.resources.read(path, validate);
     }
 
     private async readSeasons(): Promise<ISeasonInfo[]> {
@@ -61,14 +49,12 @@ export class HymnsDataProvider implements IHymnsDataProvider {
     }
 
     public async getServiceSummary(seasonId: string, serviceId: string): Promise<IServiceInfo | undefined> {
-        if (this.version === "v3") return this.getService(seasonId, serviceId);
         const { hymns, ...service } = await this.readSharedService(seasonId, serviceId);
         return this.mergeServiceTranslation({ ...service, verse: service.verse ?? "",
             isDateSpecific: service.isDateSpecific ?? false, displayName: service.name }, await this.getSeasonTranslations());
     }
 
     public async getServiceSummaryList(seasonId: string): Promise<IServiceInfo[]> {
-        if (this.version === "v3") return this.getServiceList(seasonId);
         const season = (await this.readSeasons()).find(s => s.id === seasonId);
         const summaries = await Promise.all((season?.serviceIds ?? []).map(async serviceId => {
             const summary = await this.getServiceSummary(seasonId, serviceId);
@@ -180,70 +166,20 @@ export class HymnsDataProvider implements IHymnsDataProvider {
 
     public async getService(seasonId: string, serviceId: string): Promise<IServiceInfo | undefined> {
         try {
-            if (this.version === "v4") {
-                const source = await this.readSharedService(seasonId, serviceId);
-                const resolved = await resolveSharedService(source,
-                    id => this.read(this.paths.hymn(id), data => validateIdentity(data, id)),
-                    id => this.read(this.paths.content(id), data => validateLibraryRecord(data, id)), this.language);
-                return this.mergeServiceTranslation(resolved, await this.getSeasonTranslations());
-            }
-            const service = await this.read<IServiceInfo>(this.paths.service(seasonId, serviceId));
-            
-            // Load and merge Arabic translations for service name
-            const translations = await this.getSeasonTranslations();
-            const serviceWithTranslation = this.mergeServiceTranslation(service, translations);
-            
-            // Load hymn-references.json to get Arabic hymn names
-            if (serviceWithTranslation.hymns && serviceWithTranslation.hymns.length > 0) {
-                const refIndex = await this.getReferenceIndex();
-                serviceWithTranslation.hymns = serviceWithTranslation.hymns.map(hymn => {
-                    const hymnRef = refIndex[hymn.id];
-                    const nameAr = hymn.nameAr ?? hymnRef?.nameAr;
-                    
-                    // Merge variation names from hymn-references
-                    const updatedFormats = hymn.formats?.map(format => {
-                        const formatRef = hymnRef?.formats?.[format.id];
-                        const updatedVariations = format.variations?.map(variation => {
-                            const variationRef = formatRef?.variations?.[variation.id];
-                            const variationNameAr = variation.nameAr ?? variationRef?.nameAr;
-                            
-                            return {
-                                ...variation,
-                                nameAr: variationNameAr,
-                                displayName: this.language === 'ar' && variationNameAr ? variationNameAr : variation.name
-                            };
-                        });
-                        
-                        return {
-                            ...format,
-                            variations: updatedVariations
-                        };
-                    });
-                    
-                    return {
-                        ...hymn,
-                        nameAr,
-                        displayName: this.language === 'ar' && nameAr ? nameAr : hymn.name,
-                        formats: updatedFormats
-                    };
-                });
-            }
-            
-            return serviceWithTranslation;
-        } catch (ex) {
-            if (this.version === "v4") {
-                this.resources.invalidate();
-                throw ex;
-            }
-            console.log(ex);
-            return undefined;
+            const source = await this.readSharedService(seasonId, serviceId);
+            const resolved = await resolveSharedService(source,
+                id => this.read(this.paths.hymn(id), data => validateIdentity(data, id)),
+                id => this.read(this.paths.content(id), data => validateLibraryRecord(data, id)), this.language);
+            return this.mergeServiceTranslation(resolved, await this.getSeasonTranslations());
+        } catch (error) {
+            this.resources.invalidate();
+            throw error;
         }
     }
 
     public async getReferenceIndex(): Promise<IReferenceIndex> {
         try {
             const source = await this.read<IReferenceIndex>(this.paths.hymnReferences());
-            if (this.version === "v3") return source;
             const index: IReferenceIndex = JSON.parse(JSON.stringify(source));
             for (const entry of Object.values(index)) entry.usages = [];
             // Existing v4 publishers contain only canonical names. Read thin assignments
@@ -266,72 +202,30 @@ export class HymnsDataProvider implements IHymnsDataProvider {
             }));
             return index;
         } catch (ex) {
-            if (this.version === "v4") {
-                this.resources.invalidate();
-                throw ex;
-            }
-            console.log(ex);
-            return {};
-        }
-    }
-
-    public async getServiceHymnList(seasonId: string, serviceId: string): Promise<IHymnInfo[]> {
-        if (this.version === "v4") return (await this.getService(seasonId, serviceId))?.hymns ?? [];
-        try {
-            const response = await this.httpClient.get<IHymnInfo[]>(`/seasons/${seasonId}/services/${serviceId}/hymns`);
-            return response.data;
-        } catch (ex) {
-            console.log(ex);
-            return [];
-        }
-    }
-
-    public async getServiceHymn(seasonId: string, serviceId: string, hymnId: string): Promise<IHymnInfo> {
-        if (this.version === "v4") {
-            const hymn = (await this.getServiceHymnList(seasonId, serviceId)).find(h => h.id === hymnId);
-            if (!hymn) throw new Error("Hymn not found");
-            return hymn;
-        }
-        try {
-            const response = await this.httpClient.get<IHymnInfo>(`/seasons/${seasonId}/services/${serviceId}/hymns/${hymnId}`);
-            return response.data;
-        } catch (ex) {
-            console.log(ex);
+            this.resources.invalidate();
             throw ex;
         }
     }
 
+    public async getServiceHymnList(seasonId: string, serviceId: string): Promise<IHymnInfo[]> {
+        return (await this.getService(seasonId, serviceId))?.hymns ?? [];
+    }
+
+    public async getServiceHymn(seasonId: string, serviceId: string, hymnId: string): Promise<IHymnInfo> {
+        const hymn = (await this.getServiceHymnList(seasonId, serviceId)).find(h => h.id === hymnId);
+        if (!hymn) throw new Error("Hymn not found");
+        return hymn;
+    }
+
     public async getServiceHymnFormatList(seasonId: string, serviceId: string, hymnId: string): Promise<IFormatInfo[]> {
-        if (this.version === "v4") return (await this.getServiceHymn(seasonId, serviceId, hymnId)).formats ?? [];
-        try {
-            const response = await this.httpClient.get<IFormatInfo[]>(`/seasons/${seasonId}/services/${serviceId}/hymns/${hymnId}/formats`);
-            return response.data;
-        } catch (ex) {
-            console.log(ex);
-            return [];
-        }
+        return (await this.getServiceHymn(seasonId, serviceId, hymnId)).formats ?? [];
     }
 
     public async getServiceHymnFormat(seasonId: string, serviceId: string, hymnId: string, formatId: string): Promise<IFormatInfo | undefined> {
-        if (this.version === "v4") return (await this.getServiceHymnFormatList(seasonId, serviceId, hymnId)).find(f => f.id === formatId);
-        try {
-            const response = await this.httpClient.get<IFormatInfo>(`/seasons/${seasonId}/services/${serviceId}/hymns/${hymnId}/formats/${formatId}`);
-            return response.data;
-        } catch (ex) {
-            console.log(ex);
-            return undefined;
-        }
+        return (await this.getServiceHymnFormatList(seasonId, serviceId, hymnId)).find(f => f.id === formatId);
     }
 
     public async getServiceHymnsFormatVariationList<T extends IHymnContent>(seasonId: string, serviceId: string, hymnId: string, formatId: string): Promise<IVariationInfo<T>[]> {
-        if (this.version === "v4") return ((await this.getServiceHymnFormat(seasonId, serviceId, hymnId, formatId))?.variations ?? []) as IVariationInfo<T>[];
-        try {
-            const response = await this.httpClient.get<IVariationInfo<T>[]>(`/seasons/${seasonId}/services/${serviceId}/hymns/${hymnId}/formats/${formatId}/variations`);
-            return response.data;
-        } catch (ex) {
-            console.log(ex);
-            return [];
-        }
+        return ((await this.getServiceHymnFormat(seasonId, serviceId, hymnId, formatId))?.variations ?? []) as IVariationInfo<T>[];
     }
-
 }

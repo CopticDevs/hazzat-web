@@ -55,7 +55,13 @@ describe("v4 service resolution and contextual titles", () => {
         (axios.create as jest.Mock).mockReturnValue({ get });
     });
 
-    const provider = (language = "en", base = "https://content.example") => new HymnsDataProvider(language, "https://unused.example", base, { version: "v4" });
+    const provider = (language = "en", base = "https://content.example") => new HymnsDataProvider(language, "https://unused.example", base, {});
+
+    it("does not request a legacy feed when a v4 dependency is unavailable", async () => {
+        delete files[`/v4/content/${FIRST}.json`];
+        await expect(provider().getService("annual", "basil")).rejects.toThrow("Missing file");
+        expect(get.mock.calls.every(([path]) => path.startsWith("/v4/"))).toBe(true);
+    });
 
     it("preserves service-specific titles, unchanged names, hymn order, variation order, and tied format order", async () => {
         const annual = await provider().getService("annual", "basil");

@@ -1,19 +1,10 @@
-export type ContentVersion = "v3" | "v4";
-
-export function parseContentVersion(value: string = "v3"): ContentVersion {
-    if (value !== "v3" && value !== "v4") throw new Error("Unsupported Hazzat content version");
-    return value;
-}
-
-export const CONTENT_VERSION = parseContentVersion(process.env.REACT_APP_HAZZAT_CONTENT_VERSION);
-
 export function safeContentId(id: string): string {
     if (!/^[a-zA-Z0-9_-]+$/.test(id)) throw new Error("Invalid Hazzat content ID");
     return id;
 }
 
-export function createContentPaths(version: ContentVersion) {
-    const contentPath = (path: string) => `/${version}/${path}`;
+export function createContentPaths() {
+    const contentPath = (path: string) => `/v4/${path}`;
     return {
         seasons: () => contentPath("metadata/seasons.json"),
         seasonsArabic: () => contentPath("metadata/seasons.ar.json"),
@@ -25,4 +16,4 @@ export function createContentPaths(version: ContentVersion) {
     };
 }
 
-export const ContentPaths = createContentPaths(CONTENT_VERSION);
+export const ContentPaths = createContentPaths();
