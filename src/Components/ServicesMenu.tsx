@@ -4,11 +4,11 @@ import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
-import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
 import BreadCrumb from "./BreadCrumb";
 import LoadingSpinner from "./LoadingSpinner";
+import ContentLoadError from "./ContentLoadError";
 import "./SeasonDetails.css";
 import ServiceContents from "./ServiceContents";
 
@@ -28,18 +28,28 @@ function ServicesMenu(props: IProps) {
     const loadingDiv = useMemo(() => getLoadingSpinnerDiv(), []);
     const { languageProperties } = useContext(LanguageContext);
     const { environmentProperties } = useContext(EnvironmentContext);
+    const [isLoading, setIsLoading] = useState(true);
     const [services, setServices] = useState<IServiceInfo[]>([]);
     const [servicesNodes, setServicesNodes] = useState<React.ReactNode[]>([loadingDiv]);
     const isMounted = useRef(true);
+    const requestId = useRef(0);
+    const [loadFailed, setLoadFailed] = useState(false);
 
     const fetchFromBackend = React.useCallback(async () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
-        const servicesResponse = await hymnsDataProvider.getServiceList(props.seasonId);
-
-        if (isMounted.current) {
-            setServices([...servicesResponse].sort(HymnUtils.serviceInfoComparer));
+        const request = ++requestId.current;
+        const current = () => isMounted.current && request === requestId.current;
+        setIsLoading(true);
+        setLoadFailed(false);
+        try {
+            const provider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
+            const response = await provider.getServiceSummaryList(props.seasonId);
+            if (current()) setServices([...response].sort(HymnUtils.serviceInfoComparer));
+        } catch {
+            if (current()) setLoadFailed(true);
+        } finally {
+            if (current()) setIsLoading(false);
         }
-    }, [languageProperties, environmentProperties, props.seasonId]);
+    }, [languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl, props.seasonId]);
 
     useEffect(() => {
         isMounted.current = true;
@@ -60,14 +70,11 @@ function ServicesMenu(props: IProps) {
             return <ServiceContents key={service.id} seasonId={props.seasonId} serviceId={service.id} serviceName={service.displayName} />
         });
 
-        if (theNodes.length === 0) {
-            setServicesNodes([loadingDiv]);
-        } else {
-            setServicesNodes(theNodes);
-        }
+        setServicesNodes(theNodes);
     }, [services, serviceIdParam, loadingDiv, props.seasonId]);
 
-    if (!isMounted.current) {
+    if (loadFailed) return <ContentLoadError retry={fetchFromBackend} />;
+    if (isLoading || !isMounted.current) {
         return <LoadingSpinner />;
     }
 

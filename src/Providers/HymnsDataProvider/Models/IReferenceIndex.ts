@@ -18,9 +18,17 @@ export interface IHymnReference {
     name: string;              // English hymn name
     nameAr?: string;           // Arabic hymn name (optional)
     services: string[];        // List of service paths using this hymn
+    usages?: IHymnUsage[];
     formats: {
         [formatId: string]: IHymnFormat;
     };
+}
+
+export interface IHymnUsage {
+    seasonId: string;
+    serviceId: string;
+    name: string;
+    nameAr?: string;
 }
 
 export interface IReferenceIndex {

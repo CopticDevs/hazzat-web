@@ -14,14 +14,10 @@ describe('HymnsDataProvider - Seasons List Loading', () => {
   const mockCloudFrontClient = {
     get: jest.fn(),
   };
-  const mockHttpClient = {
-    get: jest.fn(),
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockedAxios.create = jest.fn()
-      .mockReturnValueOnce(mockHttpClient as any)
       .mockReturnValueOnce(mockCloudFrontClient as any);
     
     provider = new HymnsDataProvider('en', 'https://api.hazzat.com', 'https://d1zhmhuei1bwco.cloudfront.net');
@@ -53,7 +49,7 @@ describe('HymnsDataProvider - Seasons List Loading', () => {
 
     const result = await provider.getSeasonList();
 
-    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v3/metadata/seasons.json');
+    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v4/metadata/seasons.json');
     expect(result).toHaveLength(2);
     expect(result[0].displayName).toBe('Nativity');
     expect(result[0].displayVerse).toBe('Glory to God in the highest');

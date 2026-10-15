@@ -11,6 +11,8 @@ export interface IHymnsDataProvider {
 
     getServiceList(seasonId: string): Promise<IServiceInfo[]>;
     getService(seasonId: string, serviceId: string): Promise<IServiceInfo | undefined>;
+    getServiceSummary?(seasonId: string, serviceId: string): Promise<IServiceInfo | undefined>;
+    getServiceSummaryList?(seasonId: string): Promise<IServiceInfo[]>;
 
     getServiceHymnList(seasonId: string, serviceId: string): Promise<IHymnInfo[]>;
     getServiceHymn(seasonId: string, serviceId: string, hymnId: string): Promise<IHymnInfo>;

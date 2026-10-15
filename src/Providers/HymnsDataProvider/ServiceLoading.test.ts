@@ -1,3 +1,4 @@
+import { assignedFormatFixture, sharedServiceFixture } from "../../testSupport/sharedServiceFixture";
 import { HymnsDataProvider } from './HymnsDataProvider';
 import { IServiceInfo } from './Models/IServiceInfo';
 import { IHymnInfo } from './Models/IHymnInfo';
@@ -16,14 +17,10 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
   const mockCloudFrontClient = {
     get: jest.fn(),
   };
-  const mockHttpClient = {
-    get: jest.fn(),
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockedAxios.create = jest.fn()
-      .mockReturnValueOnce(mockHttpClient as unknown as AxiosInstance)
       .mockReturnValueOnce(mockCloudFrontClient as unknown as AxiosInstance);
 
     provider = new HymnsDataProvider('en', 'https://api.hazzat.com', 'https://d1zhmhuei1bwco.cloudfront.net');
@@ -56,13 +53,11 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
       ]
     };
 
-    mockCloudFrontClient.get
-      .mockResolvedValueOnce({ data: mockService })
-      .mockResolvedValueOnce({ data: {} });
+    mockCloudFrontClient.get.mockImplementation(sharedServiceFixture(mockService));
 
     const result = await provider.getService('nativity', 'vespers');
 
-    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v3/seasons/nativity/services/vespers.json');
+    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v4/seasons/nativity/services/vespers.json');
     expect(result).toBeDefined();
     expect(result?.hymns).toHaveLength(2);
     expect(result?.seasonId).toBe('nativity');
@@ -77,20 +72,8 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
         displayName: 'Opening Hymn',
         order: 1,
         formats: [
-          {
-            id: '1',
-            name: 'Text',
-            order: 1,
-            variationCount: 0,
-            variations: []
-          },
-          {
-            id: '2',
-            name: 'Hazzat',
-            order: 2,
-            variationCount: 0,
-            variations: []
-          }
+          assignedFormatFixture('1', 'Text', 1),
+          assignedFormatFixture('2', 'Hazzat', 2)
         ]
       },
       {
@@ -99,13 +82,7 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
         displayName: 'Psalm',
         order: 2,
         formats: [
-          {
-            id: '1',
-            name: 'Text',
-            order: 1,
-            variationCount: 0,
-            variations: []
-          }
+          assignedFormatFixture('1', 'Text', 1)
         ]
       }
     ];
@@ -121,9 +98,7 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
       hymns: mockHymns
     };
 
-    mockCloudFrontClient.get
-      .mockResolvedValueOnce({ data: mockService })
-      .mockResolvedValueOnce({ data: {} });
+    mockCloudFrontClient.get.mockImplementation(sharedServiceFixture(mockService));
 
     const result = await provider.getService('nativity', 'vespers');
 
@@ -144,13 +119,13 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
       displayName: 'Complete Hymn',
       order: 1,
       formats: [
-        { id: '1', name: 'Text', order: 1, variationCount: 0, variations: [] },
-        { id: '2', name: 'Hazzat', order: 2, variationCount: 0, variations: [] },
-        { id: '3', name: 'VerticalHazzat', order: 3, variationCount: 0, variations: [] },
-        { id: '4', name: 'MusicalNotes', order: 4, variationCount: 0, variations: [] },
-        { id: '5', name: 'Audio', order: 5, variationCount: 0, variations: [] },
-        { id: '6', name: 'Video', order: 6, variationCount: 0, variations: [] },
-        { id: '7', name: 'Information', order: 7, variationCount: 0, variations: [] }
+        assignedFormatFixture('1', 'Text', 1),
+        assignedFormatFixture('2', 'Hazzat', 2),
+        assignedFormatFixture('3', 'VerticalHazzat', 3),
+        assignedFormatFixture('4', 'MusicalNotes', 4),
+        assignedFormatFixture('5', 'Audio', 5),
+        assignedFormatFixture('6', 'Video', 6),
+        assignedFormatFixture('7', 'Information', 7)
       ]
     };
 
@@ -165,9 +140,7 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
       hymns: [mockHymn]
     };
 
-    mockCloudFrontClient.get
-      .mockResolvedValueOnce({ data: mockService })
-      .mockResolvedValueOnce({ data: {} });
+    mockCloudFrontClient.get.mockImplementation(sharedServiceFixture(mockService));
 
     const result = await provider.getService('nativity', 'vespers');
 
@@ -228,9 +201,7 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
       hymns: [mockHymn]
     };
 
-    mockCloudFrontClient.get
-      .mockResolvedValueOnce({ data: mockService })
-      .mockResolvedValueOnce({ data: {} });
+    mockCloudFrontClient.get.mockImplementation(sharedServiceFixture(mockService));
 
     const result = await provider.getService('nativity', 'vespers');
 
@@ -244,11 +215,9 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
     expect(paragraph?.columns[2].language).toBe('Arabic');
   });
 
-  it('should return undefined on service not found', async () => {
+  it('rejects an unavailable v4 service without a legacy fallback', async () => {
     mockCloudFrontClient.get.mockRejectedValue(new Error('404 Not Found'));
 
-    const result = await provider.getService('invalid', 'invalid');
-
-    expect(result).toBeUndefined();
+    await expect(provider.getService('invalid', 'invalid')).rejects.toThrow('404 Not Found');
   });
 });
