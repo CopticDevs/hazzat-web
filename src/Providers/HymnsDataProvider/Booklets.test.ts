@@ -1,3 +1,4 @@
+import { sharedServiceFixture } from "../../testSupport/sharedServiceFixture";
 import axios, { AxiosInstance } from "axios";
 import { HymnsDataProvider } from "./HymnsDataProvider";
 import { ISeasonInfo } from "./Models/ISeasonInfo";
@@ -14,14 +15,10 @@ describe("HymnsDataProvider - season booklet data", () => {
     const mockCloudFrontClient = {
         get: jest.fn()
     };
-    const mockHttpClient = {
-        get: jest.fn()
-    };
 
     beforeEach(() => {
         jest.clearAllMocks();
         mockedAxios.create = jest.fn()
-            .mockReturnValueOnce(mockHttpClient as unknown as AxiosInstance)
             .mockReturnValueOnce(mockCloudFrontClient as unknown as AxiosInstance);
 
         provider = new HymnsDataProvider("en", "https://api.hazzat.com", "https://d1zhmhuei1bwco.cloudfront.net");
@@ -45,8 +42,8 @@ describe("HymnsDataProvider - season booklet data", () => {
 
         const result = await provider.getSeasonList();
 
-        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v3/metadata/seasons.json");
-        expect(mockHttpClient.get).not.toHaveBeenCalled();
+        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v4/metadata/seasons.json");
+        expect(mockedAxios.create).toHaveBeenCalledTimes(1);
         expect(result).toEqual(seasons);
     });
 
@@ -74,17 +71,15 @@ describe("HymnsDataProvider - season booklet data", () => {
             hymns: []
         };
 
-        mockCloudFrontClient.get
-            .mockResolvedValueOnce({ data: seasons })
-            .mockResolvedValueOnce({ data: service });
+        mockCloudFrontClient.get.mockImplementation(sharedServiceFixture(service, { "/v4/metadata/seasons.json": seasons }));
 
         const result = await provider.getServiceList("nativity");
 
-        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v3/metadata/seasons.json");
-        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v3/seasons/nativity/services/vespers.json");
-        expect(mockHttpClient.get).not.toHaveBeenCalled();
+        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v4/metadata/seasons.json");
+        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v4/seasons/nativity/services/vespers.json");
+        expect(mockedAxios.create).toHaveBeenCalledTimes(1);
         expect(JSON.stringify(mockCloudFrontClient.get.mock.calls)).not.toContain("/booklets");
-        expect(result).toEqual([service]);
+        expect(result).toEqual([{ ...service, schemaVersion: 4, nameAr: undefined }]);
     });
 
     it("does not expose legacy booklet endpoints on the provider", () => {

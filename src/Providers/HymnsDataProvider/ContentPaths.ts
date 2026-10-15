@@ -1,13 +1,19 @@
-export const CONTENT_VERSION = process.env.REACT_APP_HAZZAT_CONTENT_VERSION || "v3";
-
-function contentPath(path: string): string {
-    return `/${CONTENT_VERSION}/${path.replace(/^\/+/, "")}`;
+export function safeContentId(id: string): string {
+    if (!/^[a-zA-Z0-9_-]+$/.test(id)) throw new Error("Invalid Hazzat content ID");
+    return id;
 }
 
-export const ContentPaths = {
-    seasons: () => contentPath("metadata/seasons.json"),
-    seasonsArabic: () => contentPath("metadata/seasons.ar.json"),
-    hymnReferences: () => contentPath("metadata/hymn-references.json"),
-    service: (seasonId: string, serviceId: string) =>
-        contentPath(`seasons/${seasonId}/services/${serviceId}.json`)
-};
+export function createContentPaths() {
+    const contentPath = (path: string) => `/v4/${path}`;
+    return {
+        seasons: () => contentPath("metadata/seasons.json"),
+        seasonsArabic: () => contentPath("metadata/seasons.ar.json"),
+        hymnReferences: () => contentPath("metadata/hymn-references.json"),
+        service: (seasonId: string, serviceId: string) =>
+            contentPath(`seasons/${safeContentId(seasonId)}/services/${safeContentId(serviceId)}.json`),
+        hymn: (hymnId: string) => contentPath(`hymns/${safeContentId(hymnId)}/hymn.json`),
+        content: (contentId: string) => contentPath(`content/${safeContentId(contentId)}.json`)
+    };
+}
+
+export const ContentPaths = createContentPaths();

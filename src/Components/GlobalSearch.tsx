@@ -5,9 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
-import { IHymnReference, ISearchResult } from "../Providers/HymnsDataProvider/Models/ISearchResult";
+import { ISearchResult } from "../Providers/HymnsDataProvider/Models/ISearchResult";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
-import { getHymnDisplayName } from "../Utils/DisplayNameUtils";
+import { searchContent } from "../Providers/HymnsDataProvider/Search";
+import ContentLoadError from "./ContentLoadError";
 import LoadingSpinner from "./LoadingSpinner";
 import MainPaper, { Size } from "./MainPaper";
 import MyNavLink from "./MyNavLink";
@@ -21,106 +22,33 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
     const [results, setResults] = useState<ISearchResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
+    const [failed, setFailed] = useState(false);
+    const [retry, setRetry] = useState(0);
     const navigate = useNavigate();
     const { languageProperties } = useContext(LanguageContext);
 
-    // Debounced search (300ms)
     useEffect(() => {
-        if (query.length < 2) {
-            setResults([]);
-            setHasSearched(false);
+        let active = true;
+        setFailed(false);
+        setResults([]);
+        setHasSearched(false);
+        if (query.trim().length < 2) {
+            setIsLoading(false);
             return;
         }
-
         setIsLoading(true);
         const timer = setTimeout(async () => {
             try {
-                const searchResults: ISearchResult[] = [];
-                const currentLanguage = languageProperties.localeName;
-                
-                // Search seasons by name only (both English and Arabic)
-                const seasons = await dataProvider.getSeasonList();
-                const seasonResults = seasons.filter(s => {
-                    // Search both English and Arabic names
-                    const matchesEnglish = s.name.toLowerCase().includes(query.toLowerCase());
-                    const matchesArabic = s.nameAr?.toLowerCase().includes(query.toLowerCase());
-                    return matchesEnglish || matchesArabic;
-                });
-                
-                seasonResults.forEach(season => {
-                    searchResults.push({
-                        type: 'season',
-                        season: season
-                    });
-                });
-                
-                // Search hymns using reference index (both English and Arabic)
-                const refIndex = await dataProvider.getReferenceIndex();
-                
-                const hymnIds = Object.keys(refIndex).filter(hymnId => {
-                    const hymnRef = refIndex[hymnId];
-                    
-                    // Search in English name, Arabic name, or hymn ID
-                    const matchesEnglish = hymnRef.name.toLowerCase().includes(query.toLowerCase());
-                    const matchesArabic = hymnRef.nameAr?.toLowerCase().includes(query.toLowerCase());
-                    const matchesId = hymnId.toLowerCase().includes(query.toLowerCase());
-                    
-                    return matchesEnglish || matchesArabic || matchesId;
-                });
-                
-                // Build hymn search results with service references
-                for (const hymnId of hymnIds) {
-                    const hymnRef = refIndex[hymnId];
-                    const references: IHymnReference[] = [];
-                    const servicePaths = hymnRef.services;
-                    
-                    for (const path of servicePaths) {
-                        const [seasonId, serviceId] = path.split('/');
-                        
-                        // Get season name
-                        const season = seasons.find(s => s.id === seasonId);
-                        if (!season) continue;
-                        
-                        // Get service to find service name
-                        const service = await dataProvider.getService(seasonId, serviceId);
-                        if (!service) continue;
-                        
-                        references.push({
-                            seasonId: seasonId,
-                            seasonName: season.displayName,
-                            serviceId: serviceId,
-                            serviceName: service.displayName
-                        });
-                    }
-                    
-                    if (references.length > 0) {
-                        // Use appropriate language name, fallback to English if Arabic not available
-                        const displayName = getHymnDisplayName(hymnRef, currentLanguage);
-                        
-                        searchResults.push({
-                            type: 'hymn',
-                            hymn: {
-                                id: hymnId,
-                                name: displayName,
-                                references: references
-                            }
-                        });
-                    }
-                }
-                
-                setResults(searchResults);
-                setHasSearched(true);
-            } catch (error) {
-                console.error('Search error:', error);
-                setResults([]);
-                setHasSearched(true);
+                const found = await searchContent(dataProvider, query, languageProperties.localeName);
+                if (active) { setResults(found); setHasSearched(true); }
+            } catch {
+                if (active) setFailed(true);
             } finally {
-                setIsLoading(false);
+                if (active) setIsLoading(false);
             }
         }, 300);
-        
-        return () => clearTimeout(timer);
-    }, [query, dataProvider, languageProperties.localeName]);
+        return () => { active = false; clearTimeout(timer); };
+    }, [query, dataProvider, languageProperties.localeName, retry]);
 
     const handleSeasonClick = (season: ISeasonInfo) => {
         navigate(`/Seasons/${season.id}`);
@@ -153,7 +81,9 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                     </div>
                 )}
 
-                {!isLoading && hasSearched && results.length === 0 && (
+                {failed && <ContentLoadError retry={() => setRetry(value => value + 1)} />}
+
+                {!isLoading && !failed && hasSearched && results.length === 0 && (
                     <div className="alert alert-info">
                         <LocalizedMessage of="noSearchResults" />
                     </div>
@@ -200,7 +130,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                                                             <MyNavLink
                                                                 to={`/Seasons/${ref.seasonId}/services/${ref.serviceId}/hymns/${result.hymn!.id}`}
                                                             >
-                                                                {ref.seasonName} → {ref.serviceName}
+                                                                {ref.seasonName} → {ref.serviceName}{ref.hymnName ? ` → ${ref.hymnName}` : ""}
                                                             </MyNavLink>
                                                         </li>
                                                     ))}

@@ -77,6 +77,7 @@ export declare type IHymnContent =
  */
 export interface IVariationInfo<T extends IHymnContent> {
     id: string;
+    order?: number;
     name: string;
     nameAr?: string; // Arabic name (optional)
     displayName: string; // Computed display name based on current language

@@ -14,7 +14,6 @@ import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
-import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
@@ -24,8 +23,9 @@ import "./BookletDetails.css";
 import BreadCrumb from "./BreadCrumb";
 import InvalidAddressMessage from "./InvalidAddressMessage";
 import LoadingSpinner from "./LoadingSpinner";
+import ContentLoadError from "./ContentLoadError";
 
-type BookletVariation = IVariationInfo<IHymnContent>;
+type BookletVariation = IVariationInfo<IHymnContent> & { formatId: string };
 
 function BookletDetails() {
     const { bookletId } = useParams();
@@ -40,21 +40,31 @@ function BookletDetails() {
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
     const isMounted = useRef(true);
+    const requestId = useRef(0);
+    const [loadFailed, setLoadFailed] = useState(false);
 
     const fetchFromBackend = React.useCallback(async () => {
+        const request = ++requestId.current;
+        const current = () => isMounted.current && request === requestId.current;
         setIsLoading(true);
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
-        const seasonResponse = await hymnsDataProvider.getSeason(seasonIdParam);
-        const serviceResponse = seasonResponse ? await hymnsDataProvider.getServiceList(seasonIdParam) : [];
-
-        if (isMounted.current) {
-            const sortedServices = [...serviceResponse].sort((a, b) => a.order - b.order);
-            setSeasonInfo(seasonResponse);
-            setServices(sortedServices);
-            setSelection(createDefaultSelection(sortedServices));
-            setIsLoading(false);
+        setLoadFailed(false);
+        try {
+            const provider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
+            const seasonResponse = await provider.getSeason(seasonIdParam);
+            const serviceResponse = seasonResponse ? await provider.getServiceList(seasonIdParam) : [];
+            if (current()) {
+                const sorted = [...serviceResponse].sort((a, b) => a.order - b.order);
+                setSeasonInfo(seasonResponse);
+                setServices(sorted);
+                setSelection(createDefaultSelection(sorted));
+                setErrorMessage(undefined);
+            }
+        } catch {
+            if (current()) setLoadFailed(true);
+        } finally {
+            if (current()) setIsLoading(false);
         }
-    }, [seasonIdParam, languageProperties, environmentProperties]);
+    }, [seasonIdParam, languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl]);
 
     useEffect(() => {
         isMounted.current = true;
@@ -72,7 +82,7 @@ function BookletDetails() {
     }, [isLoading, pageTitle]);
 
     const downloadBooklet = async (formatKind: BookletFormatKind, layoutKind: BookletLayoutKind) => {
-        if (!seasonInfo) {
+        if (!seasonInfo || loadFailed) {
             return;
         }
 
@@ -111,6 +121,8 @@ function BookletDetails() {
     if (isLoading) {
         return <LoadingSpinner />;
     }
+
+    if (loadFailed) return <ContentLoadError retry={fetchFromBackend} />;
 
     if (!seasonInfo) {
         return <InvalidAddressMessage />;
@@ -213,7 +225,7 @@ function BookletDownloadGroup(props: BookletDownloadGroupProps) {
     );
 }
 
-interface BookletSelectionState {
+export interface BookletSelectionState {
     services: Record<string, boolean>;
     hymns: Record<string, boolean>;
     variations: Record<string, boolean>;
@@ -274,7 +286,7 @@ function BookletContentSelector(props: BookletContentSelectorProps) {
                                                         checked={isVariationSelected(props.selection, service, hymn, variation)}
                                                         onChange={event => toggleVariationSelection(props.onSelectionChange, service, hymn, variation, event.target.checked)}
                                                     />
-                                                    {getVariationDisplayName(variation)}
+                                                    {getVariationDisplayName(variation)} <small>({variation.formatId === "2" ? strings.hazzatFormatName : strings.verticalHazzatFormatName})</small>
                                                 </label>
                                             ))}
                                         </div>
@@ -380,7 +392,7 @@ function cloneSelection(selection: BookletSelectionState): BookletSelectionState
     };
 }
 
-function getSelectedBookletServices(services: IServiceInfo[], selection: BookletSelectionState): IServiceInfo[] {
+export function getSelectedBookletServices(services: IServiceInfo[], selection: BookletSelectionState): IServiceInfo[] {
     const selectedServices: IServiceInfo[] = [];
 
     services
@@ -396,7 +408,7 @@ function getSelectedBookletServices(services: IServiceInfo[], selection: Booklet
                     getBookletFormats(hymn)
                         .forEach(format => {
                             const variations = (format.variations || [])
-                                .filter(variation => isVariationSelected(selection, service, hymn, variation));
+                                .filter(variation => isVariationSelected(selection, service, hymn, { ...variation, formatId: format.id }));
 
                             if (variations.length > 0) {
                                 selectedFormats.push({ ...format, variations, variationCount: variations.length });
@@ -454,48 +466,21 @@ function getBookletFormats(hymn: IHymnInfo): IFormatInfo[] {
         .sort((a, b) => a.order - b.order);
 }
 
-function getSelectableVariations(hymn: IHymnInfo): BookletVariation[] {
-    const variations: BookletVariation[] = [];
-    const variationKeys = new Set<string>();
-
-    getBookletFormats(hymn).forEach(format => {
-        (format.variations || []).forEach(variation => {
-            const key = getVariationSelectionKey(variation);
-            if (!variationKeys.has(key) && !isFormatOnlyVariationKey(key)) {
-                variationKeys.add(key);
-                variations.push(variation);
-            }
-        });
-    });
-
-    return variations.length > 1 ? variations : [];
+export function getSelectableVariations(hymn: IHymnInfo): BookletVariation[] {
+    return getBookletFormats(hymn).flatMap(format =>
+        (format.variations || []).map(variation => ({ ...variation, formatId: format.id })));
 }
 
 function hymnKey(service: IServiceInfo, hymn: IHymnInfo): string {
-    return `${service.id}/${hymn.id}`;
+    return `${service.seasonId ?? ""}/${service.id}/${hymn.id}`;
 }
 
-function variationKey(service: IServiceInfo, hymn: IHymnInfo, variation: BookletVariation): string {
-    return `${service.id}/${hymn.id}/${getVariationSelectionKey(variation)}`;
+export function variationKey(service: IServiceInfo, hymn: IHymnInfo, variation: BookletVariation): string {
+    return `${hymnKey(service, hymn)}/${variation.formatId}/${variation.id}`;
 }
 
 function getVariationDisplayName(variation: BookletVariation): string {
     return variation.displayName || variation.name || variation.id;
-}
-
-function getVariationSelectionKey(variation: BookletVariation): string {
-    return getSelectorTextKey(getVariationDisplayName(variation));
-}
-
-function isFormatOnlyVariationKey(key: string): boolean {
-    return key === getSelectorTextKey(strings.hazzatFormatName) ||
-        key === getSelectorTextKey(strings.verticalHazzatFormatName) ||
-        key === "hazzat" ||
-        key === "vertical hazzat";
-}
-
-function getSelectorTextKey(text: string): string {
-    return text.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
 function getBookletDisabledMessage(formatExists: boolean): string {

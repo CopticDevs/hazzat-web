@@ -20,4 +20,5 @@ export interface IHymnReference {
     seasonName: string;
     serviceId: string;
     serviceName: string;
+    hymnName?: string;
 }
