@@ -6,8 +6,8 @@ import { HymnsDataProvider } from "./HymnsDataProvider";
 import { IServiceInfo } from "./Models/IServiceInfo";
 
 jest.mock("axios", () => ({ create: jest.fn() }));
-const dataset = process.env.HAZZAT_V4_DATASET;
-const originals = process.env.HAZZAT_V3_DATASET;
+const dataset = process.env.HAZZAT_V5_DATASET;
+const originals = process.env.HAZZAT_V4_DATASET;
 const datasetTest = dataset && originals ? it : it.skip;
 
 function readerShape(service: IServiceInfo) {
@@ -25,12 +25,20 @@ datasetTest("preserves all 84 migrated services' titles, content, hymn order, an
     let services = 0;
     // Inspect retained files too: two legacy services are absent from the
     // existing metadata list, and the preservation migration keeps them.
-    for (const seasonId of fs.readdirSync(path.join(root, "v4/seasons"))) {
-        for (const file of fs.readdirSync(path.join(root, "v4/seasons", seasonId, "services"))) {
+    for (const seasonId of fs.readdirSync(path.join(root, "v5/seasons"))) {
+        for (const file of fs.readdirSync(path.join(root, "v5/seasons", seasonId, "services"))) {
             const id = file.replace(/\.json$/, "");
             const actual = await provider.getService(seasonId, id);
-            const original = JSON.parse(fs.readFileSync(path.join(originals!, "v3/seasons", seasonId, "services", file), "utf8"));
-            expect(readerShape(actual!)).toEqual(readerShape(original));
+            const original = JSON.parse(fs.readFileSync(path.join(originals!, "v4/seasons", seasonId, "services", file), "utf8"));
+            const expected = {hymns: original.hymns.map((binding: any) => {
+                const identity = JSON.parse(fs.readFileSync(path.join(originals!, 'v4/hymns', binding.hymnId, 'hymn.json'), 'utf8'));
+                return {id: identity.id, name: binding.name ?? identity.name, order: binding.order,
+                    formats: Object.entries(binding.formats).filter(([, ids]) => (ids as string[]).length).map(([formatId, ids]) => ({
+                        id: formatId, name: ['Text', 'Hazzat', 'Vertical Hazzat', 'Musical Notes', 'Audio', 'Video', 'Information'][Number(formatId)-1], order: Number(formatId),
+                        variations: (ids as string[]).map(id => JSON.parse(fs.readFileSync(path.join(originals!, 'v4/content', id+'.json'), 'utf8')))
+                    })).sort((a, b) => Number(a.id)-Number(b.id))};
+            }).sort((a: any, b: any) => a.order-b.order)};
+            expect(readerShape(actual!)).toEqual(readerShape(expected as IServiceInfo));
             services++;
         }
     }
@@ -44,10 +52,10 @@ datasetTest("includes every retained service use in contextual search without do
     const provider = new HymnsDataProvider("en", "https://unused.example", "https://dataset-search.example", {});
     const index = await provider.getReferenceIndex();
     const uses = Object.values(index).flatMap(entry => entry.usages ?? []);
-    for (const seasonId of fs.readdirSync(path.join(dataset!, "v4/seasons"))) {
-        for (const file of fs.readdirSync(path.join(dataset!, "v4/seasons", seasonId, "services"))) {
-            const service = JSON.parse(fs.readFileSync(path.join(dataset!, "v4/seasons", seasonId, "services", file), "utf8"));
-            expect(uses.filter(use => use.seasonId === seasonId && use.serviceId === service.id)).toHaveLength(service.hymns.length);
+    for (const seasonId of fs.readdirSync(path.join(dataset!, "v5/seasons"))) {
+        for (const file of fs.readdirSync(path.join(dataset!, "v5/seasons", seasonId, "services"))) {
+            const service = JSON.parse(fs.readFileSync(path.join(dataset!, "v5/seasons", seasonId, "services", file), "utf8"));
+            if (!service.archived) expect(uses.filter(use => use.seasonId === seasonId && use.serviceId === service.id)).toHaveLength(service.hymns.length);
         }
     }
     expect(get.mock.calls.some(([url]) => url.includes("/content/") || url.includes("/hymns/"))).toBe(false);

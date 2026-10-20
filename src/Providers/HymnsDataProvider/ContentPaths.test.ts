@@ -6,8 +6,8 @@ it("uses v4 even when an old deployment variable requests v3", () => {
     try {
         jest.isolateModules(() => {
             const { ContentPaths } = require("./ContentPaths");
-            expect(ContentPaths.seasons()).toBe("/v4/metadata/seasons.json");
-            expect(ContentPaths.service("annual", "basil")).toBe("/v4/seasons/annual/services/basil.json");
+            expect(ContentPaths.seasons()).toBe("/v5/metadata/seasons.json");
+            expect(ContentPaths.service("annual", "basil")).toBe("/v5/seasons/annual/services/basil.json");
         });
     } finally {
         if (previous === undefined) delete process.env.REACT_APP_HAZZAT_CONTENT_VERSION;

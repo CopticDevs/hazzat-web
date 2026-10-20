@@ -24,7 +24,7 @@ steps:
     customCommand: 'install'
 
 - task: Npm@1
-  displayName: 'npm build (v4)'
+  displayName: 'npm build (v5)'
   env:
     REACT_APP_HAZZAT_CONTENT_BASE_URL: 'https://d1zhmhuei1bwco.cloudfront.net'
   inputs:
