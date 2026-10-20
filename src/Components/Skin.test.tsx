@@ -35,6 +35,19 @@ test('mobile navigation opens by keyboard, Escape closes and returns focus, and 
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
 });
 
+test.each(['header', 'footer'])('%s menu closes when selecting the current page', placement => {
+    render(<MemoryRouter initialEntries={['/Seasons']} >
+        {placement === 'header' ? <Header navItems={navItems} /> : <Footer navItems={navItems} />}
+        <Location />
+    </MemoryRouter>);
+    const toggle = screen.getByRole('button', { name: 'Menu' });
+    userEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    userEvent.click(screen.getByRole('link', { name: 'Seasons' }));
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId('location')).toHaveTextContent('/Seasons');
+});
+
 test('footer does not move the reader when mounting or opening its menu', () => {
     const scroll = jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
     render(<MemoryRouter><Footer navItems={navItems} /></MemoryRouter>);

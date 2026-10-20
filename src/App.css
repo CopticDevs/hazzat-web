@@ -98,7 +98,7 @@ body {
 }
 .site-nav {
     background: #fff;
-    border-block: 1px solid var(--rule);
+    border-block: 2px solid #555;
 }
 .site-menu {
     display: none;

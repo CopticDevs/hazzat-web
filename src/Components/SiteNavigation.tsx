@@ -33,7 +33,10 @@ export default function SiteNavigation({ id, navItems, footer = false }: Props) 
             aria-expanded={expanded} aria-controls={id} onClick={() => setExpanded(value => !value)}>
             <FontAwesomeIcon icon={faBars} /> <LocalizedMessage of="menu" />
         </button>
-        <ul id={id} className={`site-menu${expanded ? " is-open" : ""}`}>
+        <ul id={id} className={`site-menu${expanded ? " is-open" : ""}`}
+            onClick={event => {
+                if ((event.target as Element).closest("a[href]")) setExpanded(false);
+            }}>
             {navItems.filter(item => !item.disabled).map(item => <li key={item.id}>
                 <MyNavLink to={item.location} end><LocalizedMessage of={item.id} /></MyNavLink>
             </li>)}
