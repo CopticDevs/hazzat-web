@@ -113,6 +113,7 @@ describe("shared content reader views", () => {
         expect(frames).toHaveLength(2);
         expect(frames[0]).toHaveAttribute("src", "https://www.youtube.com/embed/first?autoplay=0");
         expect(frames[1]).toHaveAttribute("src", "https://www.youtube.com/embed/second?autoplay=0");
+        frames.forEach(frame => expect(frame).toHaveAttribute("referrerpolicy", "strict-origin-when-cross-origin"));
     });
 
     it("blocks incomplete PDFs and lets the user retry the entire booklet load", async () => {
