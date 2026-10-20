@@ -10,7 +10,7 @@ The skin retains the parchment artwork, logo and Coptic/Hazzat font mappings. La
 - 62rem switches the site navigation/home layout; 37.5rem switches reading columns and phone format controls. Other Bootstrap components retain Bootstrap's grid breakpoints. There are no special 999/1000/1001px corrections.
 - Content.css owns bounded notation scrolling, information columns, score containers and video aspect ratio. The existing text renderer retains its language-column layout and phone stacking.
 - UserSettingsChanger.css owns the sticky reader-tools row and the settings form. It does not position controls over either edge of a hymn.
-- print.css is imported last, removes site controls/decoration, and gives printable content the available page width. A small monochrome logo and hazzat.com attribution appear once at the start of each printed document. Reduced-motion preferences are handled centrally. Settings open/close without a fade transition.
+- print.css is imported last, removes site controls/decoration, and gives printable content the available page width. A small monochrome Hazzat logo appears once at the start of each printed document. Reduced-motion preferences are handled centrally. Settings open/close without a fade transition.
 
 ## Reader behavior
 

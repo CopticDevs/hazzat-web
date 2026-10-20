@@ -31,7 +31,6 @@ function App() {
                 <div className="mainContainer">
                     <div className="print-brand" dir="ltr">
                         <Logo aria-hidden="true" focusable="false" />
-                        <div>hazzat.com</div>
                     </div>
                     <Header navItems={AppSettings.navigationMenuItems} />
                     <main id="main-content" tabIndex={-1} className="site-body">
