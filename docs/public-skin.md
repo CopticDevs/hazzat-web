@@ -14,7 +14,7 @@ The skin retains the parchment artwork, logo and Coptic/Hazzat font mappings. La
 
 ## Reader behavior
 
-- All format controls derive the same canonical ID order. Phones use a labeled native format picker; larger screens retain visible format links. Dropdown triggers and site menus are native buttons with keyboard support.
+- All format controls derive the same canonical ID order. All screen sizes retain visible icons and labels; phones use a compact wrapping grid of links. Dropdown triggers and site menus are native buttons with keyboard support.
 - Notation is never arbitrarily word-broken. A direction-aware, keyboard-focusable local scroll region keeps long encoded note/lyric runs reachable, including Arabic at the maximum reader size. Coptic/Hazzat font files and encoded content are unchanged.
 - Information languages stack on phones and use equal flexible columns when wider. Font size and text color follow the reader settings, including embedded content classes.
 - Size/color preferences are validated and stored under hazzat.reader-settings. Blocked or malformed storage falls back to defaults without preventing reading. Language switches stay within the application and retain preferences.
@@ -27,7 +27,7 @@ The skin retains the parchment artwork, logo and Coptic/Hazzat font mappings. La
 
 Run the existing website regression suite and production build. Interaction tests cover keyboard menu/format selection, language/query preservation, preference persistence and malformed storage, information typography, notation markup preservation, scroll restoration and contact-page behavior. Score tests cover title deduplication and the existing engraving/resize behavior. Migrated-content tests continue to compare all 84 retained services against the v4 backup when fixture paths are supplied.
 
-For visual validation, inspect home, a long season title, a multilingual hymn, maximum-size Arabic vertical notation, a score, information, video, booklet selection, font illustrations and help tables. Check English and Arabic at 320, 390, 600, 768, 991/992, 1024, 1280/1281 and 1440px. Document scroll width should not exceed client width; oversized notation may scroll only within its own region. Verify settings close/focus restoration, radio keyboard navigation, footer expansion, browser Back and native format selection.
+For visual validation, inspect home, a long season title, a multilingual hymn, maximum-size Arabic vertical notation, a score, information, video, booklet selection, font illustrations and help tables. Check English and Arabic at 320, 390, 600, 768, 991/992, 1024, 1280/1281 and 1440px. Document scroll width should not exceed client width; oversized notation may scroll only within its own region. Verify settings close/focus restoration, radio keyboard navigation, footer expansion, browser Back and icon format selection.
 
 Local visual checks use Chromium viewport emulation. Real iOS Safari/Android Chrome, Firefox/WebKit, 200%/400% browser zoom, mobile software keyboards and device safe areas still need PPE/device validation. Do not treat viewport emulation as proof of those browser/device combinations.
 

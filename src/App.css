@@ -208,7 +208,9 @@ body {
         width: 287px;
     }
     .site-nav {
-        background: url(images/navBg.png) no-repeat center top / 100% 100%;
+        background: url(images/navBg.png) no-repeat center top;
+        /* The 241px header artwork ends 2px before the logo box. */
+        margin-block-start: -2px;
         border: 0;
         min-height: 54px;
         padding: 16px 48px 8px;

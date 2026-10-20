@@ -138,9 +138,12 @@ test('new navigation starts at the top and Back restores the prior reading posit
 });
 
 
-test('the native phone format picker changes format without dropping query parameters', () => {
+test('visible icon format links change format without dropping query parameters', () => {
     render(<MemoryRouter initialEntries={['/video?lang=ar&env=PPE']}><FormatBar title="Hymn" formatsMap={{'6':'/video','1':'/text'}} activeFormatId="6" /><Location /></MemoryRouter>);
-    userEvent.selectOptions(screen.getByRole('combobox', { name: 'Formats' }), '1');
+    const textLink = screen.getByRole('link', { name: 'Text' });
+    expect(textLink.querySelector('svg')).not.toBeNull();
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+    userEvent.click(textLink);
     expect(screen.getByTestId('location')).toHaveTextContent('/text?lang=ar&env=PPE');
 });
 
