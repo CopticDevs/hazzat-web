@@ -1,4 +1,27 @@
+.print-brand {
+    display: none;
+}
 @media print {
+    .print-brand {
+        display: block;
+        text-align: center;
+        color: #000;
+        font: 12pt/1.4 Arial, sans-serif;
+        margin-block-end: 12pt;
+        break-inside: avoid;
+        break-after: avoid;
+    }
+    .print-brand svg {
+        display: block;
+        width: 32mm;
+        height: auto;
+        margin: 0 auto 2mm;
+    }
+    .mainContainer {
+        display: block;
+        min-height: 0;
+        max-width: none;
+    }
     body, .main, .mainContainer {
         background: #fff;
     }

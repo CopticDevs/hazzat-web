@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
+import { ReactComponent as Logo } from "./images/logo.svg";
 import { AppSettings } from "./AppSettings";
 import BookletsPage from "./Components/BookletsPage";
 import RouteScroll from "./Components/RouteScroll";
@@ -28,6 +29,10 @@ function App() {
             <a href="#main-content" className="skip-link">{strings.skipToContent}</a>
             <div className={languageProperties.isRtl ? "main dirRtl" : "main"}>
                 <div className="mainContainer">
+                    <div className="print-brand" dir="ltr">
+                        <Logo aria-hidden="true" focusable="false" />
+                        <div>hazzat.com</div>
+                    </div>
                     <Header navItems={AppSettings.navigationMenuItems} />
                     <main id="main-content" tabIndex={-1} className="site-body">
                         <div className="rightleftmain clearfix">
