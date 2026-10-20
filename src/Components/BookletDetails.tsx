@@ -136,7 +136,7 @@ function BookletDetails() {
 
     return (
         <div>
-            <div className="pageTitle">{pageTitle}</div>
+            <h1 className="pageTitle">{pageTitle}</h1>
 
             <BreadCrumb items={[
                 { title: strings.booklets, path: "/Booklets" },

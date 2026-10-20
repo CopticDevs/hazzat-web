@@ -20,14 +20,14 @@ function HelpPage() {
 
     useEffect(() => {
         document.title = strings.help + " - hazzat.com";
-    }, []);
+    }, [languageProperties.localeName]);
 
     return (
         <MainPaper size={Size.Wide}>
             <Routes>
                 <Route path="/" element={
                     <>
-                        <div className="pageTitle"><LocalizedMessage of="hazzatFontHelp" /></div>
+                        <h1 className="pageTitle"><LocalizedMessage of="hazzatFontHelp" /></h1>
                         <div><LocalizedMessage of="insallingFonts" /></div>
                         <div className={langClassName}>
                             <strong><MyNavLink to="InstallFontWinXP"><LocalizedMessage of="instructionsForWinXP" /></MyNavLink></strong>

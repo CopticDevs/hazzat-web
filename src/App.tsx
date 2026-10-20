@@ -1,8 +1,10 @@
 import { useContext } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { AppSettings } from "./AppSettings";
 import BookletsPage from "./Components/BookletsPage";
+import RouteScroll from "./Components/RouteScroll";
+import { strings } from "./l8n";
 import ContactUsPage from "./Components/ContactUsPage";
 import FontsPage from "./Components/FontsPage";
 import Footer from "./Components/Footer";
@@ -21,11 +23,13 @@ function App() {
     const { languageProperties } = useContext(LanguageContext);
 
     return (
-        <BrowserRouter>
+        <>
+            <RouteScroll />
+            <a href="#main-content" className="skip-link">{strings.skipToContent}</a>
             <div className={languageProperties.isRtl ? "main dirRtl" : "main"}>
                 <div className="mainContainer">
                     <Header navItems={AppSettings.navigationMenuItems} />
-                    <div className="body clearfix">
+                    <main id="main-content" tabIndex={-1} className="site-body">
                         <div className="rightleftmain clearfix">
                             <Routes>
                                 <Route path="/" element={<Home navItems={AppSettings.navigationMenuItems} />} />
@@ -43,11 +47,11 @@ function App() {
                                     </MainPaper>} />
                             </Routes>
                         </div>
-                    </div>
+                    </main>
                     <Footer navItems={AppSettings.navigationMenuItems} />
                 </div>
             </div>
-        </BrowserRouter>
+        </>
     );
 }
 

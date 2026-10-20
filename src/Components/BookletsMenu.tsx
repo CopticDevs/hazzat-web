@@ -65,7 +65,7 @@ function BookletsMenu() {
 
     return (
         <div>
-            <div className="pageTitle"><LocalizedMessage of="booklets" /></div>
+            <h1 className="pageTitle"><LocalizedMessage of="booklets" /></h1>
             {renderContent()}
         </div>
     );

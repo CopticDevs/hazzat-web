@@ -1,0 +1,21 @@
+@media print {
+    body, .main, .mainContainer {
+        background: #fff;
+    }
+    .header, .footer, .reader-tools, .format-bar, .skip-link, .hymnLeft {
+        display: none !important;
+    }
+    .mainPaper {
+        border: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    .home-page {
+        display: block;
+        padding: 0;
+    }
+    .notation-scroll {
+        overflow: visible;
+    }
+}

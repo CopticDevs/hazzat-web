@@ -1,9 +1,21 @@
 .alternate {
-    background-color: #e0e0e0;
+    background: #e0e0e0;
 }
-
 .contentLinksDiv {
     display: flex;
-    justify-items: center;
     align-items: center;
+    min-inline-size: 0;
+}
+.contentLinksDiv > div {
+    min-inline-size: 0;
+}
+.contentLinksDiv a {
+    overflow-wrap: anywhere;
+}
+
+/* Wrapped titles have one contiguous touch target, independent of line breaks. */
+.contentLinksDiv > div > a {
+    display: block;
+    min-block-size: 44px;
+    padding-block: 4px;
 }

@@ -1,5 +1,43 @@
 .format-bar {
-    width: 100%;
-    background-color: #f8f9fa;
-    padding: 10px 0;
+    padding: 8px;
+    margin-block: 12px;
+    background: #f8f9fa;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
 }
+.format-links > a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 6px;
+    border-radius: 3px;
+}
+.format-links > [aria-current="page"] {
+    background: #e2e9e7;
+    font-weight: 700;
+}
+.format-links > a:hover {
+    background: #e9ecef;
+}
+.format-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.mobile-format-picker {
+    display: none;
+    margin: 0;
+}
+.mobile-format-picker select {
+    min-height: 44px;
+}
+@media (max-width: 37.5rem) {
+    .format-links {
+        display: none;
+    }
+    .mobile-format-picker {
+        display: block;
+    }
+}
+
+[dir="rtl"] .mobile-format-picker select { background-position: left .75rem center; padding-inline-start: .75rem; padding-inline-end: 2.25rem; }

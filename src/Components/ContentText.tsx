@@ -1,6 +1,5 @@
 import { useContext } from "react";
 import { UserSettingsContext } from "../Contexts/UserSettingsContext";
-import { LanguageContext } from "../LanguageContext";
 import { ITextContent, IVariationInfo, TextColumn, TextParagraph } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
 import "./ContentText.css";
@@ -19,9 +18,7 @@ interface IContentTable {
 }
 
 function ContentText(props: IProps) {
-    const { languageProperties } = useContext(LanguageContext);
     const { userSettings } = useContext(UserSettingsContext);
-    const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
     const englishMask: number = 0x100;
     const copticMask: number = 0x010;
@@ -218,20 +215,18 @@ function ContentText(props: IProps) {
         <>
             {props.hymnTitle && (
                 <>
-                    <div className={langClassName}>
+                    <div className="content-heading">
                         <HymnTitle content={props.hymnTitle} />
                     </div>
-                    <div className="clear" />
                 </>
             )}
             {props.variations.map((variation) => {
                 return <div key={variation.id}>
                     {props.variations.length > 1 && (
                         <>
-                            <div className={langClassName}>
+                            <div className="content-heading">
                                 <VariationTitle content={variation.displayName} />
                             </div>
-                            <div className="clear" />
                         </>
                     )}
                     <div className="table-responsive dirLtr">

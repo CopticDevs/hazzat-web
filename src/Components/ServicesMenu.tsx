@@ -1,5 +1,6 @@
+import MyNavLink from "./MyNavLink";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
@@ -87,9 +88,9 @@ function ServicesMenu(props: IProps) {
                             <div className="seasonVerse" dangerouslySetInnerHTML={{ __html: props.seasonVerse }} />
                         </div>
                         <div className="seasonDownloadActions">
-                            <Link className="seasonDownloadPdfsButton" to={`/Booklets/${props.seasonId}`}>
+                            <MyNavLink className="seasonDownloadPdfsButton" to={`/Booklets/${props.seasonId}`}>
                                 {strings.downloadPdfs}
-                            </Link>
+                            </MyNavLink>
                         </div>
                         <BreadCrumb items={[
                             { title: strings.seasons, path: "/Seasons" },

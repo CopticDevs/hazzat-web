@@ -1,5 +1,5 @@
+import { UserSettingsContext } from "../Contexts/UserSettingsContext";
 import { useContext } from "react";
-import { LanguageContext } from "../LanguageContext";
 import { IInformationContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
 import CrossDivider from "./CrossDivider";
@@ -12,35 +12,34 @@ interface IProps {
 }
 
 function ContentInformation(props: IProps) {
-    const { languageProperties } = useContext(LanguageContext);
-    const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
+    const { userSettings } = useContext(UserSettingsContext);
+    const typography = { '--english-font-size': userSettings.englishFontSize, '--arabic-font-size': userSettings.arabicFontSize,
+        '--content-font-color': userSettings.contentFontColor, '--hazzat-font-color': userSettings.hazzatFontColor } as React.CSSProperties;
 
     return (
         <>
             {props.hymnTitle && (
                 <>
-                    <div className={langClassName}>
+                    <div className="content-heading">
                         <HymnTitle content={props.hymnTitle} />
                     </div>
-                    <div className="clear" />
                 </>
             )}
             {props.variations.map((variation) => {
                 return <div key={variation.id}>
                     {props.variations.length > 1 && (
                         <>
-                            <div className={langClassName}>
+                            <div className="content-heading">
                                 <VariationTitle content={variation.displayName} />
                             </div>
-                            <div className="clear" />
                         </>
                     )}
-                    <div className="d-flex align-items-stretch dirLtr">
+                    <div className="information-columns dirLtr" style={typography}>
                         {variation.content.englishInformation ?
-                            <div className={variation.content.arabicInformation ? "flex-grow-1 p-3 contentRBorder" : "flex-grow-1 p-3"} lang="en" style={{ direction: "ltr", textAlign: "left" }} dangerouslySetInnerHTML={{ __html: variation.content.englishInformation }} />
+                            <div className="information-language" lang="en" style={{ direction: "ltr", textAlign: "left", fontSize: userSettings.englishFontSize, color: userSettings.contentFontColor }} dangerouslySetInnerHTML={{ __html: variation.content.englishInformation }} />
                             : ""}
                         {variation.content.arabicInformation ?
-                            <div className={variation.content.englishInformation ? "flex-grow-1 p-3 contentLBorder" : "flex-grow-1 p-3"} lang="ar" style={{ direction: "rtl", textAlign: "right" }} dangerouslySetInnerHTML={{ __html: variation.content.arabicInformation }} />
+                            <div className="information-language" lang="ar" style={{ direction: "rtl", textAlign: "right", fontSize: userSettings.arabicFontSize, color: userSettings.contentFontColor }} dangerouslySetInnerHTML={{ __html: variation.content.arabicInformation }} />
                             : ""}
                     </div>
                     <CrossDivider />

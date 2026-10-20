@@ -1,17 +1,22 @@
-@keyframes bounceAnimation {
-    0% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-5px);
-    }
-
-    100% {
-        transform: translateY(0);
-    }
+.format-dropdown {
+    flex: 0 0 auto;
 }
-
-.bounce {
-    animation: bounceAnimation 0.3s linear;
+.format-dropdown-toggle {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    color: #555;
+    background: transparent;
+}
+.format-dropdown-toggle::after {
+    display: none;
+}
+.format-dropdown .dropdown-menu {
+    max-inline-size: calc(100vw - 24px);
+}
+.format-dropdown .dropdown-item {
+    min-height: 44px;
+    white-space: normal;
+    display: flex;
+    align-items: center;
 }

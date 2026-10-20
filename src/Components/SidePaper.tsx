@@ -1,6 +1,4 @@
 import { useContext } from "react";
-import hymnBottom from "../images/hymnBottom.png";
-import hymnTop from "../images/hymnTop.png";
 import { ReactComponent as YoutubeIcon } from "../images/youtube.svg";
 import { ReactComponent as TwitterIcon } from "../images/twitter.svg";
 import { ReactComponent as FacebookIcon } from "../images/facebook.svg";
@@ -9,19 +7,12 @@ import HymnTitle from "./HymnTitle";
 import { strings } from "../l8n";
 import "./SidePaper.css";
 
-interface IProps {
-    children?: React.ReactNode;
-}
-
-function SidePaper(props: IProps) {
+function SidePaper() {
     const { languageProperties } = useContext(LanguageContext);
     const langClassName = languageProperties.isRtl ? "dirRtl" : "";
 
     return (
-        <div className={`hymnLeft fLeft ${langClassName}`}>
-            <div className="md">
-                <img src={hymnTop} alt="" />
-            </div>
+        <aside className={`hymnLeft ${langClassName}`} aria-label={strings.downloadTheApp}>
 
             <div className="hymnRep clearfix">
 
@@ -57,41 +48,23 @@ function SidePaper(props: IProps) {
                 <HymnTitle content={strings.followUs} />
                 <div className="socialMedia clearfix social-media-section">
 
-                    <a href="http://www.facebook.com/hazzat.com" target="_blank" rel="noreferrer">
-                        <FacebookIcon />
+                    <a aria-label="Facebook" href="https://www.facebook.com/hazzat.com" target="_blank" rel="noreferrer">
+                        <FacebookIcon aria-hidden="true" focusable="false" />
                     </a>
 
-                    <a href="http://www.twitter.com/CopticHazzat" target="_blank" rel="noreferrer">
-                        <TwitterIcon />
+                    <a aria-label="Twitter" href="https://www.twitter.com/CopticHazzat" target="_blank" rel="noreferrer">
+                        <TwitterIcon aria-hidden="true" focusable="false" />
                     </a>
 
-                    <a href="http://www.youtube.com/CopticHazzat" target="_blank" rel="noreferrer">
-                        <YoutubeIcon />
+                    <a aria-label="YouTube" href="https://www.youtube.com/CopticHazzat" target="_blank" rel="noreferrer">
+                        <YoutubeIcon aria-hidden="true" focusable="false" />
                     </a>
-
-                </div>
-
-                <div className="hymnData clearfix">
-
-                    <div id="RightTopContentPane" className="hymnData clearfix">
-                        {props.children}
-                    </div>
-                </div>
-
-                <div className="hymnData clearfix">
-
-                    <div id="RightBottomContentPane"  className="hymnData clearfix">
-                    </div>
 
                 </div>
 
             </div>
 
-            <div className="md">
-                <img src={hymnBottom} alt="" />
-            </div>
-            
-        </div>
+        </aside>
     );
 }
 

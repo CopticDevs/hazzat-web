@@ -52,8 +52,9 @@ function Home(props: IProps) {
     }, [languageProperties, environmentProperties]);
 
     return (
-        <div className={languageProperties.isRtl ? "row dirRtl home-page" : "row home-page"}>
+        <div className={languageProperties.isRtl ? "dirRtl home-page" : "home-page"}>
             <MainPaper>
+                <h1 className="visually-hidden">Hazzat — {strings.home}</h1>
                 {isLoading ? (
                     <LoadingSpinner />
                 ) : (

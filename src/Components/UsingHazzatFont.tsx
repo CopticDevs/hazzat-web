@@ -76,11 +76,11 @@ function UsingHazzatFont() {
 
     useEffect(() => {
         document.title = strings.usingTheHazzatFont + " - hazzat.com";
-    }, []);
+    }, [languageProperties.localeName]);
 
     return (
         <>
-            <div className="pageTitle"><LocalizedMessage of="usingTheHazzatFont" /></div>
+            <h1 className="pageTitle"><LocalizedMessage of="usingTheHazzatFont" /></h1>
             <BreadCrumb items={[
                 { title: strings.help, path: "/Help" },
                 { title: strings.usingTheHazzatFont }]} />
