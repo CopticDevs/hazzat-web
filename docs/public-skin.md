@@ -19,7 +19,7 @@ The skin retains the parchment artwork, logo and Coptic/Hazzat font mappings. La
 - Information languages stack on phones and use equal flexible columns when wider. Font size and text color follow the reader settings, including embedded content classes.
 - Size/color preferences are validated and stored under hazzat.reader-settings. Blocked or malformed storage falls back to defaults without preventing reading. Language switches stay within the application and retain preferences.
 - The active document language and direction update centrally. Logical spacing mirrors booklet nesting and help indentation. Internal links preserve query parameters, explicit language overrides, route-relative destinations and hashes.
-- New routes start at the top. Browser Back/Forward restores remembered positions, retrying while asynchronously loaded content grows. User interaction stops restoration. Footer menus never scroll the document on mount.
+- New routes start at the top. Browser Back/Forward restores remembered positions, retrying while asynchronously loaded content grows. User interaction stops restoration. Footer menus never scroll the document on mount; opening one reveals its links by scrolling the expanded menu into view.
 - Duplicate MusicXML/hymn titles are suppressed only when identical; distinct score titles and subtitles remain visible.
 - The disabled Contact Us navigation entry remains disabled. Direct visits show an unavailable notice instead of a form that claims to send messages while only logging them.
 

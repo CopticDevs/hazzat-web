@@ -16,6 +16,9 @@ export default function SiteNavigation({ id, navItems, footer = false }: Props) 
     const { pathname, search } = useLocation();
     useEffect(() => { setExpanded(false); }, [pathname, search]);
     useEffect(() => {
+        if (footer && expanded) ref.current?.scrollIntoView({ block: "end", behavior: "auto" });
+    }, [footer, expanded]);
+    useEffect(() => {
         const outside = (event: MouseEvent) => {
             if (ref.current && !ref.current.contains(event.target as Node)) setExpanded(false);
         };

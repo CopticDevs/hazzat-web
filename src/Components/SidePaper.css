@@ -1,7 +1,7 @@
 .hymnLeft {
     min-inline-size: 0;
     background: url(../images/hymnRepBk.png) no-repeat center / 100% 100%;
-    padding: 24px;
+    padding: 24px clamp(28px, 12%, 40px);
 }
 .mobile-app-links {
     padding-bottom: 24px;

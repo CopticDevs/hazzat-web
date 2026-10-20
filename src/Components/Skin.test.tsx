@@ -20,7 +20,7 @@ import RouteScroll from "./RouteScroll";
 const navItems = [{ id: "home", location: "/" }, { id: "seasons", location: "/Seasons" }] as any;
 function Location() { const l = useLocation(); return <output data-testid="location">{l.pathname}{l.search}{l.hash}</output>; }
 function Settings() { const { userSettings } = useContext(UserSettingsContext); return <output data-testid="settings">{JSON.stringify(userSettings)}</output>; }
-beforeEach(() => { localStorage.clear(); strings.setLanguage('en'); window.gtag = jest.fn(); });
+beforeEach(() => { HTMLElement.prototype.scrollIntoView = jest.fn(); localStorage.clear(); strings.setLanguage('en'); window.gtag = jest.fn(); });
 afterEach(() => { strings.setLanguage('en'); document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; jest.restoreAllMocks(); });
 
 test('mobile navigation opens by keyboard, Escape closes and returns focus, and choosing a page closes it', async () => {
@@ -48,11 +48,17 @@ test.each(['header', 'footer'])('%s menu closes when selecting the current page'
     expect(screen.getByTestId('location')).toHaveTextContent('/Seasons');
 });
 
-test('footer does not move the reader when mounting or opening its menu', () => {
+test('footer stays put on mount and reveals its links when opened', () => {
     const scroll = jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    const reveal = jest.fn();
+    const original = HTMLElement.prototype.scrollIntoView;
+    HTMLElement.prototype.scrollIntoView = reveal;
     render(<MemoryRouter><Footer navItems={navItems} /></MemoryRouter>);
+    expect(reveal).not.toHaveBeenCalled();
     userEvent.click(screen.getByRole('button', { name: 'Menu' }));
     expect(scroll).not.toHaveBeenCalled();
+    expect(reveal).toHaveBeenCalledWith({ block: 'end', behavior: 'auto' });
+    HTMLElement.prototype.scrollIntoView = original;
 });
 
 test('format dropdown has a native keyboard toggle and preserves language and environment', async () => {
