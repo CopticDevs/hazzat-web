@@ -1,3 +1,4 @@
+const ref = (contentId: string) => ({contentId, name: "Standard", nameAr: "المعتاد"});
 import { FORMAT_NAMES_EN, FORMAT_NAMES_AR, formatDisplayName } from './FormatNames';
 import { resolveSharedService, SHARED_TYPES, SharedService } from './SharedContent';
 import { strings } from '../../l8n';
@@ -18,10 +19,10 @@ test('all seven format types have the canonical English and Arabic labels in the
 });
 
 test('reader labels ignore saved aliases while keeping IDs, order, payloads and hymn titles', async () => {
-    const service: SharedService = { schemaVersion: 4, id: 's', seasonId: 'annual', name: 'Service', order: 1, hymns: [{ hymnId: 'h', name: 'Context title', order: 2,
-        formats: { '3': ['vertical'], '4': ['score'] }, formatMetadata: { '3': { name: 'Wrong vertical name', order: 2 }, '4': { name: 'Wrong score name', order: 1 } } }] };
+    const service: SharedService = { schemaVersion: 5, id: 's', seasonId: 'annual', name: 'Service', order: 1, hymns: [{ hymnId: 'h', name: 'Context title', order: 2,
+        formats: { '3': [ref('vertical')], '4': [ref('score')] }, formatMetadata: { '3': { name: 'Wrong vertical name', order: 2 }, '4': { name: 'Wrong score name', order: 1 } } }] };
     const before = JSON.parse(JSON.stringify(service));
-    const result = await resolveSharedService(service, async id => ({ schemaVersion: 4, id, name: 'Identity title' }), async id => ({ schemaVersion: 4, id, name: 'Content', contentType: SHARED_TYPES[id === 'vertical' ? 2 : 3], content: id === 'vertical' ? { copticVerticalHazzat: 'saved payload' } : { musicXml: '<score-partwise />' } }), 'en');
+    const result = await resolveSharedService(service, async id => ({ schemaVersion: 5, id, name: 'Identity title' }), async id => ({ schemaVersion: 5, id, name: 'Content', contentType: SHARED_TYPES[id === 'vertical' ? 2 : 3], content: id === 'vertical' ? { copticVerticalHazzat: 'saved payload' } : { musicXml: '<score-partwise />' } }), 'en');
     const hymn = result.hymns![0];
     expect(hymn.name).toBe('Context title');
     expect(hymn.formats!.map(f => [f.id, f.name, f.order, f.variations![0].id])).toEqual([['4', 'Musical Notes', 1, 'score'], ['3', 'Vertical Hazzat', 2, 'vertical']]);
