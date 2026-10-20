@@ -13,10 +13,10 @@ describe("shared browser resource cache", () => {
         const get = jest.fn().mockResolvedValueOnce({ data: { value: 1 }, headers: { etag: '"one"' }, status: 200 })
             .mockResolvedValueOnce({ status: 304, headers: {} });
         const client = new ContentResourceClient({ get } as unknown as AxiosInstance, "https://etag.example", true);
-        expect(await client.read("/v4/content.json", validate)).toEqual({ value: 1 });
+        expect(await client.read("/v5/content.json", validate)).toEqual({ value: 1 });
         jest.advanceTimersByTime(60_001);
-        expect(await client.read("/v4/content.json", validate)).toEqual({ value: 1 });
-        expect(get).toHaveBeenLastCalledWith("/v4/content.json", expect.objectContaining({ headers: { "If-None-Match": '"one"' } }));
+        expect(await client.read("/v5/content.json", validate)).toEqual({ value: 1 });
+        expect(get).toHaveBeenLastCalledWith("/v5/content.json", expect.objectContaining({ headers: { "If-None-Match": '"one"' } }));
     });
 
     it("does not send conditional headers unless explicitly enabled and retries failed refreshes", async () => {
@@ -24,10 +24,10 @@ describe("shared browser resource cache", () => {
             .mockRejectedValueOnce(new Error("offline"))
             .mockResolvedValueOnce({ data: { value: 2 } });
         const client = new ContentResourceClient({ get } as unknown as AxiosInstance, "https://plain.example");
-        await client.read("/v4/content.json", validate);
+        await client.read("/v5/content.json", validate);
         jest.advanceTimersByTime(60_001);
-        await expect(client.read("/v4/content.json", validate)).rejects.toThrow("offline");
-        expect(await client.read("/v4/content.json", validate)).toEqual({ value: 2 });
+        await expect(client.read("/v5/content.json", validate)).rejects.toThrow("offline");
+        expect(await client.read("/v5/content.json", validate)).toEqual({ value: 2 });
         expect(get.mock.calls.every(call => call.length === 1)).toBe(true);
     });
 
@@ -41,7 +41,7 @@ describe("shared browser resource cache", () => {
         });
         const a = new ContentResourceClient({ get } as unknown as AxiosInstance, "https://limited.example");
         const b = new ContentResourceClient({ get } as unknown as AxiosInstance, "https://limited.example");
-        const calls = [a.read("/v4/0", validate), b.read("/v4/0", validate), ...Array.from({ length: 8 }, (_, i) => a.read(`/v4/${i + 1}`, validate))];
+        const calls = [a.read("/v5/0", validate), b.read("/v5/0", validate), ...Array.from({ length: 8 }, (_, i) => a.read(`/v5/${i + 1}`, validate))];
         for (let i = 0; i < 6; i++) { await Promise.resolve(); await Promise.resolve(); jest.advanceTimersByTime(10); }
         await Promise.all(calls);
         expect(peak).toBe(4);

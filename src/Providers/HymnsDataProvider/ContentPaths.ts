@@ -4,7 +4,7 @@ export function safeContentId(id: string): string {
 }
 
 export function createContentPaths() {
-    const contentPath = (path: string) => `/v4/${path}`;
+    const contentPath = (path: string) => `/v5/${path}`;
     return {
         seasons: () => contentPath("metadata/seasons.json"),
         seasonsArabic: () => contentPath("metadata/seasons.ar.json"),

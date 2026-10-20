@@ -57,7 +57,7 @@ describe('HymnsDataProvider - Service Loading and Hymn Rendering', () => {
 
     const result = await provider.getService('nativity', 'vespers');
 
-    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v4/seasons/nativity/services/vespers.json');
+    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v5/seasons/nativity/services/vespers.json');
     expect(result).toBeDefined();
     expect(result?.hymns).toHaveLength(2);
     expect(result?.seasonId).toBe('nativity');

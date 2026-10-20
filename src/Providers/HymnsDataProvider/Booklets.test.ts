@@ -42,7 +42,7 @@ describe("HymnsDataProvider - season booklet data", () => {
 
         const result = await provider.getSeasonList();
 
-        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v4/metadata/seasons.json");
+        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v5/metadata/seasons.json");
         expect(mockedAxios.create).toHaveBeenCalledTimes(1);
         expect(result).toEqual(seasons);
     });
@@ -71,15 +71,15 @@ describe("HymnsDataProvider - season booklet data", () => {
             hymns: []
         };
 
-        mockCloudFrontClient.get.mockImplementation(sharedServiceFixture(service, { "/v4/metadata/seasons.json": seasons }));
+        mockCloudFrontClient.get.mockImplementation(sharedServiceFixture(service, { "/v5/metadata/seasons.json": seasons }));
 
         const result = await provider.getServiceList("nativity");
 
-        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v4/metadata/seasons.json");
-        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v4/seasons/nativity/services/vespers.json");
+        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v5/metadata/seasons.json");
+        expect(mockCloudFrontClient.get).toHaveBeenCalledWith("/v5/seasons/nativity/services/vespers.json");
         expect(mockedAxios.create).toHaveBeenCalledTimes(1);
         expect(JSON.stringify(mockCloudFrontClient.get.mock.calls)).not.toContain("/booklets");
-        expect(result).toEqual([{ ...service, schemaVersion: 4, nameAr: undefined }]);
+        expect(result).toEqual([{ ...service, schemaVersion: 5, nameAr: undefined }]);
     });
 
     it("does not expose legacy booklet endpoints on the provider", () => {

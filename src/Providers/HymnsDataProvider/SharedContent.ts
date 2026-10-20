@@ -8,7 +8,7 @@ export const SHARED_TYPES = ["Text", "Hazzat", "VerticalHazzat", "MusicalNotes",
 export type SharedContentType = typeof SHARED_TYPES[number];
 
 export interface SharedHymnIdentity {
-    schemaVersion: 4;
+    schemaVersion: 5;
     id: string;
     name: string;
     nameAr?: string;
@@ -24,12 +24,12 @@ export interface SharedHymnAssignment {
     order: number;
     name?: string;
     nameAr?: string;
-    formats: Record<string, string[]>;
+    formats: Record<string, {contentId: string; name: string; nameAr?: string}[]>;
     formatMetadata?: Record<string, { name: string; nameAr?: string; order: number; position?: number }>;
 }
 
 export interface SharedService {
-    schemaVersion: 4;
+    schemaVersion: 5;
     id: string;
     seasonId: string;
     name: string;
@@ -70,7 +70,7 @@ export function formatType(format: string): SharedContentType {
 
 export function validateIdentity(value: unknown, id: string): SharedHymnIdentity {
     object(value);
-    if (value.schemaVersion !== 4 || value.id !== id) throw new Error(`Hymn identity mismatch: ${id}`);
+    if (value.schemaVersion !== 5 || value.id !== id) throw new Error(`Hymn identity mismatch: ${id}`);
     safeContentId(id);
     validateEnglishTitle(value.name);
     optionalName(value.nameAr);
@@ -79,7 +79,7 @@ export function validateIdentity(value: unknown, id: string): SharedHymnIdentity
 
 export function validateService(value: unknown, seasonId: string, serviceId: string): SharedService {
     object(value);
-    if (value.schemaVersion !== 4 || value.id !== serviceId || value.seasonId !== seasonId || !Array.isArray(value.hymns)) {
+    if (value.schemaVersion !== 5 || value.id !== serviceId || value.seasonId !== seasonId || !Array.isArray(value.hymns)) {
         throw new Error(`Service identity mismatch: ${seasonId}/${serviceId}`);
     }
     safeContentId(seasonId);
@@ -101,10 +101,13 @@ export function validateService(value: unknown, seasonId: string, serviceId: str
         object(binding.formats);
         for (const [format, ids] of Object.entries(binding.formats)) {
             formatType(format);
-            if (!Array.isArray(ids) || new Set(ids).size !== ids.length) throw new Error("Invalid or duplicate content assignment");
-            for (const id of ids) {
-                if (typeof id !== "string") throw new Error("Invalid content reference");
-                validateUuid(id);
+            if (!Array.isArray(ids) || new Set(ids.map(ref => ref?.contentId)).size !== ids.length) throw new Error("Invalid or duplicate content assignment");
+            for (const ref of ids) {
+                object(ref);
+                if (typeof ref.contentId !== "string") throw new Error("Invalid content reference");
+                validateUuid(ref.contentId);
+                validateEnglishTitle(ref.name);
+                optionalName(ref.nameAr);
             }
         }
         if (binding.formatMetadata !== undefined) {
@@ -183,20 +186,19 @@ export async function resolveSharedService(
         const identity = await readIdentity(binding.hymnId);
         const title = assignmentTitle(binding, identity);
         const formats = await Promise.all(Object.entries(binding.formats).filter(([, ids]) => ids.length > 0).map(async ([id, ids]) => {
-            const metadata = binding.formatMetadata?.[id];
-            const variations = await Promise.all(ids.map(async (contentId, index) => {
+            const variations = await Promise.all(ids.map(async (reference, index) => {
+                const contentId = reference.contentId;
                 const record = await readContent(contentId);
                 if (record.contentType !== formatType(id)) throw new Error(`Content type mismatch: ${contentId}`);
                 return {
-                    id: contentId, name: record.name, nameAr: record.nameAr,
-                    displayName: localizedName(record, language), order: index + 1,
+                    id: contentId, name: reference.name, nameAr: reference.nameAr,
+                    displayName: localizedName(reference, language), order: index + 1,
                     content: JSON.parse(JSON.stringify(record.content)) as IHymnContent
                 };
             }));
-            return { id, name: formatDisplayName(id), order: metadata?.order ?? Number(id), variationCount: variations.length, variations };
+            return { id, name: formatDisplayName(id), order: Number(id), variationCount: variations.length, variations };
         }));
-        formats.sort((a, b) => a.order - b.order ||
-            (binding.formatMetadata?.[a.id]?.position ?? Number(a.id)) - (binding.formatMetadata?.[b.id]?.position ?? Number(b.id)) || Number(a.id) - Number(b.id));
+        formats.sort((a, b) => Number(a.id) - Number(b.id));
         return { id: identity.id, ...title, displayName: localizedName(title, language), order: binding.order, formats };
     }));
     return { ...service, verse: service.verse ?? "", isDateSpecific: service.isDateSpecific ?? false,
