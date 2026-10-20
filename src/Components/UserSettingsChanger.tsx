@@ -21,7 +21,7 @@ function UserSettingsChanger() {
     const [selectedHazzatColor, setSelectedHazzatColor] = useState(userSettings.hazzatFontColor);
     const [selectedContentColor, setSelectedContentColor] = useState(userSettings.contentFontColor);
     const [expanded, setExpanded] = useState(false);
-    const [selectedFontSize, setSelectedFontSize] = useState<number>(18);
+    const selectedFontSize = parseFloat(userSettings.englishFontSize) || 18;
     const langDirName = languageProperties.isRtl ? "dirRtl" : "dirLtr";
 
     const collectAnalytics = () => {
@@ -63,14 +63,12 @@ function UserSettingsChanger() {
     const handleIncrementTextSize = () => {
         let num = selectedFontSize + 2;
         num = num > AppSettings.maxContentTextSize ? AppSettings.maxContentTextSize : num;
-        setSelectedFontSize(num);
         setContentFontSize(num);
     };
 
     const handleDecrementTextSize = () => {
         let num = selectedFontSize - 2;
         num = num < AppSettings.minContentTextSize ? AppSettings.minContentTextSize : num;
-        setSelectedFontSize(num);
         setContentFontSize(num);
     };
 
