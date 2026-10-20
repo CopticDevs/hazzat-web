@@ -43,12 +43,13 @@ function object(value: unknown): asserts value is Record<string, unknown> {
     if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid shared-content object");
 }
 
-function name(value: unknown): asserts value is string {
+export function validateEnglishTitle(value: unknown): asserts value is string {
     if (typeof value !== "string" || !value.trim()) throw new Error("Invalid shared-content name");
 }
 
 function optionalName(value: unknown) {
-    if (value !== undefined) name(value);
+    // Optional translations may be blank; English titles are validated separately.
+    if (value !== undefined && typeof value !== "string") throw new Error("Invalid shared-content name");
 }
 
 function order(value: unknown): asserts value is number {
@@ -70,7 +71,7 @@ export function validateIdentity(value: unknown, id: string): SharedHymnIdentity
     object(value);
     if (value.schemaVersion !== 4 || value.id !== id) throw new Error(`Hymn identity mismatch: ${id}`);
     safeContentId(id);
-    name(value.name);
+    validateEnglishTitle(value.name);
     optionalName(value.nameAr);
     return value as unknown as SharedHymnIdentity;
 }
@@ -82,7 +83,7 @@ export function validateService(value: unknown, seasonId: string, serviceId: str
     }
     safeContentId(seasonId);
     safeContentId(serviceId);
-    name(value.name);
+    validateEnglishTitle(value.name);
     optionalName(value.nameAr);
     order(value.order);
     if (value.verse !== undefined && typeof value.verse !== "string") throw new Error("Invalid service verse");
@@ -94,7 +95,7 @@ export function validateService(value: unknown, seasonId: string, serviceId: str
         safeContentId(binding.hymnId);
         seen.add(binding.hymnId);
         order(binding.order);
-        optionalName(binding.name);
+        if (binding.name !== undefined) validateEnglishTitle(binding.name);
         optionalName(binding.nameAr);
         object(binding.formats);
         for (const [format, ids] of Object.entries(binding.formats)) {
@@ -110,7 +111,7 @@ export function validateService(value: unknown, seasonId: string, serviceId: str
             for (const [format, metadata] of Object.entries(binding.formatMetadata)) {
                 formatType(format);
                 object(metadata);
-                name(metadata.name);
+                validateEnglishTitle(metadata.name);
                 optionalName(metadata.nameAr);
                 order(metadata.order);
                 if (metadata.position !== undefined && (typeof metadata.position !== "number" || !Number.isSafeInteger(metadata.position) || metadata.position < 0)) {
@@ -168,7 +169,7 @@ export function assignmentTitle(binding: SharedHymnAssignment, identity: Pick<Sh
 }
 
 export function localizedName(value: { name: string; nameAr?: string }, language: string) {
-    return language === "ar" && value.nameAr ? value.nameAr : value.name;
+    return language === "ar" && value.nameAr?.trim() ? value.nameAr : value.name;
 }
 
 export async function resolveSharedService(
