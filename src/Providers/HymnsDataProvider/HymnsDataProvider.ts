@@ -9,7 +9,7 @@ import { IHymnContent, IVariationInfo } from "./Models/IVariationInfo";
 import { ISeasonTranslations } from "./Models/ISeasonTranslations";
 import { createContentPaths } from "./ContentPaths";
 import { ContentResourceClient } from "./ContentResourceClient";
-import { assignmentTitle, resolveSharedService, SharedService, validateIdentity, validateLibraryRecord, validateService } from "./SharedContent";
+import { assignmentTitle, localizedName, validateEnglishTitle, resolveSharedService, SharedService, validateIdentity, validateLibraryRecord, validateService } from "./SharedContent";
 
 export class HymnsDataProvider implements IHymnsDataProvider {
     private cloudFrontClient: AxiosInstance;
@@ -40,6 +40,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
     private async readSeasons(): Promise<ISeasonInfo[]> {
         return this.read(this.paths.seasons(), data => {
             if (!Array.isArray(data)) throw new Error("Invalid season metadata");
+            for (const season of data) validateEnglishTitle(season?.name);
             return data as ISeasonInfo[];
         });
     }
@@ -97,7 +98,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
                 ...season,
                 nameAr,
                 verseAr,
-                displayName: this.language === 'ar' && nameAr ? nameAr : season.name,
+                displayName: localizedName({ name: season.name, nameAr }, this.language),
                 displayVerse: this.language === 'ar' && verseAr ? verseAr : season.verse
             };
         });
@@ -117,7 +118,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         return {
             ...service,
             nameAr,
-            displayName: this.language === 'ar' && nameAr ? nameAr : service.name
+            displayName: localizedName({ name: service.name, nameAr }, this.language)
         };
     }
 

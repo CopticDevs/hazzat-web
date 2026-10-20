@@ -154,4 +154,30 @@ describe("v4 service resolution and contextual titles", () => {
         await expect(provider().getService("annual", "basil")).rejects.toThrow("Invalid shared-content name");
     });
 
+    it.each(["", "  \t\n"])("falls back to English for blank translated titles (%j)", async blank => {
+        const source = files["/v4/seasons/annual/services/basil.json"] as SharedService;
+        source.nameAr = blank;
+        source.hymns[0].nameAr = blank;
+        source.hymns[0].formatMetadata!["2"].nameAr = blank;
+        (files["/v4/hymns/aspasmos-adam/hymn.json"] as any).nameAr = blank;
+        (files[`/v4/content/${FIRST}.json`] as SharedLibraryRecord).nameAr = blank;
+        files["/v4/metadata/seasons.ar.json"] = { annual: { name: blank, verse: "", services: { basil: blank } } };
+        const ar = provider("ar");
+        expect((await ar.getSeason("annual"))?.displayName).toBe("Annual");
+        expect((await ar.getServiceSummary("annual", "basil"))?.displayName).toBe(source.name);
+        const result = await ar.getService("annual", "basil");
+        expect(result?.displayName).toBe(source.name);
+        expect(result!.hymns![1].displayName).toBe("Aspasmos Adam (Rejoice O Mary)");
+        expect(result!.hymns![1].formats![0].variations![1].displayName).toBe("Standard");
+        expect(source.hymns[0].nameAr).toBe(blank);
+    });
+
+    it.each(["service", "assignment", "format", "identity", "content", "season"])("requires English %s titles even when Arabic is provided", async kind => {
+        const source = files["/v4/seasons/annual/services/basil.json"] as SharedService;
+        const target = kind === "service" ? source : kind === "assignment" ? source.hymns[0] : kind === "format" ? source.hymns[0].formatMetadata!["2"] : kind === "identity" ? files["/v4/hymns/aspasmos-adam/hymn.json"] : kind === "content" ? files[`/v4/content/${FIRST}.json`] : (files["/v4/metadata/seasons.json"] as any[])[0];
+        Object.assign(target as object, { name: "  ", nameAr: "عنوان" });
+        const ar = provider("ar");
+        await expect(kind === "season" ? ar.getServiceSummaryList("annual") : ar.getService("annual", "basil")).rejects.toThrow("Invalid shared-content name");
+    });
+
 });
