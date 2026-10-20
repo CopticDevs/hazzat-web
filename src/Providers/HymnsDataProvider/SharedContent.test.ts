@@ -130,4 +130,28 @@ describe("v4 service resolution and contextual titles", () => {
         (invalid.hymns[0] as any).nameAr = 1;
         expect(() => validateService(invalid, "annual", "basil")).toThrow();
     });
+    it("loads services with blank optional Arabic titles saved by the admin", async () => {
+        const source = files["/v4/seasons/annual/services/basil.json"] as SharedService;
+        source.nameAr = "";
+        source.hymns[0].nameAr = "";
+        source.hymns[0].formatMetadata!["2"].nameAr = "";
+        (files["/v4/hymns/aspasmos-adam/hymn.json"] as any).nameAr = "";
+        (files[`/v4/content/${FIRST}.json`] as SharedLibraryRecord).nameAr = "";
+        const english = await provider().getService("annual", "basil");
+        const arabic = await provider("ar").getService("annual", "basil");
+        expect(english?.hymns).toHaveLength(2);
+        const hymn = arabic!.hymns![1];
+        expect(hymn.displayName).toBe("Aspasmos Adam (Rejoice O Mary)");
+        expect(hymn.formats![0].variations![1].displayName).toBe("Standard");
+        expect(source.hymns[0].nameAr).toBe("");
+    });
+
+    it("still rejects empty required titles", async () => {
+        const source = service("annual", "basil", "Title");
+        source.name = "";
+        expect(() => validateService(source, "annual", "basil")).toThrow("Invalid shared-content name");
+        (files[`/v4/content/${FIRST}.json`] as SharedLibraryRecord).name = "";
+        await expect(provider().getService("annual", "basil")).rejects.toThrow("Invalid shared-content name");
+    });
+
 });

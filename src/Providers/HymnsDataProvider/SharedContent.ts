@@ -48,7 +48,8 @@ function name(value: unknown): asserts value is string {
 }
 
 function optionalName(value: unknown) {
-    if (value !== undefined) name(value);
+    // Admin saves optional translations as an empty string when left blank.
+    if (value !== undefined && value !== "") name(value);
 }
 
 function order(value: unknown): asserts value is number {
