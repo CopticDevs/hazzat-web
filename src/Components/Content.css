@@ -18,6 +18,8 @@
 
 .musicXmlScoreWrap {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     overflow-x: auto;
     background: #fff;
     border: 1px solid #d7d2c7;
@@ -27,7 +29,25 @@
 }
 
 .musicXmlScore {
+    width: 100%;
+    min-width: 0;
     min-height: 260px;
+}
+
+.musicXmlScoreTitle,
+.musicXmlScoreSubtitle {
+    text-align: center;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
+    margin: 0 0 0.75em;
+}
+
+.musicXmlScoreTitle {
+    font-size: 1.25em;
+}
+
+.musicXmlScoreSubtitle {
+    font-size: 1em;
 }
 
 .musicXmlScoreError {
