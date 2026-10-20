@@ -1,3 +1,4 @@
+import { formatDisplayName } from './FormatNames';
 import { safeContentId } from "./ContentPaths";
 import { IHymnInfo } from "./Models/IHymnInfo";
 import { IServiceInfo } from "./Models/IServiceInfo";
@@ -192,7 +193,7 @@ export async function resolveSharedService(
                     content: JSON.parse(JSON.stringify(record.content)) as IHymnContent
                 };
             }));
-            return { id, name: metadata?.name ?? formatType(id), order: metadata?.order ?? Number(id), variationCount: variations.length, variations };
+            return { id, name: formatDisplayName(id), order: metadata?.order ?? Number(id), variationCount: variations.length, variations };
         }));
         formats.sort((a, b) => a.order - b.order ||
             (binding.formatMetadata?.[a.id]?.position ?? Number(a.id)) - (binding.formatMetadata?.[b.id]?.position ?? Number(b.id)) || Number(a.id) - Number(b.id));
