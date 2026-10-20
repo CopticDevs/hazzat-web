@@ -34,9 +34,9 @@ datasetTest("preserves all 84 migrated services' titles, content, hymn order, an
                 const identity = JSON.parse(fs.readFileSync(path.join(originals!, 'v4/hymns', binding.hymnId, 'hymn.json'), 'utf8'));
                 return {id: identity.id, name: binding.name ?? identity.name, order: binding.order,
                     formats: Object.entries(binding.formats).filter(([, ids]) => (ids as string[]).length).map(([formatId, ids]) => ({
-                        id: formatId, name: ['Text', 'Hazzat', 'Vertical Hazzat', 'Musical Notes', 'Audio', 'Video', 'Information'][Number(formatId)-1], order: binding.formatMetadata?.[formatId]?.order ?? Number(formatId),
+                        id: formatId, name: ['Text', 'Hazzat', 'Vertical Hazzat', 'Musical Notes', 'Audio', 'Video', 'Information'][Number(formatId)-1], order: Number(formatId),
                         variations: (ids as string[]).map(id => JSON.parse(fs.readFileSync(path.join(originals!, 'v4/content', id+'.json'), 'utf8')))
-                    })).sort((a, b) => a.order-b.order || (binding.formatMetadata?.[a.id]?.position ?? Number(a.id))-(binding.formatMetadata?.[b.id]?.position ?? Number(b.id)) || Number(a.id)-Number(b.id))};
+                    })).sort((a, b) => Number(a.id)-Number(b.id))};
             }).sort((a: any, b: any) => a.order-b.order)};
             expect(readerShape(actual!)).toEqual(readerShape(expected as IServiceInfo));
             services++;

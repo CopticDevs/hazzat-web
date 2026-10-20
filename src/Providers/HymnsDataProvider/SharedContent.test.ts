@@ -64,17 +64,17 @@ describe("v5 service resolution and contextual titles", () => {
         expect(get.mock.calls.every(([path]) => path.startsWith("/v5/"))).toBe(true);
     });
 
-    it("preserves service-specific titles, unchanged names, hymn order, variation order, and tied format order", async () => {
+    it("preserves service-specific titles, unchanged names, hymn order, variation order, and fixed format order", async () => {
         const annual = await provider().getService("annual", "basil");
         const kiahk = await provider().getService("kiahk", "liturgy");
         expect(annual?.hymns?.map(h => h.id)).toEqual(["opening", "aspasmos-adam"]);
         const hymn = annual!.hymns![1];
         expect(hymn.displayName).toBe("Aspasmos Adam (Rejoice O Mary)");
         expect(kiahk!.hymns![1].displayName).toBe("Aspasmos Adam (3rd Sunday)");
-        expect(hymn.formats?.map(f => f.id)).toEqual(["2", "1", "4", "5"]);
-        expect(hymn.formats![0].variations?.map(v => [v.id, v.name, v.order])).toEqual([[SECOND, "Standard", 1], [FIRST, "Standard", 2]]);
-        expect(hymn.formats![0].variations![1].content).toEqual({ englishHazzat: "first", arabicHazzat: null });
-        expect(kiahk!.hymns![1].formats![1].variations![0].id).toBe(TEXT);
+        expect(hymn.formats?.map(f => f.id)).toEqual(["1", "2", "4", "5"]);
+        expect(hymn.formats![1].variations?.map(v => [v.id, v.name, v.order])).toEqual([[SECOND, "Standard", 1], [FIRST, "Standard", 2]]);
+        expect(hymn.formats![1].variations![1].content).toEqual({ englishHazzat: "first", arabicHazzat: null });
+        expect(kiahk!.hymns![1].formats![0].variations![0].id).toBe(TEXT);
         expect(get.mock.calls.filter(([path]) => path === `/v5/content/${FIRST}.json`)).toHaveLength(1);
     });
 
@@ -83,7 +83,7 @@ describe("v5 service resolution and contextual titles", () => {
         source.hymns[0].nameAr = "عنوان خاص";
         const hymn = (await provider("ar").getService("annual", "basil"))!.hymns![1];
         expect(hymn.displayName).toBe("عنوان خاص");
-        expect(hymn.formats![0].variations![0].displayName).toBe("المعتاد");
+        expect(hymn.formats![1].variations![0].displayName).toBe("المعتاد");
         const untranslated = (await provider("ar").getService("kiahk", "liturgy"))!.hymns![1];
         expect(untranslated.displayName).toBe("Aspasmos Adam (3rd Sunday)");
     });
@@ -144,7 +144,7 @@ describe("v5 service resolution and contextual titles", () => {
         expect(english?.hymns).toHaveLength(2);
         const hymn = arabic!.hymns![1];
         expect(hymn.displayName).toBe("Aspasmos Adam (Rejoice O Mary)");
-        expect(hymn.formats![0].variations![1].displayName).toBe("Standard");
+        expect(hymn.formats![1].variations![1].displayName).toBe("Standard");
         expect(source.hymns[0].nameAr).toBe("");
     });
 
@@ -171,7 +171,7 @@ describe("v5 service resolution and contextual titles", () => {
         const result = await ar.getService("annual", "basil");
         expect(result?.displayName).toBe(source.name);
         expect(result!.hymns![1].displayName).toBe("Aspasmos Adam (Rejoice O Mary)");
-        expect(result!.hymns![1].formats![0].variations![1].displayName).toBe("Standard");
+        expect(result!.hymns![1].formats![1].variations![1].displayName).toBe("Standard");
         expect(source.hymns[0].nameAr).toBe(blank);
     });
 

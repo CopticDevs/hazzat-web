@@ -186,7 +186,6 @@ export async function resolveSharedService(
         const identity = await readIdentity(binding.hymnId);
         const title = assignmentTitle(binding, identity);
         const formats = await Promise.all(Object.entries(binding.formats).filter(([, ids]) => ids.length > 0).map(async ([id, ids]) => {
-            const metadata = binding.formatMetadata?.[id];
             const variations = await Promise.all(ids.map(async (reference, index) => {
                 const contentId = reference.contentId;
                 const record = await readContent(contentId);
@@ -197,10 +196,9 @@ export async function resolveSharedService(
                     content: JSON.parse(JSON.stringify(record.content)) as IHymnContent
                 };
             }));
-            return { id, name: formatDisplayName(id), order: metadata?.order ?? Number(id), variationCount: variations.length, variations };
+            return { id, name: formatDisplayName(id), order: Number(id), variationCount: variations.length, variations };
         }));
-        formats.sort((a, b) => a.order - b.order ||
-            (binding.formatMetadata?.[a.id]?.position ?? Number(a.id)) - (binding.formatMetadata?.[b.id]?.position ?? Number(b.id)) || Number(a.id) - Number(b.id));
+        formats.sort((a, b) => Number(a.id) - Number(b.id));
         return { id: identity.id, ...title, displayName: localizedName(title, language), order: binding.order, formats };
     }));
     return { ...service, verse: service.verse ?? "", isDateSpecific: service.isDateSpecific ?? false,

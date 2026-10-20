@@ -25,8 +25,8 @@ test('reader labels ignore saved aliases while keeping IDs, order, payloads and 
     const result = await resolveSharedService(service, async id => ({ schemaVersion: 5, id, name: 'Identity title' }), async id => ({ schemaVersion: 5, id, name: 'Content', contentType: SHARED_TYPES[id === 'vertical' ? 2 : 3], content: id === 'vertical' ? { copticVerticalHazzat: 'saved payload' } : { musicXml: '<score-partwise />' } }), 'en');
     const hymn = result.hymns![0];
     expect(hymn.name).toBe('Context title');
-    expect(hymn.formats!.map(f => [f.id, f.name, f.order, f.variations![0].id])).toEqual([['4', 'Musical Notes', 1, 'score'], ['3', 'Vertical Hazzat', 2, 'vertical']]);
-    expect(hymn.formats![1].variations![0].content).toEqual({ copticVerticalHazzat: 'saved payload' });
+    expect(hymn.formats!.map(f => [f.id, f.name, f.order, f.variations![0].id])).toEqual([['3', 'Vertical Hazzat', 3, 'vertical'], ['4', 'Musical Notes', 4, 'score']]);
+    expect(hymn.formats![0].variations![0].content).toEqual({ copticVerticalHazzat: 'saved payload' });
     expect(service).toEqual(before);
 });
 test.each(['0', '8', '01', 'constructor'])('rejects invalid format %s', id => expect(() => formatDisplayName(id)).toThrow(/Unsupported format/));
