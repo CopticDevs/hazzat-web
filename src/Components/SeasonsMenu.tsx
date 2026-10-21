@@ -96,7 +96,7 @@ function SeasonsMenu() {
     
     return (
         <div>
-            <div className="pageTitle"><LocalizedMessage of="seasons" /></div>
+            <h1 className="pageTitle"><LocalizedMessage of="seasons" /></h1>
             { dsSeasonNodes }
             <div className="otherServicesTitle"><LocalizedMessage of="otherServices" /></div>
             { ndsSeasonNodes }

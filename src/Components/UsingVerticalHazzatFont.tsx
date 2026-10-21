@@ -51,11 +51,11 @@ function UsingVerticalHazzatFont() {
 
     useEffect(() => {
         document.title = strings.usingTheVerticalHazzatFont + " - hazzat.com";
-    }, []);
+    }, [languageProperties.localeName]);
 
     return (
         <>
-            <div className="pageTitle"><LocalizedMessage of="usingTheVerticalHazzatFont" /></div>
+            <h1 className="pageTitle"><LocalizedMessage of="usingTheVerticalHazzatFont" /></h1>
             <BreadCrumb items={[
                 { title: strings.help, path: "/Help" },
                 { title: strings.usingTheVerticalHazzatFont }]} />

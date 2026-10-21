@@ -1,57 +1,54 @@
-.navLink {
-    font-family: "Trajan Pro";
-    font-size: 18px;
-    font-weight: 700;
+.home-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    padding: 12px var(--page-gutter) 0;
 }
-
-/* Make MainPaper wider on narrow displays so content takes full width */
-@media screen and (max-width: 999px) {
-    .home-page .mainPaper {
-        width: 90%;
-    }
+.home-page .mainPaper {
+    margin: 0;
 }
-
 .section-title {
-    font-family: "Trajan Pro";
+    font-family: var(--heading-font);
     margin-bottom: 20px;
 }
-
 .season-link {
     text-decoration: none;
     color: inherit;
 }
-
 .season-card {
-    cursor: pointer;
     padding: 15px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    transition: background-color 0.2s;
+    transition: background-color .2s;
 }
-
 .season-card:hover {
-    background-color: #f5f5f5;
+    background: #f5f5f5;
 }
-
 .season-card-title {
     margin-bottom: 5px;
-    font-size: 18px;
+    font: 700 18px/1.4 var(--heading-font);
 }
-
 .season-card-date {
     font-size: 14px;
-    color: #666;
+    color: var(--muted-ink);
     margin-bottom: 5px;
 }
-
 .season-card-verse {
     font-size: 14px;
     font-style: italic;
-    color: #888;
+    color: var(--muted-ink);
 }
-
 .other-links-section {
     margin-top: 40px;
     padding-top: 20px;
     border-top: 1px solid #ddd;
+}
+.navLink {
+    font: 700 18px/1.4 var(--heading-font);
+}
+@media (min-width: 62rem) {
+    .home-page {
+        grid-template-columns: minmax(0, 1fr) 300px;
+        align-items: start;
+    }
 }

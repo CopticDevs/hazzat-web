@@ -65,12 +65,12 @@ export default function HymnContentFromService({ seasonInfo }: { seasonInfo: ISe
             { title: seasonInfo.displayName, path: `/Seasons/${seasonId}` },
             { title: selectedHymn ? `${service.displayName}: ${selectedHymn.displayName}` : service.displayName }
         ]} />
+        <ContentPageSettingPane />
         <FormatBar title={title ?? service.displayName} formatsMap={formatsMap} activeFormatId={formatId} />
         {shownHymns.map(hymn => {
             const format = hymn.formats?.find(f => f.id === formatId);
             return format ? <Content key={`${seasonId}/${serviceId}/${hymn.id}/${formatId}`} formatId={formatId}
                 hymnTitle={hymn.displayName} variationsCallback={async () => format.variations ?? []} /> : null;
         })}
-        <ContentPageSettingPane />
     </>;
 }

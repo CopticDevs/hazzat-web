@@ -1,6 +1,7 @@
+import { LanguageContext } from "../LanguageContext";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { strings } from "../l8n";
 import LocalizedMessage from "../LocalizedMessage";
@@ -10,18 +11,19 @@ import MyNavLink from "./MyNavLink";
 
 function FontsPage() {
 
+    const { languageProperties } = useContext(LanguageContext);
     useEffect(() => {
         document.title = strings.fonts + " - hazzat.com";
-    }, []);
+    }, [languageProperties.localeName]);
 
     return (
         <Routes>
             <Route path="/" element={
                 <MainPaper size={Size.Wide}>
-                    <div className="pageTitle"><LocalizedMessage of="hazzatFont" /></div>
+                    <h1 className="pageTitle"><LocalizedMessage of="hazzatFont" /></h1>
                     <div><strong><MyNavLink to="HazzatFont"><LocalizedMessage of="hazzatFontVer" /></MyNavLink></strong><br /> <LocalizedMessage of="hazzatFontDesc" /></div>
 
-                    <div className="pageTitle" style={{ paddingTop: "40px" }}><LocalizedMessage of="copticFonts" /></div>
+                    <h2 className="pageTitle" style={{ paddingTop: "40px" }}><LocalizedMessage of="copticFonts" /></h2>
                     <div><LocalizedMessage of="copticZipTitle" /></div>
                     <div style={{ paddingTop: "20px" }} dangerouslySetInnerHTML={{ __html: strings.copticZipContents }}></div>
                     <div style={{ textAlign: "center" }}>

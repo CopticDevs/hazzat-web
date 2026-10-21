@@ -57,7 +57,7 @@ function SeasonRouter() {
                 isLoading ? <LoadingSpinner /> :
                     !!seasonInfo ?
                         <div>
-                            <div className="pageTitle">{stringFormat(strings.seasonTitle, seasonInfo.displayName)}</div>
+                            <h1 className="pageTitle">{stringFormat(strings.seasonTitle, seasonInfo.displayName)}</h1>
 
                             <Routes>
                                 <Route path="/" element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.displayName} seasonVerse={seasonInfo.displayVerse} />} />

@@ -1,5 +1,3 @@
-import { useContext } from "react";
-import { LanguageContext } from "../LanguageContext";
 import { IVariationInfo, IVideoContent } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
 import CrossDivider from "./CrossDivider";
@@ -13,27 +11,23 @@ interface IProps {
 }
 
 function ContentVideo(props: IProps) {
-    const { languageProperties } = useContext(LanguageContext);
-    const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
     return (
         <>
             {props.hymnTitle && (
                 <>
-                    <div className={langClassName}>
+                    <div className="content-heading">
                         <HymnTitle content={props.hymnTitle} />
                     </div>
-                    <div className="clear" />
                 </>
             )}
             {props.variations.map((variation) => {
                 return <div key={variation.id}>
                     {props.variations.length > 1 && (
                         <>
-                            <div className={langClassName}>
+                            <div className="content-heading">
                                 <VariationTitle content={variation.displayName} />
                             </div>
-                            <div className="clear" />
                         </>
                     )}
                     {variation.content.copticVideo ?

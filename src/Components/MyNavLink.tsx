@@ -1,23 +1,11 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { ComponentProps } from "react";
+import { NavLink, useLocation, useResolvedPath } from "react-router-dom";
 
-interface IProps {
-    to: string;
-    className?: string;
-    style?: React.CSSProperties;
-    onClick?: any;
-    children?: React.ReactNode;
-}
-
-function MyNavLink(props: IProps) {
+type Props = Omit<ComponentProps<typeof NavLink>, "to"> & { to: string };
+export default function MyNavLink({ to, ...props }: Props) {
     const location = useLocation();
-    const searchParams = new URLSearchParams(location.search);
-    const navTo = `${props.to}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-    
-    return (
-        <NavLink to={navTo} className={props.className} style={props.style} onClick={props.onClick}>
-            {props.children}
-        </NavLink>
-    );
+    const target = useResolvedPath(to);
+    const search = new URLSearchParams(target.search);
+    new URLSearchParams(location.search).forEach((value, key) => { if (!search.has(key)) search.set(key, value); });
+    return <NavLink to={{ ...target, search: search.toString() ? `?${search}` : "" }} {...props} />;
 }
-
-export default MyNavLink;

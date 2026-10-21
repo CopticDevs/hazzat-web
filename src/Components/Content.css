@@ -3,19 +3,15 @@
     border-width: 3px;
     border-style: solid;
 }
-
 .contentLBorder {
     border-left: 1px solid black;
 }
-
 .contentRBorder {
     border-right: 1px solid black;
 }
-
 .textAlignTop {
     vertical-align: text-top;
 }
-
 .musicXmlScoreWrap {
     width: 100%;
     max-width: 100%;
@@ -27,13 +23,11 @@
     padding: 12px;
     margin: 12px 0 24px;
 }
-
 .musicXmlScore {
     width: 100%;
     min-width: 0;
     min-height: 260px;
 }
-
 .musicXmlScoreTitle,
 .musicXmlScoreSubtitle {
     text-align: center;
@@ -41,15 +35,12 @@
     line-height: 1.35;
     margin: 0 0 0.75em;
 }
-
 .musicXmlScoreTitle {
     font-size: 1.25em;
 }
-
 .musicXmlScoreSubtitle {
     font-size: 1em;
 }
-
 .musicXmlScoreError {
     color: #842029;
     background: #f8d7da;
@@ -57,4 +48,58 @@
     border-radius: 4px;
     padding: 10px;
     margin-bottom: 10px;
+}
+/* Notation overflow is local and direction-aware; never split musical glyph runs. */
+.notation-scroll {
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    overflow-x: auto;
+    padding-block: 12px;
+}
+.information-columns {
+    display: flex;
+    flex-direction: column;
+}
+.information-language {
+    flex: 1 1 0;
+    min-inline-size: 0;
+    padding: 12px;
+    overflow-wrap: anywhere;
+}
+.information-language + .information-language {
+    border-block-start: 1px solid var(--rule);
+}
+.youtube-video {
+    position: relative;
+    width: 90%;
+    margin-inline: auto;
+    aspect-ratio: 16 / 9;
+}
+.youtube-video iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+@media (min-width: 37.5rem) {
+    .information-columns {
+        flex-direction: row;
+    }
+    .information-language + .information-language {
+        border-block-start: 0;
+        border-inline-start: 1px solid var(--rule);
+    }
+}
+@supports not (aspect-ratio: 16 / 9) {
+    .youtube-video {
+        height: 0;
+        padding-bottom: 50.625%;
+    }
+}
+.information-language[lang="ar"] {
+    font-family: "Noto Naskh Arabic", serif;
+}
+.notation-scroll {
+    scroll-margin-block-start: 64px;
 }

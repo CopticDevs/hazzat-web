@@ -1,6 +1,7 @@
+import NotationContent from "./NotationContent";
+import "./Content.css";
 import { useContext } from "react";
 import { UserSettingsContext } from "../Contexts/UserSettingsContext";
-import { LanguageContext } from "../LanguageContext";
 import { IHazzatContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
@@ -12,9 +13,7 @@ interface IProps {
 }
 
 function ContentHazzat(props: IProps) {
-    const { languageProperties } = useContext(LanguageContext);
     const { userSettings } = useContext(UserSettingsContext);
-    const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
     const overrideEnglishStyle = {
         '--english-font-size': userSettings.englishFontSize,
@@ -36,35 +35,33 @@ function ContentHazzat(props: IProps) {
         <>
             {props.hymnTitle && (
                 <>
-                    <div className={langClassName}>
+                    <div className="content-heading">
                         <HymnTitle content={props.hymnTitle} />
                     </div>
-                    <div className="clear" />
                 </>
             )}
             {props.variations.map((variation) => {
                 return <div key={variation.id}>
                     {props.variations.length > 1 && (
                         <>
-                            <div className={langClassName}>
+                            <div className="content-heading">
                                 <VariationTitle content={variation.displayName} />
                             </div>
-                            <div className="clear" />
                         </>
                     )}
                     {variation.content.copticHazzat ?
                         <>
-                            <div lang="en" style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: variation.content.copticHazzat }} />
+                            <NotationContent language="en" style={overrideEnglishStyle} content={variation.content.copticHazzat} />
                             <CrossDivider />
                         </> : ""}
                     {variation.content.englishHazzat ?
                         <>
-                            <div lang="en" style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: variation.content.englishHazzat }} />
+                            <NotationContent language="en" style={overrideEnglishStyle} content={variation.content.englishHazzat} />
                             <CrossDivider />
                         </> : ""}
                     {variation.content.arabicHazzat ?
                         <>
-                            <div lang="ar" style={overrideArabicStyle} dangerouslySetInnerHTML={{ __html: variation.content.arabicHazzat }} />
+                            <NotationContent language="ar" style={overrideArabicStyle} content={variation.content.arabicHazzat} />
                             <CrossDivider />
                         </> : ""}
                     
