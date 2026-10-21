@@ -8,11 +8,7 @@
         --reader-black: #e7e3d9;
         --preference-border: #606761;
         --preference-surface: #191d1e;
-        --preference-selected: #41413a;
-        --preference-selected-ink: #f4deb0;
-        --preference-selected-shadow: inset 0 0 0 1px #78735d;
         --preference-hover: #343b36;
-        --preference-rule-filter: invert(.8);
         --reader-maroon: #f0a8ad;
         --reader-navy: #a9c8ff;
     }
