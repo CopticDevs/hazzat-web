@@ -111,7 +111,7 @@ test('information shares reader size/color settings and preferences survive remo
     expect(screen.getByText('English information')).toHaveStyle({fontSize:'20px'});
     expect(screen.getByText('معلومات')).toHaveStyle({fontSize:'24px'});
     userEvent.click(within(screen.getByRole('group', { name: 'Text' })).getByRole('radio', { name:'Navy' }));
-    expect(screen.getByText('English information')).toHaveStyle({color:'NAVY'});
+    expect((screen.getByText('English information').closest('.information-columns') as HTMLElement).style.getPropertyValue('--content-font-color')).toBe('var(--reader-navy, NAVY)');
     view.unmount(); render(<UserSettingProvider><Settings /></UserSettingProvider>);
     expect(screen.getByTestId('settings')).toHaveTextContent('20px');
     expect(screen.getByTestId('settings')).toHaveTextContent('NAVY');

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { UserSettingsContext } from "../Contexts/UserSettingsContext";
+import { readerColor, UserSettingsContext } from "../Contexts/UserSettingsContext";
 import { ITextContent, IVariationInfo, TextColumn, TextParagraph } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
 import "./ContentText.css";
@@ -26,15 +26,15 @@ function ContentText(props: IProps) {
 
     const overrideEnglishStyle = {
         '--english-font-size': userSettings.englishFontSize,
-        '--content-font-color': userSettings.contentFontColor,
-        '--hazzat-font-color': userSettings.hazzatFontColor,
+        '--content-font-color': readerColor(userSettings.contentFontColor),
+        '--hazzat-font-color': readerColor(userSettings.hazzatFontColor),
         direction: 'ltr'
     } as React.CSSProperties & { '--english-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
 
     const overrideArabicStyle = {
         '--arabic-font-size': userSettings.arabicFontSize,
-        '--content-font-color': userSettings.contentFontColor,
-        '--hazzat-font-color': userSettings.hazzatFontColor,
+        '--content-font-color': readerColor(userSettings.contentFontColor),
+        '--hazzat-font-color': readerColor(userSettings.hazzatFontColor),
         direction: 'rtl'
     } as React.CSSProperties & { '--arabic-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
 

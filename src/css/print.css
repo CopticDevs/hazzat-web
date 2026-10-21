@@ -2,6 +2,8 @@
     display: none;
 }
 @media print {
+    :root { color-scheme: light; --ink: #302c26; --muted-ink: #625e55; --rule: #d7d2c7; --reader-black: BLACK; --reader-maroon: MAROON; --reader-navy: NAVY; }
+    body { color: #000; }
     .print-brand {
         display: block;
         text-align: center;

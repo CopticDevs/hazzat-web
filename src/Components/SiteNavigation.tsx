@@ -7,6 +7,7 @@ import { strings } from "../l8n";
 import LocalizedMessage from "../LocalizedMessage";
 import LanguageSwitcher from "./LanguageSwitcher";
 import MyNavLink from "./MyNavLink";
+import SitePreferences from "./SitePreferences";
 
 interface Props { id: string; navItems: INavMenuItem[]; footer?: boolean }
 export default function SiteNavigation({ id, navItems, footer = false }: Props) {
@@ -44,7 +45,8 @@ export default function SiteNavigation({ id, navItems, footer = false }: Props) 
                 <MyNavLink to={item.location} end><LocalizedMessage of={item.id} /></MyNavLink>
             </li>)}
             {!footer && <li><MyNavLink to="/Search"><FontAwesomeIcon icon={faSearch} /> <LocalizedMessage of="search" /></MyNavLink></li>}
-            <LanguageSwitcher />
+            {footer && <LanguageSwitcher />}
         </ul>
+        {!footer && <SitePreferences />}
     </nav>;
 }

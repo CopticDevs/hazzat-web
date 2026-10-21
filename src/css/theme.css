@@ -1,0 +1,244 @@
+/* Dark appearance is screen-only: printed pages retain light paper and dark ink. */
+@media screen {
+    :root[data-theme="dark"] {
+        color-scheme: dark;
+        --ink: #e7e3d9;
+        --muted-ink: #bcc2ba;
+        --rule: #505752;
+        --reader-black: #e7e3d9;
+        --reader-maroon: #f0a8ad;
+        --reader-navy: #a9c8ff;
+    }
+    :root[data-theme="dark"] body {
+        background: #111416;
+        color: var(--ink);
+    }
+    :root[data-theme="dark"] .main {
+        position: relative;
+        isolation: isolate;
+        background: none;
+    }
+    :root[data-theme="dark"] .main::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: url(../images/bg.png) repeat-y center top / 1280px auto;
+        filter: grayscale(1) brightness(.14);
+        pointer-events: none;
+    }
+    :root[data-theme="dark"] .mainContainer {
+        background: #1e2223;
+    }
+    :root[data-theme="dark"] .innerHeader {
+        position: relative;
+        isolation: isolate;
+        background: #24282a;
+    }
+    :root[data-theme="dark"] .innerHeader::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: url(../images/headerBgNew.png) no-repeat center top / cover;
+        filter: brightness(.64) sepia(.12);
+        -webkit-mask-image: linear-gradient(to right, #000 0%, #000 25%, transparent 70%);
+        mask-image: linear-gradient(to right, #000 0%, #000 25%, transparent 70%);
+    }
+    :root[data-theme="dark"] .logo {
+        position: relative;
+        filter: invert(.9) sepia(.15);
+    }
+    :root[data-theme="dark"] .site-nav {
+        background: #24282a;
+        margin-block-start: 0;
+    }
+    :root[data-theme="dark"] .site-nav::before, :root[data-theme="dark"] .site-nav::after {
+        filter: invert(.75);
+        opacity: .7;
+        display: block;
+    }
+    :root[data-theme="dark"] .site-nav .site-menu a:hover, :root[data-theme="dark"] .main a:hover {
+        color: #f3dbab;
+    }
+    :root[data-theme="dark"] .preference-switch {
+        background: #191d1e;
+        border-color: #606761;
+    }
+    :root[data-theme="dark"] .preference-switch a, :root[data-theme="dark"] .preference-switch button {
+        color: #d0d4cb;
+    }
+    :root[data-theme="dark"] .preference-switch [aria-current="true"], :root[data-theme="dark"] .preference-switch [aria-pressed="true"] {
+        background: #41413a;
+        color: #f4deb0;
+        box-shadow: inset 0 0 0 1px #78735d;
+    }
+    :root[data-theme="dark"] .preference-switch a:hover, :root[data-theme="dark"] .preference-switch button:hover {
+        background: #343b36;
+    }
+    :root[data-theme="dark"] .mainPaper {
+        background: #202526;
+        border-image: none;
+        border-color: #666b62;
+        border-width: 2px;
+        border-radius: 3px 4px 10px 4px;
+        padding: 24px;
+    }
+    :root[data-theme="dark"] .home-page .mainPaper {
+        padding: 24px;
+    }
+    :root[data-theme="dark"] .hymnLeft {
+        position: relative;
+        isolation: isolate;
+        background: #292d2d;
+    }
+    :root[data-theme="dark"] .hymnLeft::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: url(../images/hymnRepBk.png) no-repeat center / 100% 100%;
+        filter: invert(.88) brightness(.82);
+        opacity: .25;
+        pointer-events: none;
+    }
+    :root[data-theme="dark"] .hymnData > div > svg, :root[data-theme="dark"] .social-media-section svg {
+        filter: invert(.8);
+    }
+    :root[data-theme="dark"] .season-card {
+        background: #262b2b;
+        border-color: var(--rule);
+    }
+    :root[data-theme="dark"] .bookletSeasonCard:hover {
+        background: #303735;
+    }
+    :root[data-theme="dark"] .season-card:hover, :root[data-theme="dark"] .seasonDownloadPdfsButton:hover, :root[data-theme="dark"] .bookletDownloadButton:hover:not(:disabled) {
+        background: #303735;
+    }
+    :root[data-theme="dark"] .season-card-date, :root[data-theme="dark"] .season-card-verse, :root[data-theme="dark"] .bookletVariationSelector {
+        color: var(--muted-ink);
+    }
+    :root[data-theme="dark"] .other-links-section, :root[data-theme="dark"] .bookletHymnSelector, :root[data-theme="dark"] .bookletDownloadTitle, :root[data-theme="dark"] .bookletDownloadButton {
+        border-color: var(--rule);
+    }
+    :root[data-theme="dark"] .bookletDownloadButton {
+        color: var(--ink);
+    }
+    :root[data-theme="dark"] .alternate {
+        background: #292f2d;
+    }
+    :root[data-theme="dark"] .format-bar {
+        background: #252b29;
+        border-color: var(--rule);
+    }
+    :root[data-theme="dark"] .format-links > [aria-current="page"] {
+        background: #3d4339;
+        color: #f4deb0;
+    }
+    :root[data-theme="dark"] .format-links > a:hover {
+        background: #343b36;
+    }
+    :root[data-theme="dark"] .format-option svg, :root[data-theme="dark"] .format-dropdown-toggle svg {
+        filter: invert(.8);
+    }
+    :root[data-theme="dark"] .reader-tools {
+        background: #202526;
+    }
+    :root[data-theme="dark"] .reader-tool, :root[data-theme="dark"] .size-button {
+        background: #292f2d;
+        color: var(--ink);
+        border-color: #727c72;
+    }
+    :root[data-theme="dark"] .reader-tool:hover, :root[data-theme="dark"] .size-button:hover {
+        background: #3b443c;
+        color: #fff;
+    }
+    :root[data-theme="dark"] .modal-content, :root[data-theme="dark"] .dropdown-menu {
+        background: #252b29;
+        color: var(--ink);
+        border-color: #727c72;
+    }
+    :root[data-theme="dark"] .modal-header, :root[data-theme="dark"] .modal-footer {
+        border-color: var(--rule);
+    }
+    :root[data-theme="dark"] .btn-close {
+        filter: invert(1);
+    }
+    :root[data-theme="dark"] .dropdown-item {
+        color: var(--ink);
+    }
+    :root[data-theme="dark"] .dropdown-item:hover, :root[data-theme="dark"] .dropdown-item:focus {
+        background: #3b443c;
+        color: #fff;
+    }
+    :root[data-theme="dark"] .form-control, :root[data-theme="dark"] .form-select {
+        background-color: #191e1c;
+        color: var(--ink);
+        border-color: #727c72;
+    }
+    :root[data-theme="dark"] .form-control::placeholder {
+        color: #b8beb5;
+    }
+    :root[data-theme="dark"] .form-control:focus {
+        background: #191e1c;
+        color: var(--ink);
+        border-color: #ddbd79;
+    }
+    :root[data-theme="dark"] .form-text, :root[data-theme="dark"] .text-muted {
+        color: var(--muted-ink) !important;
+    }
+    :root[data-theme="dark"] .table {
+        color: var(--ink);
+        border-color: var(--rule);
+    }
+    :root[data-theme="dark"] .contentLBorder, :root[data-theme="dark"] .contentRBorder {
+        border-color: #7b8276;
+    }
+    :root[data-theme="dark"] .information-language {
+        color: var(--reader-black);
+    }
+    :root[data-theme="dark"] .musicXmlScoreWrap {
+        background: #242a27;
+        border-color: var(--rule);
+    }
+    :root[data-theme="dark"] .musicXmlScore {
+        filter: invert(.88) hue-rotate(180deg);
+    }
+    :root[data-theme="dark"] .bookletDownloadButton svg {
+        filter: invert(.8);
+    }
+    :root[data-theme="dark"] .musicXmlScoreTitle, :root[data-theme="dark"] .musicXmlScoreSubtitle {
+        color: var(--ink);
+    }
+    :root[data-theme="dark"] .alert-info {
+        background: #24383e;
+        color: #d3e7ee;
+        border-color: #60828c;
+    }
+    :root[data-theme="dark"] :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+        outline-color: #e3c58c;
+    }
+    :root[data-theme="dark"] .format-dropdown-toggle, :root[data-theme="dark"] .bookletSelectionPanel, :root[data-theme="dark"] .bookletSelectionReset, :root[data-theme="dark"] .bookletLinkDiv {
+        color: var(--ink);
+    }
+    :root[data-theme="dark"] .bookletSeasonVerse {
+        color: var(--muted-ink);
+    }
+    :root[data-theme="dark"] .bookletSelectionReset:hover {
+        background: #343b36;
+    }
+    :root[data-theme="dark"] .bookletSelectionPanel, :root[data-theme="dark"] .bookletServiceSelection {
+        border-color: var(--rule);
+    }
+    @media (min-width: 62rem) {
+        :root[data-theme="dark"] .innerHeader::before {
+            background-image: url(../images/headerBg.png);
+            background-size: auto;
+        }
+    }
+    @media (max-width: 37.5rem) {
+        :root[data-theme="dark"] .mainPaper, :root[data-theme="dark"] .home-page .mainPaper {
+            padding: 12px;
+        }
+    }
+}
