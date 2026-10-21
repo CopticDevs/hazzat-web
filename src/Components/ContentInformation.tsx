@@ -1,4 +1,4 @@
-import { UserSettingsContext } from "../Contexts/UserSettingsContext";
+import { readerColor, UserSettingsContext } from "../Contexts/UserSettingsContext";
 import { useContext } from "react";
 import { IInformationContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
@@ -14,7 +14,7 @@ interface IProps {
 function ContentInformation(props: IProps) {
     const { userSettings } = useContext(UserSettingsContext);
     const typography = { '--english-font-size': userSettings.englishFontSize, '--arabic-font-size': userSettings.arabicFontSize,
-        '--content-font-color': userSettings.contentFontColor, '--hazzat-font-color': userSettings.hazzatFontColor } as React.CSSProperties;
+        '--content-font-color': readerColor(userSettings.contentFontColor), '--hazzat-font-color': readerColor(userSettings.hazzatFontColor) } as React.CSSProperties;
 
     return (
         <>
@@ -36,10 +36,10 @@ function ContentInformation(props: IProps) {
                     )}
                     <div className="information-columns dirLtr" style={typography}>
                         {variation.content.englishInformation ?
-                            <div className="information-language" lang="en" style={{ direction: "ltr", textAlign: "left", fontSize: userSettings.englishFontSize, color: userSettings.contentFontColor }} dangerouslySetInnerHTML={{ __html: variation.content.englishInformation }} />
+                            <div className="information-language" lang="en" style={{ direction: "ltr", textAlign: "left", fontSize: userSettings.englishFontSize, color: readerColor(userSettings.contentFontColor) }} dangerouslySetInnerHTML={{ __html: variation.content.englishInformation }} />
                             : ""}
                         {variation.content.arabicInformation ?
-                            <div className="information-language" lang="ar" style={{ direction: "rtl", textAlign: "right", fontSize: userSettings.arabicFontSize, color: userSettings.contentFontColor }} dangerouslySetInnerHTML={{ __html: variation.content.arabicInformation }} />
+                            <div className="information-language" lang="ar" style={{ direction: "rtl", textAlign: "right", fontSize: userSettings.arabicFontSize, color: readerColor(userSettings.contentFontColor) }} dangerouslySetInnerHTML={{ __html: variation.content.arabicInformation }} />
                             : ""}
                     </div>
                     <CrossDivider />

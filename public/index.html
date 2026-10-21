@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
+    <script>
+      try { document.documentElement.dataset.theme = localStorage.getItem("hazzat.theme") === "dark" ? "dark" : "light"; }
+      catch (_) { document.documentElement.dataset.theme = "light"; }
+    </script>
     <link rel="icon" type="image/png" href="%PUBLIC_URL%/logo192.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#000000" />

@@ -1,7 +1,7 @@
 import NotationContent from "./NotationContent";
 import "./Content.css";
 import { useContext } from "react";
-import { UserSettingsContext } from "../Contexts/UserSettingsContext";
+import { readerColor, UserSettingsContext } from "../Contexts/UserSettingsContext";
 import { IHazzatContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
@@ -17,16 +17,16 @@ function ContentHazzat(props: IProps) {
 
     const overrideEnglishStyle = {
         '--english-font-size': userSettings.englishFontSize,
-        '--content-font-color': userSettings.contentFontColor,
-        '--hazzat-font-color': userSettings.hazzatFontColor,
+        '--content-font-color': readerColor(userSettings.contentFontColor),
+        '--hazzat-font-color': readerColor(userSettings.hazzatFontColor),
         direction: 'ltr',
         textAlign: 'left'
     } as React.CSSProperties & { '--english-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
 
     const overrideArabicStyle = {
         '--arabic-font-size': userSettings.arabicFontSize,
-        '--content-font-color': userSettings.contentFontColor,
-        '--hazzat-font-color': userSettings.hazzatFontColor,
+        '--content-font-color': readerColor(userSettings.contentFontColor),
+        '--hazzat-font-color': readerColor(userSettings.hazzatFontColor),
         direction: 'rtl',
         textAlign: 'right'
     } as React.CSSProperties & { '--arabic-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };

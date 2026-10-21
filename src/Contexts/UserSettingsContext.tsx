@@ -1,6 +1,11 @@
 import React, { createContext, useEffect, useState } from "react";
 import { AppSettings } from "../AppSettings";
 
+export function readerColor(color: string): string {
+    const variables: Record<string, string> = { BLACK: "--reader-black", MAROON: "--reader-maroon", NAVY: "--reader-navy" };
+    return variables[color] ? `var(${variables[color]}, ${color})` : color;
+}
+
 type UserSettings = { contentFontColor: string; hazzatFontColor: string; arabicFontSize: string; englishFontSize: string };
 const defaults: UserSettings = { contentFontColor: "BLACK", hazzatFontColor: "BLACK", arabicFontSize: "22px", englishFontSize: "18px" };
 const storageKey = "hazzat.reader-settings";

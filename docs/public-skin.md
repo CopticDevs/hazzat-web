@@ -32,3 +32,13 @@ For visual validation, inspect home, a long season title, a multilingual hymn, m
 Local visual checks use Chromium viewport emulation. Real iOS Safari/Android Chrome, Firefox/WebKit, 200%/400% browser zoom, mobile software keyboards and device safe areas still need PPE/device validation. Do not treat viewport emulation as proof of those browser/device combinations.
 
 This PR targets develop for PPE. Promote to master separately after PPE validation. It does not modify AWS content, schemas, backend services or native applications.
+
+## Light and dark appearance
+
+Light remains the first-visit default and retains the existing artwork. The grouped navigation controls keep English/Arabic and Light/Dark together; on compact screens the theme labels become named sun/moon buttons next to the menu. Both choices remain available without opening the menu. Selected states and keyboard focus are explicit.
+
+ThemeProvider stores an explicit choice under hazzat.theme. The early HTML initializer restores it before the stylesheet paints; invalid or blocked storage falls back to light. Switching languages preserves the theme, route, query parameters and anchor. Theme selection is separate from reader preferences.
+
+Dark mode uses warm charcoal surfaces and ivory text. The Christ artwork retains its original tones, is gently darkened and fades into the charcoal header; only the logo and monochrome UI artwork invert. Reader Black/Maroon/Navy choices resolve to ivory/rose/pale blue on screen without changing their stored values. Scores invert their own engraving surface; photographs, illustrations, app-store badges and video embeds retain their own colors.
+
+Dark overrides live in css/theme.css inside screen media rules. Printing always uses light paper, the original monochrome logo and dark reader inks, regardless of the selected screen theme. Native print pagination, Safari/Firefox and physical-device safe areas remain PPE checks.
