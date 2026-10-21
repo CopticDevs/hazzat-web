@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { AppSettings } from "../AppSettings";
-import { UserSettingsContext } from "../Contexts/UserSettingsContext";
+import { readerColor, UserSettingsContext } from "../Contexts/UserSettingsContext";
 import { LanguageContext } from "../LanguageContext";
 import { strings } from "../l8n";
 import "./UserSettingsChanger.css";
@@ -14,7 +14,7 @@ export default function UserSettingsChanger() {
     const [expanded, setExpanded] = useState(false);
     const size = parseFloat(userSettings.englishFontSize) || 18;
     const options = [{ value: "BLACK", label: strings.black }, { value: "MAROON", label: strings.maroon }, { value: "NAVY", label: strings.navy }];
-    const sampleStyle = { '--english-font-size': userSettings.englishFontSize, '--content-font-color': userSettings.contentFontColor, '--hazzat-font-color': userSettings.hazzatFontColor } as React.CSSProperties;
+    const sampleStyle = { '--english-font-size': userSettings.englishFontSize, '--content-font-color': readerColor(userSettings.contentFontColor), '--hazzat-font-color': readerColor(userSettings.hazzatFontColor) } as React.CSSProperties;
     return <>
         <Button className="reader-tool" variant="light" aria-label={strings.settings} onClick={() => {
             setExpanded(true); window.gtag?.("event", "button_click", { event_category: "Engagement", event_label: "Customization Button Clicked" });
@@ -36,7 +36,7 @@ export default function UserSettingsChanger() {
                     <legend>{group.title}</legend><div className="reader-colors">
                         {options.map(option => <label className="reader-color" key={option.value}>
                             <input type="radio" name={`reader-${group.name}-color`} value={option.value} checked={group.selected === option.value} onChange={() => group.set(option.value)} />
-                            <span className="reader-color-swatch" style={{ backgroundColor: option.value }} aria-hidden="true" /><span>{option.label}</span>
+                            <span className="reader-color-swatch" style={{ backgroundColor: readerColor(option.value) }} aria-hidden="true" /><span>{option.label}</span>
                         </label>)}
                     </div>
                 </fieldset>)}
