@@ -194,6 +194,9 @@
     :root[data-theme="dark"] .contentLBorder, :root[data-theme="dark"] .contentRBorder {
         border-color: #7b8276;
     }
+    :root[data-theme="dark"] :is(.EnglishComment, .CopticComment, .ArabicComment) {
+        color: #cdbb94;
+    }
     :root[data-theme="dark"] .information-language {
         color: var(--reader-black);
     }
