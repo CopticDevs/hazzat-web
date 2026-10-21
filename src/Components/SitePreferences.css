@@ -1,92 +1,60 @@
 .site-preferences {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
 }
-.preference-switch {
-    display: flex;
-    gap: 2px;
-    padding: 3px;
-    border: 1px solid #aaa69c;
-    border-radius: 8px;
-    background: #f5f3ed;
-}
-.preference-switch a, .preference-switch button {
+.site-preferences .preference-toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
+    min-width: 44px;
     min-height: 44px;
-    padding: 5px 8px;
-    border: 0;
+    padding: 6px 10px;
+    border: 1px solid var(--preference-border, #aaa69c);
     border-radius: 5px;
-    background: transparent;
+    background: var(--preference-surface, #f5f3ed);
     color: var(--ink);
-    font: 14px/1.3 "Myriad Pro", Arial, sans-serif;
+    font: 700 14px/1.4 "Myriad Pro", Arial, sans-serif;
     white-space: nowrap;
 }
-.preference-switch [aria-current="true"], .preference-switch [aria-pressed="true"] {
-    background: #e1dfd3;
-    color: #302c26;
-    box-shadow: inset 0 0 0 1px #b0a98f;
-    font-weight: 700;
-}
-.preference-switch a:hover, .preference-switch button:hover {
-    background: #e8e5da;
+.site-preferences .preference-toggle:hover {
+    background: var(--preference-hover, #e8e5da);
+    color: var(--ink);
     text-decoration: none;
+}
+.site-preferences svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 .site-nav {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
+    padding-inline: 16px;
 }
 .site-nav > .mobile-menu-toggle {
     width: auto;
-    padding-inline: 12px;
+    min-width: 44px;
+    padding-inline: 0;
     font-size: 16px;
 }
 .site-nav > .site-preferences {
     grid-column: 2;
     grid-row: 1;
     justify-self: end;
-    padding: 5px 8px;
+    padding-block: 6px;
 }
 .site-nav > .site-menu {
     grid-column: 1 / -1;
     grid-row: 2;
 }
-@media (max-width: 61.999rem) {
-    .theme-switch span {
-        display: none;
-    }
-}
-@media (max-width: 25rem) {
-    .site-preferences {
-        gap: 5px;
-    }
-    .preference-switch {
-        padding: 2px;
-    }
-    .preference-switch a, .preference-switch button {
-        padding-inline: 6px;
-        font-size: 13px;
-    }
-    .site-nav > .mobile-menu-toggle {
-        padding-inline: 6px;
-        font-size: 14px;
-    }
-    .site-nav > .site-preferences {
-        padding-inline: 4px;
-    }
-}
 @media (min-width: 62rem) {
-    .preference-switch {
-        padding: 1px;
-    }
     .site-nav {
         grid-template-columns: minmax(0, 1fr) auto;
-        padding: 3px 26px;
-        gap: 10px;
+        padding: 3px 48px;
+        gap: 16px;
     }
     .site-nav > .site-menu {
         grid-column: 1;
@@ -95,11 +63,27 @@
     }
     .site-nav > .site-preferences {
         padding: 0;
+        gap: 16px;
     }
-}
-
-.theme-sun-icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
+    .site-preferences .preference-toggle {
+        --preference-surface: transparent;
+        --preference-hover: transparent;
+        position: relative;
+        border: 0;
+        border-radius: 0;
+        padding: 8px 6px;
+        font: 700 13px/1.4 var(--heading-font);
+    }
+    .site-preferences .theme-toggle::before {
+        content: "";
+        position: absolute;
+        inset-inline-start: -8px;
+        inset-block: 10px;
+        width: 1px;
+        background: var(--rule);
+    }
+    .site-preferences svg {
+        width: 16px;
+        height: 16px;
+    }
 }
