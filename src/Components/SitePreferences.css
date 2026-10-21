@@ -97,3 +97,9 @@
         padding: 0;
     }
 }
+
+.theme-sun-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
