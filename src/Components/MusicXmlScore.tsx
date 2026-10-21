@@ -6,6 +6,7 @@ import "./Content.css";
 
 interface IProps {
     musicXml: string;
+    hymnTitle?: string;
 }
 
 function MusicXmlScore(props: IProps) {
@@ -101,7 +102,7 @@ function MusicXmlScore(props: IProps) {
     return (
         <div className="musicXmlScoreWrap" style={{ fontSize }}>
             {error && <div className="musicXmlScoreError">{error}</div>}
-            {!error && heading.title && <h3 className="musicXmlScoreTitle" dir="auto">{heading.title}</h3>}
+            {!error && heading.title && heading.title.trim() !== props.hymnTitle?.trim() && <h3 className="musicXmlScoreTitle" dir="auto">{heading.title}</h3>}
             {!error && heading.subtitle && <p className="musicXmlScoreSubtitle" dir="auto">{heading.subtitle}</p>}
             <div ref={containerRef} className="musicXmlScore" />
         </div>

@@ -21,6 +21,19 @@ export interface ILanguageProperties {
 
 export const strings = new LocalizedStrings({
     en: {
+        "readerTools": "Reader tools",
+        "formats": "Formats",
+        "mainNavigation": "Main navigation",
+        "footerNavigation": "Footer navigation",
+        "skipToContent": "Skip to content",
+        "breadcrumbs": "Breadcrumbs",
+        "increaseTextSize": "Increase text size",
+        "decreaseTextSize": "Decrease text size",
+        "backToTop": "Back to top",
+        "close": "Close",
+        "notationScroll": "Musical notation — scroll horizontally if needed",
+        "contactUnavailable": "This contact form is currently unavailable. No message has been sent.",
+
         "noContent": "The page you are looking for is not found. Please check the address and try again.",
         "switchLang": "اللغة العربية",
         "home": "Home",
@@ -271,6 +284,19 @@ export const strings = new LocalizedStrings({
         "helpfulTipVerticalDesc1": "Other than <span style=\"color: red\">disabling the Autocorrect and the Grammar and Spelling check</span> on your MS word, here's another helpful tip: When typing the notes for a certain hymn that you have, I understand it's a hassle to switch back and forth between the Coptic or English font and the Hazzat font. So here's the best way to do it:<br /><br />1. Type the words for the whole hymn first.<br /><br />2. Copy a certain letter from the Hazzat font that you know you'll be using a lot. This will place it in your clipboard. Lets say you copy this: <span class=\"HazzatVFont\" style=\"font-size: 29pt\">x</span><br /><br />3. Paste the copied Hazzat character wherever you want to place a note.This will make MS Word have the Hazzat font automatically selected.< br /><br />4. If you don't want to use the <span class=\"HazzatVFont\" style=\"font-size: 29pt\">x </span> character where you pasted it, then you can hit the \"Backspace\" button and type whatever character you wanted instead. This will work because the Hazzat font will still be selected.<br />",
     },
     ar: {
+        "readerTools": "أدوات القراءة",
+        "formats": "التنسيقات",
+        "mainNavigation": "التنقل الرئيسي",
+        "footerNavigation": "التنقل السفلي",
+        "skipToContent": "انتقل إلى المحتوى",
+        "breadcrumbs": "مسار التنقل",
+        "increaseTextSize": "تكبير النص",
+        "decreaseTextSize": "تصغير النص",
+        "backToTop": "العودة إلى الأعلى",
+        "close": "إغلاق",
+        "notationScroll": "تدوين موسيقي — مرر أفقياً عند الحاجة",
+        "contactUnavailable": "نموذج الاتصال غير متاح حالياً. لم يتم إرسال أي رسالة.",
+
         "noContent": "الصفحة التي تبحث عنها غير موجودة. يرجى التحقق من العنوان ثم حاول مرة أخرى.",
         "switchLang": "English",
         "home": "الرئيسية",

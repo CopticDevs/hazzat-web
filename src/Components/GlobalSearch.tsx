@@ -1,3 +1,4 @@
+import { strings } from "../l8n";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useState } from "react";
@@ -26,6 +27,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
     const [retry, setRetry] = useState(0);
     const navigate = useNavigate();
     const { languageProperties } = useContext(LanguageContext);
+    useEffect(() => { document.title = `${strings.search} - hazzat.com`; }, [languageProperties.localeName]);
 
     useEffect(() => {
         let active = true;
@@ -57,7 +59,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
     return (
         <MainPaper size={Size.Wide}>
             <div className="global-search">
-                <h2><LocalizedMessage of="search" /></h2>
+                <h1 className="pageTitle"><LocalizedMessage of="search" /></h1>
                 
                 <div className="search-input-container mb-4">
                     <div className="input-group">
@@ -66,6 +68,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                         </span>
                         <input 
                             type="search"
+                            aria-label={strings.search}
                             className="form-control"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}

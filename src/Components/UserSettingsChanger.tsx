@@ -1,163 +1,46 @@
 import { faCog, faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useState } from "react";
-import { Button, Modal } from 'react-bootstrap';
+import { Button, Modal } from "react-bootstrap";
 import { AppSettings } from "../AppSettings";
 import { UserSettingsContext } from "../Contexts/UserSettingsContext";
-import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
-import LocalizedMessage from "../LocalizedMessage";
-import CircleButton from "./CircleButton";
+import { strings } from "../l8n";
 import "./UserSettingsChanger.css";
 
-interface IRadioOption {
-    value: string;
-    label: string;
-}
-
-function UserSettingsChanger() {
+export default function UserSettingsChanger() {
     const { languageProperties } = useContext(LanguageContext);
     const { userSettings, setHazzatFontColor, setContentFontColor, setContentFontSize } = useContext(UserSettingsContext);
-    const [selectedHazzatColor, setSelectedHazzatColor] = useState(userSettings.hazzatFontColor);
-    const [selectedContentColor, setSelectedContentColor] = useState(userSettings.contentFontColor);
     const [expanded, setExpanded] = useState(false);
-    const selectedFontSize = parseFloat(userSettings.englishFontSize) || 18;
-    const langDirName = languageProperties.isRtl ? "dirRtl" : "dirLtr";
-
-    const collectAnalytics = () => {
-        // Track button click
-        window.gtag('event', 'button_click', {
-            event_category: 'Engagement',
-            event_label: 'Customization Button Clicked',
-        });
-    };
-
-    const handleToggleModal = () => {
-        setExpanded(!expanded);
-        collectAnalytics();
-    };
-
-    const overrideEnglishStyle = {
-        '--english-font-size': userSettings.englishFontSize,
-        '--content-font-color': userSettings.contentFontColor,
-        '--hazzat-font-color': userSettings.hazzatFontColor,
-        direction: 'ltr',
-    } as React.CSSProperties & { '--english-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
-
-    const options: IRadioOption[] = [
-        { value: 'BLACK', label: strings.black },
-        { value: 'MAROON', label: strings.maroon },
-        { value: 'NAVY', label: strings.navy },
-    ];
-
-    const handleHazzatColorChange = (color: string) => {
-        setSelectedHazzatColor(color);
-        setHazzatFontColor(color);
-    };
-
-    const handleContentColorChange = (color: string) => {
-        setSelectedContentColor(color);
-        setContentFontColor(color);
-    };
-
-    const handleIncrementTextSize = () => {
-        let num = selectedFontSize + 2;
-        num = num > AppSettings.maxContentTextSize ? AppSettings.maxContentTextSize : num;
-        setContentFontSize(num);
-    };
-
-    const handleDecrementTextSize = () => {
-        let num = selectedFontSize - 2;
-        num = num < AppSettings.minContentTextSize ? AppSettings.minContentTextSize : num;
-        setContentFontSize(num);
-    };
-
-    return (
-        <>
-            {!expanded &&
-                <Button
-                    onClick={handleToggleModal}
-                    className="modal-toggle"
-                    style={{ width: "45px" }}
-                >
-                    <FontAwesomeIcon icon={faCog} className="text-dark" />
-                </Button>}
-            <Modal show={expanded} onHide={handleToggleModal} animation={true} size="lg" className={langDirName}>
-                <Modal.Header closeButton>
-                    <Modal.Title><LocalizedMessage of="settings" /></Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <form>
-                        <div className="container-fluid">
-                            <div className="row">
-                                <div className="row" style={{ paddingTop: "10px" }}>
-                                    <div><strong><LocalizedMessage of="size" /></strong></div>
-                                </div>
-                            </div>
-
-                            <div className="m-4">
-                                <Modal.Title as="h5"><LocalizedMessage of="sample" /></Modal.Title>
-                                <div className="container">
-                                    <div className="row">
-                                        <div style={{ textAlign: languageProperties.isRtl ? "left" : "right", width: "10%", minWidth: "41px", padding: "0px" }}>
-                                            <Button
-                                                variant="light"
-                                                className={selectedFontSize === AppSettings.minContentTextSize ? "rounded-circle size-button disabled" : "rounded-circle size-button"}
-                                                onClick={handleDecrementTextSize}>
-                                                <FontAwesomeIcon icon={faMinus} />
-                                            </Button>
-                                        </div>
-                                        <div className="border" style={{ width: "60%" }}>
-                                            <div style={overrideEnglishStyle} dangerouslySetInnerHTML={{ __html: strings.sampleCopticShort }} />
-                                        </div>
-                                        <div style={{ textAlign: languageProperties.isRtl ? "right" : "left", width: "10%", minWidth: "41px", padding: "0px" }}>
-                                            <Button
-                                                variant="light"
-                                                className={selectedFontSize === AppSettings.maxContentTextSize ? "rounded-circle size-button disabled" : "rounded-circle size-button"}
-                                                onClick={handleIncrementTextSize}>
-                                                <FontAwesomeIcon icon={faPlus} />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="row">
-                                <div><strong><LocalizedMessage of="textFormatName" /></strong></div>
-                            </div>
-                            <div className="row">
-                                {options.map((option) => (
-                                    <CircleButton
-                                        key={option.value}
-                                        fill={option.value}
-                                        active={selectedContentColor === option.value}
-                                        setActive={() => handleContentColorChange(option.value)}
-                                    />
-                                ))}
-                            </div>
-
-                            <div className="row" style={{ paddingTop: "10px" }}>
-                                <div><strong><LocalizedMessage of="hazzatFormatName" /></strong></div>
-                            </div>
-                            <div className="row">
-                                {options.map((option) => (
-                                    <CircleButton
-                                        key={option.value}
-                                        fill={option.value}
-                                        active={selectedHazzatColor === option.value}
-                                        setActive={() => handleHazzatColorChange(option.value)}
-                                    />
-                                ))}
-                            </div>
-                            
-                        </div>
-                    
-                        
-                    </form>
-                </Modal.Body>
-            </Modal>
-        </>
-    );
+    const size = parseFloat(userSettings.englishFontSize) || 18;
+    const options = [{ value: "BLACK", label: strings.black }, { value: "MAROON", label: strings.maroon }, { value: "NAVY", label: strings.navy }];
+    const sampleStyle = { '--english-font-size': userSettings.englishFontSize, '--content-font-color': userSettings.contentFontColor, '--hazzat-font-color': userSettings.hazzatFontColor } as React.CSSProperties;
+    return <>
+        <Button className="reader-tool" variant="light" aria-label={strings.settings} onClick={() => {
+            setExpanded(true); window.gtag?.("event", "button_click", { event_category: "Engagement", event_label: "Customization Button Clicked" });
+        }}><FontAwesomeIcon icon={faCog} /></Button>
+        <Modal animation={false} show={expanded} onHide={() => setExpanded(false)} aria-labelledby="reader-settings-title" className={languageProperties.isRtl ? "dirRtl" : "dirLtr"}>
+            <Modal.Header closeButton closeLabel={strings.close}><Modal.Title id="reader-settings-title">{strings.settings}</Modal.Title></Modal.Header>
+            <Modal.Body className="reader-settings">
+                <fieldset><legend>{strings.size}</legend>
+                    <div className="reader-size-controls">
+                        <Button variant="light" className="size-button" aria-label={strings.decreaseTextSize} disabled={size <= AppSettings.minContentTextSize}
+                            onClick={() => setContentFontSize(Math.max(AppSettings.minContentTextSize, size - 2))}><FontAwesomeIcon icon={faMinus} /></Button>
+                        <div className="reader-size-sample" aria-label={strings.sample} dir="ltr" style={sampleStyle} dangerouslySetInnerHTML={{ __html: strings.sampleCopticShort }} />
+                        <Button variant="light" className="size-button" aria-label={strings.increaseTextSize} disabled={size >= AppSettings.maxContentTextSize}
+                            onClick={() => setContentFontSize(Math.min(AppSettings.maxContentTextSize, size + 2))}><FontAwesomeIcon icon={faPlus} /></Button>
+                    </div>
+                </fieldset>
+                {[{ name: 'text', title: strings.textFormatName, selected: userSettings.contentFontColor, set: setContentFontColor },
+                    { name: 'hazzat', title: strings.hazzatFormatName, selected: userSettings.hazzatFontColor, set: setHazzatFontColor }].map(group => <fieldset key={group.name}>
+                    <legend>{group.title}</legend><div className="reader-colors">
+                        {options.map(option => <label className="reader-color" key={option.value}>
+                            <input type="radio" name={`reader-${group.name}-color`} value={option.value} checked={group.selected === option.value} onChange={() => group.set(option.value)} />
+                            <span className="reader-color-swatch" style={{ backgroundColor: option.value }} aria-hidden="true" /><span>{option.label}</span>
+                        </label>)}
+                    </div>
+                </fieldset>)}
+            </Modal.Body>
+        </Modal>
+    </>;
 }
-
-export default UserSettingsChanger;

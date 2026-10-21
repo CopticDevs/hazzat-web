@@ -1,5 +1,6 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { ArabicLanguageProperties, EnglishLanguageProperties, ILanguageProperties, strings } from "./l8n";
 import { LanguageContext } from "./LanguageContext";
 
@@ -20,17 +21,15 @@ const setDefaultLanguage = (interfaceLanguage: string): ILanguageProperties => {
 function LanguageProvider(props: IProps) {
     const [languageProperties, setLanguageProperties] = useState<ILanguageProperties>(setDefaultLanguage(strings.getInterfaceLanguage()));
 
-    const setApplicationLanguage = React.useCallback(() => {
-        const urlSearchParams = new URLSearchParams(window.location.search);
-        const lang = urlSearchParams.get('lang') || strings.getInterfaceLanguage();
+    const { search } = useLocation();
+    useLayoutEffect(() => {
+        const lang = new URLSearchParams(search).get('lang') || strings.getInterfaceLanguage();
         const appLang = setDefaultLanguage(lang);
-
+        strings.setLanguage(appLang.localeName);
         setLanguageProperties(appLang);
-    }, []);
-
-    useEffect(() => {
-        setApplicationLanguage();
-    }, [setApplicationLanguage]);
+        document.documentElement.lang = appLang.localeName;
+        document.documentElement.dir = appLang.isRtl ? "rtl" : "ltr";
+    }, [search]);
 
     return (
         <LanguageContext.Provider value={{

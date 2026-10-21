@@ -107,3 +107,12 @@ test('settings controls start from the current size rather than resetting to 18'
     fireEvent.click(document.querySelectorAll('.size-button')[0]);
     expect(sizeSetter).toHaveBeenLastCalledWith(22);
 });
+
+
+test('an identical hymn heading is not repeated but distinct score titles and subtitles remain', async () => {
+    const view = render(<MusicXmlScore musicXml="<score-partwise />" hymnTitle="MusicXML score title" />);
+    await screen.findByText('Source subtitle');
+    expect(screen.queryByRole('heading', { name: 'MusicXML score title' })).not.toBeInTheDocument();
+    view.rerender(<MusicXmlScore musicXml="<score-partwise />" hymnTitle="A different hymn title" />);
+    expect(screen.getByRole('heading', { name: 'MusicXML score title' })).toBeInTheDocument();
+});
