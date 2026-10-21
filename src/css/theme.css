@@ -6,6 +6,13 @@
         --muted-ink: #bcc2ba;
         --rule: #505752;
         --reader-black: #e7e3d9;
+        --preference-border: #606761;
+        --preference-surface: #191d1e;
+        --preference-selected: #41413a;
+        --preference-selected-ink: #f4deb0;
+        --preference-selected-shadow: inset 0 0 0 1px #78735d;
+        --preference-hover: #343b36;
+        --preference-rule-filter: invert(.8);
         --reader-maroon: #f0a8ad;
         --reader-navy: #a9c8ff;
     }
@@ -60,21 +67,6 @@
     }
     :root[data-theme="dark"] .site-nav .site-menu a:hover, :root[data-theme="dark"] .main a:hover {
         color: #f3dbab;
-    }
-    :root[data-theme="dark"] .preference-switch {
-        background: #191d1e;
-        border-color: #606761;
-    }
-    :root[data-theme="dark"] .preference-switch a, :root[data-theme="dark"] .preference-switch button {
-        color: #d0d4cb;
-    }
-    :root[data-theme="dark"] .preference-switch [aria-current="true"], :root[data-theme="dark"] .preference-switch [aria-pressed="true"] {
-        background: #41413a;
-        color: #f4deb0;
-        box-shadow: inset 0 0 0 1px #78735d;
-    }
-    :root[data-theme="dark"] .preference-switch a:hover, :root[data-theme="dark"] .preference-switch button:hover {
-        background: #343b36;
     }
     :root[data-theme="dark"] .mainPaper {
         background: #202526;

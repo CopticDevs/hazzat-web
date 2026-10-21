@@ -7,9 +7,9 @@
     display: flex;
     gap: 2px;
     padding: 3px;
-    border: 1px solid #aaa69c;
+    border: 1px solid var(--preference-border, #aaa69c);
     border-radius: 8px;
-    background: #f5f3ed;
+    background: var(--preference-surface, #f5f3ed);
 }
 .preference-switch a, .preference-switch button {
     display: inline-flex;
@@ -26,13 +26,13 @@
     white-space: nowrap;
 }
 .preference-switch [aria-current="true"], .preference-switch [aria-pressed="true"] {
-    background: #e1dfd3;
-    color: #302c26;
-    box-shadow: inset 0 0 0 1px #b0a98f;
+    background: var(--preference-selected, #e1dfd3);
+    color: var(--preference-selected-ink, #302c26);
+    box-shadow: var(--preference-selected-shadow, inset 0 0 0 1px #b0a98f);
     font-weight: 700;
 }
 .preference-switch a:hover, .preference-switch button:hover {
-    background: #e8e5da;
+    background: var(--preference-hover, #e8e5da);
     text-decoration: none;
 }
 .site-nav {
@@ -102,4 +102,46 @@
     width: 18px;
     height: 18px;
     flex-shrink: 0;
+}
+
+@media (min-width: 62rem) {
+    .site-preferences {
+        gap: 14px;
+    }
+    .preference-switch {
+        --preference-border: transparent;
+        --preference-surface: transparent;
+        --preference-selected: transparent;
+        --preference-selected-ink: var(--ink);
+        --preference-selected-shadow: none;
+        --preference-hover: transparent;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        gap: 2px;
+    }
+    .preference-switch a, .preference-switch button {
+        position: relative;
+        padding: 8px 6px;
+        border-radius: 0;
+        font: 700 13px/1.4 var(--heading-font);
+    }
+    .theme-switch {
+        border-inline-start: 1px solid var(--rule);
+        padding-inline-start: 10px;
+    }
+    .preference-switch [aria-current="true"]::after, .preference-switch [aria-pressed="true"]::after {
+        content: "";
+        position: absolute;
+        inset-inline: 6px;
+        inset-block-end: 3px;
+        height: 3px;
+        background: url(../images/headingBottom.svg) no-repeat center / 100% 100%;
+        filter: var(--preference-rule-filter, none);
+        pointer-events: none;
+    }
+    .theme-switch svg {
+        width: 16px;
+        height: 16px;
+    }
 }
