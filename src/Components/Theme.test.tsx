@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { ThemeProvider } from "../Contexts/ThemeContext";
@@ -18,24 +18,26 @@ test('first visit retains light appearance and switching by keyboard persists da
     const view = render(<Preview />);
     expect(document.documentElement).toHaveAttribute('data-theme', 'light');
     const dark = screen.getByRole('button', { name: 'Dark' });
+    expect(dark).toHaveAttribute('title', 'Switch to dark mode');
     dark.focus(); await userEvent.keyboard('{Enter}');
     expect(dark).toHaveAttribute('aria-pressed', 'true');
+    expect(dark).toHaveAttribute('title', 'Switch to light mode');
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
     expect(localStorage.getItem('hazzat.theme')).toBe('dark');
     view.unmount(); render(<Preview />);
     expect(screen.getByRole('button', { name: 'Dark' })).toHaveAttribute('aria-pressed', 'true');
-    userEvent.click(screen.getByRole('button', { name: 'Light' }));
+    userEvent.click(screen.getByRole('button', { name: 'Dark' }));
     expect(document.documentElement).toHaveAttribute('data-theme', 'light');
 });
 test('language changes retain theme, environment and anchor without reloading the page', () => {
     localStorage.setItem('hazzat.theme', 'dark');
     render(<Preview />);
-    userEvent.click(screen.getByRole('link', { name: 'العربية' }));
+    userEvent.click(screen.getByRole('link', { name: 'Switch to Arabic' }));
     expect(document.documentElement).toHaveAttribute('dir', 'rtl');
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
-    const languages = screen.getByRole('group', { name: 'لغة التصفح' });
-    expect(within(languages).getByRole('link', { name: 'العربية' })).toHaveAttribute('aria-current', 'true');
-    expect(within(languages).getByRole('link', { name: 'English' })).toHaveAttribute('href', '/Seasons/annual?env=PPE&lang=en#hymn');
+    expect(screen.getByRole('link', { name: 'التبديل إلى الإنجليزية' })).toHaveAttribute('href', '/Seasons/annual?env=PPE&lang=en#hymn');
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+    expect(screen.getAllByRole('link')).toHaveLength(1);
 });
 test('invalid saved theme falls back to light', () => {
     localStorage.setItem('hazzat.theme', 'invalid'); render(<Preview />);

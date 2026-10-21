@@ -21,6 +21,7 @@ export interface ILanguageProperties {
 
 export const strings = new LocalizedStrings({
     en: {
+        switchToArabic: "Switch to Arabic", switchToEnglish: "Switch to English", switchToDark: "Switch to dark mode", switchToLight: "Switch to light mode",
         sitePreferences: "Website preferences", navigationLanguage: "Navigation language", appearance: "Appearance", lightMode: "Light", darkMode: "Dark",
         "readerTools": "Reader tools",
         "formats": "Formats",
@@ -285,6 +286,7 @@ export const strings = new LocalizedStrings({
         "helpfulTipVerticalDesc1": "Other than <span style=\"color: red\">disabling the Autocorrect and the Grammar and Spelling check</span> on your MS word, here's another helpful tip: When typing the notes for a certain hymn that you have, I understand it's a hassle to switch back and forth between the Coptic or English font and the Hazzat font. So here's the best way to do it:<br /><br />1. Type the words for the whole hymn first.<br /><br />2. Copy a certain letter from the Hazzat font that you know you'll be using a lot. This will place it in your clipboard. Lets say you copy this: <span class=\"HazzatVFont\" style=\"font-size: 29pt\">x</span><br /><br />3. Paste the copied Hazzat character wherever you want to place a note.This will make MS Word have the Hazzat font automatically selected.< br /><br />4. If you don't want to use the <span class=\"HazzatVFont\" style=\"font-size: 29pt\">x </span> character where you pasted it, then you can hit the \"Backspace\" button and type whatever character you wanted instead. This will work because the Hazzat font will still be selected.<br />",
     },
     ar: {
+        switchToArabic: "التبديل إلى العربية", switchToEnglish: "التبديل إلى الإنجليزية", switchToDark: "التبديل إلى الوضع الداكن", switchToLight: "التبديل إلى الوضع الفاتح",
         sitePreferences: "تفضيلات الموقع", navigationLanguage: "لغة التصفح", appearance: "المظهر", lightMode: "فاتح", darkMode: "داكن",
         "readerTools": "أدوات القراءة",
         "formats": "التنسيقات",

@@ -35,7 +35,7 @@ This PR targets develop for PPE. Promote to master separately after PPE validati
 
 ## Light and dark appearance
 
-Light remains the first-visit default and retains the existing artwork. The grouped navigation controls keep English/Arabic and Light/Dark together; on compact screens the theme labels become named sun/moon buttons next to the menu. Both choices remain available without opening the menu. Selected states and keyboard focus are explicit.
+Light remains the first-visit default and retains the existing artwork. The grouped navigation preferences use two compact toggles: a globe with the current EN/ع label switches to the other navigation language, and a sun/moon button toggles dark appearance. Tooltips describe the next action; the theme button exposes its pressed state. Both controls remain visible without opening the mobile menu, keep 44px touch targets, and use inset navigation styling on desktop.
 
 ThemeProvider stores an explicit choice under hazzat.theme. The early HTML initializer restores it before the stylesheet paints; invalid or blocked storage falls back to light. Switching languages preserves the theme, route, query parameters and anchor. Theme selection is separate from reader preferences.
 
