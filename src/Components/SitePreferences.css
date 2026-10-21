@@ -13,13 +13,12 @@
     padding: 6px 10px;
     border: 1px solid var(--preference-border, #aaa69c);
     border-radius: 5px;
-    background: var(--preference-surface, #f5f3ed);
+    background: transparent;
     color: var(--ink);
     font: 700 14px/1.4 "Myriad Pro", Arial, sans-serif;
     white-space: nowrap;
 }
 .site-preferences .preference-toggle:hover {
-    background: var(--preference-hover, #e8e5da);
     color: var(--ink);
     text-decoration: none;
 }
@@ -66,8 +65,6 @@
         gap: 16px;
     }
     .site-preferences .preference-toggle {
-        --preference-surface: transparent;
-        --preference-hover: transparent;
         position: relative;
         border: 0;
         border-radius: 0;
