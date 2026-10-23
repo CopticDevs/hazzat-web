@@ -88,7 +88,9 @@
         opacity: .25;
         pointer-events: none;
     }
-    :root[data-theme="dark"] .hymnData > div > svg, :root[data-theme="dark"] .social-media-section svg {
+    :root[data-theme="dark"] .hymnData > div > svg,
+    :root[data-theme="dark"] .variationData > div > svg,
+    :root[data-theme="dark"] .social-media-section svg {
         filter: invert(.8);
     }
     :root[data-theme="dark"] .season-card {
