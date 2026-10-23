@@ -165,16 +165,19 @@ body {
     margin-block: 0 16px;
     overflow-wrap: anywhere;
 }
-.hymnData {
+.hymnData,
+.variationData {
     inline-size: fit-content;
     max-inline-size: 100%;
     padding-block-end: 16px;
 }
-.hymnData > div {
+.hymnData > div,
+.variationData > div {
     position: relative;
     height: 6px;
 }
-.hymnData > div > svg {
+.hymnData > div > svg,
+.variationData > div > svg {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -188,9 +191,6 @@ body {
 .hymnData p {
     padding-block-start: 5px;
     padding-inline-start: 10px;
-}
-.variationData {
-    padding-block-end: 16px;
 }
 .variationData h3 {
     font: 700 18px/1.4 var(--heading-font);
