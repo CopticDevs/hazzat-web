@@ -10,7 +10,7 @@ function VariationTitle(props: IProps) {
         <div className="variationData">
             <h3><span>{props.content}</span></h3>
             <div>
-                <HeadingBottom />
+                <HeadingBottom preserveAspectRatio="none" aria-hidden="true" />
             </div>
         </div>
     );
