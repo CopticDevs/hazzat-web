@@ -52,7 +52,9 @@
 @media (min-width: 62rem) {
     .site-nav {
         grid-template-columns: minmax(0, 1fr) auto;
-        padding: 3px 48px;
+        /* The Christ artwork continues into the physical left of the nav,
+           including when Arabic reverses the menu and preferences. */
+        padding: 3px 48px 3px 96px;
         gap: 16px;
     }
     .site-nav > .site-menu {
