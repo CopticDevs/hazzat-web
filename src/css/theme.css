@@ -222,6 +222,13 @@
         border-color: var(--rule);
     }
     @media (min-width: 62rem) {
+        :root[data-theme="dark"] .site-nav {
+            /* Retain the lower part of the Christ artwork on dark paper. */
+            background-image: url(../images/navBg.png);
+            background-repeat: no-repeat;
+            background-position: center top;
+            background-blend-mode: multiply;
+        }
         :root[data-theme="dark"] .innerHeader::before {
             background-image: url(../images/headerBg.png);
             background-size: auto;
