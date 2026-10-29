@@ -48,7 +48,6 @@
     }
     :root[data-theme="dark"] .logo {
         position: relative;
-        filter: invert(.9) sepia(.15);
     }
     :root[data-theme="dark"] .site-nav {
         background: #24282a;

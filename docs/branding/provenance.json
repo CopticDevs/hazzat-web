@@ -1,0 +1,9 @@
+{
+  "reference": "User-supplied E345FE5B-9864-4601-8DF6-538A65E2630C.jpeg",
+  "referenceSha256": "898b8f19f227e765f1a572b03694a8642de29e5d26b3ae3908b4c0f51e509358",
+  "preparation": "Direct Bezier tracing of the supplied artwork. SVG masters contain only paths, with no embedded bitmap. Android uses VectorDrawable; iOS uses a vector-preserving SVG image asset. Store/legacy icons are raster exports from these masters.",
+  "lightInk": "#625E55",
+  "darkInk": "#BCC2BA",
+  "logoSvgSha256": "6f3dbd58fe9ea1c49fbe3bf95da53ca53713ba47c55eddce2323fea581a22d9c",
+  "markSvgSha256": "fe2742e0b286d80c8826eda1b7ee68e71036f35ef7af9c936da47bcc118988be"
+}

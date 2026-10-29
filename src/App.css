@@ -85,11 +85,13 @@ body {
 .logo {
     width: clamp(160px, 40vw, 240px);
     margin-inline: auto;
+    color: var(--muted-ink);
 }
 .logo svg {
     display: block;
     width: 100%;
     height: auto;
+    aspect-ratio: 287 / 226;
 }
 .site-nav ul, .footer ul {
     list-style: none;
