@@ -1,4 +1,4 @@
-import { PDFDocument } from "pdf-lib";
+import { PDFArray, PDFDocument, PDFRawStream, decodePDFRawStream } from "pdf-lib";
 import fs from "fs";
 import path from "path";
 import {
@@ -356,6 +356,28 @@ describe("BookletPdfGenerator", () => {
         expect(pdfText).toContain("/Subtype /Link");
         expect(pdfText).toContain("/S /GoTo");
         expect(pdfText).toContain("/Subtype /Image");
+    });
+
+    it("keeps the supplied SVG logo as vector curves on both booklet covers", async () => {
+        const logo = fs.readFileSync(path.join(process.cwd(), "src", "images", "logo.svg"));
+        expect(logo.toString()).not.toMatch(/<image\b|data:image/);
+        const bytes = await generateSeasonBookletPdf({
+            season: createSeason(), services: [], formatKind: "regular", layoutKind: "display",
+            fontSources: createFontSources(),
+            imageSources: { frontCoverBackground: undefined, backCoverBackground: undefined,
+                frontCoverLogo: new Uint8Array(logo), backCoverLogo: new Uint8Array(logo) }
+        });
+        const pdf = await PDFDocument.load(bytes);
+        expect(Buffer.from(bytes).toString("latin1")).not.toContain("/Subtype /Image");
+        for (const index of [0, pdf.getPageCount() - 1]) {
+            const streams = pdf.getPage(index).node.Contents() as PDFArray;
+            const operators = Array.from({ length: streams.size() }, (_, i) => {
+                const stream = pdf.context.lookup(streams.get(i));
+                if (!(stream instanceof PDFRawStream)) throw new Error("Expected a PDF content stream");
+                return Buffer.from(decodePDFRawStream(stream).decode()).toString("latin1");
+            }).join("\n");
+            expect((operators.match(/ c\n/g) || []).length).toBeGreaterThan(50);
+        }
     });
 
     it("draws supplied front and back cover image resources", async () => {
