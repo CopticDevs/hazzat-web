@@ -8,6 +8,7 @@
     --space-lg: 24px;
     --ink: #302c26;
     --muted-ink: #625e55;
+    --brand-ink: #303030;
     --rule: #d7d2c7;
     --heading-font: "Trajan Pro", Georgia, serif;
 }
@@ -85,7 +86,7 @@ body {
 .logo {
     width: clamp(160px, 40vw, 240px);
     margin-inline: auto;
-    color: var(--muted-ink);
+    color: var(--brand-ink);
 }
 .logo svg {
     display: block;

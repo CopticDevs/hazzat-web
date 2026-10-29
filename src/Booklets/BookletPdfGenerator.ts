@@ -492,7 +492,7 @@ function drawBookletLogo(page: PDFPage, logo: BookletLogo, x: number, y: number,
     const height = width * logo.height / logo.width;
     if ("paths" in logo) {
         logo.paths.forEach(path => page.drawSvgPath(path, {
-            x, y: y + height, scale: width / logo.width, color: rgb(98 / 255, 94 / 255, 85 / 255), opacity
+            x, y: y + height, scale: width / logo.width, color: rgb(48 / 255, 48 / 255, 48 / 255), opacity
         }));
     } else {
         page.drawImage(logo, { x, y, width, height, opacity });
