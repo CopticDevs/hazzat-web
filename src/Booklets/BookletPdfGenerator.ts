@@ -8,7 +8,8 @@ import copticFallbackFontUrl from "../fonts/cs_new_athanasius.ttf";
 import hazzatFontUrl from "../fonts/hazzat1_10a.ttf";
 import arabicFontUrl from "../fonts/NotoNaskhArabic-Regular.ttf";
 import trajanFontUrl from "../fonts/TrajanPro-Regular.ttf";
-import bookletBackCoverLogoUrl from "../images/logo.png";
+import bookletLogoUrl from "../images/logo.svg";
+import bookletFrontCoverBackgroundUrl from "../images/bookletFrontCoverBackground.jpg";
 import bookletBackCoverBackgroundUrl from "../images/bookletBackCoverBackground.jpg";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
@@ -84,13 +85,16 @@ export interface BookletImageSources {
 
 interface FrontCoverImages {
     background?: PDFImage;
-    logo?: PDFImage;
+    logo?: BookletLogo;
 }
 
 interface BackCoverImages {
     background?: PDFImage;
-    logo?: PDFImage;
+    logo?: BookletLogo;
 }
+
+interface VectorBookletLogo { width: number; height: number; paths: string[]; }
+type BookletLogo = PDFImage | VectorBookletLogo;
 
 const LOGICAL_PAGE_WIDTH = 396;
 const LOGICAL_PAGE_HEIGHT = 612;
@@ -113,7 +117,6 @@ const black = rgb(0, 0, 0);
 const gray = rgb(0.35, 0.35, 0.35);
 const lightGray = rgb(0.78, 0.78, 0.78);
 const coverTextGray = rgb(0.27, 0.27, 0.27);
-const bookletFrontCoverUrl = `${process.env.PUBLIC_URL || ""}/bookletFrontCover.svg`;
 
 const defaultBookletFontSources: Omit<Record<FontKey, BookletFontSource>, "english"> = {
     title: trajanFontUrl,
@@ -126,9 +129,10 @@ const defaultBookletFontSources: Omit<Record<FontKey, BookletFontSource>, "engli
     hazzatVerticalArabic: hazzatVerticalArabicFontUrl
 };
 const defaultBookletImageSources: BookletImageSources = {
-    frontCoverBackground: bookletFrontCoverUrl,
+    frontCoverBackground: bookletFrontCoverBackgroundUrl,
+    frontCoverLogo: bookletLogoUrl,
     backCoverBackground: bookletBackCoverBackgroundUrl,
-    backCoverLogo: bookletBackCoverLogoUrl
+    backCoverLogo: bookletLogoUrl
 };
 const arabicTextFontFeatures: PdfFontFeatures = {
     mark: false
@@ -445,7 +449,7 @@ async function embedFrontCoverImages(doc: PDFDocument, imageSources: BookletImag
     };
     const [background, logo] = await Promise.all([
         tryEmbedImage(doc, sources.frontCoverBackground),
-        tryEmbedImage(doc, sources.frontCoverLogo)
+        tryEmbedLogo(doc, sources.frontCoverLogo)
     ]);
 
     return { background, logo };
@@ -458,10 +462,41 @@ async function embedBackCoverImages(doc: PDFDocument, imageSources: BookletImage
     };
     const [background, logo] = await Promise.all([
         tryEmbedImage(doc, sources.backCoverBackground),
-        tryEmbedImage(doc, sources.backCoverLogo)
+        tryEmbedLogo(doc, sources.backCoverLogo)
     ]);
 
     return { background, logo };
+}
+
+async function tryEmbedLogo(doc: PDFDocument, source?: BookletImageSource): Promise<BookletLogo | undefined> {
+    if (!source) return undefined;
+    try {
+        const bytes = await loadSourceBytes(source, "booklet logo");
+        if (looksLikeSvgImage(bytes)) {
+            const xml = Array.from(bytes, byte => String.fromCharCode(byte)).join("");
+            const root = new DOMParser().parseFromString(xml, "image/svg+xml").documentElement;
+            const box = (root.getAttribute("viewBox") || "").trim().split(/[\s,]+/).map(Number);
+            const paths = Array.from(root.querySelectorAll("path"), node => node.getAttribute("d") || "");
+            if (box.length === 4 && box[0] === 0 && box[1] === 0 && box[2] > 0 && box[3] > 0 && paths.length &&
+                !root.querySelector("parsererror, image, text, use, [transform]")) {
+                return { width: box[2], height: box[3], paths };
+            }
+        }
+        return await embedImage(doc, bytes);
+    } catch {
+        return undefined;
+    }
+}
+
+function drawBookletLogo(page: PDFPage, logo: BookletLogo, x: number, y: number, width: number, opacity = 1) {
+    const height = width * logo.height / logo.width;
+    if ("paths" in logo) {
+        logo.paths.forEach(path => page.drawSvgPath(path, {
+            x, y: y + height, scale: width / logo.width, color: rgb(48 / 255, 48 / 255, 48 / 255), opacity
+        }));
+    } else {
+        page.drawImage(logo, { x, y, width, height, opacity });
+    }
 }
 
 async function tryEmbedImage(doc: PDFDocument, imageSource?: BookletImageSource): Promise<PDFImage | undefined> {
@@ -697,13 +732,7 @@ function drawCover(writer: BookletWriter, season: ISeasonInfo, images: FrontCove
 
     if (images.logo) {
         const logoWidth = 142;
-        const logoHeight = logoWidth * (images.logo.height / images.logo.width);
-        writer.page.drawImage(images.logo, {
-            x: (LOGICAL_PAGE_WIDTH - logoWidth) / 2,
-            y: LOGICAL_PAGE_HEIGHT - 132,
-            width: logoWidth,
-            height: logoHeight
-        });
+        drawBookletLogo(writer.page, images.logo, (LOGICAL_PAGE_WIDTH - logoWidth) / 2, LOGICAL_PAGE_HEIGHT - 132, logoWidth);
     } else if (!hasBackground) {
         writer.drawCenteredText("Hazzat", "title", 22, 500);
         writer.drawCenteredText("Coptic Hymnology", "english", 9, 484, gray);
@@ -1015,14 +1044,7 @@ function addBackCover(doc: PDFDocument, fonts: EmbeddedFonts, pageMetas: PageMet
 
     if (images.logo) {
         const logoWidth = 122;
-        const logoHeight = logoWidth * (images.logo.height / images.logo.width);
-        page.drawImage(images.logo, {
-            x: LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - logoWidth + 3,
-            y: 30,
-            width: logoWidth,
-            height: logoHeight,
-            opacity: 0.86
-        });
+        drawBookletLogo(page, images.logo, LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - logoWidth + 3, 30, logoWidth, 0.86);
     } else {
         drawCenteredPageText(page, fonts.english, "hazzat.com", 15, LOGICAL_PAGE_HEIGHT / 2, black);
     }
