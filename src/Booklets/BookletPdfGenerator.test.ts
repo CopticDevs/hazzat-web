@@ -371,9 +371,11 @@ describe("BookletPdfGenerator", () => {
         expect(Buffer.from(bytes).toString("latin1")).not.toContain("/Subtype /Image");
         for (const index of [0, pdf.getPageCount() - 1]) {
             const streams = pdf.getPage(index).node.Contents() as PDFArray;
-            const operators = Array.from({ length: streams.size() }, (_, i) =>
-                Buffer.from(decodePDFRawStream(pdf.context.lookup(streams.get(i), PDFRawStream)).decode()).toString("latin1")
-            ).join("\n");
+            const operators = Array.from({ length: streams.size() }, (_, i) => {
+                const stream = pdf.context.lookup(streams.get(i));
+                if (!(stream instanceof PDFRawStream)) throw new Error("Expected a PDF content stream");
+                return Buffer.from(decodePDFRawStream(stream).decode()).toString("latin1");
+            }).join("\n");
             expect((operators.match(/ c\n/g) || []).length).toBeGreaterThan(50);
         }
     });
