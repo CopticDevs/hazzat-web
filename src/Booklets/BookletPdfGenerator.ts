@@ -9,7 +9,7 @@ import hazzatFontUrl from "../fonts/hazzat1_10a.ttf";
 import arabicFontUrl from "../fonts/NotoNaskhArabic-Regular.ttf";
 import trajanFontUrl from "../fonts/TrajanPro-Regular.ttf";
 import bookletLogoUrl from "../images/logo.svg";
-import bookletCoverPaperUrl from "../images/bookletLimestonePaper.png";
+import bookletCoverPaperUrl from "../images/bookletIlluminatedBackground.png";
 import { drawCoverFrame, drawCoverVine } from "./BookletCoverArtwork";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
@@ -840,12 +840,12 @@ function drawCover(writer: BookletWriter, season: ISeasonInfo, images: FrontCove
     writer.addPage("cover");
     drawCoverFrame(writer.page, images.background);
     if (images.logo) {
-        const width = 110;
-        drawBookletLogo(writer.page, images.logo, 143, 612 - 124 - width * images.logo.height / images.logo.width, width);
+        const width = 142;
+        drawBookletLogo(writer.page, images.logo, (LOGICAL_PAGE_WIDTH - width) / 2, 612 - 124 - width * images.logo.height / images.logo.width, width);
     } else {
         writer.drawCenteredText("Hazzat.com", "title", 18, 445, black);
     }
-    drawCoverVine(writer.page, 117, 428, 162);
+    drawCoverVine(writer.page, 129, 431, 138);
 
     drawCoverTitle(writer, season);
 }
@@ -1240,7 +1240,7 @@ function addBackCover(doc: PDFDocument, fonts: EmbeddedFonts, pageMetas: PageMet
     pageMetas.push({ kind: "backCover" });
 
     drawCoverFrame(page, images.background);
-    drawCoverVine(page, 108, 270, 180);
+    drawCoverVine(page, 129, 285, 138);
     drawSpacedCenteredText(page, fonts.english, "HAZZAT.COM", 8.5, 101, black, 1.6);
 }
 
