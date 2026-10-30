@@ -127,3 +127,44 @@
     margin-bottom: 8px;
     max-width: 100%;
 }
+.bookletBuilder {
+    max-width: 960px;
+    color: var(--ink, #302c26);
+}
+.bookletBuilder fieldset { min-width: 0; }
+.bookletBuilder legend, .bookletBuilder h3 { font-size: 1.15rem; margin-block: 20px 14px; }
+.bookletPresetRow, .bookletFormatChoices { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin-block: 14px; }
+.bookletBuilder label { display: inline-flex; align-items: center; gap: 8px; }
+.bookletBuilder input[type="checkbox"] { accent-color: var(--ink, #6d604c); flex: 0 0 auto; }
+.bookletChoice, .bookletPrimaryAction {
+    border: 1px solid var(--rule, #bdb6a6);
+    border-radius: 6px;
+    padding: 10px 16px;
+    background: transparent;
+    color: inherit;
+    text-decoration: none;
+    display: inline-block;
+}
+.bookletChoice[aria-pressed="true"], .bookletBuilder .bookletPrimaryAction, .bookletBuilder .bookletPrimaryAction:hover { background: var(--ink, #302c26); color: #fff; }
+.bookletPrimaryAction:disabled { opacity: .5; cursor: not-allowed; }
+.bookletHint { color: var(--muted-ink, #625e55); font-size: .9rem; }
+.bookletBuilder .bookletVariationSelectorGroup { display: grid; gap: 6px; }
+.bookletBuilder .bookletVariationSelector { justify-content: flex-start; flex-wrap: wrap; }
+.bookletLayoutChoices { display: flex; gap: 20px; flex-wrap: wrap; margin-block-end: 24px; }
+.bookletLayoutChoices label { flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; align-items: stretch; }
+.bookletLayoutChoices select { width: 100%; min-width: 0; padding: 10px; border-radius: 6px; border: 1px solid var(--rule, #bdb6a6); background: transparent; color: inherit; }
+.bookletLayoutChoices option { background: Canvas; color: CanvasText; }
+.bookletReview { border-top: 1px solid var(--rule, #d7d2c7); margin-top: 24px; }
+.bookletReview summary { cursor: pointer; }
+.bookletReview li { padding-block: 5px; overflow-wrap: anywhere; }
+.bookletReview .bookletPrimaryAction { margin-top: 20px; }
+.bookletPdfPreview { margin-block: 24px; }
+.bookletPdfPreview object { width: 100%; height: 680px; border: 1px solid var(--rule, #d7d2c7); }
+@media screen {
+    :root[data-theme="dark"] .bookletChoice[aria-pressed="true"], :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction, :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction:hover { color: #202526; }
+}
+@media (max-width: 576px) {
+    .bookletBuilder { padding-inline: 0; }
+    .bookletBuilder button, .bookletBuilder select, .bookletBuilder label { min-height: 44px; }
+    .bookletPdfPreview object { height: 480px; }
+}
