@@ -4,6 +4,7 @@ import { ContentResourceClient } from "./ContentResourceClient";
 import { HymnsDataProvider } from "./HymnsDataProvider";
 import { searchContent } from "./Search";
 import { SharedLibraryRecord, SharedService, validateService } from "./SharedContent";
+import { getBookletSections, hasBookletFormat } from "../../Booklets/BookletPdfGenerator";
 
 jest.mock("axios", () => ({ create: jest.fn() }));
 const TEXT = "11111111-1111-4111-8111-111111111111";
@@ -74,6 +75,8 @@ describe("v5 service resolution and contextual titles", () => {
         expect(hymn.formats?.map(f => f.id)).toEqual(["1", "2", "4", "5"]);
         expect(hymn.formats![1].variations?.map(v => [v.id, v.name, v.order])).toEqual([[SECOND, "Standard", 1], [FIRST, "Standard", 2]]);
         expect(hymn.formats![1].variations![1].content).toEqual({ englishHazzat: "first", arabicHazzat: null });
+        expect(hasBookletFormat([annual!], "regular")).toBe(true);
+        expect(getBookletSections([annual!], ["regular"]).find(section => section.hymn === hymn)!.format.variations!.map(v => v.id)).toEqual([SECOND, FIRST]);
         expect(kiahk!.hymns![1].formats![0].variations![0].id).toBe(TEXT);
         expect(get.mock.calls.filter(([path]) => path === `/v5/content/${FIRST}.json`)).toHaveLength(1);
     });
