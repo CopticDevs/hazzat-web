@@ -4,6 +4,12 @@ export enum ContentLanguage {
     Arabic = "Arabic"
 }
 
+/** Published records contain both title-case and lowercase language labels. */
+export function normalizeContentLanguage(language: string): ContentLanguage | undefined {
+    const normalized = language.trim().toLowerCase();
+    return Object.values(ContentLanguage).find(value => value.toLowerCase() === normalized);
+}
+
 export const enum ContentType {
     TextContent = "TextContent",
     HazzatContent = "HazzatContent",

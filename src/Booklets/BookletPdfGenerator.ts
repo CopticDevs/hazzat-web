@@ -15,7 +15,7 @@ import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
-import { ContentLanguage, ContentType, IHazzatContent, IHymnContent, IMusicalNotesContent, ITextContent, IVariationInfo, IVerticalHazzatContent } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
+import { ContentLanguage, ContentType, IHazzatContent, IHymnContent, IMusicalNotesContent, ITextContent, IVariationInfo, IVerticalHazzatContent, normalizeContentLanguage } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import { BookletScorePage, renderBookletMusic } from "./BookletMusicRenderer";
 import bookletServiceDividerUrl from "../images/bookletServiceDivider.svg";
 import bookletVariationDividerUrl from "../images/crossline.svg";
@@ -1030,11 +1030,11 @@ export interface BookletTextTable {
 /** Stable columns across paragraphs, including paragraphs missing a translation. */
 export function layoutBookletTextTable(content: ITextContent, fonts: EmbeddedFonts, width = CONTENT_WIDTH): BookletTextTable {
     const order = [ContentLanguage.English, ContentLanguage.Coptic, ContentLanguage.Arabic];
-    const languages = order.filter(language => content.paragraphs.some(paragraph => paragraph.columns.some(column => column.language === language && column.content?.trim())));
+    const languages = order.filter(language => content.paragraphs.some(paragraph => paragraph.columns.some(column => normalizeContentLanguage(column.language) === language && column.content?.trim())));
     const columnWidth = languages.length ? (width - (languages.length - 1) * 12) / languages.length : width;
     const rows = content.paragraphs.map(paragraph => languages.map(language => {
         const key: FontKey = language === ContentLanguage.Arabic ? "arabic" : language === ContentLanguage.Coptic ? "coptic" : "english";
-        const columns = paragraph.columns.filter(column => column.language === language);
+        const columns = paragraph.columns.filter(column => normalizeContentLanguage(column.language) === language);
         return columns.flatMap(column => parseHazzatHtmlToLines(column.content || "", key).flatMap(line =>
             wrapRuns(line.map(run => {
                 const isComment = paragraph.isComment || run.isComment;
@@ -1085,10 +1085,10 @@ function getLanguageHtmlBlocks(variation: BookletContentVariation, formatKind: B
     if (formatKind === "text") {
         const content = variation.content as ITextContent;
         // Keep paragraphs and their translations together, in source order.
-        return (content.paragraphs || []).flatMap(paragraph => (paragraph.columns || []).map(column => ({
+        return (content.paragraphs || []).flatMap(paragraph => (paragraph.columns || []).filter(column => normalizeContentLanguage(column.language)).map(column => ({
             html: column.content,
-            defaultFontKey: (column.language === ContentLanguage.Arabic ? "arabic" : column.language === ContentLanguage.Coptic ? "coptic" : "english") as FontKey,
-            languageName: column.language
+            defaultFontKey: (normalizeContentLanguage(column.language) === ContentLanguage.Arabic ? "arabic" : normalizeContentLanguage(column.language) === ContentLanguage.Coptic ? "coptic" : "english") as FontKey,
+            languageName: normalizeContentLanguage(column.language)!
         }))).filter(hasLanguageHtml);
     }
     if (formatKind === "vertical") {
