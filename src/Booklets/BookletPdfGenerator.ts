@@ -9,8 +9,8 @@ import hazzatFontUrl from "../fonts/hazzat1_10a.ttf";
 import arabicFontUrl from "../fonts/NotoNaskhArabic-Regular.ttf";
 import trajanFontUrl from "../fonts/TrajanPro-Regular.ttf";
 import bookletLogoUrl from "../images/logo.svg";
-import bookletFrontCoverBackgroundUrl from "../images/bookletFrontCoverBackground.jpg";
-import bookletBackCoverBackgroundUrl from "../images/bookletBackCoverBackground.jpg";
+import bookletCoverPaperUrl from "../images/bookletLimestonePaper.png";
+import { drawCoverFrame, drawCoverVine } from "./BookletCoverArtwork";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
@@ -106,7 +106,6 @@ interface FrontCoverImages {
 
 interface BackCoverImages {
     background?: PDFImage;
-    logo?: BookletLogo;
 }
 
 interface VectorBookletLogo { width: number; height: number; paths: string[]; }
@@ -124,15 +123,14 @@ const BODY_FONT_SIZE = 10.5;
 const HAZZAT_FONT_SIZE = 10.5;
 const ARABIC_FONT_SIZE = 12;
 const TOC_LINE_HEIGHT = 13;
-const COVER_TITLE_RULE_Y = 190;
-const COVER_TITLE_MAX_WIDTH = 300;
-const COVER_TITLE_BASE_SIZE = 37;
-const COVER_TITLE_MIN_SIZE = 22;
+const COVER_TITLE_RULE_Y = 315;
+const COVER_TITLE_MAX_WIDTH = 230;
+const COVER_TITLE_BASE_SIZE = 30;
+const COVER_TITLE_MIN_SIZE = 18;
 
 const black = rgb(0, 0, 0);
 const gray = rgb(0.35, 0.35, 0.35);
 const lightGray = rgb(0.78, 0.78, 0.78);
-const coverTextGray = rgb(0.27, 0.27, 0.27);
 
 const defaultBookletFontSources: Omit<Record<FontKey, BookletFontSource>, "english"> = {
     title: trajanFontUrl,
@@ -145,10 +143,9 @@ const defaultBookletFontSources: Omit<Record<FontKey, BookletFontSource>, "engli
     hazzatVerticalArabic: hazzatVerticalArabicFontUrl
 };
 const defaultBookletImageSources: BookletImageSources = {
-    frontCoverBackground: bookletFrontCoverBackgroundUrl,
+    frontCoverBackground: bookletCoverPaperUrl,
     frontCoverLogo: bookletLogoUrl,
-    backCoverBackground: bookletBackCoverBackgroundUrl,
-    backCoverLogo: bookletLogoUrl,
+    backCoverBackground: bookletCoverPaperUrl,
     serviceDivider: bookletServiceDividerUrl,
     variationDivider: bookletVariationDividerUrl
 };
@@ -566,12 +563,7 @@ async function embedBackCoverImages(doc: PDFDocument, imageSources: BookletImage
         ...defaultBookletImageSources,
         ...imageSources
     };
-    const [background, logo] = await Promise.all([
-        tryEmbedImage(doc, sources.backCoverBackground),
-        tryEmbedLogo(doc, sources.backCoverLogo)
-    ]);
-
-    return { background, logo };
+    return { background: await tryEmbedImage(doc, sources.backCoverBackground) };
 }
 
 async function tryEmbedLogo(doc: PDFDocument, source?: BookletImageSource): Promise<BookletLogo | undefined> {
@@ -598,7 +590,7 @@ function drawBookletLogo(page: PDFPage, logo: BookletLogo, x: number, y: number,
     const height = width * logo.height / logo.width;
     if ("paths" in logo) {
         logo.paths.forEach(path => page.drawSvgPath(path, {
-            x, y: y + height, scale: width / logo.width, color: rgb(48 / 255, 48 / 255, 48 / 255), opacity
+            x, y: y + height, scale: width / logo.width, color: black, opacity
         }));
     } else {
         page.drawImage(logo, { x, y, width, height, opacity });
@@ -864,61 +856,51 @@ class BookletWriter {
 
 function drawCover(writer: BookletWriter, season: ISeasonInfo, images: FrontCoverImages) {
     writer.addPage("cover");
-    const hasBackground = !!images.background;
-
-    if (hasBackground && images.background) {
-        drawImageCover(writer.page, images.background, 0, 0, LOGICAL_PAGE_WIDTH, LOGICAL_PAGE_HEIGHT, 1);
-    }
-
+    drawCoverFrame(writer.page, images.background);
     if (images.logo) {
-        const logoWidth = 142;
-        drawBookletLogo(writer.page, images.logo, (LOGICAL_PAGE_WIDTH - logoWidth) / 2, LOGICAL_PAGE_HEIGHT - 132, logoWidth);
-    } else if (!hasBackground) {
-        writer.drawCenteredText("Hazzat", "title", 22, 500);
-        writer.drawCenteredText("Coptic Hymnology", "english", 9, 484, gray);
+        const width = 110;
+        drawBookletLogo(writer.page, images.logo, 143, 612 - 124 - width * images.logo.height / images.logo.width, width);
+    } else {
+        writer.drawCenteredText("Hazzat.com", "title", 18, 445, black);
     }
-
-    if (!hasBackground) {
-        writer.page.drawLine({
-            start: { x: 48, y: COVER_TITLE_RULE_Y },
-            end: { x: LOGICAL_PAGE_WIDTH - 48, y: COVER_TITLE_RULE_Y },
-            thickness: 0.75,
-            color: gray
-        });
-    }
+    drawCoverVine(writer.page, 117, 428, 162);
 
     drawCoverTitle(writer, season);
 }
 
 function drawCoverTitle(writer: BookletWriter, season: ISeasonInfo) {
     const title = getCoverDisplayTitle(season);
-    const font = arabicUnicodePattern.test(title) ? writer.fonts.arabic : writer.fonts.english;
+    const arabic = arabicUnicodePattern.test(title);
+    const font = arabic ? writer.fonts.arabic : writer.fonts.title;
     const { lines, size } = fitCoverTitle(title, font);
-    const lineHeight = size * 1.08;
-    let y = COVER_TITLE_RULE_Y + 18 + ((lines.length - 1) * lineHeight);
-
+    const lineHeight = size * (arabic ? 1.7 : 1.35);
+    // Align the title block with the approved cover; keep long seasonal names inside the arch.
+    let y = COVER_TITLE_RULE_Y;
     lines.forEach(line => {
-        drawPlainHeadingLine(writer.page, writer.fonts, line, "english", size, 0, LOGICAL_PAGE_WIDTH, y, coverTextGray, true);
+        drawPlainHeadingLine(writer.page, writer.fonts, line, "title", size, 0, LOGICAL_PAGE_WIDTH, y, black, true);
         y -= lineHeight;
     });
-    drawSpacedCenteredText(writer.page, writer.fonts.english, "HAZZAT", 10.5, COVER_TITLE_RULE_Y - 27, coverTextGray, 21);
+    if (arabic) drawPlainHeadingLine(writer.page, writer.fonts, "علم الألحان القبطية", "arabic", 12, 0, LOGICAL_PAGE_WIDTH, 217, black, true);
+    else drawSpacedCenteredText(writer.page, writer.fonts.english, "COPTIC HYMNOLOGY", 8.5, 217, black, 1.6);
 }
 
 function fitCoverTitle(title: string, font: PDFFont): { lines: string[]; size: number } {
+    const arabic = arabicUnicodePattern.test(title);
+    const prefix = title.match(/^(الألحان|ألحان)\s+(.+)$/);
+    const wrap = (size: number) => prefix
+        ? [prefix[1], ...wrapPlainText(prefix[2], font, size, COVER_TITLE_MAX_WIDTH)]
+        : / Hymns$/i.test(title)
+            ? [...wrapPlainText(title.replace(/ Hymns$/i, ""), font, size, COVER_TITLE_MAX_WIDTH), "Hymns"]
+            : wrapPlainText(title, font, size, COVER_TITLE_MAX_WIDTH);
     for (let size = COVER_TITLE_BASE_SIZE; size >= COVER_TITLE_MIN_SIZE; size -= 1) {
-        const lines = wrapPlainText(title, font, size, COVER_TITLE_MAX_WIDTH);
-        if (lines.length <= 2 && lines.every(line => safeTextWidth(font, line, size) <= COVER_TITLE_MAX_WIDTH)) {
-            return { lines, size };
-        }
+        const lines = wrap(size);
+        if (lines.length <= 3 && (lines.length - 1) * size * (arabic ? 1.7 : 1.35) <= 80 &&
+            lines.every(line => safeTextWidth(font, line, size) <= COVER_TITLE_MAX_WIDTH)) return { lines, size };
     }
-
-    const lines = wrapPlainText(title, font, COVER_TITLE_MIN_SIZE, COVER_TITLE_MAX_WIDTH)
-        .slice(0, 2);
-    const lastLine = lines[lines.length - 1];
-    if (lastLine) {
-        lines[lines.length - 1] = truncateToWidth(lastLine, font, COVER_TITLE_MIN_SIZE, COVER_TITLE_MAX_WIDTH);
-    }
-
+    const wrapped = wrap(COVER_TITLE_MIN_SIZE);
+    const lines = wrapped.length <= 3 ? wrapped : / Hymns$/i.test(title)
+        ? [wrapped[0], truncateToWidth(wrapped.slice(1, -1).join(" "), font, COVER_TITLE_MIN_SIZE, COVER_TITLE_MAX_WIDTH), "Hymns"]
+        : [wrapped[0], wrapped[1], truncateToWidth(wrapped.slice(2).join(" "), font, COVER_TITLE_MIN_SIZE, COVER_TITLE_MAX_WIDTH)];
     return { lines, size: COVER_TITLE_MIN_SIZE };
 }
 
@@ -1267,15 +1249,8 @@ function drawPageNumbers(doc: PDFDocument, fonts: EmbeddedFonts, pageMetas: Page
             return;
         }
 
-        const pageNumber = `${index + 1}`;
-        const width = safeTextWidth(fonts.english, pageNumber, 8);
-        page.drawText(pageNumber, {
-            x: (LOGICAL_PAGE_WIDTH - width) / 2,
-            y: 22,
-            size: 8,
-            font: fonts.english,
-            color: gray
-        });
+        const footer = `hazzat.com  ·  ${index + 1}`;
+        drawCenteredPageText(page, fonts.english, footer, 8, 14, gray);
     });
 }
 
@@ -1292,16 +1267,9 @@ function addBackCover(doc: PDFDocument, fonts: EmbeddedFonts, pageMetas: PageMet
     initializePageContent(page);
     pageMetas.push({ kind: "backCover" });
 
-    if (images.background) {
-        drawImageCover(page, images.background, 0, 0, LOGICAL_PAGE_WIDTH, LOGICAL_PAGE_HEIGHT, 0.42);
-    }
-
-    if (images.logo) {
-        const logoWidth = 122;
-        drawBookletLogo(page, images.logo, LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - logoWidth + 3, 30, logoWidth, 0.86);
-    } else {
-        drawCenteredPageText(page, fonts.english, "hazzat.com", 15, LOGICAL_PAGE_HEIGHT / 2, black);
-    }
+    drawCoverFrame(page, images.background);
+    drawCoverVine(page, 108, 270, 180);
+    drawSpacedCenteredText(page, fonts.english, "HAZZAT.COM", 8.5, 101, black, 1.6);
 }
 
 function initializePageContent(page: PDFPage) {
@@ -1322,21 +1290,6 @@ function drawCenteredPageText(page: PDFPage, font: PDFFont, text: string, size: 
         size,
         font,
         color
-    });
-}
-
-function drawImageCover(page: PDFPage, image: PDFImage, x: number, y: number, width: number, height: number, opacity: number) {
-    const imageRatio = image.width / image.height;
-    const targetRatio = width / height;
-    const drawWidth = imageRatio > targetRatio ? height * imageRatio : width;
-    const drawHeight = imageRatio > targetRatio ? height : width / imageRatio;
-
-    page.drawImage(image, {
-        x: x + ((width - drawWidth) / 2),
-        y: y + ((height - drawHeight) / 2),
-        width: drawWidth,
-        height: drawHeight,
-        opacity
     });
 }
 
