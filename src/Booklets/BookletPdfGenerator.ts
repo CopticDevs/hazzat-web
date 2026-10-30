@@ -1026,45 +1026,52 @@ async function addFormatContent(writer: BookletWriter, format: IFormatInfo, form
     }
 }
 
-export interface BookletTextTable {
+export interface BookletTextRow {
     languages: ContentLanguage[];
     columnWidth: number;
-    rows: SizedTextRun[][][][];
+    columns: SizedTextRun[][][];
 }
 
-/** Stable columns across paragraphs, including paragraphs missing a translation. */
+export interface BookletTextTable {
+    rows: BookletTextRow[];
+}
+
+/** Like the reader, use only the languages present in each paragraph. */
 export function layoutBookletTextTable(content: ITextContent, fonts: EmbeddedFonts, width = CONTENT_WIDTH): BookletTextTable {
     const order = [ContentLanguage.English, ContentLanguage.Coptic, ContentLanguage.Arabic];
-    const languages = order.filter(language => content.paragraphs.some(paragraph => paragraph.columns.some(column => normalizeContentLanguage(column.language) === language && column.content?.trim())));
-    const columnWidth = languages.length ? (width - (languages.length - 1) * 12) / languages.length : width;
-    const rows = content.paragraphs.map(paragraph => languages.map(language => {
-        const key: FontKey = language === ContentLanguage.Arabic ? "arabic" : language === ContentLanguage.Coptic ? "coptic" : "english";
-        const columns = paragraph.columns.filter(column => normalizeContentLanguage(column.language) === language);
-        return columns.flatMap(column => parseHazzatHtmlToLines(column.content || "", key).flatMap(line =>
-            wrapRuns(line.map(run => {
-                const isComment = paragraph.isComment || run.isComment;
-                return { ...run, ...(isComment ? { isComment: true } : {}), size: getRunFontSize(run.fontKey) * (isComment ? .9 : 1) };
-            }), fonts, columnWidth)));
-    })).filter(row => row.some(column => column.some(line => line.some(run => run.text.trim()))));
-    return { languages, columnWidth, rows };
+    const rows = content.paragraphs.map(paragraph => {
+        const languages = order.filter(language => paragraph.columns.some(column => normalizeContentLanguage(column.language) === language && column.content?.trim()));
+        const columnWidth = languages.length ? (width - (languages.length - 1) * 12) / languages.length : width;
+        const columns = languages.map(language => {
+            const key: FontKey = language === ContentLanguage.Arabic ? "arabic" : language === ContentLanguage.Coptic ? "coptic" : "english";
+            const columns = paragraph.columns.filter(column => normalizeContentLanguage(column.language) === language);
+            return columns.flatMap(column => parseHazzatHtmlToLines(column.content || "", key).flatMap(line =>
+                wrapRuns(line.map(run => {
+                    const isComment = paragraph.isComment || run.isComment;
+                    return { ...run, ...(isComment ? { isComment: true } : {}), size: getRunFontSize(run.fontKey) * (isComment ? .9 : 1) };
+                }), fonts, columnWidth)));
+        });
+        return { languages, columnWidth, columns };
+    }).filter(row => row.columns.some(column => column.some(line => line.some(run => run.text.trim()))));
+    return { rows };
 }
 
 function drawTextTable(writer: BookletWriter, content: ITextContent) {
     const table = layoutBookletTextTable(content, writer.fonts);
-    const lineHeight = table.languages.includes(ContentLanguage.Arabic) ? ARABIC_FONT_SIZE * 1.45 : BODY_FONT_SIZE * 1.45;
     for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
         const row = table.rows[rowIndex];
-        const isComment = row.flat(2).some(run => run.isComment);
+        const lineHeight = row.languages.includes(ContentLanguage.Arabic) ? ARABIC_FONT_SIZE * 1.45 : BODY_FONT_SIZE * 1.45;
+        const isComment = row.columns.flat(2).some(run => run.isComment);
         const nextRow = table.rows[rowIndex + 1];
-        const connectsToNextRow = nextRow && !nextRow.flat(2).some(run => run.isComment);
-        const lineCount = Math.max(...row.map(column => column.length));
+        const connectsToNextRow = nextRow && row.languages.join() === nextRow.languages.join() && !nextRow.columns.flat(2).some(run => run.isComment);
+        const lineCount = Math.max(...row.columns.map(column => column.length));
         const rowHeight = lineCount * lineHeight + 12;
         if (rowIndex > 0 && rowHeight <= LOGICAL_PAGE_HEIGHT - PAGE_TOP - PAGE_BOTTOM) writer.ensureSpace(rowHeight);
         for (let lineIndex = 0; lineIndex < lineCount; lineIndex++) {
             writer.ensureSpace(lineHeight + 6);
-            row.forEach((column, columnIndex) => {
-                const x = PAGE_MARGIN_X + columnIndex * (table.columnWidth + 12);
-                drawSizedLine(writer, column[lineIndex] || [], x, table.columnWidth, table.languages[columnIndex] === ContentLanguage.Arabic);
+            row.columns.forEach((column, columnIndex) => {
+                const x = PAGE_MARGIN_X + columnIndex * (row.columnWidth + 12);
+                drawSizedLine(writer, column[lineIndex] || [], x, row.columnWidth, row.languages[columnIndex] === ContentLanguage.Arabic);
                 if (columnIndex > 0 && !isComment) writer.page.drawLine({
                     start: { x: x - 6, y: writer.cursorY + lineHeight - 3 },
                     end: { x: x - 6, y: writer.cursorY - 3 - (lineIndex === lineCount - 1 && connectsToNextRow ? 12 : 0) }, thickness: 0.35, color: lightGray

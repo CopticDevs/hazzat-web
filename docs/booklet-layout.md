@@ -14,6 +14,6 @@ Each variation ends with the site's thin cross rule. At the end of a service, th
 
 Comment paragraphs and HTML marked with EnglishComment, CopticComment, or ArabicComment use dark red, italic text at 90% of the normal font size. Styling survives wrapping and nested markup while retaining the language's font and direction.
 
-Column dividers connect across the spacing between consecutive regular paragraphs. Comment rows have no dividers, and adjacent regular rows do not extend their dividers through comments.
+Text tables use the languages present in each paragraph, matching the reader's changing language groups. A single-language verse uses the full available width; later multilingual verses restore their columns in English, Coptic, Arabic order. Line height and Arabic alignment follow each row's languages. Column dividers connect across the spacing only between consecutive regular paragraphs with the same languages. Comment rows have no dividers, and dividers stop before comments or a language-group change.
 
 Published v5 library records have a validated outer content type; their content payloads need not repeat `contentType`. Availability checks accept those payloads while continuing to reject empty content and explicitly mismatched inner types. The Annual Midnight Psalmody explanation of the Second Canticle includes both Hazzat assignments, including its Coptic-only alternative.
