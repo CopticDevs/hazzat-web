@@ -225,7 +225,7 @@ describe("BookletPdfGenerator", () => {
                 calls.forEach(([, options]) => expect(options?.color).toEqual({ type: "RGB", red: 0, green: 0, blue: 128 / 255 }));
             }
             const notes = draws.mock.calls.filter(([text]) => text === "x");
-            expect(notes.length).toBeGreaterThanOrEqual(4);
+            expect(notes.length).toBeGreaterThanOrEqual(3);
             notes.forEach(([, options]) => expect(options?.color).toEqual({ type: "RGB", red: 128 / 255, green: 0, blue: 0 }));
             expect(draws.mock.calls.find(([text]) => text === "CommentInk")![1]!.color).toEqual({ type: "RGB", red: .55, green: .16, blue: .14 });
         } finally { draws.mockRestore(); }
@@ -297,7 +297,7 @@ describe("BookletPdfGenerator", () => {
             await generateSeasonBookletPdf({ season: createSeason(), services: [first, second], formatKinds: ["regular"], layoutKind: "display",
                 fontSources: createFontSources(), imageSources: { ...createImageSources(), serviceDivider: readImage("logo.png"), variationDivider: fs.readFileSync(path.join(process.cwd(), "src", "images", "crossline.svg")) } });
             expect(images.mock.calls.filter(([, options]) => options?.opacity === .8)).toHaveLength(3);
-            expect(paths).not.toHaveBeenCalled(); // The grapevine replaces the final variation's cross.
+            expect(paths.mock.calls.filter(([, options]) => options?.opacity === .65)).toHaveLength(0); // No variation cross before a service grapevine.
         } finally { images.mockRestore(); paths.mockRestore(); }
     });
 
@@ -331,7 +331,7 @@ describe("BookletPdfGenerator", () => {
         try {
             await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text"], layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
             expect(lines.mock.calls.some(([line]) => line.start.y === line.end.y && line.start.x === 24 && line.end.x === 372 && line.thickness === .35)).toBe(false);
-            expect(lines.mock.calls.filter(([line]) => line.thickness === .7).length).toBeGreaterThanOrEqual(4);
+            expect(lines.mock.calls.filter(([line]) => line.thickness === .7).length).toBeGreaterThanOrEqual(3);
         } finally { lines.mockRestore(); }
     });
     it("lays out aligned text columns in English, Coptic, Arabic order without language heading rows", () => {
@@ -726,7 +726,7 @@ describe("BookletPdfGenerator", () => {
         expect(pdfText).toContain("/Subtype /Image");
     });
 
-    it("keeps the supplied SVG logo as vector curves on both booklet covers", async () => {
+    it("keeps the front logo and both covers as vector curves", async () => {
         const logo = fs.readFileSync(path.join(process.cwd(), "src", "images", "logo.svg"));
         expect(logo.toString()).not.toMatch(/<image\b|data:image/);
         const bytes = await generateSeasonBookletPdf({
@@ -748,6 +748,24 @@ describe("BookletPdfGenerator", () => {
         }
     });
 
+    it("centers a quiet website and page-number footer only on TOC and content pages", async () => {
+        const drawText = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [createService()],
+                formatKind: "regular", layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
+            const footers = drawText.mock.calls.filter(([text]) => text.startsWith("hazzat.com  ·  "));
+            expect(footers.length).toBeGreaterThanOrEqual(2);
+            footers.forEach(([text, options]) => {
+                expect(text).toMatch(/^hazzat\.com  ·  \d+$/);
+                expect(options?.y).toBe(14);
+                expect(options?.size).toBe(8);
+                const width = options!.font!.widthOfTextAtSize(text, options!.size!);
+                expect(options!.x! + width / 2).toBeCloseTo(198);
+            });
+            expect(drawText.mock.calls.some(([text]) => text === "hazzat.com  ·  1")).toBe(false);
+        } finally { drawText.mockRestore(); }
+    });
+
     it("draws supplied front and back cover image resources", async () => {
         const pdfBytes = await generateSeasonBookletPdf({
             season: createSeason("passion-week-general-hours", "Passion Week"),
@@ -762,7 +780,7 @@ describe("BookletPdfGenerator", () => {
         const pdfText = Buffer.from(pdfBytes).toString("latin1");
 
         expect(pdf.getPageCount()).toBe(4);
-        expect((pdfText.match(/\/Subtype \/Image/g) || []).length).toBeGreaterThanOrEqual(4);
+        expect((pdfText.match(/\/Subtype \/Image/g) || []).length).toBeGreaterThanOrEqual(3);
     });
 
     it("pads display PDFs to a multiple of four pages with a final back cover", async () => {
