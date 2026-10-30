@@ -123,6 +123,7 @@ const BODY_FONT_SIZE = 10.5;
 const HAZZAT_FONT_SIZE = 10.5;
 const ARABIC_FONT_SIZE = 12;
 const TOC_LINE_HEIGHT = 13;
+const CROSS_DIVIDER_ADVANCE = 40; // Includes 12pt of extra padding after the ornament.
 const COVER_TITLE_RULE_Y = 315;
 const COVER_TITLE_MAX_WIDTH = 230;
 const COVER_TITLE_BASE_SIZE = 30;
@@ -768,7 +769,7 @@ class BookletWriter {
 
     public drawLanguageDivider(lines: TextRun[][]) {
         // Keep the divider with the next language's opening content, preserving end ornaments.
-        this.ensureSpace(28 + measureOpeningBody(this, lines));
+        this.ensureSpace(CROSS_DIVIDER_ADVANCE + measureOpeningBody(this, lines));
         this.drawCrossDivider();
     }
 
@@ -785,7 +786,7 @@ class BookletWriter {
             this.page.drawLine({ start: { x: center - 3, y }, end: { x: center + 3, y }, thickness: .7, color: gray });
             this.page.drawLine({ start: { x: center, y: y - 4 }, end: { x: center, y: y + 4 }, thickness: .7, color: gray });
         }
-        this.cursorY -= 28;
+        this.cursorY -= CROSS_DIVIDER_ADVANCE;
     }
 
     public drawServiceDivider() {
