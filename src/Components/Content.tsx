@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { UserSettingsContext } from "../Contexts/UserSettingsContext";
+import { filterContentLanguages, hasLanguageContent } from "../ContentLanguages";
+import { strings } from "../l8n";
 import { IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import ContentAudio from "./ContentAudio";
 import ContentHazzat from "./ContentHazzat";
@@ -17,7 +20,10 @@ interface IProps {
 }
 
 function Content({ formatId, hymnTitle, variationsCallback }: IProps) {
-    const [variations, setVariations] = useState<IVariationInfo<any>[]>([]);
+    const [sourceVariations, setVariations] = useState<IVariationInfo<any>[]>([]);
+    const { userSettings } = useContext(UserSettingsContext);
+    const variations = sourceVariations.map(variation => ({ ...variation, content: filterContentLanguages(variation.content, userSettings.contentLanguages) }))
+        .filter(variation => hasLanguageContent(variation.content));
     const [loading, setLoading] = useState(true);
     const [failed, setFailed] = useState(false);
     const [retry, setRetry] = useState(0);
@@ -33,6 +39,7 @@ function Content({ formatId, hymnTitle, variationsCallback }: IProps) {
     }, [variationsCallback, formatId, hymnTitle, retry]);
     if (loading) return <LoadingSpinner />;
     if (failed) return <ContentLoadError retry={() => setRetry(value => value + 1)} />;
+    if (!variations.length && sourceVariations.length) return <section><h3>{hymnTitle}</h3><p role="status">{strings.noSelectedLanguageContent}</p></section>;
     switch (formatId) {
         case "1": return <ContentText variations={variations} hymnTitle={hymnTitle} />;
         case "2": return <ContentHazzat variations={variations} hymnTitle={hymnTitle} />;
