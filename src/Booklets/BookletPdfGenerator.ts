@@ -763,6 +763,16 @@ class BookletWriter {
     public drawVariationDivider(followedByServiceDivider = false) {
         this.reservedBottom = 0;
         if (followedByServiceDivider && this.serviceDivider) return;
+        this.drawCrossDivider();
+    }
+
+    public drawLanguageDivider(lines: TextRun[][]) {
+        // Keep the divider with the next language's opening content, preserving end ornaments.
+        this.ensureSpace(28 + measureOpeningBody(this, lines));
+        this.drawCrossDivider();
+    }
+
+    private drawCrossDivider() {
         if (this.variationDivider) {
             const width = CONTENT_WIDTH * .72;
             const height = width * this.variationDivider.height / this.variationDivider.width;
@@ -979,7 +989,10 @@ function measureOpeningContent(writer: BookletWriter, variation: BookletContentV
     const blocks = getLanguageHtmlBlocks(variation, kind);
     const first = blocks[0];
     if (!first) return 0;
-    const lines = parseHazzatHtmlToLines(first.html, first.defaultFontKey);
+    return measureOpeningBody(writer, parseHazzatHtmlToLines(first.html, first.defaultFontKey));
+}
+
+function measureOpeningBody(writer: BookletWriter, lines: TextRun[][]): number {
     let height = 0, visibleLines = 0;
     for (const line of lines) {
         if (!line.some(run => run.text.trim())) { height += HAZZAT_FONT_SIZE + 3; continue; }
@@ -1034,8 +1047,9 @@ async function addFormatContent(writer: BookletWriter, format: IFormatInfo, form
             continue;
         }
         const languageBlocks = getLanguageHtmlBlocks(variation, formatKind);
-        languageBlocks.forEach(languageBlock => {
+        languageBlocks.forEach((languageBlock, index) => {
             const lines = parseHazzatHtmlToLines(languageBlock.html, languageBlock.defaultFontKey);
+            if (index > 0) writer.drawLanguageDivider(lines);
             writer.drawBodyLines(lines);
             writer.cursorY -= 8;
         });

@@ -296,7 +296,9 @@ describe("BookletPdfGenerator", () => {
             await generateSeasonBookletPdf({ season: createSeason(), services: [first, second], formatKinds: ["regular"], layoutKind: "display",
                 fontSources: createFontSources(), imageSources: { ...createImageSources(), serviceDivider: readImage("logo.png"), variationDivider: fs.readFileSync(path.join(process.cwd(), "src", "images", "crossline.svg")) } });
             expect(images.mock.calls.filter(([, options]) => options?.opacity === .8)).toHaveLength(3);
-            expect(paths.mock.calls.filter(([, options]) => options?.opacity === .65)).toHaveLength(0); // No variation cross before a service grapevine.
+            const crossPaths = Array.from(new DOMParser().parseFromString(fs.readFileSync(path.join(process.cwd(), "src", "images", "crossline.svg"), "utf8"), "image/svg+xml").querySelectorAll("path")).filter(path => path.getAttribute("d")?.trim()).length;
+            // Two language transitions per service; no extra final cross before its grapevine.
+            expect(paths.mock.calls.filter(([, options]) => options?.opacity === .65)).toHaveLength(4 * crossPaths);
         } finally { images.mockRestore(); paths.mockRestore(); }
     });
 
@@ -664,6 +666,20 @@ describe("BookletPdfGenerator", () => {
             const body = draws.mock.calls.filter(([, options]) => options?.size === 10.5);
             expect(body.length).toBeGreaterThan(0);
         } finally { draws.mockRestore(); }
+    });
+
+    it.each(["regular", "vertical"] as const)("draws crosses only between selected language blocks (%s)", async formatKind => {
+        const imageSources = { ...createImageSources(), serviceDivider: readImage("logo.png"), variationDivider: readImage("crossline.svg") };
+        const pathCount = Array.from(new DOMParser().parseFromString(fs.readFileSync(path.join(process.cwd(), "src", "images", "crossline.svg"), "utf8"), "image/svg+xml").querySelectorAll("path")).filter(path => path.getAttribute("d")?.trim()).length;
+        const paths = jest.spyOn(PDFPage.prototype, "drawSvgPath");
+        try {
+            for (const languages of [undefined, [ContentLanguage.English]]) {
+                paths.mockClear();
+                await generateSeasonBookletPdf({ season: createSeason(), services: [createService()], formatKind,
+                    layoutKind: "display", languages, fontSources: createFontSources(), imageSources });
+                expect(paths.mock.calls.filter(([, options]) => options?.opacity === .65)).toHaveLength(languages ? 0 : 2 * pathCount);
+            }
+        } finally { paths.mockRestore(); }
     });
 
     it("calculates stable TOC pages, padding, and print imposition order", () => {
