@@ -115,6 +115,7 @@ function BookletDetails() {
         try {
             const pdfBytes = await generateSeasonBookletPdf({
                 season: seasonInfo,
+                localeName: languageProperties.localeName,
                 services: selected,
                 formatKinds: selectedKinds,
                 groupingKind: grouping,

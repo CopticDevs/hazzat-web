@@ -1,5 +1,5 @@
 import fontkit from "@pdf-lib/fontkit";
-import { PDFDocument, PDFFont, PDFImage, PDFPage, rgb, RGB, StandardFonts } from "pdf-lib";
+import { PDFDocument, PDFFont, PDFImage, PDFPage, rgb, RGB, StandardFonts, degrees } from "pdf-lib";
 import hazzatArabicFontUrl from "../fonts/HazzatA.ttf";
 import hazzatVerticalFontUrl from "../fonts/HazzatV.ttf";
 import hazzatVerticalArabicFontUrl from "../fonts/HazzatVA.ttf";
@@ -32,6 +32,7 @@ type PdfFontFeatures = NonNullable<PdfEmbedFontOptions["features"]>;
 
 export interface GenerateBookletPdfOptions {
     season: ISeasonInfo;
+    localeName?: string;
     services: IServiceInfo[];
     /** Legacy single-format callers remain supported. */
     formatKind?: BookletFormatKind;
@@ -57,6 +58,7 @@ export type FontKey =
 export interface TextRun {
     text: string;
     fontKey: FontKey;
+    isComment?: boolean;
 }
 
 export interface SizedTextRun extends TextRun {
@@ -252,9 +254,9 @@ export function normalizeFontKey(className?: string, style?: string, inheritedFo
     if (classTokens.includes("hazzatafont")) return "hazzatArabic";
     if (classTokens.includes("hazzatvfont")) return "hazzatVertical";
     if (classTokens.includes("hazzatfont") || inlineFontFamily) return "hazzat";
-    if (classTokens.includes("copticfont")) return "coptic";
-    if (classTokens.includes("arabicfont")) return "arabic";
-    if (classTokens.includes("englishfont") || classTokens.includes("msonormal")) return "english";
+    if (classTokens.includes("copticfont") || classTokens.includes("copticcomment")) return "coptic";
+    if (classTokens.includes("arabicfont") || classTokens.includes("arabiccomment")) return "arabic";
+    if (classTokens.includes("englishfont") || classTokens.includes("englishcomment") || classTokens.includes("msonormal")) return "english";
 
     return inheritedFontKey;
 }
@@ -268,7 +270,7 @@ export function parseHazzatHtmlToLines(html: string, defaultFontKey: FontKey = "
         lines.push([]);
     };
 
-    const pushText = (text: string, fontKey: FontKey) => {
+    const pushText = (text: string, fontKey: FontKey, isComment: boolean) => {
         const normalized = text
             .replace(/\u00a0/g, " ")
             .replace(/\r/g, "")
@@ -283,17 +285,17 @@ export function parseHazzatHtmlToLines(html: string, defaultFontKey: FontKey = "
         splitTextForFont(normalized, fontKey).forEach(run => {
             const currentLine = lines[lines.length - 1];
             const previous = currentLine[currentLine.length - 1];
-            if (previous && previous.fontKey === run.fontKey) {
+            if (previous && previous.fontKey === run.fontKey && !!previous.isComment === isComment) {
                 previous.text += run.text;
             } else {
-                currentLine.push(run);
+                currentLine.push(isComment ? { ...run, isComment: true } : run);
             }
         });
     };
 
-    const visit = (node: Node, inheritedFontKey: FontKey) => {
+    const visit = (node: Node, inheritedFontKey: FontKey, inheritedComment = false) => {
         if (node.nodeType === Node.TEXT_NODE) {
-            pushText(node.textContent || "", inheritedFontKey);
+            pushText(node.textContent || "", inheritedFontKey, inheritedComment);
             return;
         }
 
@@ -316,7 +318,8 @@ export function parseHazzatHtmlToLines(html: string, defaultFontKey: FontKey = "
             pushBreak();
         }
 
-        Array.from(element.childNodes).forEach(child => visit(child, elementFontKey));
+        const isComment = inheritedComment || /\b(?:EnglishComment|CopticComment|ArabicComment)\b/i.test(element.className);
+        Array.from(element.childNodes).forEach(child => visit(child, elementFontKey, isComment));
 
         if (startsBlock && lines[lines.length - 1].length > 0) {
             pushBreak();
@@ -457,7 +460,7 @@ async function renderLogicalBooklet(options: GenerateBookletPdfOptions, tocPageC
             previousKind = formatKind;
         }
     }
-    drawToc(tocPages, fonts, tocEntries, options.layoutKind === "display", writer.serviceDivider);
+    drawToc(tocPages, fonts, tocEntries, options.layoutKind === "display", options.localeName ? options.localeName === "ar" : arabicUnicodePattern.test(options.season.displayName || options.season.name), writer.serviceDivider);
 
     return {
         doc,
@@ -827,7 +830,7 @@ class BookletWriter {
 
             const sizedRuns = line.map(run => ({
                 ...run,
-                size: getRunFontSize(run.fontKey)
+                size: getRunFontSize(run.fontKey) * (run.isComment ? .9 : 1)
             }));
             drawWrappedRuns(this, sizedRuns);
         });
@@ -864,16 +867,16 @@ function drawCover(writer: BookletWriter, season: ISeasonInfo, images: FrontCove
 
 function drawCoverTitle(writer: BookletWriter, season: ISeasonInfo) {
     const title = getCoverDisplayTitle(season);
-    const font = writer.fonts.english;
+    const font = arabicUnicodePattern.test(title) ? writer.fonts.arabic : writer.fonts.english;
     const { lines, size } = fitCoverTitle(title, font);
     const lineHeight = size * 1.08;
     let y = COVER_TITLE_RULE_Y + 18 + ((lines.length - 1) * lineHeight);
 
     lines.forEach(line => {
-        drawCenteredPageText(writer.page, font, line, size, y, coverTextGray);
+        drawPlainHeadingLine(writer.page, writer.fonts, line, "english", size, 0, LOGICAL_PAGE_WIDTH, y, coverTextGray, true);
         y -= lineHeight;
     });
-    drawSpacedCenteredText(writer.page, font, "HAZZAT", 10.5, COVER_TITLE_RULE_Y - 27, coverTextGray, 21);
+    drawSpacedCenteredText(writer.page, writer.fonts.english, "HAZZAT", 10.5, COVER_TITLE_RULE_Y - 27, coverTextGray, 21);
 }
 
 function fitCoverTitle(title: string, font: PDFFont): { lines: string[]; size: number } {
@@ -922,6 +925,12 @@ function isPassionWeekSeason(seasonId?: string): boolean {
 }
 
 export function getCoverDisplayTitle(season: ISeasonInfo): string {
+    const title = getCoverSeasonName(season);
+    if (arabicUnicodePattern.test(title)) return /ألحان|الألحان/.test(title) ? title : `ألحان ${title}`;
+    return /\bhymns\b/i.test(title) ? title : `${title} Hymns`;
+}
+
+function getCoverSeasonName(season: ISeasonInfo): string {
     const seasonName = season.displayName || season.name;
     if (season.id === "annual") return arabicUnicodePattern.test(seasonName) ? "الألحان السنوية" : "Annual Hymns";
 
@@ -1027,7 +1036,10 @@ export function layoutBookletTextTable(content: ITextContent, fonts: EmbeddedFon
         const key: FontKey = language === ContentLanguage.Arabic ? "arabic" : language === ContentLanguage.Coptic ? "coptic" : "english";
         const columns = paragraph.columns.filter(column => column.language === language);
         return columns.flatMap(column => parseHazzatHtmlToLines(column.content || "", key).flatMap(line =>
-            wrapRuns(line.map(run => ({ ...run, size: getRunFontSize(run.fontKey) })), fonts, columnWidth)));
+            wrapRuns(line.map(run => {
+                const isComment = paragraph.isComment || run.isComment;
+                return { ...run, ...(isComment ? { isComment: true } : {}), size: getRunFontSize(run.fontKey) * (isComment ? .9 : 1) };
+            }), fonts, columnWidth)));
     })).filter(row => row.some(column => column.some(line => line.some(run => run.text.trim()))));
     return { languages, columnWidth, rows };
 }
@@ -1037,6 +1049,9 @@ function drawTextTable(writer: BookletWriter, content: ITextContent) {
     const lineHeight = table.languages.includes(ContentLanguage.Arabic) ? ARABIC_FONT_SIZE * 1.45 : BODY_FONT_SIZE * 1.45;
     for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
         const row = table.rows[rowIndex];
+        const isComment = row.flat(2).some(run => run.isComment);
+        const nextRow = table.rows[rowIndex + 1];
+        const connectsToNextRow = nextRow && !nextRow.flat(2).some(run => run.isComment);
         const lineCount = Math.max(...row.map(column => column.length));
         const rowHeight = lineCount * lineHeight + 12;
         if (rowIndex > 0 && rowHeight <= LOGICAL_PAGE_HEIGHT - PAGE_TOP - PAGE_BOTTOM) writer.ensureSpace(rowHeight);
@@ -1045,9 +1060,9 @@ function drawTextTable(writer: BookletWriter, content: ITextContent) {
             row.forEach((column, columnIndex) => {
                 const x = PAGE_MARGIN_X + columnIndex * (table.columnWidth + 12);
                 drawSizedLine(writer, column[lineIndex] || [], x, table.columnWidth, table.languages[columnIndex] === ContentLanguage.Arabic);
-                if (columnIndex > 0) writer.page.drawLine({
+                if (columnIndex > 0 && !isComment) writer.page.drawLine({
                     start: { x: x - 6, y: writer.cursorY + lineHeight - 3 },
-                    end: { x: x - 6, y: writer.cursorY - 3 }, thickness: 0.35, color: lightGray
+                    end: { x: x - 6, y: writer.cursorY - 3 - (lineIndex === lineCount - 1 && connectsToNextRow ? 12 : 0) }, thickness: 0.35, color: lightGray
                 });
             });
             writer.cursorY -= lineHeight;
@@ -1114,18 +1129,13 @@ function drawServiceOrnament(page: PDFPage, image: PDFImage, top: number, maxHei
     page.drawImage(image, { x: (LOGICAL_PAGE_WIDTH - width) / 2, y: top - height, width, height, opacity: .8 });
 }
 
-function drawToc(tocPages: PDFPage[], fonts: EmbeddedFonts, entries: TocEntry[], linkTargets: boolean, serviceDivider?: PDFImage) {
+function drawToc(tocPages: PDFPage[], fonts: EmbeddedFonts, entries: TocEntry[], linkTargets: boolean, arabic: boolean, serviceDivider?: PDFImage) {
     let pageIndex = 0;
     let cursorY = LOGICAL_PAGE_HEIGHT - PAGE_TOP;
     const currentPage = () => tocPages[Math.min(pageIndex, tocPages.length - 1)];
 
-    currentPage().drawText("Table of Contents", {
-        x: PAGE_MARGIN_X,
-        y: cursorY,
-        size: 16,
-        font: fonts.title,
-        color: black
-    });
+    drawPlainHeadingLine(currentPage(), fonts, arabic ? "جدول المحتويات" : "Table of Contents", "title", 16,
+        PAGE_MARGIN_X, LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X, cursorY, black, false);
     cursorY -= 30;
 
     entries.forEach(entry => {
@@ -1136,28 +1146,24 @@ function drawToc(tocPages: PDFPage[], fonts: EmbeddedFonts, entries: TocEntry[],
 
         const page = currentPage();
         const size = entry.level === "service" ? 9.5 : 8.5;
-        const font = entry.level === "service" ? fonts.title : fonts.english;
+        const rtl = arabicUnicodePattern.test(entry.title);
+        const font = rtl ? fonts.arabic : entry.level === "service" ? fonts.title : fonts.english;
         const indent = entry.level === "service" ? 0 : 12;
         const title = truncateToWidth(entry.title, font, size, CONTENT_WIDTH - 52 - indent);
-        const pageNumber = `${entry.pageNumber}`;
-        const pageNumberWidth = safeTextWidth(fonts.english, pageNumber, 8.5);
+        const pageNumber = arabic ? `${entry.pageNumber}`.replace(/[0-9]/g, digit => "٠١٢٣٤٥٦٧٨٩"[Number(digit)]) : `${entry.pageNumber}`;
+        const numberFont = arabic ? fonts.arabic : fonts.english;
+        const pageNumberWidth = safeTextWidth(numberFont, pageNumber, 8.5);
 
-        page.drawText(title, {
-            x: PAGE_MARGIN_X + indent,
-            y: cursorY,
-            size,
-            font,
-            color: black
-        });
-        page.drawText(pageNumber, {
-            x: LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - pageNumberWidth,
-            y: cursorY,
-            size: 8.5,
-            font: fonts.english,
-            color: black
+        drawPlainHeadingLine(page, fonts, title, entry.level === "service" ? "title" : "english", size,
+            PAGE_MARGIN_X + (arabic ? 52 : indent), LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - (arabic ? indent : 52), cursorY, black, false);
+        let numberX = arabic ? PAGE_MARGIN_X : LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - pageNumberWidth;
+        // The Arabic font shapes digit strings right-to-left; place digits individually to preserve ١٣ rather than ٣١.
+        (arabic ? Array.from(pageNumber) : [pageNumber]).forEach(part => {
+            page.drawText(part, { x: numberX, y: cursorY, size: 8.5, font: numberFont, color: black });
+            numberX += safeTextWidth(numberFont, part, 8.5);
         });
         if (linkTargets) {
-            addPageLinkAnnotation(page, entry.pageNumber, PAGE_MARGIN_X + indent, cursorY - 2, CONTENT_WIDTH - indent, TOC_LINE_HEIGHT);
+            addPageLinkAnnotation(page, entry.pageNumber, PAGE_MARGIN_X + (arabic ? 0 : indent), cursorY - 2, CONTENT_WIDTH - indent, TOC_LINE_HEIGHT);
         }
         cursorY -= TOC_LINE_HEIGHT;
     });
@@ -1295,19 +1301,40 @@ async function createPrintPdf(logicalDoc: PDFDocument, logicalPageCount: number)
 }
 
 function drawWrappedPlainText(writer: BookletWriter, text: string, fontKey: FontKey, size: number, lineHeight: number, color: RGB, center: boolean) {
-    const font = writer.fonts[fontKey];
+    const rtl = arabicUnicodePattern.test(text);
+    const font = rtl ? writer.fonts.arabic : writer.fonts[fontKey];
     const lines = wrapPlainText(text, font, size, CONTENT_WIDTH);
     lines.forEach(line => {
         writer.ensureSpace(lineHeight);
-        const width = safeTextWidth(font, line, size);
-        writer.page.drawText(line, {
-            x: center ? (LOGICAL_PAGE_WIDTH - width) / 2 : PAGE_MARGIN_X,
-            y: writer.cursorY,
-            size,
-            font,
-            color
-        });
+        drawPlainHeadingLine(writer.page, writer.fonts, line, fontKey, size, PAGE_MARGIN_X, LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X, writer.cursorY, color, center);
         writer.cursorY -= lineHeight;
+    });
+}
+
+function drawPlainHeadingLine(page: PDFPage, fonts: EmbeddedFonts, text: string, fontKey: FontKey, size: number, left: number, right: number, y: number, color: RGB, center: boolean) {
+    const rtl = arabicUnicodePattern.test(text);
+    const runs: (TextRun & { ltr?: boolean })[] = rtl ? (text.match(/[\u0020-\u00ff]+|[^\u0020-\u00ff]+/g) || []).flatMap(segment => {
+        if (/[A-Za-z0-9\u00c0-\u00ff]/.test(segment)) {
+            // Keep Latin words and numbers together within an Arabic heading.
+            const leading = segment.match(/^\s*/)![0];
+            const trailing = segment.match(/\s*$/)![0];
+            return [{ text: trailing + segment.trim() + leading, fontKey: "english" as FontKey, ltr: true }];
+        }
+        return splitTextForFont(segment, "arabic");
+    }) : splitTextForFont(text, fontKey);
+    const mirror: Record<string, string> = { "(": ")", ")": "(", "[": "]", "]": "[", "{": "}", "}": "{", "<": ">", ">": "<" };
+    const drawable = runs.map((run, i) => {
+        let value = getDrawableRunText(runs, i, rtl);
+        if (rtl && run.fontKey === "english" && !run.ltr) value = Array.from(value).reverse().map(char => mirror[char] || char).join("");
+        return { text: value, font: fonts[run.fontKey] };
+    });
+    const width = drawable.reduce((sum, run) => sum + safeTextWidth(run.font, run.text, size), 0);
+    const start = center ? left + (right - left - width) / 2 : rtl ? right - width : left;
+    let x = rtl ? start + width : start;
+    drawable.forEach(run => {
+        const runWidth = safeTextWidth(run.font, run.text, size);
+        page.drawText(run.text, { x: rtl ? x - runWidth : x, y, size, font: run.font, color });
+        x += rtl ? -runWidth : runWidth;
     });
 }
 
@@ -1335,7 +1362,8 @@ function drawSizedLine(writer: BookletWriter, line: SizedTextRun[], left: number
                 y: writer.cursorY,
                 size: run.size,
                 font,
-                color: black
+                color: run.isComment ? rgb(.55, .16, .14) : black,
+                ySkew: run.isComment ? degrees(10) : undefined
             });
         }
         x = rtl ? x - runWidth : x + runWidth;
