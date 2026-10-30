@@ -157,6 +157,32 @@ function createService(): IServiceInfo {
 }
 
 describe("BookletPdfGenerator", () => {
+    it.each(["display", "print"] as const)("exports independent text and notation colors while keeping comments distinct (%s)", async layoutKind => {
+        const service = withText();
+        service.hymns![0].formats![0].variations![0].content = { contentType: ContentType.TextContent, paragraphs: [
+            { columns: [{ language: ContentLanguage.English, content: "TextInk" }, { language: ContentLanguage.Coptic, content: "Nai" }, { language: ContentLanguage.Arabic, content: "ارحمنا" }] },
+            { isComment: true, columns: [{ language: ContentLanguage.English, content: "CommentInk" }] }
+        ] };
+        service.hymns![0].formats![1].variations![0].content = { contentType: ContentType.HazzatContent,
+            englishHazzat: 'WordsInk <span class="HazzatFont">x</span>', copticHazzat: '', arabicHazzat: 'كلمات <span class="HazzatAFont">x</span>' };
+        service.hymns![0].formats![2].variations![0].content = { contentType: ContentType.VerticalHazzatContent,
+            englishVerticalHazzat: 'VerticalWords <span class="HazzatVFont">x</span>', copticVerticalHazzat: '', arabicVerticalHazzat: 'كلمات <span class="HazzatVAFont">x</span>' };
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            const pdf = await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text", "regular", "vertical"], layoutKind,
+                appearance: { textColor: "NAVY", hazzatColor: "MAROON" }, fontSources: createFontSources(), imageSources: createImageSources() });
+            expect((await PDFDocument.load(pdf)).getPageCount()).toBeGreaterThan(0);
+            for (const word of ["TextInk", "Nai", "ارحمنا", "WordsInk", "VerticalWords"]) {
+                const calls = draws.mock.calls.filter(([text]) => text === word);
+                expect(calls.length).toBeGreaterThan(0);
+                calls.forEach(([, options]) => expect(options?.color).toEqual({ type: "RGB", red: 0, green: 0, blue: 128 / 255 }));
+            }
+            const notes = draws.mock.calls.filter(([text]) => text === "x");
+            expect(notes.length).toBeGreaterThanOrEqual(4);
+            notes.forEach(([, options]) => expect(options?.color).toEqual({ type: "RGB", red: 128 / 255, green: 0, blue: 0 }));
+            expect(draws.mock.calls.find(([text]) => text === "CommentInk")![1]!.color).toEqual({ type: "RGB", red: .55, green: .16, blue: .14 });
+        } finally { draws.mockRestore(); }
+    });
     it("preserves multilingual comment styling across wrapping and PDF rendering", async () => {
         const columns = [
             { language: ContentLanguage.English, content: "Comment instruction" },

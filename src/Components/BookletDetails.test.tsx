@@ -6,6 +6,7 @@ import { ContentLanguage, ContentType } from "../Providers/HymnsDataProvider/Mod
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { strings } from "../l8n";
 import BookletDetails, { getSelectedBookletServices } from "./BookletDetails";
+import { UserSettingsContext } from "../Contexts/UserSettingsContext";
 
 jest.mock("axios", () => ({ create: jest.fn() }));
 
@@ -28,10 +29,11 @@ const generator = generateSeasonBookletPdf as jest.MockedFunction<typeof generat
 const createUrl = jest.fn(() => "blob:booklet-preview");
 const revokeUrl = jest.fn();
 
-async function openBuilder() {
-    const result = render(<MemoryRouter initialEntries={["/Booklets/annual"]}><Routes>
+async function openBuilder(settings?: React.ContextType<typeof UserSettingsContext>) {
+    const content = <MemoryRouter initialEntries={["/Booklets/annual"]}><Routes>
         <Route path="/Booklets/:bookletId" element={<BookletDetails />} />
-    </Routes></MemoryRouter>);
+    </Routes></MemoryRouter>;
+    const result = render(settings ? <UserSettingsContext.Provider value={settings}>{content}</UserSettingsContext.Provider> : content);
     await screen.findByRole("heading", { name: "Build your booklet" });
     return result;
 }
@@ -136,8 +138,10 @@ describe("booklet builder", () => {
         expect(within(hymn).getByRole("checkbox", { name: "Text words (Text)" })).toBeChecked();
         expect(first).not.toBeChecked();
         expect(second).not.toBeChecked();
-        fireEvent.click(screen.getByRole("checkbox", { name: "Vespers", exact: true }));
         fireEvent.click(screen.getByRole("button", { name: "All Formats" }));
+        expect(first).toBeChecked();
+        expect(second).toBeChecked();
+        fireEvent.click(screen.getByRole("checkbox", { name: "Vespers", exact: true }));
         fireEvent.click(second);
         expect(second).toBeChecked();
         expect(first).not.toBeChecked();
@@ -204,7 +208,7 @@ describe("booklet builder", () => {
         const { container } = await openBuilder();
         const labels = ["Text Only", "Hazzat", "Vertical Hazzat", "Musical Notes", "Text + Hazzat", "Text + Vertical Hazzat", "All Formats"];
         const choices = [["Text"], ["Hazzat"], ["Vertical Hazzat"], ["Musical Notes"], ["Text", "Hazzat"], ["Text", "Vertical Hazzat"], ["Text", "Hazzat", "Vertical Hazzat", "Musical Notes"]];
-        expect(Array.from(container.querySelectorAll('.bookletChoice')).map(button => button.textContent)).toEqual(labels);
+        expect(Array.from(container.querySelectorAll('.bookletPresetRow > .bookletChoice')).map(button => button.textContent)).toEqual(labels);
         const global = container.querySelector('fieldset > .bookletFormatChoices') as HTMLElement;
         labels.forEach((label, i) => {
             fireEvent.click(screen.getByRole("button", { name: label, exact: true }));
@@ -216,8 +220,57 @@ describe("booklet builder", () => {
         const onlyMusic = { ...service, hymns: [{ ...service.hymns![0], formats: [{ id: "4", name: "Musical Notes", order: 4, variationCount: 1, variations: [{ id: "score", name: "Score", displayName: "Score", content: { contentType: ContentType.MusicalNotesContent, musicXml: "<score-partwise />" } }] }] }] };
         jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue([onlyMusic]);
         await openBuilder();
-        expect(screen.getByRole("button", { name: "Musical Notes", exact: true })).toHaveAttribute("aria-pressed", "true");
+        expect(screen.getByRole("button", { name: "Musical Notes", exact: true })).not.toHaveAttribute("aria-pressed");
+        expect(screen.getByRole("status")).toHaveTextContent("Selection: Musical Notes");
         expect(screen.queryByRole("button", { name: "Text Only" })).not.toBeInTheDocument();
         expect(screen.getByRole("button", { name: "Review booklet" })).toBeEnabled();
+    });
+
+    it("treats presets as apply actions and derives Custom selection from actual content", async () => {
+        const multiple = JSON.parse(JSON.stringify(service)) as IServiceInfo;
+        multiple.hymns![0].formats![1].variations!.push({ ...multiple.hymns![0].formats![1].variations![0], id: "alternate", displayName: "Alternative" });
+        jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue([multiple]);
+        const { container } = await openBuilder();
+        expect(screen.getByRole("status")).toHaveTextContent("Selection: Text + Hazzat");
+        expect(container.querySelectorAll('.bookletChoice[aria-pressed]')).toHaveLength(0);
+        fireEvent.click(screen.getByRole("checkbox", { name: "Notation (Hazzat)" }));
+        expect(screen.getByRole("status")).toHaveTextContent("Custom selection");
+        expect(screen.getByRole("status")).toHaveTextContent("Started with Text + Hazzat");
+        fireEvent.click(screen.getByRole("checkbox", { name: "Notation (Hazzat)" }));
+        expect(screen.getByRole("status")).toHaveTextContent("Selection: Text + Hazzat");
+        fireEvent.click(screen.getByRole("checkbox", { name: "First hymn", exact: true }));
+        expect(screen.getAllByRole("status")[0]).toHaveTextContent("Custom selection");
+        fireEvent.click(screen.getByRole("button", { name: "Text + Hazzat", exact: true }));
+        expect(screen.getByRole("checkbox", { name: "First hymn", exact: true })).toBeChecked();
+        expect(screen.getByRole("status")).toHaveTextContent("Selection: Text + Hazzat");
+        fireEvent.click(screen.getByRole("button", { name: "All Formats", exact: true }));
+        expect(screen.getByRole("status")).toHaveTextContent("Selection: All Formats");
+    });
+
+    it("keeps booklet colors independent, copies reader preferences explicitly and invalidates stale PDFs", async () => {
+        const settings = { userSettings: { contentFontColor: "NAVY", hazzatFontColor: "MAROON", englishFontSize: "18px", arabicFontSize: "22px" },
+            setContentFontColor: jest.fn(), setHazzatFontColor: jest.fn(), setContentFontSize: jest.fn() };
+        await openBuilder(settings);
+        const advanced = screen.getByText("Advanced options · Appearance").closest("details")!;
+        expect(advanced).not.toHaveAttribute("open");
+        fireEvent.click(screen.getByText("Advanced options · Appearance"));
+        const text = within(screen.getByRole("group", { name: "Text color", exact: true }));
+        const notes = within(screen.getByRole("group", { name: "Hazzat color", exact: true }));
+        expect(text.getByRole("radio", { name: "Black" })).toBeChecked();
+        expect(notes.getByRole("radio", { name: "Black" })).toBeChecked();
+        fireEvent.click(screen.getByRole("button", { name: "Use my website colors" }));
+        expect(text.getByRole("radio", { name: "Navy" })).toBeChecked();
+        expect(notes.getByRole("radio", { name: "Maroon" })).toBeChecked();
+        expect(screen.getByRole("status")).toHaveTextContent("Selection: Text + Hazzat");
+        fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+        await screen.findByRole("link", { name: "Download PDF" });
+        expect(generator).toHaveBeenLastCalledWith(expect.objectContaining({ appearance: { textColor: "NAVY", hazzatColor: "MAROON" } }));
+        fireEvent.click(text.getByRole("radio", { name: "Black" }));
+        expect(screen.queryByRole("link", { name: "Download PDF" })).not.toBeInTheDocument();
+        expect(revokeUrl).toHaveBeenCalledWith("blob:booklet-preview");
+        expect(notes.getByRole("radio", { name: "Maroon" })).toBeChecked();
+        expect(settings.setContentFontColor).not.toHaveBeenCalled();
+        expect(settings.setHazzatFontColor).not.toHaveBeenCalled();
+        expect(settings.userSettings.contentFontColor).toBe("NAVY");
     });
 });

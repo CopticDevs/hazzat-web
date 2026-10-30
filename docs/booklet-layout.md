@@ -1,5 +1,9 @@
 # Booklet ornaments and published content
 
+Booklet appearance controls are independent of reader preferences. Both ink choices default to black. Users can choose Black, Maroon, or Navy separately for text and Hazzat, or explicitly copy their website color choices. Text ink covers English, Coptic, and Arabic words, including words within notation. Hazzat ink covers regular and vertical notation in both writing directions. PDF ink uses fixed colors on white paper in either website theme; headings, ornaments, score images, and the existing comment styling retain their own appearance. Changing appearance invalidates the previous PDF preview.
+
+Presets are apply actions, with no persistent pressed state. Applying one replaces the content selection with its complete available starting selection. The status compares the actual included variation IDs with those complete presets, showing “Custom selection” for individual changes and the preset name when restored exactly. Equivalent presets retain the most recently applied name. Color and layout changes do not change the content-selection status.
+
 Every season cover includes “Hymns” (for example, “Kiahk Hymns”), with the corresponding Arabic wording. Existing Passion Week title shortening is preserved, and titles that already include “Hymns” are not duplicated.
 
 Arabic booklets use “جدول المحتويات” for the contents heading. Contents rows place titles on the right, with hymn indentation from the right, followed by Arabic-Indic page numbers in the left column. Arabic headings use the embedded Arabic font, with Latin text and punctuation falling back to a compatible font; parentheses are mirrored for right-to-left placement.
