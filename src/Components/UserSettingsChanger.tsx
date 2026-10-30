@@ -7,10 +7,11 @@ import { readerColor, UserSettingsContext } from "../Contexts/UserSettingsContex
 import { LanguageContext } from "../LanguageContext";
 import { strings } from "../l8n";
 import "./UserSettingsChanger.css";
+import ContentLanguageChoices from "./ContentLanguageChoices";
 
 export default function UserSettingsChanger() {
     const { languageProperties } = useContext(LanguageContext);
-    const { userSettings, setHazzatFontColor, setContentFontColor, setContentFontSize } = useContext(UserSettingsContext);
+    const { userSettings, setHazzatFontColor, setContentFontColor, setContentFontSize, setContentLanguages } = useContext(UserSettingsContext);
     const [expanded, setExpanded] = useState(false);
     const size = parseFloat(userSettings.englishFontSize) || 18;
     const options = [{ value: "BLACK", label: strings.black }, { value: "MAROON", label: strings.maroon }, { value: "NAVY", label: strings.navy }];
@@ -22,6 +23,7 @@ export default function UserSettingsChanger() {
         <Modal animation={false} show={expanded} onHide={() => setExpanded(false)} aria-labelledby="reader-settings-title" className={languageProperties.isRtl ? "dirRtl" : "dirLtr"}>
             <Modal.Header closeButton closeLabel={strings.close}><Modal.Title id="reader-settings-title">{strings.settings}</Modal.Title></Modal.Header>
             <Modal.Body className="reader-settings">
+                <ContentLanguageChoices included={userSettings.contentLanguages} onChange={setContentLanguages} hint={strings.readerLanguagesHint} />
                 <fieldset><legend>{strings.size}</legend>
                     <div className="reader-size-controls">
                         <Button variant="light" className="size-button" aria-label={strings.decreaseTextSize} disabled={size <= AppSettings.minContentTextSize}

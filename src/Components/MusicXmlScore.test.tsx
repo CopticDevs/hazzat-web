@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import MusicXmlScore from "./MusicXmlScore";
 import UserSettingsChanger from "./UserSettingsChanger";
+import { contentLanguages } from "../ContentLanguages";
 import { UserSettingsContext } from "../Contexts/UserSettingsContext";
 
 const mockInstances: any[] = [];
@@ -18,7 +19,7 @@ let width = 320;
 let resized: () => void;
 const disconnect = jest.fn();
 const sizeSetter = jest.fn();
-const value = (size: number) => ({ userSettings: { englishFontSize: `${size}px`, arabicFontSize: `${size + 4}px`, contentFontColor: "BLACK", hazzatFontColor: "BLACK" }, setContentFontSize: sizeSetter, setContentFontColor: jest.fn(), setHazzatFontColor: jest.fn() });
+const value = (size: number) => ({ userSettings: { englishFontSize: `${size}px`, arabicFontSize: `${size + 4}px`, contentFontColor: "BLACK", hazzatFontColor: "BLACK", contentLanguages: [...contentLanguages] }, setContentFontSize: sizeSetter, setContentFontColor: jest.fn(), setHazzatFontColor: jest.fn(), setContentLanguages: jest.fn() });
 const score = (size = 18, xml = "<score-partwise />") => <UserSettingsContext.Provider value={value(size)}><MusicXmlScore musicXml={xml} /></UserSettingsContext.Provider>;
 
 beforeEach(() => {

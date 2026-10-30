@@ -9,6 +9,7 @@ import {
     calculateTocPageCount,
     generateSeasonBookletPdf,
     getBookletSections,
+    filterBookletServicesLanguages,
     getBookletFileName,
     hasBookletVariationContent,
     layoutBookletTextTable,
@@ -157,6 +158,52 @@ function createService(): IServiceInfo {
 }
 
 describe("BookletPdfGenerator", () => {
+    it.each(["display", "print"] as const)("filters booklet languages before pagination and omits format labels (%s)", async layoutKind => {
+        const service = withText();
+        const original = JSON.stringify(service);
+        const filtered = filterBookletServicesLanguages([service], [ContentLanguage.Arabic]);
+        expect(filtered[0].hymns![0].formats!.map(format => format.id)).toEqual(["1", "2", "3"]);
+        const text = filtered[0].hymns![0].formats!.find(format => format.id === "1")!.variations![0].content as ITextContent;
+        expect(text.paragraphs[0].columns.map(column => column.language)).toEqual([ContentLanguage.Arabic]);
+        expect(filterBookletServicesLanguages([service], [])).toEqual([]);
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text", "regular", "vertical"], layoutKind,
+                languages: [ContentLanguage.Arabic], fontSources: createFontSources(), imageSources: createImageSources() });
+            const words = draws.mock.calls.map(([text]) => text);
+            expect(words).not.toContain("Mercy");
+            expect(words).not.toContain("Lord");
+            expect(words.some(word => /[\u0600-\u06ff]/.test(word))).toBe(true);
+            expect(words).not.toEqual(expect.arrayContaining(["TEXT", "HAZZAT", "VERTICAL HAZZAT"]));
+            expect(words.filter(word => ["TEXT", "HAZZAT", "VERTICAL HAZZAT"].includes(word))).toEqual([]);
+            expect(JSON.stringify(service)).toBe(original);
+        } finally { draws.mockRestore(); }
+    });
+
+    it.each(["hymn", "format"] as const)("keeps wrapped hymn headings with their opening content (%s grouping)", async groupingKind => {
+        const service = withText();
+        const base = service.hymns![0];
+        service.hymns = Array.from({ length: 12 }, (_, index) => ({ ...base, id: `hymn-${index}`, order: index,
+            displayName: `Heading${index} with a sufficiently long name to wrap across multiple lines of the page`,
+            formats: [{ ...base.formats!.find(format => format.id === "1")!, variations: [{ id: "verse", name: "Verse", displayName: "Verse", content: {
+                contentType: ContentType.TextContent, paragraphs: [{ columns: [{ language: ContentLanguage.English,
+                    content: `Body${index} ` + "mercy upon us ".repeat(20 + index * 5) }] }]
+            } }] }]
+        }));
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text"], groupingKind, layoutKind: "display",
+                fontSources: createFontSources(), imageSources: { ...createImageSources(), serviceDivider: readImage("bookletBackCoverBackground.jpg") } });
+            for (let index = 0; index < 12; index++) {
+                const heading = draws.mock.calls.findIndex(([text, options]) => text.startsWith(`Heading${index} `) && options?.size === 11.5);
+                const body = draws.mock.calls.findIndex(([text]) => text === `Body${index}`);
+                expect(heading).toBeGreaterThan(-1);expect(body).toBeGreaterThan(-1);
+                expect(draws.mock.instances[heading]).toBe(draws.mock.instances[body]);
+                expect(draws.mock.calls[body][1]!.x).toBe(24);
+            }
+            expect(draws.mock.calls.filter(([text]) => text === "Text")).toEqual([]);
+        } finally { draws.mockRestore(); }
+    });
     it.each(["display", "print"] as const)("exports independent text and notation colors while keeping comments distinct (%s)", async layoutKind => {
         const service = withText();
         service.hymns![0].formats![0].variations![0].content = { contentType: ContentType.TextContent, paragraphs: [
@@ -283,7 +330,7 @@ describe("BookletPdfGenerator", () => {
         const lines = jest.spyOn(PDFPage.prototype, "drawLine");
         try {
             await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text"], layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
-            expect(lines.mock.calls.some(([line]) => line.start.y === line.end.y && line.start.x === 36 && line.end.x === 360 && line.thickness === .35)).toBe(false);
+            expect(lines.mock.calls.some(([line]) => line.start.y === line.end.y && line.start.x === 24 && line.end.x === 372 && line.thickness === .35)).toBe(false);
             expect(lines.mock.calls.filter(([line]) => line.thickness === .7).length).toBeGreaterThanOrEqual(4);
         } finally { lines.mockRestore(); }
     });
@@ -299,7 +346,7 @@ describe("BookletPdfGenerator", () => {
         expect(table.rows[0].columns.map(words)).toEqual(["Mercy", "Nai", "ارحمنا"]);
         expect(table.rows[1].columns.map(words)).toEqual(["Next paragraph"]);
         expect(table.rows[1].languages).toEqual([ContentLanguage.English]);
-        expect(table.rows[1].columnWidth).toBe(324);
+        expect(table.rows[1].columnWidth).toBe(348);
         expect(table.rows.flatMap(row => row.columns.flat(2)).map(run => run.text)).not.toEqual(expect.arrayContaining(["ENGLISH", "COPTIC", "ARABIC"]));
     });
 
@@ -317,7 +364,7 @@ describe("BookletPdfGenerator", () => {
             [ContentLanguage.Coptic, ContentLanguage.Arabic], [ContentLanguage.English, ContentLanguage.Coptic, ContentLanguage.Arabic],
             [ContentLanguage.Arabic], [ContentLanguage.English, ContentLanguage.Coptic]
         ]);
-        expect(table.rows.map(row => row.columnWidth)).toEqual([100, 324, 156, 100, 324, 156]);
+        expect(table.rows.map(row => row.columnWidth)).toEqual([108, 348, 168, 108, 348, 168]);
     });
 
     it.each([
@@ -329,7 +376,7 @@ describe("BookletPdfGenerator", () => {
         const table = layoutBookletTextTable(content, createFakeFonts());
         expect(table.rows.map(row => row.languages.length)).toEqual(counts);
         table.rows.filter(row => row.languages.length === 1).forEach(row => {
-            expect(row.columnWidth).toBe(324);
+            expect(row.columnWidth).toBe(348);
             expect(row.languages).toEqual([file.startsWith("asomen") ? ContentLanguage.Coptic : ContentLanguage.English]);
         });
         expect(JSON.stringify(content)).toBe(original);
