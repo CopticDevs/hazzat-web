@@ -9,8 +9,8 @@ import hazzatFontUrl from "../fonts/hazzat1_10a.ttf";
 import arabicFontUrl from "../fonts/NotoNaskhArabic-Regular.ttf";
 import trajanFontUrl from "../fonts/TrajanPro-Regular.ttf";
 import bookletLogoUrl from "../images/logo.svg";
-import bookletFrontCoverBackgroundUrl from "../images/bookletFrontCoverBackground.jpg";
-import bookletBackCoverBackgroundUrl from "../images/bookletBackCoverBackground.jpg";
+import bookletCoverPaperUrl from "../images/bookletIlluminatedBackground.png";
+import { drawCoverFrame, drawCoverVine } from "./BookletCoverArtwork";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
@@ -20,6 +20,7 @@ import { BookletScorePage, renderBookletMusic } from "./BookletMusicRenderer";
 import bookletServiceDividerUrl from "../images/bookletServiceDivider.svg";
 import bookletVariationDividerUrl from "../images/crossline.svg";
 import { BookletAppearance, bookletColors, defaultBookletAppearance, normalizeBookletColor } from "./BookletAppearance";
+import { filterContentLanguages } from "../ContentLanguages";
 
 export type BookletFormatKind = "text" | "regular" | "vertical" | "musical";
 export type BookletLayoutKind = "display" | "print";
@@ -44,6 +45,7 @@ export interface GenerateBookletPdfOptions {
     imageSources?: BookletImageSources;
     generatedAt?: Date;
     appearance?: Partial<BookletAppearance>;
+    languages?: ContentLanguage[];
 }
 
 export type FontKey =
@@ -104,7 +106,6 @@ interface FrontCoverImages {
 
 interface BackCoverImages {
     background?: PDFImage;
-    logo?: BookletLogo;
 }
 
 interface VectorBookletLogo { width: number; height: number; paths: string[]; }
@@ -114,23 +115,22 @@ const LOGICAL_PAGE_WIDTH = 396;
 const LOGICAL_PAGE_HEIGHT = 612;
 const PRINT_PAGE_WIDTH = 792;
 const PRINT_PAGE_HEIGHT = 612;
-const PAGE_MARGIN_X = 36;
-const PAGE_TOP = 48;
-const PAGE_BOTTOM = 42;
+const PAGE_MARGIN_X = 24;
+const PAGE_TOP = 36;
+const PAGE_BOTTOM = 30;
 const CONTENT_WIDTH = LOGICAL_PAGE_WIDTH - (PAGE_MARGIN_X * 2);
 const BODY_FONT_SIZE = 10.5;
 const HAZZAT_FONT_SIZE = 10.5;
 const ARABIC_FONT_SIZE = 12;
 const TOC_LINE_HEIGHT = 13;
-const COVER_TITLE_RULE_Y = 190;
-const COVER_TITLE_MAX_WIDTH = 300;
-const COVER_TITLE_BASE_SIZE = 37;
-const COVER_TITLE_MIN_SIZE = 22;
+const COVER_TITLE_RULE_Y = 315;
+const COVER_TITLE_MAX_WIDTH = 230;
+const COVER_TITLE_BASE_SIZE = 30;
+const COVER_TITLE_MIN_SIZE = 18;
 
 const black = rgb(0, 0, 0);
 const gray = rgb(0.35, 0.35, 0.35);
 const lightGray = rgb(0.78, 0.78, 0.78);
-const coverTextGray = rgb(0.27, 0.27, 0.27);
 
 const defaultBookletFontSources: Omit<Record<FontKey, BookletFontSource>, "english"> = {
     title: trajanFontUrl,
@@ -143,10 +143,9 @@ const defaultBookletFontSources: Omit<Record<FontKey, BookletFontSource>, "engli
     hazzatVerticalArabic: hazzatVerticalArabicFontUrl
 };
 const defaultBookletImageSources: BookletImageSources = {
-    frontCoverBackground: bookletFrontCoverBackgroundUrl,
+    frontCoverBackground: bookletCoverPaperUrl,
     frontCoverLogo: bookletLogoUrl,
-    backCoverBackground: bookletBackCoverBackgroundUrl,
-    backCoverLogo: bookletLogoUrl,
+    backCoverBackground: bookletCoverPaperUrl,
     serviceDivider: bookletServiceDividerUrl,
     variationDivider: bookletVariationDividerUrl
 };
@@ -180,6 +179,17 @@ export interface BookletSection {
     hymn: IHymnInfo;
     format: IFormatInfo;
     formatKind: BookletFormatKind;
+}
+
+export function filterBookletServicesLanguages(services: IServiceInfo[], languages: ContentLanguage[]): IServiceInfo[] {
+    return services.map(service => ({ ...service, hymns: (service.hymns || []).map(hymn => ({ ...hymn,
+        formats: (hymn.formats || []).map(format => ({ ...format, variations: (format.variations || []).map(variation => ({
+            ...variation, content: filterContentLanguages(variation.content, languages)
+        })) })).map(format => ({ ...format, variations: format.variations.filter(variation => {
+            const kind = bookletFormatKinds.find(value => getFormatId(value) === format.id);
+            return !!kind && hasBookletVariationContent(variation, kind);
+        }) })).filter(format => format.variations.length > 0)
+    })).filter(hymn => hymn.formats.length > 0) })).filter(service => service.hymns.length > 0);
 }
 
 export function getBookletSections(services: IServiceInfo[], kinds: BookletFormatKind[], grouping: BookletGroupingKind = "hymn"): BookletSection[] {
@@ -385,6 +395,7 @@ function sanitizeTextForFont(text: string, fontKey: FontKey): string {
 }
 
 export async function generateSeasonBookletPdf(options: GenerateBookletPdfOptions): Promise<Uint8Array> {
+    if (options.languages) options = { ...options, services: filterBookletServicesLanguages(options.services, options.languages) };
     const scores = new Map<string, Promise<BookletScorePage[]>>();
     let logicalResult = await renderLogicalBooklet(options, 1, scores);
     const requiredTocPageCount = calculateTocPageCount(logicalResult.tocEntries.length);
@@ -438,25 +449,25 @@ async function renderLogicalBooklet(options: GenerateBookletPdfOptions, tocPageC
             const { service, hymn, format, formatKind } = sections[sectionIndex];
             const next = sections[sectionIndex + 1];
             const endsService = !next || next.service !== service || (options.groupingKind === "format" && next.formatKind !== formatKind);
-            if (formatKind === "musical") writer.ensureSpace(LOGICAL_PAGE_HEIGHT - PAGE_TOP - PAGE_BOTTOM);
             const newGroup = options.groupingKind === "format" && previousKind !== formatKind;
-            if (newGroup) {
-                writer.drawHeading(getPdfFormatName(formatKind), 16, 12, false);
-            }
-            if (service !== previousService || newGroup) {
-                writer.ensureSpace(100);
+            const newService = service !== previousService || newGroup;
+            const newHymn = hymn !== previousHymn || newService;
+            const showHymn = newHymn || formatKind === "musical";
+            const variations = getOrderedBookletVariations(format).filter(variation => hasBookletVariationContent(variation, formatKind));
+            writer.reservedBottom = writer.serviceDivider && endsService && variations.length === 1 ? 110 : 40;
+            if (formatKind === "musical" && writer.cursorY < LOGICAL_PAGE_HEIGHT - PAGE_TOP) writer.addPage("content");
+            const headingHeight = (newService ? measureHeading(writer, service.displayName || service.name, 15, 12, false) : 0)
+                + (showHymn ? measureHeading(writer, hymn.displayName || hymn.name, 11.5, 10) : 0);
+            const variationTitleHeight = variations.length > 1 ? measureVariationTitle(writer, variations[0]) : 0;
+            writer.ensureSpace(headingHeight + variationTitleHeight + measureOpeningContent(writer, variations[0], formatKind) + 2);
+            if (newService) {
                 tocEntries.push({ title: service.displayName || service.name, pageNumber: writer.pageNumber, level: "service" });
                 writer.drawHeading(service.displayName || service.name, 15, 12, false);
             }
-            if (hymn !== previousHymn || service !== previousService || newGroup) {
-                writer.ensureSpace(90);
-                const suffix = options.groupingKind === "format" ? ` - ${getPdfFormatName(formatKind)}` : "";
-                tocEntries.push({ title: (hymn.displayName || hymn.name) + suffix, pageNumber: writer.pageNumber, level: "hymn" });
-                writer.drawHeading(hymn.displayName || hymn.name, 11.5, 10);
-            } else if (formatKind === "musical") {
-                writer.drawHeading(hymn.displayName || hymn.name, 11.5, 10);
+            if (newHymn) {
+                tocEntries.push({ title: hymn.displayName || hymn.name, pageNumber: writer.pageNumber, level: "hymn" });
             }
-            if (kinds.length > 1 && options.groupingKind !== "format") writer.drawLanguageMarker(getPdfFormatName(formatKind), false);
+            if (showHymn) writer.drawHeading(hymn.displayName || hymn.name, 11.5, 10);
             await addFormatContent(writer, format, formatKind, scores, endsService);
             if (endsService) writer.drawServiceDivider();
             writer.cursorY -= 8;
@@ -552,12 +563,7 @@ async function embedBackCoverImages(doc: PDFDocument, imageSources: BookletImage
         ...defaultBookletImageSources,
         ...imageSources
     };
-    const [background, logo] = await Promise.all([
-        tryEmbedImage(doc, sources.backCoverBackground),
-        tryEmbedLogo(doc, sources.backCoverLogo)
-    ]);
-
-    return { background, logo };
+    return { background: await tryEmbedImage(doc, sources.backCoverBackground) };
 }
 
 async function tryEmbedLogo(doc: PDFDocument, source?: BookletImageSource): Promise<BookletLogo | undefined> {
@@ -584,7 +590,7 @@ function drawBookletLogo(page: PDFPage, logo: BookletLogo, x: number, y: number,
     const height = width * logo.height / logo.width;
     if ("paths" in logo) {
         logo.paths.forEach(path => page.drawSvgPath(path, {
-            x, y: y + height, scale: width / logo.width, color: rgb(48 / 255, 48 / 255, 48 / 255), opacity
+            x, y: y + height, scale: width / logo.width, color: black, opacity
         }));
     } else {
         page.drawImage(logo, { x, y, width, height, opacity });
@@ -720,6 +726,12 @@ async function loadSourceBytes(source: BookletFontSource | BookletImageSource, l
 }
 
 class BookletWriter {
+    private textTables = new WeakMap<ITextContent, BookletTextTable>();
+    public textTable(content: ITextContent): BookletTextTable {
+        let table = this.textTables.get(content);
+        if (!table) { table = layoutBookletTextTable(content, this.fonts); this.textTables.set(content, table); }
+        return table;
+    }
     public reservedBottom = 0;
     public serviceDivider?: PDFImage;
     public variationDivider?: BookletLogo;
@@ -743,7 +755,7 @@ class BookletWriter {
     }
 
     public ensureSpace(height: number) {
-        if (this.cursorY - height < PAGE_BOTTOM + this.reservedBottom) {
+        if (this.cursorY - height < PAGE_BOTTOM + this.reservedBottom - .01) {
             this.addPage("content");
         }
     }
@@ -844,61 +856,51 @@ class BookletWriter {
 
 function drawCover(writer: BookletWriter, season: ISeasonInfo, images: FrontCoverImages) {
     writer.addPage("cover");
-    const hasBackground = !!images.background;
-
-    if (hasBackground && images.background) {
-        drawImageCover(writer.page, images.background, 0, 0, LOGICAL_PAGE_WIDTH, LOGICAL_PAGE_HEIGHT, 1);
-    }
-
+    drawCoverFrame(writer.page, images.background);
     if (images.logo) {
-        const logoWidth = 142;
-        drawBookletLogo(writer.page, images.logo, (LOGICAL_PAGE_WIDTH - logoWidth) / 2, LOGICAL_PAGE_HEIGHT - 132, logoWidth);
-    } else if (!hasBackground) {
-        writer.drawCenteredText("Hazzat", "title", 22, 500);
-        writer.drawCenteredText("Coptic Hymnology", "english", 9, 484, gray);
+        const width = 142;
+        drawBookletLogo(writer.page, images.logo, (LOGICAL_PAGE_WIDTH - width) / 2, 612 - 124 - width * images.logo.height / images.logo.width, width);
+    } else {
+        writer.drawCenteredText("Hazzat.com", "title", 18, 445, black);
     }
-
-    if (!hasBackground) {
-        writer.page.drawLine({
-            start: { x: 48, y: COVER_TITLE_RULE_Y },
-            end: { x: LOGICAL_PAGE_WIDTH - 48, y: COVER_TITLE_RULE_Y },
-            thickness: 0.75,
-            color: gray
-        });
-    }
+    drawCoverVine(writer.page, 129, 431, 138);
 
     drawCoverTitle(writer, season);
 }
 
 function drawCoverTitle(writer: BookletWriter, season: ISeasonInfo) {
     const title = getCoverDisplayTitle(season);
-    const font = arabicUnicodePattern.test(title) ? writer.fonts.arabic : writer.fonts.english;
+    const arabic = arabicUnicodePattern.test(title);
+    const font = arabic ? writer.fonts.arabic : writer.fonts.title;
     const { lines, size } = fitCoverTitle(title, font);
-    const lineHeight = size * 1.08;
-    let y = COVER_TITLE_RULE_Y + 18 + ((lines.length - 1) * lineHeight);
-
+    const lineHeight = size * (arabic ? 1.7 : 1.35);
+    // Align the title block with the approved cover; keep long seasonal names inside the arch.
+    let y = COVER_TITLE_RULE_Y;
     lines.forEach(line => {
-        drawPlainHeadingLine(writer.page, writer.fonts, line, "english", size, 0, LOGICAL_PAGE_WIDTH, y, coverTextGray, true);
+        drawPlainHeadingLine(writer.page, writer.fonts, line, "title", size, 0, LOGICAL_PAGE_WIDTH, y, black, true);
         y -= lineHeight;
     });
-    drawSpacedCenteredText(writer.page, writer.fonts.english, "HAZZAT", 10.5, COVER_TITLE_RULE_Y - 27, coverTextGray, 21);
+    if (arabic) drawPlainHeadingLine(writer.page, writer.fonts, "علم الألحان القبطية", "arabic", 12, 0, LOGICAL_PAGE_WIDTH, 217, black, true);
+    else drawSpacedCenteredText(writer.page, writer.fonts.english, "COPTIC HYMNOLOGY", 8.5, 217, black, 1.6);
 }
 
 function fitCoverTitle(title: string, font: PDFFont): { lines: string[]; size: number } {
+    const arabic = arabicUnicodePattern.test(title);
+    const prefix = title.match(/^(الألحان|ألحان)\s+(.+)$/);
+    const wrap = (size: number) => prefix
+        ? [prefix[1], ...wrapPlainText(prefix[2], font, size, COVER_TITLE_MAX_WIDTH)]
+        : / Hymns$/i.test(title)
+            ? [...wrapPlainText(title.replace(/ Hymns$/i, ""), font, size, COVER_TITLE_MAX_WIDTH), "Hymns"]
+            : wrapPlainText(title, font, size, COVER_TITLE_MAX_WIDTH);
     for (let size = COVER_TITLE_BASE_SIZE; size >= COVER_TITLE_MIN_SIZE; size -= 1) {
-        const lines = wrapPlainText(title, font, size, COVER_TITLE_MAX_WIDTH);
-        if (lines.length <= 2 && lines.every(line => safeTextWidth(font, line, size) <= COVER_TITLE_MAX_WIDTH)) {
-            return { lines, size };
-        }
+        const lines = wrap(size);
+        if (lines.length <= 3 && (lines.length - 1) * size * (arabic ? 1.7 : 1.35) <= 80 &&
+            lines.every(line => safeTextWidth(font, line, size) <= COVER_TITLE_MAX_WIDTH)) return { lines, size };
     }
-
-    const lines = wrapPlainText(title, font, COVER_TITLE_MIN_SIZE, COVER_TITLE_MAX_WIDTH)
-        .slice(0, 2);
-    const lastLine = lines[lines.length - 1];
-    if (lastLine) {
-        lines[lines.length - 1] = truncateToWidth(lastLine, font, COVER_TITLE_MIN_SIZE, COVER_TITLE_MAX_WIDTH);
-    }
-
+    const wrapped = wrap(COVER_TITLE_MIN_SIZE);
+    const lines = wrapped.length <= 3 ? wrapped : / Hymns$/i.test(title)
+        ? [wrapped[0], truncateToWidth(wrapped.slice(1, -1).join(" "), font, COVER_TITLE_MIN_SIZE, COVER_TITLE_MAX_WIDTH), "Hymns"]
+        : [wrapped[0], wrapped[1], truncateToWidth(wrapped.slice(2).join(" "), font, COVER_TITLE_MIN_SIZE, COVER_TITLE_MAX_WIDTH)];
     return { lines, size: COVER_TITLE_MIN_SIZE };
 }
 
@@ -968,8 +970,45 @@ function drawInsideFrontCover(writer: BookletWriter, generatedAt: Date) {
     writer.drawCenteredText(`Generated ${formatGeneratedMonthYear(generatedAt)}`, "english", 9, 72, gray);
 }
 
-function getPdfFormatName(kind: BookletFormatKind): string {
-    return kind === "musical" ? "Musical Notes" : kind === "text" ? "Text" : kind === "regular" ? "Hazzat" : "Vertical Hazzat";
+function measureHeading(writer: BookletWriter, text: string, size: number, extraSpace: number, showRule = true): number {
+    const font = arabicUnicodePattern.test(text) ? writer.fonts.arabic : writer.fonts.title;
+    return wrapPlainText(text, font, size, CONTENT_WIDTH).length * (size + 5)
+        + (showRule ? 8 + Math.max(12, extraSpace) : Math.max(4, extraSpace / 3));
+}
+
+function measureVariationTitle(writer: BookletWriter, variation: BookletContentVariation): number {
+    const text = variation.displayName || variation.name;
+    return wrapPlainText(text, arabicUnicodePattern.test(text) ? writer.fonts.arabic : writer.fonts.title, 9.5, CONTENT_WIDTH).length * 12 + 4;
+}
+
+function measureOpeningContent(writer: BookletWriter, variation: BookletContentVariation, kind: BookletFormatKind): number {
+    if (kind === "musical") return 100;
+    if (kind === "text") {
+        let height = 0;
+        for (const row of writer.textTable(variation.content as ITextContent).rows) {
+            const lineHeight = row.languages.includes(ContentLanguage.Arabic) ? ARABIC_FONT_SIZE * 1.45 : BODY_FONT_SIZE * 1.45;
+            const count = Math.max(...row.columns.map(column => column.length));
+            const isComment = row.columns.flat(2).some(run => run.isComment);
+            height += (isComment ? count : Math.min(2, count)) * lineHeight + 12;
+            if (!isComment) break;
+        }
+        return Math.min(height + 6, 160);
+    }
+    const blocks = getLanguageHtmlBlocks(variation, kind);
+    const first = blocks[0];
+    if (!first) return 0;
+    const lines = parseHazzatHtmlToLines(first.html, first.defaultFontKey);
+    let height = 0, visibleLines = 0;
+    for (const line of lines) {
+        if (!line.some(run => run.text.trim())) { height += HAZZAT_FONT_SIZE + 3; continue; }
+        const sized = line.map(run => ({ ...run, size: getRunFontSize(run.fontKey) * (run.isComment ? .9 : 1) }));
+        for (const wrapped of wrapRuns(sized, writer.fonts, CONTENT_WIDTH)) {
+            height += Math.max(...wrapped.map(run => run.size)) * 1.35;
+            if (++visibleLines >= 2) break;
+        }
+        if (visibleLines >= 2) break;
+    }
+    return Math.max(height + (shouldDrawLanguageMarker(blocks) ? 22 : 0) + 6, shouldDrawLanguageMarker(blocks) ? 60 : 0);
 }
 
 async function addFormatContent(writer: BookletWriter, format: IFormatInfo, formatKind: BookletFormatKind, scores: Map<string, Promise<BookletScorePage[]>>, endsService: boolean) {
@@ -981,8 +1020,8 @@ async function addFormatContent(writer: BookletWriter, format: IFormatInfo, form
         const ornamentSpace = writer.serviceDivider && endsService && variationIndex === variations.length - 1 ? 110 : 40;
         const followedByServiceDivider = endsService && variationIndex === variations.length - 1;
         writer.reservedBottom = ornamentSpace;
+        writer.ensureSpace((variations.length > 1 ? measureVariationTitle(writer, variation) : 0) + measureOpeningContent(writer, variation, formatKind) + 2);
         if (variations.length > 1) {
-            writer.ensureSpace(32);
             drawWrappedPlainText(writer, variation.displayName || variation.name, "title", 9.5, 12, gray, false);
             writer.cursorY -= 4;
         }
@@ -1016,6 +1055,7 @@ async function addFormatContent(writer: BookletWriter, format: IFormatInfo, form
         const showLanguageMarkers = shouldDrawLanguageMarker(languageBlocks);
         languageBlocks.forEach(languageBlock => {
             if (showLanguageMarkers) {
+                writer.ensureSpace(60);
                 writer.drawLanguageMarker(languageBlock.languageName, languageBlock.defaultFontKey === "arabic");
             }
             const lines = parseHazzatHtmlToLines(languageBlock.html, languageBlock.defaultFontKey);
@@ -1057,7 +1097,8 @@ export function layoutBookletTextTable(content: ITextContent, fonts: EmbeddedFon
 }
 
 function drawTextTable(writer: BookletWriter, content: ITextContent) {
-    const table = layoutBookletTextTable(content, writer.fonts);
+    const table = writer.textTable(content);
+    const firstVerse = table.rows.findIndex(row => !row.columns.flat(2).some(run => run.isComment));
     for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
         const row = table.rows[rowIndex];
         const lineHeight = row.languages.includes(ContentLanguage.Arabic) ? ARABIC_FONT_SIZE * 1.45 : BODY_FONT_SIZE * 1.45;
@@ -1066,7 +1107,7 @@ function drawTextTable(writer: BookletWriter, content: ITextContent) {
         const connectsToNextRow = nextRow && row.languages.join() === nextRow.languages.join() && !nextRow.columns.flat(2).some(run => run.isComment);
         const lineCount = Math.max(...row.columns.map(column => column.length));
         const rowHeight = lineCount * lineHeight + 12;
-        if (rowIndex > 0 && rowHeight <= LOGICAL_PAGE_HEIGHT - PAGE_TOP - PAGE_BOTTOM) writer.ensureSpace(rowHeight);
+        if (rowIndex > Math.max(0, firstVerse) && rowHeight <= LOGICAL_PAGE_HEIGHT - PAGE_TOP - PAGE_BOTTOM - writer.reservedBottom) writer.ensureSpace(rowHeight);
         for (let lineIndex = 0; lineIndex < lineCount; lineIndex++) {
             writer.ensureSpace(lineHeight + 6);
             row.columns.forEach((column, columnIndex) => {
@@ -1208,15 +1249,8 @@ function drawPageNumbers(doc: PDFDocument, fonts: EmbeddedFonts, pageMetas: Page
             return;
         }
 
-        const pageNumber = `${index + 1}`;
-        const width = safeTextWidth(fonts.english, pageNumber, 8);
-        page.drawText(pageNumber, {
-            x: (LOGICAL_PAGE_WIDTH - width) / 2,
-            y: 22,
-            size: 8,
-            font: fonts.english,
-            color: gray
-        });
+        const footer = `hazzat.com  ·  ${index + 1}`;
+        drawCenteredPageText(page, fonts.english, footer, 8, 14, gray);
     });
 }
 
@@ -1233,16 +1267,9 @@ function addBackCover(doc: PDFDocument, fonts: EmbeddedFonts, pageMetas: PageMet
     initializePageContent(page);
     pageMetas.push({ kind: "backCover" });
 
-    if (images.background) {
-        drawImageCover(page, images.background, 0, 0, LOGICAL_PAGE_WIDTH, LOGICAL_PAGE_HEIGHT, 0.42);
-    }
-
-    if (images.logo) {
-        const logoWidth = 122;
-        drawBookletLogo(page, images.logo, LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - logoWidth + 3, 30, logoWidth, 0.86);
-    } else {
-        drawCenteredPageText(page, fonts.english, "hazzat.com", 15, LOGICAL_PAGE_HEIGHT / 2, black);
-    }
+    drawCoverFrame(page, images.background);
+    drawCoverVine(page, 129, 285, 138);
+    drawSpacedCenteredText(page, fonts.english, "HAZZAT.COM", 8.5, 101, black, 1.6);
 }
 
 function initializePageContent(page: PDFPage) {
@@ -1263,21 +1290,6 @@ function drawCenteredPageText(page: PDFPage, font: PDFFont, text: string, size: 
         size,
         font,
         color
-    });
-}
-
-function drawImageCover(page: PDFPage, image: PDFImage, x: number, y: number, width: number, height: number, opacity: number) {
-    const imageRatio = image.width / image.height;
-    const targetRatio = width / height;
-    const drawWidth = imageRatio > targetRatio ? height * imageRatio : width;
-    const drawHeight = imageRatio > targetRatio ? height : width / imageRatio;
-
-    page.drawImage(image, {
-        x: x + ((width - drawWidth) / 2),
-        y: y + ((height - drawHeight) / 2),
-        width: drawWidth,
-        height: drawHeight,
-        opacity
     });
 }
 
