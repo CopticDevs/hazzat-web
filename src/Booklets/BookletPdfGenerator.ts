@@ -819,24 +819,6 @@ class BookletWriter {
         this.cursorY -= spacingAfter;
     }
 
-    public drawLanguageMarker(label: string, rtl: boolean) {
-        this.ensureSpace(30);
-        this.cursorY -= 2;
-        const font = this.fonts.english;
-        const size = 7.5;
-        const labelWidth = safeTextWidth(font, label.toUpperCase(), size);
-        const labelX = rtl ? LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - labelWidth : PAGE_MARGIN_X;
-
-        this.page.drawText(label.toUpperCase(), {
-            x: labelX,
-            y: this.cursorY,
-            size,
-            font,
-            color: gray
-        });
-        this.cursorY -= 20;
-    }
-
     public drawBodyLines(lines: TextRun[][]) {
         lines.forEach(line => {
             if (line.length === 0 || line.every(run => run.text.trim() === "")) {
@@ -1008,7 +990,7 @@ function measureOpeningContent(writer: BookletWriter, variation: BookletContentV
         }
         if (visibleLines >= 2) break;
     }
-    return Math.max(height + (shouldDrawLanguageMarker(blocks) ? 22 : 0) + 6, shouldDrawLanguageMarker(blocks) ? 60 : 0);
+    return height + 6;
 }
 
 async function addFormatContent(writer: BookletWriter, format: IFormatInfo, formatKind: BookletFormatKind, scores: Map<string, Promise<BookletScorePage[]>>, endsService: boolean) {
@@ -1052,12 +1034,7 @@ async function addFormatContent(writer: BookletWriter, format: IFormatInfo, form
             continue;
         }
         const languageBlocks = getLanguageHtmlBlocks(variation, formatKind);
-        const showLanguageMarkers = shouldDrawLanguageMarker(languageBlocks);
         languageBlocks.forEach(languageBlock => {
-            if (showLanguageMarkers) {
-                writer.ensureSpace(60);
-                writer.drawLanguageMarker(languageBlock.languageName, languageBlock.defaultFontKey === "arabic");
-            }
             const lines = parseHazzatHtmlToLines(languageBlock.html, languageBlock.defaultFontKey);
             writer.drawBodyLines(lines);
             writer.cursorY -= 8;
@@ -1127,11 +1104,6 @@ function drawTextTable(writer: BookletWriter, content: ITextContent) {
 function getOrderedBookletVariations(format: IFormatInfo): BookletContentVariation[] {
     return [...((format.variations || []) as BookletContentVariation[])]
         .sort((a, b) => (a.order || 0) - (b.order || 0));
-}
-
-export function shouldDrawLanguageMarker(languageBlocks: LanguageHtmlBlock[]): boolean {
-    const languageCount = new Set(languageBlocks.map(block => block.languageName.toLowerCase())).size;
-    return languageCount > 1;
 }
 
 function getLanguageHtmlBlocks(variation: BookletContentVariation, formatKind: BookletFormatKind): LanguageHtmlBlock[] {
