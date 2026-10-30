@@ -1,4 +1,5 @@
 import { PDFImage, PDFPage, rgb } from "pdf-lib";
+import { coverArchPaths, coverFrameWidth } from "./BookletCoverFrame";
 
 // Original Hazzat logo grapevine paths; keep berries maroon and foliage gold.
 const vinePaths = [
@@ -25,13 +26,19 @@ const maroon = rgb(128 / 255, 0, 0);
 const gold = rgb(146 / 255, 115 / 255, 68 / 255);
 
 export function drawCoverFrame(page: PDFPage, paper?: PDFImage) {
-    if (paper) page.drawImage(paper, { x: 0, y: 0, width: 396, height: 612 });
-    else page.drawRectangle({ x: 18, y: 18, width: 360, height: 576, color: rgb(225 / 255, 222 / 255, 212 / 255) });
-    for (const [inset, thickness] of [[25, .9], [32, .45]]) {
-        page.drawRectangle({ x: inset, y: inset, width: 396 - 2 * inset, height: 612 - 2 * inset, borderWidth: thickness, borderColor: gold });
+    if (paper) {
+        // The illustrated sheet contains the paper, outer rectangle, and corner ornaments only.
+        page.drawImage(paper, { x: 0, y: 0, width: 396, height: 612 });
+    } else {
+        page.drawRectangle({ x: 18, y: 18, width: 360, height: 576, color: rgb(225 / 255, 222 / 255, 212 / 255) });
+        for (const [inset, thickness] of [[25, .9], [32, .45]]) {
+            page.drawRectangle({ x: inset, y: inset, width: 396 - 2 * inset, height: 612 - 2 * inset, borderWidth: thickness, borderColor: gold });
+        }
     }
-    page.drawSvgPath("M67 550V203C67 127 128 84 198 61C268 84 329 127 329 203V550Z", { x: 0, y: 612, borderColor: maroon, borderWidth: .8 });
-    page.drawSvgPath("M76 541V205C76 136 133 95 198 75C263 95 320 136 320 205V541Z", { x: 0, y: 612, borderColor: gold, borderWidth: .45 });
+    coverArchPaths.forEach((path, index) => page.drawSvgPath(path, {
+        x: 0, y: 612, scale: 396 / coverFrameWidth,
+        borderColor: index === 0 ? maroon : gold, borderWidth: index === 0 ? 2 : 1.5
+    }));
 }
 
 export function drawCoverVine(page: PDFPage, x: number, top: number, width: number) {
