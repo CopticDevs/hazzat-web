@@ -20,6 +20,7 @@ import { BookletScorePage, renderBookletMusic } from "./BookletMusicRenderer";
 import bookletServiceDividerUrl from "../images/bookletServiceDivider.svg";
 import bookletVariationDividerUrl from "../images/crossline.svg";
 import { BookletAppearance, bookletColors, defaultBookletAppearance, normalizeBookletColor } from "./BookletAppearance";
+import { filterContentLanguages } from "../ContentLanguages";
 
 export type BookletFormatKind = "text" | "regular" | "vertical" | "musical";
 export type BookletLayoutKind = "display" | "print";
@@ -44,6 +45,7 @@ export interface GenerateBookletPdfOptions {
     imageSources?: BookletImageSources;
     generatedAt?: Date;
     appearance?: Partial<BookletAppearance>;
+    languages?: ContentLanguage[];
 }
 
 export type FontKey =
@@ -114,9 +116,9 @@ const LOGICAL_PAGE_WIDTH = 396;
 const LOGICAL_PAGE_HEIGHT = 612;
 const PRINT_PAGE_WIDTH = 792;
 const PRINT_PAGE_HEIGHT = 612;
-const PAGE_MARGIN_X = 36;
-const PAGE_TOP = 48;
-const PAGE_BOTTOM = 42;
+const PAGE_MARGIN_X = 24;
+const PAGE_TOP = 36;
+const PAGE_BOTTOM = 30;
 const CONTENT_WIDTH = LOGICAL_PAGE_WIDTH - (PAGE_MARGIN_X * 2);
 const BODY_FONT_SIZE = 10.5;
 const HAZZAT_FONT_SIZE = 10.5;
@@ -180,6 +182,17 @@ export interface BookletSection {
     hymn: IHymnInfo;
     format: IFormatInfo;
     formatKind: BookletFormatKind;
+}
+
+export function filterBookletServicesLanguages(services: IServiceInfo[], languages: ContentLanguage[]): IServiceInfo[] {
+    return services.map(service => ({ ...service, hymns: (service.hymns || []).map(hymn => ({ ...hymn,
+        formats: (hymn.formats || []).map(format => ({ ...format, variations: (format.variations || []).map(variation => ({
+            ...variation, content: filterContentLanguages(variation.content, languages)
+        })) })).map(format => ({ ...format, variations: format.variations.filter(variation => {
+            const kind = bookletFormatKinds.find(value => getFormatId(value) === format.id);
+            return !!kind && hasBookletVariationContent(variation, kind);
+        }) })).filter(format => format.variations.length > 0)
+    })).filter(hymn => hymn.formats.length > 0) })).filter(service => service.hymns.length > 0);
 }
 
 export function getBookletSections(services: IServiceInfo[], kinds: BookletFormatKind[], grouping: BookletGroupingKind = "hymn"): BookletSection[] {
@@ -385,6 +398,7 @@ function sanitizeTextForFont(text: string, fontKey: FontKey): string {
 }
 
 export async function generateSeasonBookletPdf(options: GenerateBookletPdfOptions): Promise<Uint8Array> {
+    if (options.languages) options = { ...options, services: filterBookletServicesLanguages(options.services, options.languages) };
     const scores = new Map<string, Promise<BookletScorePage[]>>();
     let logicalResult = await renderLogicalBooklet(options, 1, scores);
     const requiredTocPageCount = calculateTocPageCount(logicalResult.tocEntries.length);
@@ -438,25 +452,25 @@ async function renderLogicalBooklet(options: GenerateBookletPdfOptions, tocPageC
             const { service, hymn, format, formatKind } = sections[sectionIndex];
             const next = sections[sectionIndex + 1];
             const endsService = !next || next.service !== service || (options.groupingKind === "format" && next.formatKind !== formatKind);
-            if (formatKind === "musical") writer.ensureSpace(LOGICAL_PAGE_HEIGHT - PAGE_TOP - PAGE_BOTTOM);
             const newGroup = options.groupingKind === "format" && previousKind !== formatKind;
-            if (newGroup) {
-                writer.drawHeading(getPdfFormatName(formatKind), 16, 12, false);
-            }
-            if (service !== previousService || newGroup) {
-                writer.ensureSpace(100);
+            const newService = service !== previousService || newGroup;
+            const newHymn = hymn !== previousHymn || newService;
+            const showHymn = newHymn || formatKind === "musical";
+            const variations = getOrderedBookletVariations(format).filter(variation => hasBookletVariationContent(variation, formatKind));
+            writer.reservedBottom = writer.serviceDivider && endsService && variations.length === 1 ? 110 : 40;
+            if (formatKind === "musical" && writer.cursorY < LOGICAL_PAGE_HEIGHT - PAGE_TOP) writer.addPage("content");
+            const headingHeight = (newService ? measureHeading(writer, service.displayName || service.name, 15, 12, false) : 0)
+                + (showHymn ? measureHeading(writer, hymn.displayName || hymn.name, 11.5, 10) : 0);
+            const variationTitleHeight = variations.length > 1 ? measureVariationTitle(writer, variations[0]) : 0;
+            writer.ensureSpace(headingHeight + variationTitleHeight + measureOpeningContent(writer, variations[0], formatKind) + 2);
+            if (newService) {
                 tocEntries.push({ title: service.displayName || service.name, pageNumber: writer.pageNumber, level: "service" });
                 writer.drawHeading(service.displayName || service.name, 15, 12, false);
             }
-            if (hymn !== previousHymn || service !== previousService || newGroup) {
-                writer.ensureSpace(90);
-                const suffix = options.groupingKind === "format" ? ` - ${getPdfFormatName(formatKind)}` : "";
-                tocEntries.push({ title: (hymn.displayName || hymn.name) + suffix, pageNumber: writer.pageNumber, level: "hymn" });
-                writer.drawHeading(hymn.displayName || hymn.name, 11.5, 10);
-            } else if (formatKind === "musical") {
-                writer.drawHeading(hymn.displayName || hymn.name, 11.5, 10);
+            if (newHymn) {
+                tocEntries.push({ title: hymn.displayName || hymn.name, pageNumber: writer.pageNumber, level: "hymn" });
             }
-            if (kinds.length > 1 && options.groupingKind !== "format") writer.drawLanguageMarker(getPdfFormatName(formatKind), false);
+            if (showHymn) writer.drawHeading(hymn.displayName || hymn.name, 11.5, 10);
             await addFormatContent(writer, format, formatKind, scores, endsService);
             if (endsService) writer.drawServiceDivider();
             writer.cursorY -= 8;
@@ -720,6 +734,12 @@ async function loadSourceBytes(source: BookletFontSource | BookletImageSource, l
 }
 
 class BookletWriter {
+    private textTables = new WeakMap<ITextContent, BookletTextTable>();
+    public textTable(content: ITextContent): BookletTextTable {
+        let table = this.textTables.get(content);
+        if (!table) { table = layoutBookletTextTable(content, this.fonts); this.textTables.set(content, table); }
+        return table;
+    }
     public reservedBottom = 0;
     public serviceDivider?: PDFImage;
     public variationDivider?: BookletLogo;
@@ -743,7 +763,7 @@ class BookletWriter {
     }
 
     public ensureSpace(height: number) {
-        if (this.cursorY - height < PAGE_BOTTOM + this.reservedBottom) {
+        if (this.cursorY - height < PAGE_BOTTOM + this.reservedBottom - .01) {
             this.addPage("content");
         }
     }
@@ -968,8 +988,45 @@ function drawInsideFrontCover(writer: BookletWriter, generatedAt: Date) {
     writer.drawCenteredText(`Generated ${formatGeneratedMonthYear(generatedAt)}`, "english", 9, 72, gray);
 }
 
-function getPdfFormatName(kind: BookletFormatKind): string {
-    return kind === "musical" ? "Musical Notes" : kind === "text" ? "Text" : kind === "regular" ? "Hazzat" : "Vertical Hazzat";
+function measureHeading(writer: BookletWriter, text: string, size: number, extraSpace: number, showRule = true): number {
+    const font = arabicUnicodePattern.test(text) ? writer.fonts.arabic : writer.fonts.title;
+    return wrapPlainText(text, font, size, CONTENT_WIDTH).length * (size + 5)
+        + (showRule ? 8 + Math.max(12, extraSpace) : Math.max(4, extraSpace / 3));
+}
+
+function measureVariationTitle(writer: BookletWriter, variation: BookletContentVariation): number {
+    const text = variation.displayName || variation.name;
+    return wrapPlainText(text, arabicUnicodePattern.test(text) ? writer.fonts.arabic : writer.fonts.title, 9.5, CONTENT_WIDTH).length * 12 + 4;
+}
+
+function measureOpeningContent(writer: BookletWriter, variation: BookletContentVariation, kind: BookletFormatKind): number {
+    if (kind === "musical") return 100;
+    if (kind === "text") {
+        let height = 0;
+        for (const row of writer.textTable(variation.content as ITextContent).rows) {
+            const lineHeight = row.languages.includes(ContentLanguage.Arabic) ? ARABIC_FONT_SIZE * 1.45 : BODY_FONT_SIZE * 1.45;
+            const count = Math.max(...row.columns.map(column => column.length));
+            const isComment = row.columns.flat(2).some(run => run.isComment);
+            height += (isComment ? count : Math.min(2, count)) * lineHeight + 12;
+            if (!isComment) break;
+        }
+        return Math.min(height + 6, 160);
+    }
+    const blocks = getLanguageHtmlBlocks(variation, kind);
+    const first = blocks[0];
+    if (!first) return 0;
+    const lines = parseHazzatHtmlToLines(first.html, first.defaultFontKey);
+    let height = 0, visibleLines = 0;
+    for (const line of lines) {
+        if (!line.some(run => run.text.trim())) { height += HAZZAT_FONT_SIZE + 3; continue; }
+        const sized = line.map(run => ({ ...run, size: getRunFontSize(run.fontKey) * (run.isComment ? .9 : 1) }));
+        for (const wrapped of wrapRuns(sized, writer.fonts, CONTENT_WIDTH)) {
+            height += Math.max(...wrapped.map(run => run.size)) * 1.35;
+            if (++visibleLines >= 2) break;
+        }
+        if (visibleLines >= 2) break;
+    }
+    return Math.max(height + (shouldDrawLanguageMarker(blocks) ? 22 : 0) + 6, shouldDrawLanguageMarker(blocks) ? 60 : 0);
 }
 
 async function addFormatContent(writer: BookletWriter, format: IFormatInfo, formatKind: BookletFormatKind, scores: Map<string, Promise<BookletScorePage[]>>, endsService: boolean) {
@@ -981,8 +1038,8 @@ async function addFormatContent(writer: BookletWriter, format: IFormatInfo, form
         const ornamentSpace = writer.serviceDivider && endsService && variationIndex === variations.length - 1 ? 110 : 40;
         const followedByServiceDivider = endsService && variationIndex === variations.length - 1;
         writer.reservedBottom = ornamentSpace;
+        writer.ensureSpace((variations.length > 1 ? measureVariationTitle(writer, variation) : 0) + measureOpeningContent(writer, variation, formatKind) + 2);
         if (variations.length > 1) {
-            writer.ensureSpace(32);
             drawWrappedPlainText(writer, variation.displayName || variation.name, "title", 9.5, 12, gray, false);
             writer.cursorY -= 4;
         }
@@ -1016,6 +1073,7 @@ async function addFormatContent(writer: BookletWriter, format: IFormatInfo, form
         const showLanguageMarkers = shouldDrawLanguageMarker(languageBlocks);
         languageBlocks.forEach(languageBlock => {
             if (showLanguageMarkers) {
+                writer.ensureSpace(60);
                 writer.drawLanguageMarker(languageBlock.languageName, languageBlock.defaultFontKey === "arabic");
             }
             const lines = parseHazzatHtmlToLines(languageBlock.html, languageBlock.defaultFontKey);
@@ -1057,7 +1115,8 @@ export function layoutBookletTextTable(content: ITextContent, fonts: EmbeddedFon
 }
 
 function drawTextTable(writer: BookletWriter, content: ITextContent) {
-    const table = layoutBookletTextTable(content, writer.fonts);
+    const table = writer.textTable(content);
+    const firstVerse = table.rows.findIndex(row => !row.columns.flat(2).some(run => run.isComment));
     for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
         const row = table.rows[rowIndex];
         const lineHeight = row.languages.includes(ContentLanguage.Arabic) ? ARABIC_FONT_SIZE * 1.45 : BODY_FONT_SIZE * 1.45;
@@ -1066,7 +1125,7 @@ function drawTextTable(writer: BookletWriter, content: ITextContent) {
         const connectsToNextRow = nextRow && row.languages.join() === nextRow.languages.join() && !nextRow.columns.flat(2).some(run => run.isComment);
         const lineCount = Math.max(...row.columns.map(column => column.length));
         const rowHeight = lineCount * lineHeight + 12;
-        if (rowIndex > 0 && rowHeight <= LOGICAL_PAGE_HEIGHT - PAGE_TOP - PAGE_BOTTOM) writer.ensureSpace(rowHeight);
+        if (rowIndex > Math.max(0, firstVerse) && rowHeight <= LOGICAL_PAGE_HEIGHT - PAGE_TOP - PAGE_BOTTOM - writer.reservedBottom) writer.ensureSpace(rowHeight);
         for (let lineIndex = 0; lineIndex < lineCount; lineIndex++) {
             writer.ensureSpace(lineHeight + 6);
             row.columns.forEach((column, columnIndex) => {
