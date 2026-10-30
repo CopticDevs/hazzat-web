@@ -15,12 +15,15 @@ import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
-import { IHazzatContent, IVariationInfo, IVerticalHazzatContent } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
+import { ContentLanguage, ContentType, IHazzatContent, IHymnContent, IMusicalNotesContent, ITextContent, IVariationInfo, IVerticalHazzatContent } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
+import { BookletScorePage, renderBookletMusic } from "./BookletMusicRenderer";
 
-export type BookletFormatKind = "regular" | "vertical";
+export type BookletFormatKind = "text" | "regular" | "vertical" | "musical";
 export type BookletLayoutKind = "display" | "print";
-type BookletHazzatContent = IHazzatContent | IVerticalHazzatContent;
-type BookletHazzatVariation = IVariationInfo<BookletHazzatContent> & { order?: number };
+export type BookletGroupingKind = "hymn" | "format";
+export const bookletFormatKinds: BookletFormatKind[] = ["text", "regular", "vertical", "musical"];
+type BookletContent = ITextContent | IHazzatContent | IVerticalHazzatContent | IMusicalNotesContent;
+type BookletContentVariation = IVariationInfo<BookletContent> & { order?: number };
 type PdfFontkit = Parameters<PDFDocument["registerFontkit"]>[0];
 type PdfEmbedFontOptions = NonNullable<Parameters<PDFDocument["embedFont"]>[1]>;
 type PdfFontFeatures = NonNullable<PdfEmbedFontOptions["features"]>;
@@ -28,7 +31,10 @@ type PdfFontFeatures = NonNullable<PdfEmbedFontOptions["features"]>;
 export interface GenerateBookletPdfOptions {
     season: ISeasonInfo;
     services: IServiceInfo[];
-    formatKind: BookletFormatKind;
+    /** Legacy single-format callers remain supported. */
+    formatKind?: BookletFormatKind;
+    formatKinds?: BookletFormatKind[];
+    groupingKind?: BookletGroupingKind;
     layoutKind: BookletLayoutKind;
     fontSources?: BookletFontSources;
     imageSources?: BookletImageSources;
@@ -148,14 +154,47 @@ const rightJoiningArabicCharacters = new Set(Array.from(
     "\u0622\u0623\u0624\u0625\u0627\u0629\u062f\u0630\u0631\u0632\u0648\u0649\u0698"
 ));
 
-export function getBookletFileName(season: ISeasonInfo, formatKind: BookletFormatKind, layoutKind: BookletLayoutKind): string {
-    const formatPart = formatKind === "vertical" ? "vertical-hazzat" : "hazzat";
+export function getBookletFileName(season: ISeasonInfo, formatKind: BookletFormatKind | BookletFormatKind[], layoutKind: BookletLayoutKind): string {
+    const kinds = Array.isArray(formatKind) ? formatKind : [formatKind];
+    const formatPart = bookletFormatKinds.filter(kind => kinds.includes(kind))
+        .map(kind => kind === "musical" ? "musical-notes" : kind === "vertical" ? "vertical-hazzat" : kind === "text" ? "text" : "hazzat").join("-");
     return `${sanitizeFileName(`${season.id}-${formatPart}-booklet-${layoutKind}`)}.pdf`;
 }
 
 export function hasBookletFormat(services: IServiceInfo[], formatKind: BookletFormatKind): boolean {
-    const formatId = getFormatId(formatKind);
-    return services.some(service => service.hymns?.some(hymn => hymn.formats?.some(format => format.id === formatId)));
+    return services.some(service => service.hymns?.some(hymn => !!getHymnBookletFormat(hymn, formatKind)));
+}
+
+export interface BookletSection {
+    service: IServiceInfo;
+    hymn: IHymnInfo;
+    format: IFormatInfo;
+    formatKind: BookletFormatKind;
+}
+
+export function getBookletSections(services: IServiceInfo[], kinds: BookletFormatKind[], grouping: BookletGroupingKind = "hymn"): BookletSection[] {
+    const orderedKinds = bookletFormatKinds.filter(kind => kinds.includes(kind));
+    const result: BookletSection[] = [];
+    const append = (service: IServiceInfo, hymn: IHymnInfo, formatKind: BookletFormatKind) => {
+        const format = getHymnBookletFormat(hymn, formatKind);
+        if (format) result.push({ service, hymn, format, formatKind });
+    };
+    const orderedServices = [...services].sort((a, b) => a.order - b.order);
+    if (grouping === "format") {
+        orderedKinds.forEach(kind => orderedServices.forEach(service =>
+            [...(service.hymns || [])].sort((a, b) => a.order - b.order).forEach(hymn => append(service, hymn, kind))));
+    } else {
+        orderedServices.forEach(service => [...(service.hymns || [])].sort((a, b) => a.order - b.order)
+            .forEach(hymn => orderedKinds.forEach(kind => append(service, hymn, kind))));
+    }
+    return result;
+}
+
+export function hasBookletVariationContent(variation: IVariationInfo<IHymnContent>, kind: BookletFormatKind): boolean {
+    if (kind === "musical") return variation.content?.contentType === ContentType.MusicalNotesContent && !!(variation.content as IMusicalNotesContent).musicXml?.trim();
+    const expectedType = kind === "text" ? ContentType.TextContent : kind === "regular" ? ContentType.HazzatContent : ContentType.VerticalHazzatContent;
+    return variation.content?.contentType === expectedType && getLanguageHtmlBlocks(variation as BookletContentVariation, kind)
+        .some(block => parseHazzatHtmlToLines(block.html, block.defaultFontKey).some(line => line.some(run => run.text.trim())));
 }
 
 export function getBookletImpositionOrder(logicalPageCount: number): number[][] {
@@ -333,11 +372,12 @@ function sanitizeTextForFont(text: string, fontKey: FontKey): string {
 }
 
 export async function generateSeasonBookletPdf(options: GenerateBookletPdfOptions): Promise<Uint8Array> {
-    let logicalResult = await renderLogicalBooklet(options, 1);
+    const scores = new Map<string, Promise<BookletScorePage[]>>();
+    let logicalResult = await renderLogicalBooklet(options, 1, scores);
     const requiredTocPageCount = calculateTocPageCount(logicalResult.tocEntries.length);
 
     if (requiredTocPageCount !== 1) {
-        logicalResult = await renderLogicalBooklet(options, requiredTocPageCount);
+        logicalResult = await renderLogicalBooklet(options, requiredTocPageCount, scores);
     }
 
     const backCoverImages = await embedBackCoverImages(logicalResult.doc, options.imageSources);
@@ -353,7 +393,7 @@ export async function generateSeasonBookletPdf(options: GenerateBookletPdfOption
     return createPrintPdf(logicalResult.doc, logicalResult.pageMetas.length);
 }
 
-async function renderLogicalBooklet(options: GenerateBookletPdfOptions, tocPageCount: number) {
+async function renderLogicalBooklet(options: GenerateBookletPdfOptions, tocPageCount: number, scores: Map<string, Promise<BookletScorePage[]>>) {
     const doc = await createPdfDocument();
     const fonts = await embedBookletFonts(doc, options.fontSources);
     const writer = new BookletWriter(doc, fonts);
@@ -368,10 +408,39 @@ async function renderLogicalBooklet(options: GenerateBookletPdfOptions, tocPageC
     }
 
     const tocEntries: TocEntry[] = [];
-    const services = [...options.services].sort((a, b) => a.order - b.order);
-    if (hasBookletFormat(services, options.formatKind)) {
+    const kinds = options.formatKinds ?? (options.formatKind ? [options.formatKind] : []);
+    const sections = getBookletSections(options.services, kinds, options.groupingKind);
+    if (sections.length) {
         writer.addPage("content");
-        services.forEach(service => addService(writer, service, options.formatKind, tocEntries));
+        let previousService: IServiceInfo | undefined;
+        let previousHymn: IHymnInfo | undefined;
+        let previousKind: BookletFormatKind | undefined;
+        for (const { service, hymn, format, formatKind } of sections) {
+            if (formatKind === "musical") writer.ensureSpace(LOGICAL_PAGE_HEIGHT - PAGE_TOP - PAGE_BOTTOM);
+            const newGroup = options.groupingKind === "format" && previousKind !== formatKind;
+            if (newGroup) {
+                writer.drawHeading(getPdfFormatName(formatKind), 16, 12, false);
+            }
+            if (service !== previousService || newGroup) {
+                writer.ensureSpace(100);
+                tocEntries.push({ title: service.displayName || service.name, pageNumber: writer.pageNumber, level: "service" });
+                writer.drawHeading(service.displayName || service.name, 15, 12, false);
+            }
+            if (hymn !== previousHymn || service !== previousService || newGroup) {
+                writer.ensureSpace(90);
+                const suffix = options.groupingKind === "format" ? ` - ${getPdfFormatName(formatKind)}` : "";
+                tocEntries.push({ title: (hymn.displayName || hymn.name) + suffix, pageNumber: writer.pageNumber, level: "hymn" });
+                writer.drawHeading(hymn.displayName || hymn.name, 11.5, 10);
+            } else if (formatKind === "musical") {
+                writer.drawHeading(hymn.displayName || hymn.name, 11.5, 10);
+            }
+            if (kinds.length > 1 && options.groupingKind !== "format") writer.drawLanguageMarker(getPdfFormatName(formatKind), false);
+            await addFormatContent(writer, format, formatKind, scores);
+            writer.cursorY -= 8;
+            previousService = service;
+            previousHymn = hymn;
+            previousKind = formatKind;
+        }
     }
     drawToc(tocPages, fonts, tocEntries, options.layoutKind === "display");
 
@@ -841,47 +910,42 @@ function drawInsideFrontCover(writer: BookletWriter, generatedAt: Date) {
     writer.drawCenteredText(`Generated ${formatGeneratedMonthYear(generatedAt)}`, "english", 9, 72, gray);
 }
 
-function addService(writer: BookletWriter, service: IServiceInfo, formatKind: BookletFormatKind, tocEntries: TocEntry[]) {
-    const hymnsWithFormat = (service.hymns || [])
-        .map(hymn => ({ hymn, format: getHymnBookletFormat(hymn, formatKind) }))
-        .filter((entry): entry is { hymn: IHymnInfo; format: IFormatInfo } => !!entry.format)
-        .sort((a, b) => a.hymn.order - b.hymn.order);
-
-    if (hymnsWithFormat.length === 0) {
-        return;
-    }
-
-    writer.ensureSpace(70);
-    tocEntries.push({
-        title: service.displayName || service.name,
-        pageNumber: writer.pageNumber,
-        level: "service"
-    });
-    writer.drawHeading(service.displayName || service.name, 15, 12, false);
-
-    hymnsWithFormat.forEach(({ hymn, format }) => {
-        writer.ensureSpace(58);
-        tocEntries.push({
-            title: hymn.displayName || hymn.name,
-            pageNumber: writer.pageNumber,
-            level: "hymn"
-        });
-        writer.drawHeading(hymn.displayName || hymn.name, 11.5, 10);
-        addFormatContent(writer, format, formatKind);
-        writer.cursorY -= 8;
-    });
+function getPdfFormatName(kind: BookletFormatKind): string {
+    return kind === "musical" ? "Musical Notes" : kind === "text" ? "Text" : kind === "regular" ? "Hazzat" : "Vertical Hazzat";
 }
 
-function addFormatContent(writer: BookletWriter, format: IFormatInfo, formatKind: BookletFormatKind) {
-    const variations = getOrderedBookletVariations(format);
+async function addFormatContent(writer: BookletWriter, format: IFormatInfo, formatKind: BookletFormatKind, scores: Map<string, Promise<BookletScorePage[]>>) {
+    const variations = getOrderedBookletVariations(format).filter(variation => hasBookletVariationContent(variation, formatKind));
 
-    variations.forEach(variation => {
+    for (const variation of variations) {
         if (variations.length > 1) {
             writer.ensureSpace(32);
             drawWrappedPlainText(writer, variation.displayName || variation.name, "title", 9.5, 12, gray, false);
             writer.cursorY -= 4;
         }
 
+        if (formatKind === "musical") {
+            const xml = (variation.content as IMusicalNotesContent).musicXml;
+            if (!scores.has(xml)) scores.set(xml, renderBookletMusic(xml));
+            const pages = await scores.get(xml)!;
+            for (let index = 0; index < pages.length; index++) {
+                const page = pages[index];
+                if (index > 0) writer.addPage("content");
+                const image = await writer.doc.embedPng(page.pngBytes);
+                const availableHeight = Math.min(440, writer.cursorY - PAGE_BOTTOM - 8);
+                const scale = Math.min(CONTENT_WIDTH / page.width, availableHeight / page.height);
+                const width = page.width * scale;
+                const height = page.height * scale;
+                writer.ensureSpace(height + 8);
+                writer.page.drawImage(image, { x: PAGE_MARGIN_X + (CONTENT_WIDTH - width) / 2, y: writer.cursorY - height, width, height });
+                writer.cursorY -= height + 8;
+            }
+            continue;
+        }
+        if (formatKind === "text") {
+            drawTextTable(writer, variation.content as ITextContent);
+            continue;
+        }
         const languageBlocks = getLanguageHtmlBlocks(variation, formatKind);
         const showLanguageMarkers = shouldDrawLanguageMarker(languageBlocks);
         languageBlocks.forEach(languageBlock => {
@@ -892,11 +956,56 @@ function addFormatContent(writer: BookletWriter, format: IFormatInfo, formatKind
             writer.drawBodyLines(lines);
             writer.cursorY -= 8;
         });
-    });
+    }
 }
 
-function getOrderedBookletVariations(format: IFormatInfo): BookletHazzatVariation[] {
-    return [...((format.variations || []) as BookletHazzatVariation[])]
+export interface BookletTextTable {
+    languages: ContentLanguage[];
+    columnWidth: number;
+    rows: SizedTextRun[][][][];
+}
+
+/** Stable columns across paragraphs, including paragraphs missing a translation. */
+export function layoutBookletTextTable(content: ITextContent, fonts: EmbeddedFonts, width = CONTENT_WIDTH): BookletTextTable {
+    const order = [ContentLanguage.English, ContentLanguage.Coptic, ContentLanguage.Arabic];
+    const languages = order.filter(language => content.paragraphs.some(paragraph => paragraph.columns.some(column => column.language === language && column.content?.trim())));
+    const columnWidth = languages.length ? (width - (languages.length - 1) * 12) / languages.length : width;
+    const rows = content.paragraphs.map(paragraph => languages.map(language => {
+        const key: FontKey = language === ContentLanguage.Arabic ? "arabic" : language === ContentLanguage.Coptic ? "coptic" : "english";
+        const columns = paragraph.columns.filter(column => column.language === language);
+        return columns.flatMap(column => parseHazzatHtmlToLines(column.content || "", key).flatMap(line =>
+            wrapRuns(line.map(run => ({ ...run, size: getRunFontSize(run.fontKey) })), fonts, columnWidth)));
+    })).filter(row => row.some(column => column.some(line => line.some(run => run.text.trim()))));
+    return { languages, columnWidth, rows };
+}
+
+function drawTextTable(writer: BookletWriter, content: ITextContent) {
+    const table = layoutBookletTextTable(content, writer.fonts);
+    const lineHeight = table.languages.includes(ContentLanguage.Arabic) ? ARABIC_FONT_SIZE * 1.45 : BODY_FONT_SIZE * 1.45;
+    for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
+        const row = table.rows[rowIndex];
+        const lineCount = Math.max(...row.map(column => column.length));
+        const rowHeight = lineCount * lineHeight + 12;
+        if (rowIndex > 0 && rowHeight <= LOGICAL_PAGE_HEIGHT - PAGE_TOP - PAGE_BOTTOM) writer.ensureSpace(rowHeight);
+        for (let lineIndex = 0; lineIndex < lineCount; lineIndex++) {
+            writer.ensureSpace(lineHeight + 6);
+            row.forEach((column, columnIndex) => {
+                const x = PAGE_MARGIN_X + columnIndex * (table.columnWidth + 12);
+                drawSizedLine(writer, column[lineIndex] || [], x, table.columnWidth, table.languages[columnIndex] === ContentLanguage.Arabic);
+                if (columnIndex > 0) writer.page.drawLine({
+                    start: { x: x - 6, y: writer.cursorY + lineHeight - 3 },
+                    end: { x: x - 6, y: writer.cursorY - 3 }, thickness: 0.35, color: lightGray
+                });
+            });
+            writer.cursorY -= lineHeight;
+        }
+        writer.page.drawLine({ start: { x: PAGE_MARGIN_X, y: writer.cursorY }, end: { x: LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X, y: writer.cursorY }, thickness: 0.35, color: lightGray });
+        writer.cursorY -= 12;
+    }
+}
+
+function getOrderedBookletVariations(format: IFormatInfo): BookletContentVariation[] {
+    return [...((format.variations || []) as BookletContentVariation[])]
         .sort((a, b) => (a.order || 0) - (b.order || 0));
 }
 
@@ -905,7 +1014,16 @@ export function shouldDrawLanguageMarker(languageBlocks: LanguageHtmlBlock[]): b
     return languageCount > 1;
 }
 
-function getLanguageHtmlBlocks(variation: BookletHazzatVariation, formatKind: BookletFormatKind): LanguageHtmlBlock[] {
+function getLanguageHtmlBlocks(variation: BookletContentVariation, formatKind: BookletFormatKind): LanguageHtmlBlock[] {
+    if (formatKind === "text") {
+        const content = variation.content as ITextContent;
+        // Keep paragraphs and their translations together, in source order.
+        return (content.paragraphs || []).flatMap(paragraph => (paragraph.columns || []).map(column => ({
+            html: column.content,
+            defaultFontKey: (column.language === ContentLanguage.Arabic ? "arabic" : column.language === ContentLanguage.Coptic ? "coptic" : "english") as FontKey,
+            languageName: column.language
+        }))).filter(hasLanguageHtml);
+    }
     if (formatKind === "vertical") {
         const content = variation.content as IVerticalHazzatContent;
         const blocks: LanguageHtmlBlock[] = [
@@ -931,11 +1049,11 @@ function hasLanguageHtml(block: LanguageHtmlBlock): boolean {
 
 function getHymnBookletFormat(hymn: IHymnInfo, formatKind: BookletFormatKind): IFormatInfo | undefined {
     const formatId = getFormatId(formatKind);
-    return hymn.formats?.find(format => format.id === formatId);
+    return hymn.formats?.find(format => format.id === formatId && format.variations?.some(variation => hasBookletVariationContent(variation, formatKind)));
 }
 
 function getFormatId(formatKind: BookletFormatKind): string {
-    return formatKind === "vertical" ? "3" : "2";
+    return formatKind === "musical" ? "4" : formatKind === "text" ? "1" : formatKind === "vertical" ? "3" : "2";
 }
 
 function drawToc(tocPages: PDFPage[], fonts: EmbeddedFonts, entries: TocEntry[], linkTargets: boolean) {
@@ -1140,28 +1258,30 @@ function drawWrappedRuns(writer: BookletWriter, runs: SizedTextRun[]) {
     wrappedLines.forEach(line => {
         const lineHeight = Math.max(...line.map(run => run.size)) * 1.35;
         writer.ensureSpace(lineHeight);
-        const rtl = line.some(run => isRtlRun(run));
-        let x = rtl ? LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X : PAGE_MARGIN_X;
-
-        line.forEach((run, runIndex) => {
-            const text = getDrawableRunText(line, runIndex, rtl);
-            const font = writer.fonts[run.fontKey];
-            const runWidth = safeTextWidth(font, text, run.size);
-            const drawX = rtl ? x - runWidth : x;
-            if (text.trim().length > 0) {
-                writer.page.drawText(text, {
-                    x: drawX,
-                    y: writer.cursorY,
-                    size: run.size,
-                    font,
-                    color: black
-                });
-            }
-            x = rtl ? x - runWidth : x + runWidth;
-        });
-
+        drawSizedLine(writer, line, PAGE_MARGIN_X, CONTENT_WIDTH);
         writer.cursorY -= lineHeight;
     });
+}
+
+function drawSizedLine(writer: BookletWriter, line: SizedTextRun[], left: number, width: number, rtl = line.some(run => isRtlRun(run))) {
+    let x = rtl ? left + width : left;
+    line.forEach((run, runIndex) => {
+        const text = getDrawableRunText(line, runIndex, rtl);
+        const font = writer.fonts[run.fontKey];
+        const runWidth = safeTextWidth(font, text, run.size);
+        const drawX = rtl ? x - runWidth : x;
+        if (text.trim().length > 0) {
+            writer.page.drawText(text, {
+                x: drawX,
+                y: writer.cursorY,
+                size: run.size,
+                font,
+                color: black
+            });
+        }
+        x = rtl ? x - runWidth : x + runWidth;
+    });
+
 }
 
 export function getDrawableRunText(line: TextRun[], runIndex: number, rtlLine = line.some(run => isRtlRun(run))): string {
