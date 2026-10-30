@@ -2,7 +2,7 @@ import { formatDisplayName } from './FormatNames';
 import { safeContentId } from "./ContentPaths";
 import { IHymnInfo } from "./Models/IHymnInfo";
 import { IServiceInfo } from "./Models/IServiceInfo";
-import { IHymnContent } from "./Models/IVariationInfo";
+import { IHymnContent, normalizeContentLanguage } from "./Models/IVariationInfo";
 
 export const SHARED_TYPES = ["Text", "Hazzat", "VerticalHazzat", "MusicalNotes", "Audio", "Video", "Information"] as const;
 export type SharedContentType = typeof SHARED_TYPES[number];
@@ -141,7 +141,7 @@ export function validateLibraryRecord(value: unknown, id: string): SharedLibrary
             if (paragraph.isComment !== undefined && typeof paragraph.isComment !== "boolean") throw new Error("Invalid text comment");
             for (const column of paragraph.columns) {
                 object(column);
-                if (typeof column.language !== "string" || typeof column.content !== "string") throw new Error("Invalid text column");
+                if (typeof column.language !== "string" || typeof column.content !== "string" || !normalizeContentLanguage(column.language)) throw new Error("Invalid text column language or content");
             }
         }
     } else {

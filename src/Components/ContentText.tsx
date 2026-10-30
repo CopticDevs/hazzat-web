@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { readerColor, UserSettingsContext } from "../Contexts/UserSettingsContext";
-import { ITextContent, IVariationInfo, TextColumn, TextParagraph } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
+import { ContentLanguage, ITextContent, IVariationInfo, TextColumn, TextParagraph, normalizeContentLanguage } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
 import "./ContentText.css";
 import CrossDivider from "./CrossDivider";
@@ -39,13 +39,13 @@ function ContentText(props: IProps) {
     } as React.CSSProperties & { '--arabic-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
 
     const getLanguageMask = (language: string): number => {
-        if (language.toUpperCase() === "ENGLISH") {
+        if (normalizeContentLanguage(language) === ContentLanguage.English) {
             return englishMask;
         }
-        if (language.toUpperCase() === "COPTIC") {
+        if (normalizeContentLanguage(language) === ContentLanguage.Coptic) {
             return copticMask;
         }
-        if (language.toUpperCase() === "ARABIC") {
+        if (normalizeContentLanguage(language) === ContentLanguage.Arabic) {
             return arabicMask;
         }
 
@@ -153,8 +153,8 @@ function ContentText(props: IProps) {
                 'COPTIC': 2,
                 'ARABIC': 3
             };
-            const orderA = orderMap[a.language.toUpperCase()] || 999;
-            const orderB = orderMap[b.language.toUpperCase()] || 999;
+            const orderA = orderMap[normalizeContentLanguage(a.language)?.toUpperCase() || ""] || 999;
+            const orderB = orderMap[normalizeContentLanguage(b.language)?.toUpperCase() || ""] || 999;
             return orderA - orderB;
         });
 
