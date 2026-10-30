@@ -22,7 +22,6 @@ import {
     hasBookletFormat,
     normalizeFontKey,
     parseHazzatHtmlToLines,
-    shouldDrawLanguageMarker,
     wrapRuns
 } from "./BookletPdfGenerator";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
@@ -654,25 +653,17 @@ describe("BookletPdfGenerator", () => {
         expect(getDrawableRunText(line, 1)).toBe("نزا");
     });
 
-    it("draws language markers only when multiple languages are present", () => {
-        const copticOnlyBlocks = [
-            { html: "content", defaultFontKey: "coptic" as const, languageName: "Coptic" }
-        ];
-        const englishOnlyBlocks = [
-            { html: "content", defaultFontKey: "english" as const, languageName: "English" }
-        ];
-        const arabicOnlyBlocks = [
-            { html: "content", defaultFontKey: "arabic" as const, languageName: "Arabic" }
-        ];
-        const mixedBlocks = [
-            { html: "content", defaultFontKey: "coptic" as const, languageName: "Coptic" },
-            { html: "content", defaultFontKey: "english" as const, languageName: "English" }
-        ];
-
-        expect(shouldDrawLanguageMarker(copticOnlyBlocks)).toBe(false);
-        expect(shouldDrawLanguageMarker(englishOnlyBlocks)).toBe(false);
-        expect(shouldDrawLanguageMarker(arabicOnlyBlocks)).toBe(false);
-        expect(shouldDrawLanguageMarker(mixedBlocks)).toBe(true);
+    it.each(["regular", "vertical"] as const)("renders every selected language without language labels (%s)", async formatKind => {
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [createService()], formatKind,
+                layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
+            const words = draws.mock.calls.map(([text]) => text);
+            expect(words.filter(word => ["COPTIC", "ENGLISH", "ARABIC", "Coptic", "English", "Arabic"].includes(word))).toEqual([]);
+            expect(words.some(word => /[\u0600-\u06ff]/.test(word))).toBe(true);
+            const body = draws.mock.calls.filter(([, options]) => options?.size === 10.5);
+            expect(body.length).toBeGreaterThan(0);
+        } finally { draws.mockRestore(); }
     });
 
     it("calculates stable TOC pages, padding, and print imposition order", () => {
