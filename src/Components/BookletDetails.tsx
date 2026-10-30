@@ -165,7 +165,10 @@ function BookletDetails() {
     ];
     const applyFormats = (next: BookletFormatKind[]) => {
         setFormats(next);
-        setSelection(current => ({ ...current, formats: {} }));
+        setSelection(current => {
+            const nextSelection = createDefaultSelection(services);
+            return { ...current, formats: {}, variations: nextSelection.variations };
+        });
     };
 
     return (
@@ -210,7 +213,6 @@ function BookletDetails() {
                     selection={selection}
                     onSelectionChange={setSelection}
                     formats={formats}
-                    availableFormats={availableFormats}
                 />
                 <h3>{strings.bookletArrange}</h3>
                 <div className="bookletLayoutChoices">
@@ -271,7 +273,6 @@ interface BookletContentSelectorProps {
     selection: BookletSelectionState;
     onSelectionChange: React.Dispatch<React.SetStateAction<BookletSelectionState>>;
     formats: BookletFormatKind[];
-    availableFormats: BookletFormatKind[];
 }
 
 function BookletContentSelector(props: BookletContentSelectorProps) {
@@ -302,7 +303,7 @@ function BookletContentSelector(props: BookletContentSelectorProps) {
 
                         {[...(service.hymns || [])].sort((a, b) => a.order - b.order).map(hymn => {
                             const selectableVariations = getSelectableVariations(hymn).filter(variation =>
-                                (hymn.formats?.find(format => format.id === variation.formatId)?.variations?.length || 0) > 1);
+                                hasBookletVariationContent(variation, formatKindFromId(variation.formatId)));
 
                             return (
                                 <div key={hymnKey(service, hymn)} className="bookletHymnSelector">
@@ -315,29 +316,17 @@ function BookletContentSelector(props: BookletContentSelectorProps) {
                                         {hymn.displayName || hymn.name}
                                     </label>
 
-                                    <div className="bookletFormatChoices">
-                                        {props.availableFormats.map(kind => <label key={kind}>
-                                            <input type="checkbox" checked={(props.selection.formats?.[hymnKey(service, hymn)] ?? props.formats).includes(kind)}
-                                                onChange={event => {
-                                                    const checked = event.target.checked;
-                                                    props.onSelectionChange(current => {
-                                                        const currentFormats = current.formats?.[hymnKey(service, hymn)] ?? props.formats;
-                                                        return { ...current, formats: { ...current.formats, [hymnKey(service, hymn)]: bookletFormatKinds.filter(k => k === kind ? checked : currentFormats.includes(k)) } };
-                                                    });
-                                                }} />{getFormatName(kind)}
-                                        </label>)}
-                                    </div>
-
                                     {selectableVariations.length > 0 && (
                                         <div className="bookletVariationSelectorGroup">
-                                            {selectableVariations.filter(variation => (props.selection.formats?.[hymnKey(service, hymn)] ?? props.formats).includes(formatKindFromId(variation.formatId))).map(variation => (
+                                            {selectableVariations.map(variation => (
                                                 <label key={variationKey(service, hymn, variation)} className="bookletVariationSelector">
                                                     <input
                                                         type="checkbox"
-                                                        checked={isVariationSelected(props.selection, service, hymn, variation)}
-                                                        onChange={event => toggleVariationSelection(props.onSelectionChange, service, hymn, variation, event.target.checked)}
+                                                        checked={isVariationSelected(props.selection, service, hymn, variation) &&
+                                                            (props.selection.formats?.[hymnKey(service, hymn)] ?? props.formats).includes(formatKindFromId(variation.formatId))}
+                                                        onChange={event => toggleVariationSelection(props.onSelectionChange, service, hymn, variation, event.target.checked, props.formats)}
                                                     />
-                                                    {getVariationDisplayName(variation)} <small>({getFormatName(formatKindFromId(variation.formatId))})</small>
+                                                    <span>{getVariationDisplayName(variation)} ({getFormatName(formatKindFromId(variation.formatId))})</span>
                                                 </label>
                                             ))}
                                         </div>
@@ -384,6 +373,7 @@ function toggleServiceSelection(
         next.services[service.id] = checked;
         (service.hymns || []).forEach(hymn => {
             next.hymns[hymnKey(service, hymn)] = checked;
+            delete next.formats?.[hymnKey(service, hymn)];
             getSelectableVariations(hymn).forEach(variation => {
                 next.variations[variationKey(service, hymn, variation)] = checked;
             });
@@ -401,6 +391,7 @@ function toggleHymnSelection(
     setSelection(selection => {
         const next = cloneSelection(selection);
         next.hymns[hymnKey(service, hymn)] = checked;
+        delete next.formats?.[hymnKey(service, hymn)];
         getSelectableVariations(hymn).forEach(variation => {
             next.variations[variationKey(service, hymn, variation)] = checked;
         });
@@ -414,11 +405,26 @@ function toggleVariationSelection(
     service: IServiceInfo,
     hymn: IHymnInfo,
     variation: BookletVariation,
-    checked: boolean
+    checked: boolean,
+    defaultFormats: BookletFormatKind[]
 ) {
     setSelection(selection => {
         const next = cloneSelection(selection);
+        const key = hymnKey(service, hymn);
+        const kind = formatKindFromId(variation.formatId);
+        const hymnWasSelected = isHymnSelected(selection, service, hymn);
+        const requested = hymnWasSelected ? selection.formats?.[key] ?? defaultFormats : [];
+        if (checked && !hymnWasSelected) {
+            getSelectableVariations(hymn).forEach(candidate => { next.variations[variationKey(service, hymn, candidate)] = false; });
+        }
+        const sameFormat = getSelectableVariations(hymn).filter(candidate => candidate.formatId === variation.formatId &&
+            hasBookletVariationContent(candidate, kind));
+        if (checked && !requested.includes(kind)) {
+            sameFormat.forEach(candidate => { next.variations[variationKey(service, hymn, candidate)] = false; });
+        }
         next.variations[variationKey(service, hymn, variation)] = checked;
+        const includeFormat = checked || sameFormat.some(candidate => next.variations[variationKey(service, hymn, candidate)] !== false);
+        next.formats = { ...next.formats, [key]: bookletFormatKinds.filter(candidate => candidate === kind ? includeFormat : requested.includes(candidate)) };
 
         if (checked) {
             next.hymns[hymnKey(service, hymn)] = true;
@@ -510,8 +516,11 @@ function hasSelectedHymnContent(selection: BookletSelectionState, service: IServ
     }
 
     const selectableVariations = getSelectableVariations(hymn);
+    const requested = selection.formats?.[hymnKey(service, hymn)];
+    if (requested && requested.length === 0) return false;
     return selectableVariations.length === 0 ||
-        selectableVariations.some(variation => selection.variations[variationKey(service, hymn, variation)] !== false);
+        selectableVariations.some(variation => (!requested || requested.includes(formatKindFromId(variation.formatId))) &&
+            selection.variations[variationKey(service, hymn, variation)] !== false);
 }
 
 function getBookletFormats(hymn: IHymnInfo): IFormatInfo[] {
