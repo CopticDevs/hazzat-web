@@ -12,6 +12,8 @@ import {
     hasBookletVariationContent
 } from "../Booklets/BookletPdfGenerator";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
+import { UserSettingsContext } from "../Contexts/UserSettingsContext";
+import { BookletAppearance, bookletColors, bookletColorValues, defaultBookletAppearance, normalizeBookletColor } from "../Booklets/BookletAppearance";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
@@ -33,6 +35,7 @@ function BookletDetails() {
     const seasonIdParam = bookletId || "";
     const { languageProperties } = useContext(LanguageContext);
     const { environmentProperties } = useContext(EnvironmentContext);
+    const { userSettings } = useContext(UserSettingsContext);
     const [seasonInfo, setSeasonInfo] = useState<ISeasonInfo | undefined>();
     const [services, setServices] = useState<IServiceInfo[]>([]);
     const [selection, setSelection] = useState<BookletSelectionState>(createEmptySelection());
@@ -43,14 +46,24 @@ function BookletDetails() {
     const [grouping, setGrouping] = useState<BookletGroupingKind>("hymn");
     const [layout, setLayout] = useState<BookletLayoutKind>("display");
     const [preview, setPreview] = useState<{ url: string; name: string }>();
+    const [appearance, setAppearance] = useState<BookletAppearance>(defaultBookletAppearance);
+    const [lastPresetId, setLastPresetId] = useState("text-regular");
 
     const isMounted = useRef(true);
     const requestId = useRef(0);
     const [loadFailed, setLoadFailed] = useState(false);
+    const selectedServices = React.useMemo(() => getSelectedBookletServices(services, selection, formats), [services, selection, formats]);
+    const sections = React.useMemo(() => getBookletSections(selectedServices, bookletFormatKinds, grouping), [selectedServices, grouping]);
+    const availableFormats = React.useMemo(() => bookletFormatKinds.filter(kind => hasBookletFormat(services, kind)), [services]);
+    const selectableChoices = React.useMemo(() => services.flatMap(service => (service.hymns || []).flatMap(hymn =>
+        getSelectableVariations(hymn).filter(variation => hasBookletVariationContent(variation, formatKindFromId(variation.formatId)))
+            .map(variation => ({ key: variationKey(service, hymn, variation), kind: formatKindFromId(variation.formatId) })))), [services]);
+    const selectedSignature = React.useMemo(() => JSON.stringify(selectedServices.flatMap(service => (service.hymns || []).flatMap(hymn =>
+        getSelectableVariations(hymn).map(variation => variationKey(service, hymn, variation)))).sort()), [selectedServices]);
 
     useEffect(() => {
         setPreview(undefined);
-    }, [selection, formats, grouping, layout]);
+    }, [selection, formats, grouping, layout, appearance]);
 
     useEffect(() => () => {
         if (preview) URL.revokeObjectURL(preview.url);
@@ -75,6 +88,7 @@ function BookletDetails() {
                 const available = bookletFormatKinds.filter(kind => hasBookletFormat(sorted, kind));
                 const preferred = available.filter(kind => kind === "text" || kind === "regular");
                 setFormats(preferred.length ? preferred : available.slice(0, 1));
+                setLastPresetId((preferred.length ? preferred : available.slice(0, 1)).join("-"));
                 setErrorMessage(undefined);
             }
         } catch {
@@ -119,7 +133,8 @@ function BookletDetails() {
                 services: selected,
                 formatKinds: selectedKinds,
                 groupingKind: grouping,
-                layoutKind: layout
+                layoutKind: layout,
+                appearance
             });
             const blob = new Blob([pdfBytes], { type: "application/pdf" });
             const objectUrl = URL.createObjectURL(blob);
@@ -148,24 +163,29 @@ function BookletDetails() {
         return <InvalidAddressMessage />;
     }
 
-    const selectedServices = getSelectedBookletServices(services, selection, formats);
-    const sections = getBookletSections(selectedServices, bookletFormatKinds, grouping);
     const busy = !!activeDownload;
-    const availableFormats = bookletFormatKinds.filter(kind => hasBookletFormat(services, kind));
-    const presets: { kinds: BookletFormatKind[]; label: string }[] = [
+    const presets: { kinds: BookletFormatKind[]; label: string; id?: string }[] = [
         { kinds: ["text"], label: strings.bookletTextOnly },
         { kinds: ["regular"], label: strings.hazzatFormatName },
         { kinds: ["vertical"], label: strings.verticalHazzatFormatName },
         { kinds: ["musical"], label: strings.musicalNotesLinkSuffix },
         { kinds: ["text", "regular"], label: strings.bookletTextHazzat },
         { kinds: ["text", "vertical"], label: strings.bookletTextVerticalHazzat },
-        { kinds: availableFormats, label: strings.bookletAllFormats }
+        { kinds: availableFormats, label: strings.bookletAllFormats, id: "all" }
     ];
-    const applyFormats = (next: BookletFormatKind[]) => {
+    const availablePresets = presets.filter(preset => preset.kinds.length > 0 && preset.kinds.every(kind => availableFormats.includes(kind)))
+        .map(preset => ({ ...preset, id: preset.id || preset.kinds.join("-") }));
+    const matchingPresets = selectedSignature === "[]" ? [] : availablePresets.filter(preset =>
+        JSON.stringify(selectableChoices.filter(choice => preset.kinds.includes(choice.kind)).map(choice => choice.key).sort()) === selectedSignature);
+    const matchingPreset = matchingPresets.find(preset => preset.id === lastPresetId) || matchingPresets[0];
+    const startingPreset = availablePresets.find(preset => preset.id === lastPresetId);
+    const colorName = (color: string) => color === "MAROON" ? strings.maroon : color === "NAVY" ? strings.navy : strings.black;
+    const applyFormats = (next: BookletFormatKind[], presetId?: string) => {
         setFormats(next);
+        if (presetId) setLastPresetId(presetId);
         setSelection(current => {
             const nextSelection = createDefaultSelection(services);
-            return { ...current, formats: {}, variations: nextSelection.variations };
+            return presetId ? nextSelection : { ...current, formats: {}, variations: nextSelection.variations };
         });
     };
 
@@ -189,15 +209,19 @@ function BookletDetails() {
                 <h2>{strings.buildBooklet}</h2>
                 <p>{strings.buildBookletDescription}</p>
                 <fieldset disabled={busy}>
-                <legend>{strings.bookletChooseFormats}</legend>
+                <legend>{strings.bookletPresetHeading}</legend>
                 <div className="bookletPresetRow">
-                    {presets.filter(preset => preset.kinds.length > 0 && preset.kinds.every(kind => availableFormats.includes(kind))).map(preset => (
-                        <button key={preset.label} type="button" className="bookletChoice" aria-pressed={preset.kinds.join() === formats.join()}
-                            onClick={() => applyFormats(preset.kinds)}>
+                    {availablePresets.map(preset => (
+                        <button key={preset.id} type="button" className="bookletChoice"
+                            onClick={() => applyFormats(preset.kinds, preset.id)}>
                             {preset.label}
                         </button>
                     ))}
                 </div>
+                <p className="bookletSelectionStatus" role="status">
+                    <strong>{matchingPreset ? strings.formatString(strings.bookletSelectionPreset, matchingPreset.label) : strings.bookletCustomSelection}</strong>
+                    {!matchingPreset && startingPreset && <span className="bookletHint">{strings.formatString(strings.bookletStartedWith, startingPreset.label)}</span>}
+                </p>
                 <div className="bookletFormatChoices">
                     {availableFormats.map(kind => <label key={kind}>
                         <input type="checkbox" checked={formats.includes(kind)} onChange={event =>
@@ -227,6 +251,31 @@ function BookletDetails() {
                         </select>
                     </label>
                 </div>
+                <details className="bookletAppearance">
+                    <summary>{strings.bookletAdvancedAppearance}</summary>
+                    <div className="bookletColorGroups">
+                        {(["textColor", "hazzatColor"] as const).map(field => <fieldset key={field}>
+                            <legend>{field === "textColor" ? strings.bookletTextColor : strings.bookletHazzatColor}</legend>
+                            <div className="bookletColorChoices">{bookletColorValues.map(color => <label key={color}>
+                                <input type="radio" name={`booklet-${field}`} value={color} checked={appearance[field] === color}
+                                    onChange={() => setAppearance(previous => ({ ...previous, [field]: color }))} />
+                                <span className="bookletColorSwatch" style={{ backgroundColor: bookletColors[color].hex }} aria-hidden="true" />
+                                {colorName(color)}
+                            </label>)}</div>
+                        </fieldset>)}
+                    </div>
+                    <button type="button" className="bookletChoice" onClick={() => setAppearance({
+                        textColor: normalizeBookletColor(userSettings.contentFontColor), hazzatColor: normalizeBookletColor(userSettings.hazzatFontColor)
+                    })}>{strings.bookletUseWebsiteColors}</button>
+                    <p className="bookletHint">{strings.bookletColorSample}</p>
+                    <div className="bookletColorSample" role="img" aria-label={strings.bookletColorSample}>
+                        <div className="CopticFont" style={{ color: bookletColors[appearance.textColor].hex }}>P[oic nai nan</div>
+                        <div className="HazzatFont" style={{ color: bookletColors[appearance.hazzatColor].hex }}>x c z x c</div>
+                        <div style={{ color: bookletColors[appearance.textColor].hex }}>{strings.bookletSampleWords}</div>
+                        <div className="bookletSampleComment">{strings.bookletSampleComment}</div>
+                    </div>
+                    <p className="bookletHint">{strings.bookletColorScope}</p>
+                </details>
                 <section className="bookletReview" aria-labelledby="bookletReviewTitle">
                     <h3 id="bookletReviewTitle">{strings.bookletAtGlance}</h3>
                     <p aria-live="polite">{selectedServices.reduce((sum, service) => sum + (service.hymns?.length || 0), 0)} {strings.bookletHymnsSelected} · {strings.bookletOnePdf}</p>

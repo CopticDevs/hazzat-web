@@ -19,6 +19,7 @@ import { ContentLanguage, ContentType, IHazzatContent, IHymnContent, IMusicalNot
 import { BookletScorePage, renderBookletMusic } from "./BookletMusicRenderer";
 import bookletServiceDividerUrl from "../images/bookletServiceDivider.svg";
 import bookletVariationDividerUrl from "../images/crossline.svg";
+import { BookletAppearance, bookletColors, defaultBookletAppearance, normalizeBookletColor } from "./BookletAppearance";
 
 export type BookletFormatKind = "text" | "regular" | "vertical" | "musical";
 export type BookletLayoutKind = "display" | "print";
@@ -42,6 +43,7 @@ export interface GenerateBookletPdfOptions {
     fontSources?: BookletFontSources;
     imageSources?: BookletImageSources;
     generatedAt?: Date;
+    appearance?: Partial<BookletAppearance>;
 }
 
 export type FontKey =
@@ -407,7 +409,10 @@ export async function generateSeasonBookletPdf(options: GenerateBookletPdfOption
 async function renderLogicalBooklet(options: GenerateBookletPdfOptions, tocPageCount: number, scores: Map<string, Promise<BookletScorePage[]>>) {
     const doc = await createPdfDocument();
     const fonts = await embedBookletFonts(doc, options.fontSources);
-    const writer = new BookletWriter(doc, fonts);
+    const writer = new BookletWriter(doc, fonts, {
+        textColor: normalizeBookletColor(options.appearance?.textColor),
+        hazzatColor: normalizeBookletColor(options.appearance?.hazzatColor)
+    });
     const imageSources = { ...defaultBookletImageSources, ...options.imageSources };
 
     const frontCoverImages = await embedFrontCoverImages(doc, options.imageSources);
@@ -722,7 +727,7 @@ class BookletWriter {
     public cursorY = LOGICAL_PAGE_HEIGHT - PAGE_TOP;
     public readonly pageMetas: PageMeta[] = [];
 
-    constructor(public readonly doc: PDFDocument, public readonly fonts: EmbeddedFonts) {
+    constructor(public readonly doc: PDFDocument, public readonly fonts: EmbeddedFonts, public readonly appearance: BookletAppearance = defaultBookletAppearance) {
     }
 
     public addPage(kind: PageMeta["kind"] = "content"): PDFPage {
@@ -1356,13 +1361,14 @@ function drawSizedLine(writer: BookletWriter, line: SizedTextRun[], left: number
         const font = writer.fonts[run.fontKey];
         const runWidth = safeTextWidth(font, text, run.size);
         const drawX = rtl ? x - runWidth : x;
+        const ink = bookletColors[isHazzatFontKey(run.fontKey) ? writer.appearance.hazzatColor : writer.appearance.textColor].rgb;
         if (text.trim().length > 0) {
             writer.page.drawText(text, {
                 x: drawX,
                 y: writer.cursorY,
                 size: run.size,
                 font,
-                color: run.isComment ? rgb(.55, .16, .14) : black,
+                color: run.isComment ? rgb(.55, .16, .14) : rgb(ink[0], ink[1], ink[2]),
                 ySkew: run.isComment ? degrees(10) : undefined
             });
         }
