@@ -1,0 +1,336 @@
+{
+  "schemaVersion": 5,
+  "id": "824681fc-d5e6-4e26-8d43-515f5968b36f",
+  "name": "Let us Praise the Lord (Asomen)",
+  "nameAr": "لحن التوزيع (آسومين)",
+  "contentType": "Text",
+  "content": {
+    "paragraphs": [
+      {
+        "columns": [
+          {
+            "content": "Greek",
+            "language": "English"
+          },
+          {
+            "content": "يوناني",
+            "language": "Arabic"
+          }
+        ],
+        "isComment": true
+      },
+      {
+        "columns": [
+          {
+            "content": "Let us praise the Lord:  for He with glory is glorified",
+            "language": "English"
+          },
+          {
+            "content": "Acwmen tw Kuriw@  endoxwc gar dedoxac;e",
+            "language": "Coptic"
+          },
+          {
+            "content": "فلنسبح الرب لأنه بالمجد تمجد.",
+            "language": "Arabic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Greek Refrain",
+            "language": "English"
+          },
+          {
+            "content": "قرار يوناني",
+            "language": "Arabic"
+          }
+        ],
+        "isComment": true
+      },
+      {
+        "columns": [
+          {
+            "content": "He ascended to the heavens:  and sent to us the Comforter:  Spirit of truth, the comforter:  Amen.  Alleluia.",
+            "language": "English"
+          },
+          {
+            "content": "a`nel;wn ic ouranouc@  axiton paraklyton@  to `Pneuma tyc `aly;iac@  Amyn.  =a=l.",
+            "language": "Coptic"
+          },
+          {
+            "content": "صعد إلى أعلى السموات وأرسل لنا الباراقليط روح الحق المُعزي.  آمين هلليلويا.",
+            "language": "Arabic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Coptic",
+            "language": "English"
+          },
+          {
+            "content": "قبطي",
+            "language": "Arabic"
+          }
+        ],
+        "isComment": true
+      },
+      {
+        "columns": [
+          {
+            "content": "Marenhwc `e `P=o=c@  je qen ou`wou gar af[i`wou",
+            "language": "Coptic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Coptic Refrain",
+            "language": "English"
+          },
+          {
+            "content": "قرار قبطي",
+            "language": "Arabic"
+          }
+        ],
+        "isComment": true
+      },
+      {
+        "columns": [
+          {
+            "content": "afsenaf `e`pswi `e nivyoui@  afouwrp nan `mpiparaklyton@  Pi`pneuma `nte ]me;myi@  Amyn.  =a=l.",
+            "language": "Coptic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Greek",
+            "language": "English"
+          },
+          {
+            "content": "يوناني",
+            "language": "Arabic"
+          }
+        ],
+        "isComment": true
+      },
+      {
+        "columns": [
+          {
+            "content": "He made the two into one:  that is the heaven and the earth.",
+            "language": "English"
+          },
+          {
+            "content": "Touc du`o `kticac ic `ena@  ton ouranon ke tyn gyn.",
+            "language": "Coptic"
+          },
+          {
+            "content": "جعل الإثنين واحداً، أي السماء والأرض.",
+            "language": "Arabic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Coptic",
+            "language": "English"
+          },
+          {
+            "content": "قبطي",
+            "language": "Arabic"
+          }
+        ],
+        "isComment": true
+      },
+      {
+        "columns": [
+          {
+            "content": "Pentafer pi`cnau `nouai@  `ete vai pe `tve nem `pkahi.",
+            "language": "Coptic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Greek",
+            "language": "English"
+          },
+          {
+            "content": "يوناني",
+            "language": "Arabic"
+          }
+        ],
+        "isComment": true
+      },
+      {
+        "columns": [
+          {
+            "content": "Come on all you peoples:  to worship Jesus Christ.",
+            "language": "English"
+          },
+          {
+            "content": "Deute pantec `ila`i@  `prockunycwmen Iycou <rictw.",
+            "language": "Coptic"
+          },
+          {
+            "content": "تعالوا يا جميع الشعوب لنسجد ليسوع المسيح.",
+            "language": "Arabic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Coptic",
+            "language": "English"
+          },
+          {
+            "content": "قبطي",
+            "language": "Arabic"
+          }
+        ],
+        "isComment": true
+      },
+      {
+        "columns": [
+          {
+            "content": "Amwini nilaoc tyrou@  `ntebouwst `nI=y=c P=,=c.",
+            "language": "Coptic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Greek",
+            "language": "English"
+          },
+          {
+            "content": "يوناني",
+            "language": "Arabic"
+          }
+        ],
+        "isComment": true
+      },
+      {
+        "columns": [
+          {
+            "content": "This is God our Savior:  and the Lord of everybody.",
+            "language": "English"
+          },
+          {
+            "content": "Outoc ectin `o:eoc `oCwtyr `ymwn@  ke Kurioc pacyc carkoc@",
+            "language": "Coptic"
+          },
+          {
+            "content": "هذا هو الله مخصنا ورب كل جسد.",
+            "language": "Arabic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Coptic",
+            "language": "English"
+          },
+          {
+            "content": "قبطي",
+            "language": "Arabic"
+          }
+        ],
+        "isComment": true
+      },
+      {
+        "columns": [
+          {
+            "content": "Vai pe `Vnou] Pencwtyr@  ouoh `P[oic `ncarx niben@",
+            "language": "Coptic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Greek",
+            "language": "English"
+          },
+          {
+            "content": "يوناني",
+            "language": "Arabic"
+          }
+        ],
+        "isComment": true
+      },
+      {
+        "columns": [
+          {
+            "content": "Three in one and one in three:  the Father, the Son, and the Holy Spirit.",
+            "language": "English"
+          },
+          {
+            "content": "Triac en monadi@  ke monac eb `tri `adi@  `oPatyr ke `oUioc ke to `agion `Pneuma",
+            "language": "Coptic"
+          },
+          {
+            "content": "ثالوث في واحد وواحد في ثالوث الآب والابن والروح القدس.",
+            "language": "Arabic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Spirit of Truth, the comforter.  Amen.  Alleluia.",
+            "language": "English"
+          },
+          {
+            "content": "To `Pneuma tyc `aly;iac@  `amyn =a=l",
+            "language": "Coptic"
+          },
+          {
+            "content": "روح الحق المُعزي.  آمين هلليلويا.",
+            "language": "Arabic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Coptic",
+            "language": "English"
+          },
+          {
+            "content": "قبطي",
+            "language": "Arabic"
+          }
+        ],
+        "isComment": true
+      },
+      {
+        "columns": [
+          {
+            "content": "Ou`triac ecjyk `ebol@  `ecoi `nsomt ecoi `nouai@  `ete vai pe Viwt nem `Psyri nem Pi`pneuma e;ouab.",
+            "language": "Coptic"
+          }
+        ]
+      },
+      {
+        "columns": [
+          {
+            "content": "Pi`pneuma `nte ]me;myi@  `amyn =a=l.",
+            "language": "Coptic"
+          }
+        ]
+      }
+    ],
+    "contentType": "TextContent"
+  }
+}

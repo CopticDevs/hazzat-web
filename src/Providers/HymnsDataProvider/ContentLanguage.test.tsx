@@ -23,11 +23,12 @@ it("keeps lowercase-language paragraphs in the correct booklet columns and fonts
     const source = content();
     const original = JSON.stringify(source);
     const table = layoutBookletTextTable(source, fonts);
-    expect(table.languages).toEqual([ContentLanguage.English, ContentLanguage.Coptic, ContentLanguage.Arabic]);
+    expect(table.rows[0].languages).toEqual([ContentLanguage.English]);
+    expect(table.rows[1].languages).toEqual([ContentLanguage.English, ContentLanguage.Coptic, ContentLanguage.Arabic]);
     expect(table.rows).toHaveLength(2);
-    expect(table.rows[1].map(column => column.flat().map(run => run.text).join(""))).toEqual(["Second paragraph", "Nai nan", "ارحمنا"]);
-    expect(table.rows[1].map(column => column.flat().find(run => run.text.trim())!.fontKey)).toEqual(["english", "coptic", "arabic"]);
-    expect(table.rows[1].flat(2).every(run => run.isComment)).toBe(true);
+    expect(table.rows[1].columns.map(column => column.flat().map(run => run.text).join(""))).toEqual(["Second paragraph", "Nai nan", "ارحمنا"]);
+    expect(table.rows[1].columns.map(column => column.flat().find(run => run.text.trim())!.fontKey)).toEqual(["english", "coptic", "arabic"]);
+    expect(table.rows[1].columns.flat(2).every(run => run.isComment)).toBe(true);
     expect(JSON.stringify(source)).toBe(original);
 });
 
