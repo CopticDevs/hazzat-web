@@ -5,7 +5,7 @@ import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvi
 import { ContentLanguage, ContentType } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { strings } from "../l8n";
-import BookletDetails, { getMissingBookletFormats, getSelectedBookletServices } from "./BookletDetails";
+import BookletDetails, { getSelectedBookletServices } from "./BookletDetails";
 
 jest.mock("axios", () => ({ create: jest.fn() }));
 
@@ -65,15 +65,16 @@ describe("booklet builder", () => {
         expect(revokeUrl).toHaveBeenCalledTimes(2);
     });
 
-    it("requires an explicit choice before omitting unavailable formats and disables empty booklets", async () => {
+    it("automatically omits unavailable formats and still disables empty booklets", async () => {
         const partial = { ...service, hymns: [...service.hymns!, { ...service.hymns![0], id: "second", name: "Second hymn", displayName: "Second hymn", formats: [service.hymns![0].formats![1]] }] };
         jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue([partial]);
         await openBuilder();
         fireEvent.click(screen.getByRole("button", { name: "Text + Hazzat" }));
-        expect(screen.getByRole("button", { name: "Review booklet" })).toBeDisabled();
-        expect(screen.getByRole("status")).toHaveTextContent("Second hymn: Text");
-        fireEvent.click(screen.getByLabelText(/Include available content/));
         expect(screen.getByRole("button", { name: "Review booklet" })).toBeEnabled();
+        expect(screen.queryByLabelText(/Include available content/)).not.toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+        await screen.findByRole("link", { name: "Download PDF" });
+        expect(generator.mock.calls[0][0].services[0].hymns!.map(hymn => hymn.formats!.map(format => format.id))).toEqual([["1", "2"], ["2"]]);
         fireEvent.click(screen.getByRole("button", { name: "Hazzat", exact: true }));
         expect(screen.queryByText(/Some selected formats/)).not.toBeInTheDocument();
         fireEvent.click(screen.getByRole("checkbox", { name: "Vespers" }));
@@ -159,8 +160,7 @@ describe("booklet builder", () => {
         const selection = { services: {}, hymns: {}, variations: {}, formats: { "annual/vespers/first": ["text" as const] } };
         const selected = getSelectedBookletServices([service, other], selection, ["regular"]);
         expect(selected.map(s => s.hymns![0].formats!.map(f => f.id))).toEqual([["1"], ["2"]]);
-        expect(getMissingBookletFormats([service, other], selection, ["regular"])).toEqual([]);
-        expect(getMissingBookletFormats([service], { ...selection, formats: { "annual/vespers/first": [] } }, ["regular"])).toHaveLength(1);
+        expect(getSelectedBookletServices([service], { ...selection, formats: { "annual/vespers/first": [] } }, ["regular"])).toEqual([]);
     });
 
     it("allows a musical-notes-only booklet from its preset", async () => {

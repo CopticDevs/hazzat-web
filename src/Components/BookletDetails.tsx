@@ -42,7 +42,6 @@ function BookletDetails() {
     const [formats, setFormats] = useState<BookletFormatKind[]>(["text", "regular"]);
     const [grouping, setGrouping] = useState<BookletGroupingKind>("hymn");
     const [layout, setLayout] = useState<BookletLayoutKind>("display");
-    const [allowMissing, setAllowMissing] = useState(false);
     const [preview, setPreview] = useState<{ url: string; name: string }>();
 
     const isMounted = useRef(true);
@@ -50,7 +49,6 @@ function BookletDetails() {
     const [loadFailed, setLoadFailed] = useState(false);
 
     useEffect(() => {
-        setAllowMissing(false);
         setPreview(undefined);
     }, [selection, formats, grouping, layout]);
 
@@ -110,7 +108,7 @@ function BookletDetails() {
         const request = requestId.current;
         const selected = getSelectedBookletServices(services, selection, formats);
         const selectedKinds = bookletFormatKinds.filter(kind => getBookletSections(selected, [kind]).length > 0);
-        if (!selectedKinds.length || (getMissingBookletFormats(services, selection, formats).length > 0 && !allowMissing)) return;
+        if (!selectedKinds.length) return;
         setActiveDownload(downloadKey);
         setErrorMessage(undefined);
 
@@ -151,7 +149,6 @@ function BookletDetails() {
 
     const selectedServices = getSelectedBookletServices(services, selection, formats);
     const sections = getBookletSections(selectedServices, bookletFormatKinds, grouping);
-    const missing = getMissingBookletFormats(services, selection, formats);
     const busy = !!activeDownload;
     const availableFormats = bookletFormatKinds.filter(kind => hasBookletFormat(services, kind));
     const presets: { kinds: BookletFormatKind[]; label: string }[] = [
@@ -229,11 +226,6 @@ function BookletDetails() {
                         </select>
                     </label>
                 </div>
-                {missing.length > 0 && <div className="bookletMissing" role="status">
-                    <strong>{strings.bookletMissingFormats}</strong>
-                    <ul>{missing.map(item => <li key={item.key}>{item.label}</li>)}</ul>
-                    <label><input type="checkbox" checked={allowMissing} onChange={event => setAllowMissing(event.target.checked)} /> {strings.bookletSkipMissing}</label>
-                </div>}
                 <section className="bookletReview" aria-labelledby="bookletReviewTitle">
                     <h3 id="bookletReviewTitle">{strings.bookletAtGlance}</h3>
                     <p aria-live="polite">{selectedServices.reduce((sum, service) => sum + (service.hymns?.length || 0), 0)} {strings.bookletHymnsSelected} · {strings.bookletOnePdf}</p>
@@ -241,7 +233,7 @@ function BookletDetails() {
                         <ol>{sections.map((section, i) => <li key={i}>{section.service.displayName || section.service.name} / {section.hymn.displayName || section.hymn.name} · {getFormatName(section.formatKind)}</li>)}</ol>
                     </details>
                     {!sections.length && <p role="status">{strings.bookletNoSelectedContent}</p>}
-                    <button type="button" className="bookletPrimaryAction" disabled={!sections.length || (missing.length > 0 && !allowMissing)} onClick={reviewBooklet}>
+                    <button type="button" className="bookletPrimaryAction" disabled={!sections.length} onClick={reviewBooklet}>
                         {busy ? strings.generatingBooklet : strings.bookletReviewPdf}
                     </button>
                 </section>
@@ -552,18 +544,6 @@ function formatKindFromId(id: string): BookletFormatKind {
 
 function getFormatName(kind: BookletFormatKind): string {
     return kind === "musical" ? strings.musicalNotesLinkSuffix : kind === "text" ? strings.textFormatName : kind === "regular" ? strings.hazzatFormatName : strings.verticalHazzatFormatName;
-}
-
-export function getMissingBookletFormats(services: IServiceInfo[], selection: BookletSelectionState, formats: BookletFormatKind[]): { key: string; label: string }[] {
-    return services.flatMap(service => (service.hymns || []).filter(hymn => isHymnSelected(selection, service, hymn)).flatMap(hymn => {
-        const requested = selection.formats?.[hymnKey(service, hymn)] ?? formats;
-        const available = getSelectedBookletServices([{ ...service, hymns: [hymn] }], selection, formats);
-        if (!requested.length) return [{ key: hymnKey(service, hymn), label: `${service.displayName || service.name} / ${hymn.displayName || hymn.name}: ${strings.bookletChooseOneFormat}` }];
-        return requested.filter(kind => !getBookletSections(available, [kind]).length).map(kind => ({
-            key: `${hymnKey(service, hymn)}/${kind}`,
-            label: `${service.displayName || service.name} / ${hymn.displayName || hymn.name}: ${getFormatName(kind)}`
-        }));
-    }));
 }
 
 export default BookletDetails;
