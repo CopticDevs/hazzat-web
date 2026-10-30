@@ -1,5 +1,5 @@
 import fontkit from "@pdf-lib/fontkit";
-import { PDFDocument, PDFFont, PDFImage, PDFPage, rgb, RGB, StandardFonts } from "pdf-lib";
+import { PDFDocument, PDFFont, PDFImage, PDFPage, rgb, RGB, StandardFonts, degrees } from "pdf-lib";
 import hazzatArabicFontUrl from "../fonts/HazzatA.ttf";
 import hazzatVerticalFontUrl from "../fonts/HazzatV.ttf";
 import hazzatVerticalArabicFontUrl from "../fonts/HazzatVA.ttf";
@@ -58,6 +58,7 @@ export type FontKey =
 export interface TextRun {
     text: string;
     fontKey: FontKey;
+    isComment?: boolean;
 }
 
 export interface SizedTextRun extends TextRun {
@@ -253,9 +254,9 @@ export function normalizeFontKey(className?: string, style?: string, inheritedFo
     if (classTokens.includes("hazzatafont")) return "hazzatArabic";
     if (classTokens.includes("hazzatvfont")) return "hazzatVertical";
     if (classTokens.includes("hazzatfont") || inlineFontFamily) return "hazzat";
-    if (classTokens.includes("copticfont")) return "coptic";
-    if (classTokens.includes("arabicfont")) return "arabic";
-    if (classTokens.includes("englishfont") || classTokens.includes("msonormal")) return "english";
+    if (classTokens.includes("copticfont") || classTokens.includes("copticcomment")) return "coptic";
+    if (classTokens.includes("arabicfont") || classTokens.includes("arabiccomment")) return "arabic";
+    if (classTokens.includes("englishfont") || classTokens.includes("englishcomment") || classTokens.includes("msonormal")) return "english";
 
     return inheritedFontKey;
 }
@@ -269,7 +270,7 @@ export function parseHazzatHtmlToLines(html: string, defaultFontKey: FontKey = "
         lines.push([]);
     };
 
-    const pushText = (text: string, fontKey: FontKey) => {
+    const pushText = (text: string, fontKey: FontKey, isComment: boolean) => {
         const normalized = text
             .replace(/\u00a0/g, " ")
             .replace(/\r/g, "")
@@ -284,17 +285,17 @@ export function parseHazzatHtmlToLines(html: string, defaultFontKey: FontKey = "
         splitTextForFont(normalized, fontKey).forEach(run => {
             const currentLine = lines[lines.length - 1];
             const previous = currentLine[currentLine.length - 1];
-            if (previous && previous.fontKey === run.fontKey) {
+            if (previous && previous.fontKey === run.fontKey && !!previous.isComment === isComment) {
                 previous.text += run.text;
             } else {
-                currentLine.push(run);
+                currentLine.push(isComment ? { ...run, isComment: true } : run);
             }
         });
     };
 
-    const visit = (node: Node, inheritedFontKey: FontKey) => {
+    const visit = (node: Node, inheritedFontKey: FontKey, inheritedComment = false) => {
         if (node.nodeType === Node.TEXT_NODE) {
-            pushText(node.textContent || "", inheritedFontKey);
+            pushText(node.textContent || "", inheritedFontKey, inheritedComment);
             return;
         }
 
@@ -317,7 +318,8 @@ export function parseHazzatHtmlToLines(html: string, defaultFontKey: FontKey = "
             pushBreak();
         }
 
-        Array.from(element.childNodes).forEach(child => visit(child, elementFontKey));
+        const isComment = inheritedComment || /\b(?:EnglishComment|CopticComment|ArabicComment)\b/i.test(element.className);
+        Array.from(element.childNodes).forEach(child => visit(child, elementFontKey, isComment));
 
         if (startsBlock && lines[lines.length - 1].length > 0) {
             pushBreak();
@@ -828,7 +830,7 @@ class BookletWriter {
 
             const sizedRuns = line.map(run => ({
                 ...run,
-                size: getRunFontSize(run.fontKey)
+                size: getRunFontSize(run.fontKey) * (run.isComment ? .9 : 1)
             }));
             drawWrappedRuns(this, sizedRuns);
         });
@@ -1034,7 +1036,10 @@ export function layoutBookletTextTable(content: ITextContent, fonts: EmbeddedFon
         const key: FontKey = language === ContentLanguage.Arabic ? "arabic" : language === ContentLanguage.Coptic ? "coptic" : "english";
         const columns = paragraph.columns.filter(column => column.language === language);
         return columns.flatMap(column => parseHazzatHtmlToLines(column.content || "", key).flatMap(line =>
-            wrapRuns(line.map(run => ({ ...run, size: getRunFontSize(run.fontKey) })), fonts, columnWidth)));
+            wrapRuns(line.map(run => {
+                const isComment = paragraph.isComment || run.isComment;
+                return { ...run, ...(isComment ? { isComment: true } : {}), size: getRunFontSize(run.fontKey) * (isComment ? .9 : 1) };
+            }), fonts, columnWidth)));
     })).filter(row => row.some(column => column.some(line => line.some(run => run.text.trim()))));
     return { languages, columnWidth, rows };
 }
@@ -1354,7 +1359,8 @@ function drawSizedLine(writer: BookletWriter, line: SizedTextRun[], left: number
                 y: writer.cursorY,
                 size: run.size,
                 font,
-                color: black
+                color: run.isComment ? rgb(.55, .16, .14) : black,
+                ySkew: run.isComment ? degrees(10) : undefined
             });
         }
         x = rtl ? x - runWidth : x + runWidth;

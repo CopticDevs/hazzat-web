@@ -8,4 +8,6 @@ Arabic booklets use “جدول المحتويات” for the contents heading. 
 
 Each variation ends with the site's thin cross rule. At the end of a service, the grapevine replaces that final cross rule. Content pagination reserves room for the ornament, followed by padding before the next section title. The table of contents gets the same grapevine only when it fits on its final page. Text tables keep their vertical column separators and paragraph spacing without horizontal cell rules.
 
+Comment paragraphs and HTML marked with EnglishComment, CopticComment, or ArabicComment use dark red, italic text at 90% of the normal font size. Styling survives wrapping and nested markup while retaining the language's font and direction.
+
 Published v5 library records have a validated outer content type; their content payloads need not repeat `contentType`. Availability checks accept those payloads while continuing to reject empty content and explicitly mismatched inner types. The Annual Midnight Psalmody explanation of the Second Canticle includes both Hazzat assignments, including its Coptic-only alternative.

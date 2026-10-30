@@ -157,6 +157,34 @@ function createService(): IServiceInfo {
 }
 
 describe("BookletPdfGenerator", () => {
+    it("preserves multilingual comment styling across wrapping and PDF rendering", async () => {
+        const columns = [
+            { language: ContentLanguage.English, content: "Comment instruction" },
+            { language: ContentLanguage.Coptic, content: "Nai nan" },
+            { language: ContentLanguage.Arabic, content: "تعليق" }
+        ];
+        const content: ITextContent = { contentType: ContentType.TextContent, paragraphs: [
+            { isComment: true, columns }, { columns: [{ language: ContentLanguage.English, content: "Normal hymn words" }] }
+        ] };
+        const table = layoutBookletTextTable(content, createFakeFonts(), 90);
+        expect(table.rows[0].flat(2).every(run => run.isComment)).toBe(true);
+        expect(table.rows[1].flat(2).some(run => run.isComment)).toBe(false);
+        expect(parseHazzatHtmlToLines('<span class="EnglishComment">Note <b>nested</b></span> normal')[0])
+            .toEqual([{ text: "Note nested", fontKey: "english", isComment: true }, { text: " normal", fontKey: "english" }]);
+        const service = withText();
+        service.hymns![0].formats![0].variations![0].content = content;
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text"], layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
+            const comment = draws.mock.calls.find(([text]) => text === "Comment");
+            const normal = draws.mock.calls.find(([text]) => text === "Normal");
+            expect(comment).toBeDefined();
+            expect(normal).toBeDefined();
+            expect(comment![1]!.size).toBeLessThan(normal![1]!.size!);
+            expect(comment![1]!.color).not.toEqual(normal![1]!.color);
+            expect(comment![1]!.ySkew).toEqual({ type: "degrees", angle: 10 });
+        } finally { draws.mockRestore(); }
+    });
     it.each(["display", "print"] as const)("generates a booklet after switching to Arabic navigation (%s)", async layoutKind => {
         const service = createService();
         service.displayName = "تسبحة نصف الليل";
