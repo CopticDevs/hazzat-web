@@ -1142,20 +1142,20 @@ function drawToc(tocPages: PDFPage[], fonts: EmbeddedFonts, entries: TocEntry[],
         const font = rtl ? fonts.arabic : entry.level === "service" ? fonts.title : fonts.english;
         const indent = entry.level === "service" ? 0 : 12;
         const title = truncateToWidth(entry.title, font, size, CONTENT_WIDTH - 52 - indent);
-        const pageNumber = `${entry.pageNumber}`;
-        const pageNumberWidth = safeTextWidth(fonts.english, pageNumber, 8.5);
+        const pageNumber = arabic ? `${entry.pageNumber}`.replace(/[0-9]/g, digit => "٠١٢٣٤٥٦٧٨٩"[Number(digit)]) : `${entry.pageNumber}`;
+        const numberFont = arabic ? fonts.arabic : fonts.english;
+        const pageNumberWidth = safeTextWidth(numberFont, pageNumber, 8.5);
 
         drawPlainHeadingLine(page, fonts, title, entry.level === "service" ? "title" : "english", size,
-            PAGE_MARGIN_X + indent, LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - 52, cursorY, black, false);
-        page.drawText(pageNumber, {
-            x: LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - pageNumberWidth,
-            y: cursorY,
-            size: 8.5,
-            font: fonts.english,
-            color: black
+            PAGE_MARGIN_X + (arabic ? 52 : indent), LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - (arabic ? indent : 52), cursorY, black, false);
+        let numberX = arabic ? PAGE_MARGIN_X : LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - pageNumberWidth;
+        // The Arabic font shapes digit strings right-to-left; place digits individually to preserve ١٣ rather than ٣١.
+        (arabic ? Array.from(pageNumber) : [pageNumber]).forEach(part => {
+            page.drawText(part, { x: numberX, y: cursorY, size: 8.5, font: numberFont, color: black });
+            numberX += safeTextWidth(numberFont, part, 8.5);
         });
         if (linkTargets) {
-            addPageLinkAnnotation(page, entry.pageNumber, PAGE_MARGIN_X + indent, cursorY - 2, CONTENT_WIDTH - indent, TOC_LINE_HEIGHT);
+            addPageLinkAnnotation(page, entry.pageNumber, PAGE_MARGIN_X + (arabic ? 0 : indent), cursorY - 2, CONTENT_WIDTH - indent, TOC_LINE_HEIGHT);
         }
         cursorY -= TOC_LINE_HEIGHT;
     });

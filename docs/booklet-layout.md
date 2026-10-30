@@ -2,7 +2,7 @@
 
 Every season cover includes “Hymns” (for example, “Kiahk Hymns”), with the corresponding Arabic wording. Existing Passion Week title shortening is preserved, and titles that already include “Hymns” are not duplicated.
 
-Arabic booklets use “جدول المحتويات” for the contents heading. Arabic headings use the embedded Arabic font, with Latin text and punctuation falling back to a compatible font; parentheses are mirrored for right-to-left placement.
+Arabic booklets use “جدول المحتويات” for the contents heading. Contents rows place titles on the right, with hymn indentation from the right, followed by Arabic-Indic page numbers in the left column. Arabic headings use the embedded Arabic font, with Latin text and punctuation falling back to a compatible font; parentheses are mirrored for right-to-left placement.
 
 `src/images/bookletServiceDivider.svg` retains the grapevine paths from the current `src/images/logo.svg`, below the logo's tagline. Its viewBox crops the ornament without altering those paths. The larger intrinsic dimensions support sharp PDF rasterization.
 

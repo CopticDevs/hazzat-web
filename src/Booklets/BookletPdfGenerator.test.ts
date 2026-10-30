@@ -173,6 +173,12 @@ describe("BookletPdfGenerator", () => {
             expect(draws.mock.calls.some(([text, options]) => text === "(" && options?.font?.name === "Helvetica")).toBe(true);
             expect(draws.mock.calls.map(([text]) => text).join("")).toContain("جدول المحتويات");
             expect(draws.mock.calls.some(([text]) => text === "Table of Contents")).toBe(false);
+            const tocNumber = draws.mock.calls.find(([text, options]) => text === "٤" && options?.size === 8.5);
+            const tocTitle = draws.mock.calls.find(([text, options]) => text === "تسبحة" && options?.size === 9.5);
+            expect(tocNumber).toBeDefined();
+            expect(tocTitle).toBeDefined();
+            expect(tocNumber![1]!.x).toBeLessThan(tocTitle![1]!.x!);
+            expect(tocNumber![1]!.font!.name).not.toBe("Helvetica");
         } finally { draws.mockRestore(); }
     });
     it("places service ornaments after each service and the contents when space permits", async () => {
