@@ -157,6 +157,24 @@ function createService(): IServiceInfo {
 }
 
 describe("BookletPdfGenerator", () => {
+    it.each(["display", "print"] as const)("generates a booklet after switching to Arabic navigation (%s)", async layoutKind => {
+        const service = createService();
+        service.displayName = "تسبحة نصف الليل";
+        service.hymns![0].displayName = "لُبش الهوس الثاني (مارين أوأونه)";
+        const format = service.hymns![0].formats![0];
+        format.variations![0].displayName = "مارين أوأونه (Maren Ouonh)";
+        format.variations!.push({ ...format.variations![0], id: "alternative", displayName: "على لحن خين أوشوت" });
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            const bytes = await generateSeasonBookletPdf({ season: createSeason("kiahk", "كيهك"), services: [service], formatKinds: ["regular"], layoutKind,
+                fontSources: createFontSources(), imageSources: createImageSources() });
+            expect((await PDFDocument.load(bytes)).getPageCount()).toBeGreaterThan(0);
+            expect(draws.mock.calls.some(([text, options]) => text.includes("Maren Ouonh") && options?.font?.name === "Helvetica")).toBe(true);
+            expect(draws.mock.calls.some(([text, options]) => text === "(" && options?.font?.name === "Helvetica")).toBe(true);
+            expect(draws.mock.calls.map(([text]) => text).join("")).toContain("جدول المحتويات");
+            expect(draws.mock.calls.some(([text]) => text === "Table of Contents")).toBe(false);
+        } finally { draws.mockRestore(); }
+    });
     it("places service ornaments after each service and the contents when space permits", async () => {
         const first = createService();
         const second = { ...createService(), id: "matins", name: "Matins", displayName: "Matins", order: 2 };
@@ -338,11 +356,15 @@ describe("BookletPdfGenerator", () => {
     });
 
     it("uses clean Passion Week cover titles without generated season artwork", () => {
-        expect(getCoverDisplayTitle(createSeason("passion-pascha-week-good-friday", "Passion (Pascha) Week - Good Friday"))).toBe("Good Friday");
-        expect(getCoverDisplayTitle(createSeason("passion-week-general-hours", "Passion Week General Hours"))).toBe("General Hours");
-        expect(getCoverDisplayTitle(createSeason("the-lords-entry-into-jerusalem-palm-sunday", "The Lord's Entry into Jerusalem (Palm Sunday)"))).toBe("Palm Sunday");
+        expect(getCoverDisplayTitle(createSeason("passion-pascha-week-good-friday", "Passion (Pascha) Week - Good Friday"))).toBe("Good Friday Hymns");
+        expect(getCoverDisplayTitle(createSeason("passion-week-general-hours", "Passion Week General Hours"))).toBe("General Hours Hymns");
+        expect(getCoverDisplayTitle(createSeason("the-lords-entry-into-jerusalem-palm-sunday", "The Lord's Entry into Jerusalem (Palm Sunday)"))).toBe("Palm Sunday Hymns");
         expect(getCoverDisplayTitle(createSeason("annual", "Annual"))).toBe("Annual Hymns");
         expect(getCoverDisplayTitle(createSeason("annual", "سنوي"))).toBe("الألحان السنوية");
+    });
+
+    it.each([["kiahk", "Kiahk", "Kiahk Hymns"], ["nativity", "Nativity", "Nativity Hymns"], ["great-lent", "Great Lent", "Great Lent Hymns"], ["kiahk", "Kiahk Hymns", "Kiahk Hymns"], ["kiahk", "كيهك", "ألحان كيهك"], ["kiahk", "ألحان كيهك", "ألحان كيهك"]])("includes Hymns in every season cover without duplicating it: %s / %s", (id, name, expected) => {
+        expect(getCoverDisplayTitle(createSeason(id, name))).toBe(expected);
     });
 
     it("parses Hazzat HTML into text lines while preserving breaks and inherited fonts", () => {
