@@ -68,8 +68,7 @@ it("audits every catalog record and retained service through the real public rea
                     const key = language === ContentLanguage.Arabic ? "arabic" : language === ContentLanguage.Coptic ? "coptic" : "english";
                     const expected = columns.filter(c => c.language.trim().toLowerCase() === language.toLowerCase())
                         .flatMap(c => parseHazzatHtmlToLines(c.content, key)).flat().map(run => run.text).join("");
-                    const index = table.languages.indexOf(language);
-                    const actual = index < 0 ? "" : table.rows.flatMap(row => row[index]).flat().map(run => run.text).join("");
+                    const actual = table.rows.flatMap(row => row.columns[row.languages.indexOf(language)] || []).flat().map(run => run.text).join("");
                     if (compact(actual) !== compact(expected)) throw new Error(`Booklet drops or changes ${language} text`);
                 }
             }

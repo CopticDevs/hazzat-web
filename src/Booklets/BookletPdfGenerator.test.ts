@@ -157,6 +157,32 @@ function createService(): IServiceInfo {
 }
 
 describe("BookletPdfGenerator", () => {
+    it.each(["display", "print"] as const)("exports independent text and notation colors while keeping comments distinct (%s)", async layoutKind => {
+        const service = withText();
+        service.hymns![0].formats![0].variations![0].content = { contentType: ContentType.TextContent, paragraphs: [
+            { columns: [{ language: ContentLanguage.English, content: "TextInk" }, { language: ContentLanguage.Coptic, content: "Nai" }, { language: ContentLanguage.Arabic, content: "ارحمنا" }] },
+            { isComment: true, columns: [{ language: ContentLanguage.English, content: "CommentInk" }] }
+        ] };
+        service.hymns![0].formats![1].variations![0].content = { contentType: ContentType.HazzatContent,
+            englishHazzat: 'WordsInk <span class="HazzatFont">x</span>', copticHazzat: '', arabicHazzat: 'كلمات <span class="HazzatAFont">x</span>' };
+        service.hymns![0].formats![2].variations![0].content = { contentType: ContentType.VerticalHazzatContent,
+            englishVerticalHazzat: 'VerticalWords <span class="HazzatVFont">x</span>', copticVerticalHazzat: '', arabicVerticalHazzat: 'كلمات <span class="HazzatVAFont">x</span>' };
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            const pdf = await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text", "regular", "vertical"], layoutKind,
+                appearance: { textColor: "NAVY", hazzatColor: "MAROON" }, fontSources: createFontSources(), imageSources: createImageSources() });
+            expect((await PDFDocument.load(pdf)).getPageCount()).toBeGreaterThan(0);
+            for (const word of ["TextInk", "Nai", "ارحمنا", "WordsInk", "VerticalWords"]) {
+                const calls = draws.mock.calls.filter(([text]) => text === word);
+                expect(calls.length).toBeGreaterThan(0);
+                calls.forEach(([, options]) => expect(options?.color).toEqual({ type: "RGB", red: 0, green: 0, blue: 128 / 255 }));
+            }
+            const notes = draws.mock.calls.filter(([text]) => text === "x");
+            expect(notes.length).toBeGreaterThanOrEqual(4);
+            notes.forEach(([, options]) => expect(options?.color).toEqual({ type: "RGB", red: 128 / 255, green: 0, blue: 0 }));
+            expect(draws.mock.calls.find(([text]) => text === "CommentInk")![1]!.color).toEqual({ type: "RGB", red: .55, green: .16, blue: .14 });
+        } finally { draws.mockRestore(); }
+    });
     it("preserves multilingual comment styling across wrapping and PDF rendering", async () => {
         const columns = [
             { language: ContentLanguage.English, content: "Comment instruction" },
@@ -164,12 +190,12 @@ describe("BookletPdfGenerator", () => {
             { language: ContentLanguage.Arabic, content: "تعليق" }
         ];
         const content: ITextContent = { contentType: ContentType.TextContent, paragraphs: [
-            { isComment: true, columns }, { columns: [{ language: ContentLanguage.English, content: "Normal hymn words" }] },
-            { columns: [{ language: ContentLanguage.English, content: "Next paragraph" }] }
+            { isComment: true, columns }, { columns: [{ language: ContentLanguage.English, content: "Normal hymn words" }, columns[1], columns[2]] },
+            { columns: [{ language: ContentLanguage.English, content: "Next paragraph" }, columns[1], columns[2]] }
         ] };
         const table = layoutBookletTextTable(content, createFakeFonts(), 90);
-        expect(table.rows[0].flat(2).every(run => run.isComment)).toBe(true);
-        expect(table.rows[1].flat(2).some(run => run.isComment)).toBe(false);
+        expect(table.rows[0].columns.flat(2).every(run => run.isComment)).toBe(true);
+        expect(table.rows[1].columns.flat(2).some(run => run.isComment)).toBe(false);
         expect(parseHazzatHtmlToLines('<span class="EnglishComment">Note <b>nested</b></span> normal')[0])
             .toEqual([{ text: "Note nested", fontKey: "english", isComment: true }, { text: " normal", fontKey: "english" }]);
         const service = withText();
@@ -267,12 +293,70 @@ describe("BookletPdfGenerator", () => {
             { columns: [{ language: ContentLanguage.English, content: "Next paragraph" }] },
             { columns: [] }
         ] }, createFakeFonts());
-        expect(table.languages).toEqual([ContentLanguage.English, ContentLanguage.Coptic, ContentLanguage.Arabic]);
+        expect(table.rows[0].languages).toEqual([ContentLanguage.English, ContentLanguage.Coptic, ContentLanguage.Arabic]);
         expect(table.rows).toHaveLength(2);
         const words = (column: TextRun[][]) => column.flat().map(run => run.text).join("");
-        expect(table.rows[0].map(words)).toEqual(["Mercy", "Nai", "ارحمنا"]);
-        expect(table.rows[1].map(words)).toEqual(["Next paragraph", "", ""]);
-        expect(table.rows.flat(3).map(run => run.text)).not.toEqual(expect.arrayContaining(["ENGLISH", "COPTIC", "ARABIC"]));
+        expect(table.rows[0].columns.map(words)).toEqual(["Mercy", "Nai", "ارحمنا"]);
+        expect(table.rows[1].columns.map(words)).toEqual(["Next paragraph"]);
+        expect(table.rows[1].languages).toEqual([ContentLanguage.English]);
+        expect(table.rows[1].columnWidth).toBe(324);
+        expect(table.rows.flatMap(row => row.columns.flat(2)).map(run => run.text)).not.toEqual(expect.arrayContaining(["ENGLISH", "COPTIC", "ARABIC"]));
+    });
+
+    it("reflows every language transition, including returning to three columns and Arabic-only verses", () => {
+        const english = { language: "english" as ContentLanguage, content: "English verse" };
+        const coptic = { language: ContentLanguage.Coptic, content: "Nai" };
+        const arabic = { language: ContentLanguage.Arabic, content: "ارحمنا" };
+        const blank = { language: ContentLanguage.Coptic, content: "  " };
+        const table = layoutBookletTextTable({ contentType: ContentType.TextContent, paragraphs:
+            [[arabic, english, coptic], [english, blank], [coptic, arabic], [english, coptic, arabic], [arabic], [english, coptic]]
+                .map(columns => ({ columns }))
+        }, createFakeFonts());
+        expect(table.rows.map(row => row.languages)).toEqual([
+            [ContentLanguage.English, ContentLanguage.Coptic, ContentLanguage.Arabic], [ContentLanguage.English],
+            [ContentLanguage.Coptic, ContentLanguage.Arabic], [ContentLanguage.English, ContentLanguage.Coptic, ContentLanguage.Arabic],
+            [ContentLanguage.Arabic], [ContentLanguage.English, ContentLanguage.Coptic]
+        ]);
+        expect(table.rows.map(row => row.columnWidth)).toEqual([100, 324, 156, 100, 324, 156]);
+    });
+
+    it.each([
+        ["efemepsha-ghar-text.json", [...Array(5).fill(3), ...Array(31).fill(1)]],
+        ["asomen-text.json", [2, 3, 2, 3, 2, 1, 2, 1, 2, 3, 2, 1, 2, 3, 2, 1, 2, 3, 2, 1, 2, 3, 3, 2, 1, 1]]
+    ] as const)("matches published paragraph language changes: %s", (file, counts) => {
+        const { content } = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/Booklets/__fixtures__", file), "utf8"));
+        const original = JSON.stringify(content);
+        const table = layoutBookletTextTable(content, createFakeFonts());
+        expect(table.rows.map(row => row.languages.length)).toEqual(counts);
+        table.rows.filter(row => row.languages.length === 1).forEach(row => {
+            expect(row.columnWidth).toBe(324);
+            expect(row.languages).toEqual([file.startsWith("asomen") ? ContentLanguage.Coptic : ContentLanguage.English]);
+        });
+        expect(JSON.stringify(content)).toBe(original);
+    });
+
+    it.each(["display", "print"] as const)("draws a full-width verse between multilingual verses without extending dividers (%s)", async layoutKind => {
+        const service = withText();
+        const translated = [{ language: ContentLanguage.English, content: "Trilingual" },
+            { language: ContentLanguage.Coptic, content: "Nai" }, { language: ContentLanguage.Arabic, content: "ارحمنا" }];
+        service.hymns![0].formats![0].variations![0].content = { contentType: ContentType.TextContent, paragraphs: [
+            { columns: translated },
+            { columns: [{ language: ContentLanguage.English, content: "English ".repeat(7) + "WIDEEND" }] },
+            { columns: translated }
+        ] };
+        const draws = jest.spyOn(PDFPage.prototype, "drawText"), rules = jest.spyOn(PDFPage.prototype, "drawLine");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text"], layoutKind,
+                fontSources: createFontSources(), imageSources: createImageSources() });
+            const marker = draws.mock.calls.find(([text]) => text === "WIDEEND")![1]!;
+            expect(marker.x).toBeGreaterThan(200);
+            const first = draws.mock.calls.find(([text]) => text === "English")![1]!;
+            expect(marker.y).toBe(first.y);
+            const dividers = rules.mock.calls.map(([line]) => line).filter(line => line.thickness === .35);
+            expect(dividers.length).toBe(4);
+            expect(dividers.every(line => line.end.y > marker.y! || line.start.y < marker.y!)).toBe(true);
+            expect(dividers[0].end.y).toBeGreaterThan(marker.y! + 12);
+        } finally { draws.mockRestore(); rules.mockRestore(); }
     });
 
     it("wraps long translated paragraphs independently within fixed column widths", () => {
@@ -280,9 +364,9 @@ describe("BookletPdfGenerator", () => {
             { language: ContentLanguage.English, content: "Very long paragraph ".repeat(150) },
             { language: ContentLanguage.Arabic, content: "ارحمنا" }
         ] }] }, createFakeFonts());
-        expect(table.rows[0][0].length).toBeGreaterThan(50);
-        expect(table.rows[0][1]).toHaveLength(1);
-        table.rows[0].flat().forEach(line => expect(line.reduce((sum, run) => sum + run.text.length * run.size * .5, 0)).toBeLessThanOrEqual(table.columnWidth));
+        expect(table.rows[0].columns[0].length).toBeGreaterThan(50);
+        expect(table.rows[0].columns[1]).toHaveLength(1);
+        table.rows[0].columns.flat().forEach(line => expect(line.reduce((sum, run) => sum + run.text.length * run.size * .5, 0)).toBeLessThanOrEqual(table.rows[0].columnWidth));
     });
     it("includes musical notes alone or mixed and paginates every engraved score page", async () => {
         const service = createService();

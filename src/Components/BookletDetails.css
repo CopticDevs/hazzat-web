@@ -145,7 +145,7 @@
     text-decoration: none;
     display: inline-block;
 }
-.bookletChoice[aria-pressed="true"], .bookletBuilder .bookletPrimaryAction, .bookletBuilder .bookletPrimaryAction:hover { background: var(--ink, #302c26); color: #fff; }
+.bookletBuilder .bookletPrimaryAction, .bookletBuilder .bookletPrimaryAction:hover { background: var(--ink, #302c26); color: #fff; }
 .bookletPrimaryAction:disabled { opacity: .5; cursor: not-allowed; }
 .bookletHint { color: var(--muted-ink, #625e55); font-size: .9rem; }
 .bookletBuilder .bookletVariationSelectorGroup { display: grid; gap: 6px; }
@@ -160,11 +160,24 @@
 .bookletReview .bookletPrimaryAction { margin-top: 20px; }
 .bookletPdfPreview { margin-block: 24px; }
 .bookletPdfPreview object { width: 100%; height: 680px; border: 1px solid var(--rule, #d7d2c7); }
+.bookletSelectionStatus { display: flex; gap: 6px 14px; flex-wrap: wrap; }
+.bookletAppearance { border: 1px solid var(--rule, #bdb6a6); border-radius: 8px; padding: 14px; margin-block: 24px; }
+.bookletAppearance summary { cursor: pointer; font-weight: 600; }
+.bookletColorGroups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-bottom: 18px; }
+.bookletColorChoices { display: flex; flex-wrap: wrap; gap: 10px 16px; }
+.bookletColorChoices input { accent-color: var(--ink, #302c26); }
+.bookletColorSwatch { width: 14px; height: 14px; border-radius: 2px; border: 1px solid var(--rule, #bdb6a6); }
+.bookletAppearance .bookletHint { margin-top: 14px; }
+.bookletColorSample { color-scheme: light; background: #fff; color: #000; border: 1px solid #c8c3b8; padding: 18px; border-radius: 2px; }
+.bookletColorSample .CopticFont { font-size: 1.4rem; }
+.bookletColorSample .HazzatFont { font-size: 1.7rem; margin-block: 8px; }
+.bookletSampleComment { color: #8c2924; font-size: .9em; font-style: italic; margin-top: 12px; }
 @media screen {
-    :root[data-theme="dark"] .bookletChoice[aria-pressed="true"], :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction, :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction:hover { color: #202526; }
+    :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction, :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction:hover { color: #202526; }
 }
 @media (max-width: 576px) {
     .bookletBuilder { padding-inline: 0; }
     .bookletBuilder button, .bookletBuilder select, .bookletBuilder label { min-height: 44px; }
     .bookletPdfPreview object { height: 480px; }
+    .bookletColorGroups { grid-template-columns: 1fr; }
 }
