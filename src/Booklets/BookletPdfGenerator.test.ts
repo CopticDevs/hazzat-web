@@ -1,4 +1,4 @@
-import { PDFArray, PDFDocument, PDFRawStream, decodePDFRawStream } from "pdf-lib";
+import { PDFArray, PDFDocument, PDFPage, PDFRawStream, decodePDFRawStream } from "pdf-lib";
 import fs from "fs";
 import path from "path";
 import {
@@ -77,7 +77,9 @@ function createImageSources(): BookletImageSources {
         frontCoverBackground: readImage("bookletBackCoverBackground.jpg"),
         frontCoverLogo: readImage("logo.png"),
         backCoverBackground: readImage("bookletBackCoverBackground.jpg"),
-        backCoverLogo: readImage("logo.png")
+        backCoverLogo: readImage("logo.png"),
+        serviceDivider: undefined,
+        variationDivider: undefined
     };
 }
 
@@ -155,6 +157,52 @@ function createService(): IServiceInfo {
 }
 
 describe("BookletPdfGenerator", () => {
+    it("places service ornaments after each service and the contents when space permits", async () => {
+        const first = createService();
+        const second = { ...createService(), id: "matins", name: "Matins", displayName: "Matins", order: 2 };
+        const images = jest.spyOn(PDFPage.prototype, "drawImage");
+        const paths = jest.spyOn(PDFPage.prototype, "drawSvgPath");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [first, second], formatKinds: ["regular"], layoutKind: "display",
+                fontSources: createFontSources(), imageSources: { ...createImageSources(), serviceDivider: readImage("logo.png"), variationDivider: fs.readFileSync(path.join(process.cwd(), "src", "images", "crossline.svg")) } });
+            expect(images.mock.calls.filter(([, options]) => options?.opacity === .8)).toHaveLength(3);
+            expect(paths).not.toHaveBeenCalled(); // The grapevine replaces the final variation's cross.
+        } finally { images.mockRestore(); paths.mockRestore(); }
+    });
+
+    it("uses grapevine paths from the current Hazzat logo", () => {
+        const logo = new DOMParser().parseFromString(fs.readFileSync(path.join(process.cwd(), "src", "images", "logo.svg"), "utf8"), "image/svg+xml");
+        const grapevine = new DOMParser().parseFromString(fs.readFileSync(path.join(process.cwd(), "src", "images", "bookletServiceDivider.svg"), "utf8"), "image/svg+xml");
+        const logoPaths = new Set(Array.from(logo.querySelectorAll("path"), path => path.getAttribute("d")));
+        const paths = Array.from(grapevine.querySelectorAll("path"), path => path.getAttribute("d"));
+        expect(paths.length).toBeGreaterThan(10);
+        expect(paths.every(path => logoPaths.has(path))).toBe(true);
+    });
+    it("accepts published v5 payloads without an inner contentType, including Coptic-only alternatives", () => {
+        const payloads = [
+            { name: "Explanation (Lobsh) of the 2nd Canticle (Maren Ouonh)", content: { englishHazzat: "Let us give thanks", copticHazzat: "Maren ouwnh" } },
+            { name: "Maren Ouonh (on the tune of Khen Oushot)", content: { copticHazzat: "Maren ouwnh" } }
+        ];
+        const service = createService();
+        service.hymns![0].formats![0].variations = payloads.map((v, i) => ({ ...v, id: String(i), displayName: v.name })) as any;
+        const variations = service.hymns![0].formats![0].variations!;
+        expect(variations.map(v => hasBookletVariationContent(v, "regular"))).toEqual([true, true]);
+        expect(hasBookletFormat([service], "regular")).toBe(true);
+        expect(getBookletSections([service], ["regular"])[0].format.variations).toHaveLength(2);
+        expect(hasBookletVariationContent({ ...variations[0], content: { contentType: ContentType.HazzatContent, englishHazzat: "", copticHazzat: "", arabicHazzat: "" } }, "regular")).toBe(false);
+    });
+
+    it("keeps text columns without horizontal cell rules and separates consecutive variations", async () => {
+        const service = withText();
+        const text = service.hymns![0].formats![0];
+        text.variations!.push({ ...text.variations![0], id: "second", name: "Second text", displayName: "Second text" });
+        const lines = jest.spyOn(PDFPage.prototype, "drawLine");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text"], layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
+            expect(lines.mock.calls.some(([line]) => line.start.y === line.end.y && line.start.x === 36 && line.end.x === 360 && line.thickness === .35)).toBe(false);
+            expect(lines.mock.calls.filter(([line]) => line.thickness === .7).length).toBeGreaterThanOrEqual(4);
+        } finally { lines.mockRestore(); }
+    });
     it("lays out aligned text columns in English, Coptic, Arabic order without language heading rows", () => {
         const table = layoutBookletTextTable({ contentType: ContentType.TextContent, paragraphs: [
             { columns: [{ language: ContentLanguage.Arabic, content: "ارحمنا" }, { language: ContentLanguage.English, content: "Mercy" }, { language: ContentLanguage.Coptic, content: "Nai" }] },
@@ -293,7 +341,8 @@ describe("BookletPdfGenerator", () => {
         expect(getCoverDisplayTitle(createSeason("passion-pascha-week-good-friday", "Passion (Pascha) Week - Good Friday"))).toBe("Good Friday");
         expect(getCoverDisplayTitle(createSeason("passion-week-general-hours", "Passion Week General Hours"))).toBe("General Hours");
         expect(getCoverDisplayTitle(createSeason("the-lords-entry-into-jerusalem-palm-sunday", "The Lord's Entry into Jerusalem (Palm Sunday)"))).toBe("Palm Sunday");
-        expect(getCoverDisplayTitle(createSeason("annual", "Annual"))).toBe("Annual");
+        expect(getCoverDisplayTitle(createSeason("annual", "Annual"))).toBe("Annual Hymns");
+        expect(getCoverDisplayTitle(createSeason("annual", "سنوي"))).toBe("الألحان السنوية");
     });
 
     it("parses Hazzat HTML into text lines while preserving breaks and inherited fonts", () => {
