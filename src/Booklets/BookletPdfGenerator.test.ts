@@ -164,7 +164,8 @@ describe("BookletPdfGenerator", () => {
             { language: ContentLanguage.Arabic, content: "تعليق" }
         ];
         const content: ITextContent = { contentType: ContentType.TextContent, paragraphs: [
-            { isComment: true, columns }, { columns: [{ language: ContentLanguage.English, content: "Normal hymn words" }] }
+            { isComment: true, columns }, { columns: [{ language: ContentLanguage.English, content: "Normal hymn words" }] },
+            { columns: [{ language: ContentLanguage.English, content: "Next paragraph" }] }
         ] };
         const table = layoutBookletTextTable(content, createFakeFonts(), 90);
         expect(table.rows[0].flat(2).every(run => run.isComment)).toBe(true);
@@ -174,6 +175,7 @@ describe("BookletPdfGenerator", () => {
         const service = withText();
         service.hymns![0].formats![0].variations![0].content = content;
         const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        const rules = jest.spyOn(PDFPage.prototype, "drawLine");
         try {
             await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text"], layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
             const comment = draws.mock.calls.find(([text]) => text === "Comment");
@@ -183,7 +185,11 @@ describe("BookletPdfGenerator", () => {
             expect(comment![1]!.size).toBeLessThan(normal![1]!.size!);
             expect(comment![1]!.color).not.toEqual(normal![1]!.color);
             expect(comment![1]!.ySkew).toEqual({ type: "degrees", angle: 10 });
-        } finally { draws.mockRestore(); }
+            const dividers = rules.mock.calls.map(([line]) => line).filter(line => line.thickness === .35);
+            expect(dividers.length).toBeGreaterThan(0);
+            expect(dividers.every(line => line.start.y < comment![1]!.y!)).toBe(true);
+            expect(dividers.some(line => dividers.some(next => next !== line && next.start.x === line.end.x && Math.abs(next.start.y - line.end.y) < .001))).toBe(true);
+        } finally { draws.mockRestore(); rules.mockRestore(); }
     });
     it.each(["display", "print"] as const)("generates a booklet after switching to Arabic navigation (%s)", async layoutKind => {
         const service = createService();

@@ -1049,6 +1049,9 @@ function drawTextTable(writer: BookletWriter, content: ITextContent) {
     const lineHeight = table.languages.includes(ContentLanguage.Arabic) ? ARABIC_FONT_SIZE * 1.45 : BODY_FONT_SIZE * 1.45;
     for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
         const row = table.rows[rowIndex];
+        const isComment = row.flat(2).some(run => run.isComment);
+        const nextRow = table.rows[rowIndex + 1];
+        const connectsToNextRow = nextRow && !nextRow.flat(2).some(run => run.isComment);
         const lineCount = Math.max(...row.map(column => column.length));
         const rowHeight = lineCount * lineHeight + 12;
         if (rowIndex > 0 && rowHeight <= LOGICAL_PAGE_HEIGHT - PAGE_TOP - PAGE_BOTTOM) writer.ensureSpace(rowHeight);
@@ -1057,9 +1060,9 @@ function drawTextTable(writer: BookletWriter, content: ITextContent) {
             row.forEach((column, columnIndex) => {
                 const x = PAGE_MARGIN_X + columnIndex * (table.columnWidth + 12);
                 drawSizedLine(writer, column[lineIndex] || [], x, table.columnWidth, table.languages[columnIndex] === ContentLanguage.Arabic);
-                if (columnIndex > 0) writer.page.drawLine({
+                if (columnIndex > 0 && !isComment) writer.page.drawLine({
                     start: { x: x - 6, y: writer.cursorY + lineHeight - 3 },
-                    end: { x: x - 6, y: writer.cursorY - 3 }, thickness: 0.35, color: lightGray
+                    end: { x: x - 6, y: writer.cursorY - 3 - (lineIndex === lineCount - 1 && connectsToNextRow ? 12 : 0) }, thickness: 0.35, color: lightGray
                 });
             });
             writer.cursorY -= lineHeight;
