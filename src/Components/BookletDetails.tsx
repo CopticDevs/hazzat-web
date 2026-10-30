@@ -2,17 +2,18 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
     BookletFormatKind,
+    BookletGroupingKind,
     BookletLayoutKind,
+    bookletFormatKinds,
     generateSeasonBookletPdf,
     getBookletFileName,
-    hasBookletFormat
+    getBookletSections,
+    hasBookletFormat,
+    hasBookletVariationContent
 } from "../Booklets/BookletPdfGenerator";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
-import { ReactComponent as BookletFormatImg } from "../images/bookletFormat.svg";
-import { ReactComponent as DisplayFormatImg } from "../images/displayFormat.svg";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
-import LocalizedMessage from "../LocalizedMessage";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
@@ -38,16 +39,30 @@ function BookletDetails() {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [activeDownload, setActiveDownload] = useState<string | undefined>();
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    const [formats, setFormats] = useState<BookletFormatKind[]>(["text", "regular"]);
+    const [grouping, setGrouping] = useState<BookletGroupingKind>("hymn");
+    const [layout, setLayout] = useState<BookletLayoutKind>("display");
+    const [preview, setPreview] = useState<{ url: string; name: string }>();
 
     const isMounted = useRef(true);
     const requestId = useRef(0);
     const [loadFailed, setLoadFailed] = useState(false);
+
+    useEffect(() => {
+        setPreview(undefined);
+    }, [selection, formats, grouping, layout]);
+
+    useEffect(() => () => {
+        if (preview) URL.revokeObjectURL(preview.url);
+    }, [preview]);
 
     const fetchFromBackend = React.useCallback(async () => {
         const request = ++requestId.current;
         const current = () => isMounted.current && request === requestId.current;
         setIsLoading(true);
         setLoadFailed(false);
+        setActiveDownload(undefined);
+        setPreview(undefined);
         try {
             const provider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
             const seasonResponse = await provider.getSeason(seasonIdParam);
@@ -57,6 +72,9 @@ function BookletDetails() {
                 setSeasonInfo(seasonResponse);
                 setServices(sorted);
                 setSelection(createDefaultSelection(sorted));
+                const available = bookletFormatKinds.filter(kind => hasBookletFormat(sorted, kind));
+                const preferred = available.filter(kind => kind === "text" || kind === "regular");
+                setFormats(preferred.length ? preferred : available.slice(0, 1));
                 setErrorMessage(undefined);
             }
         } catch {
@@ -81,38 +99,39 @@ function BookletDetails() {
         document.title = isLoading ? "hazzat.com" : `${pageTitle} - hazzat.com`;
     }, [isLoading, pageTitle]);
 
-    const downloadBooklet = async (formatKind: BookletFormatKind, layoutKind: BookletLayoutKind) => {
+    const reviewBooklet = async () => {
         if (!seasonInfo || loadFailed) {
             return;
         }
 
-        const downloadKey = `${formatKind}-${layoutKind}`;
+        const downloadKey = "combined";
+        const request = requestId.current;
+        const selected = getSelectedBookletServices(services, selection, formats);
+        const selectedKinds = bookletFormatKinds.filter(kind => getBookletSections(selected, [kind]).length > 0);
+        if (!selectedKinds.length) return;
         setActiveDownload(downloadKey);
         setErrorMessage(undefined);
 
         try {
             const pdfBytes = await generateSeasonBookletPdf({
                 season: seasonInfo,
-                services: getSelectedBookletServices(services, selection),
-                formatKind,
-                layoutKind
+                services: selected,
+                formatKinds: selectedKinds,
+                groupingKind: grouping,
+                layoutKind: layout
             });
             const blob = new Blob([pdfBytes], { type: "application/pdf" });
             const objectUrl = URL.createObjectURL(blob);
-            const anchor = document.createElement("a");
-            anchor.href = objectUrl;
-            anchor.download = getBookletFileName(seasonInfo, formatKind, layoutKind);
-            document.body.appendChild(anchor);
-            anchor.click();
-            document.body.removeChild(anchor);
-            URL.revokeObjectURL(objectUrl);
+            if (isMounted.current && request === requestId.current) {
+                setPreview({ url: objectUrl, name: getBookletFileName(seasonInfo, selectedKinds, layout) });
+            } else URL.revokeObjectURL(objectUrl);
         } catch (error) {
             console.error("Failed to generate booklet PDF", error);
-            if (isMounted.current) {
+            if (isMounted.current && request === requestId.current) {
                 setErrorMessage(strings.bookletDownloadError);
             }
         } finally {
-            if (isMounted.current) {
+            if (isMounted.current && request === requestId.current) {
                 setActiveDownload(undefined);
             }
         }
@@ -128,11 +147,26 @@ function BookletDetails() {
         return <InvalidAddressMessage />;
     }
 
-    const selectedServices = getSelectedBookletServices(services, selection);
-    const regularExists = hasBookletFormat(services, "regular");
-    const verticalExists = hasBookletFormat(services, "vertical");
-    const regularAvailable = hasBookletFormat(selectedServices, "regular");
-    const verticalAvailable = hasBookletFormat(selectedServices, "vertical");
+    const selectedServices = getSelectedBookletServices(services, selection, formats);
+    const sections = getBookletSections(selectedServices, bookletFormatKinds, grouping);
+    const busy = !!activeDownload;
+    const availableFormats = bookletFormatKinds.filter(kind => hasBookletFormat(services, kind));
+    const presets: { kinds: BookletFormatKind[]; label: string }[] = [
+        { kinds: ["text"], label: strings.bookletTextOnly },
+        { kinds: ["regular"], label: strings.hazzatFormatName },
+        { kinds: ["vertical"], label: strings.verticalHazzatFormatName },
+        { kinds: ["musical"], label: strings.musicalNotesLinkSuffix },
+        { kinds: ["text", "regular"], label: strings.bookletTextHazzat },
+        { kinds: ["text", "vertical"], label: strings.bookletTextVerticalHazzat },
+        { kinds: availableFormats, label: strings.bookletAllFormats }
+    ];
+    const applyFormats = (next: BookletFormatKind[]) => {
+        setFormats(next);
+        setSelection(current => {
+            const nextSelection = createDefaultSelection(services);
+            return { ...current, formats: {}, variations: nextSelection.variations };
+        });
+    };
 
     return (
         <div>
@@ -148,78 +182,72 @@ function BookletDetails() {
                 )}
             </div>
 
-            {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+            {errorMessage && <div role="alert" className="alert alert-danger">{errorMessage}</div>}
 
-            <div className="container">
+            <div className="container bookletBuilder">
+                <h2>{strings.buildBooklet}</h2>
+                <p>{strings.buildBookletDescription}</p>
+                <fieldset disabled={busy}>
+                <legend>{strings.bookletChooseFormats}</legend>
+                <div className="bookletPresetRow">
+                    {presets.filter(preset => preset.kinds.length > 0 && preset.kinds.every(kind => availableFormats.includes(kind))).map(preset => (
+                        <button key={preset.label} type="button" className="bookletChoice" aria-pressed={preset.kinds.join() === formats.join()}
+                            onClick={() => applyFormats(preset.kinds)}>
+                            {preset.label}
+                        </button>
+                    ))}
+                </div>
+                <div className="bookletFormatChoices">
+                    {availableFormats.map(kind => <label key={kind}>
+                        <input type="checkbox" checked={formats.includes(kind)} onChange={event =>
+                            applyFormats(bookletFormatKinds.filter(k => k === kind ? event.target.checked : formats.includes(k)))} />
+                        {getFormatName(kind)}
+                    </label>)}
+                </div>
+                <p className="bookletHint">{strings.bookletFormatsHint}</p>
                 <BookletContentSelector
                     services={services}
                     selection={selection}
                     onSelectionChange={setSelection}
+                    formats={formats}
                 />
-
-                <div className="row">
-                    <BookletDownloadGroup
-                        formatKind="regular"
-                        title={strings.hazzatFormatName}
-                        available={regularAvailable}
-                        disabledMessage={getBookletDisabledMessage(regularExists)}
-                        activeDownload={activeDownload}
-                        onDownload={downloadBooklet}
-                    />
-                    <BookletDownloadGroup
-                        formatKind="vertical"
-                        title={strings.verticalHazzatFormatName}
-                        available={verticalAvailable}
-                        disabledMessage={getBookletDisabledMessage(verticalExists)}
-                        activeDownload={activeDownload}
-                        onDownload={downloadBooklet}
-                    />
+                <h3>{strings.bookletArrange}</h3>
+                <div className="bookletLayoutChoices">
+                    <label>{strings.bookletGroupContent}
+                        <select value={grouping} onChange={event => setGrouping(event.target.value as BookletGroupingKind)}>
+                            <option value="hymn">{strings.bookletByHymn}</option>
+                            <option value="format">{strings.bookletByFormat}</option>
+                        </select>
+                    </label>
+                    <label>{strings.bookletPdfLayout}
+                        <select value={layout} onChange={event => setLayout(event.target.value as BookletLayoutKind)}>
+                            <option value="display">{strings.bookletDeviceLayout}</option>
+                            <option value="print">{strings.bookletPrintLayout}</option>
+                        </select>
+                    </label>
                 </div>
-            </div>
-        </div>
-    );
-}
-
-interface BookletDownloadGroupProps {
-    formatKind: BookletFormatKind;
-    title: string;
-    available: boolean;
-    disabledMessage: string;
-    activeDownload?: string;
-    onDownload: (formatKind: BookletFormatKind, layoutKind: BookletLayoutKind) => void;
-}
-
-function BookletDownloadGroup(props: BookletDownloadGroupProps) {
-    const printKey = `${props.formatKind}-print`;
-    const displayKey = `${props.formatKind}-display`;
-    const isBusy = !!props.activeDownload;
-
-    return (
-        <div className="col-lg-6 bookletDownloadGroup">
-            <div className="bookletDownloadTitle">{props.title}</div>
-            <div className="row">
-                <div className="col-sm-6 bookletLinkDiv">
-                    <button
-                        type="button"
-                        className="bookletDownloadButton"
-                        disabled={!props.available || isBusy}
-                        onClick={() => props.onDownload(props.formatKind, "print")}>
-                        <BookletFormatImg title={strings.forPrinting} /><br />
-                        <strong>{props.activeDownload === printKey ? strings.generatingBooklet : <LocalizedMessage of="forPrinting" />}</strong><br />
+                <section className="bookletReview" aria-labelledby="bookletReviewTitle">
+                    <h3 id="bookletReviewTitle">{strings.bookletAtGlance}</h3>
+                    <p aria-live="polite">{selectedServices.reduce((sum, service) => sum + (service.hymns?.length || 0), 0)} {strings.bookletHymnsSelected} · {strings.bookletOnePdf}</p>
+                    <details><summary>{strings.bookletContentOrder}</summary>
+                        <ol>{sections.map((section, i) => <li key={i}>{section.service.displayName || section.service.name} / {section.hymn.displayName || section.hymn.name} · {getFormatName(section.formatKind)}</li>)}</ol>
+                    </details>
+                    {!sections.length && <p role="status">{strings.bookletNoSelectedContent}</p>}
+                    <button type="button" className="bookletPrimaryAction" disabled={!sections.length} onClick={reviewBooklet}>
+                        {busy ? strings.generatingBooklet : strings.bookletReviewPdf}
                     </button>
-                    {props.available ? <LocalizedMessage of="forPrintingDesc" /> : props.disabledMessage}
-                </div>
-                <div className="col-sm-6 bookletLinkDiv">
-                    <button
-                        type="button"
-                        className="bookletDownloadButton"
-                        disabled={!props.available || isBusy}
-                        onClick={() => props.onDownload(props.formatKind, "display")}>
-                        <DisplayFormatImg title={strings.forDevices} /><br />
-                        <strong>{props.activeDownload === displayKey ? strings.generatingBooklet : <LocalizedMessage of="forDevices" />}</strong><br />
-                    </button>
-                    {props.available ? <LocalizedMessage of="forDevicesDesc" /> : props.disabledMessage}
-                </div>
+                </section>
+                </fieldset>
+                {preview && <section className="bookletPdfPreview" aria-labelledby="bookletPreviewTitle">
+                    <h3 id="bookletPreviewTitle">{strings.bookletPdfPreview}</h3>
+                    <div className="bookletPresetRow">
+                        <a className="bookletPrimaryAction" href={preview.url} download={preview.name}>{strings.bookletDownloadPdf}</a>
+                        <a href={preview.url} target="_blank" rel="noopener noreferrer">{strings.bookletOpenPdf}</a>
+                    </div>
+                    <object data={preview.url} type="application/pdf" aria-label={strings.bookletPdfPreview}>
+                        <p>{strings.bookletPreviewFallback}</p>
+                    </object>
+                </section>}
             </div>
         </div>
     );
@@ -229,12 +257,14 @@ export interface BookletSelectionState {
     services: Record<string, boolean>;
     hymns: Record<string, boolean>;
     variations: Record<string, boolean>;
+    formats?: Record<string, BookletFormatKind[]>;
 }
 
 interface BookletContentSelectorProps {
     services: IServiceInfo[];
     selection: BookletSelectionState;
     onSelectionChange: React.Dispatch<React.SetStateAction<BookletSelectionState>>;
+    formats: BookletFormatKind[];
 }
 
 function BookletContentSelector(props: BookletContentSelectorProps) {
@@ -264,7 +294,8 @@ function BookletContentSelector(props: BookletContentSelectorProps) {
                         </summary>
 
                         {[...(service.hymns || [])].sort((a, b) => a.order - b.order).map(hymn => {
-                            const selectableVariations = getSelectableVariations(hymn);
+                            const selectableVariations = getSelectableVariations(hymn).filter(variation =>
+                                hasBookletVariationContent(variation, formatKindFromId(variation.formatId)));
 
                             return (
                                 <div key={hymnKey(service, hymn)} className="bookletHymnSelector">
@@ -283,10 +314,11 @@ function BookletContentSelector(props: BookletContentSelectorProps) {
                                                 <label key={variationKey(service, hymn, variation)} className="bookletVariationSelector">
                                                     <input
                                                         type="checkbox"
-                                                        checked={isVariationSelected(props.selection, service, hymn, variation)}
-                                                        onChange={event => toggleVariationSelection(props.onSelectionChange, service, hymn, variation, event.target.checked)}
+                                                        checked={isVariationSelected(props.selection, service, hymn, variation) &&
+                                                            (props.selection.formats?.[hymnKey(service, hymn)] ?? props.formats).includes(formatKindFromId(variation.formatId))}
+                                                        onChange={event => toggleVariationSelection(props.onSelectionChange, service, hymn, variation, event.target.checked, props.formats)}
                                                     />
-                                                    {getVariationDisplayName(variation)} <small>({variation.formatId === "2" ? strings.hazzatFormatName : strings.verticalHazzatFormatName})</small>
+                                                    <span>{getVariationDisplayName(variation)} ({getFormatName(formatKindFromId(variation.formatId))})</span>
                                                 </label>
                                             ))}
                                         </div>
@@ -333,6 +365,7 @@ function toggleServiceSelection(
         next.services[service.id] = checked;
         (service.hymns || []).forEach(hymn => {
             next.hymns[hymnKey(service, hymn)] = checked;
+            delete next.formats?.[hymnKey(service, hymn)];
             getSelectableVariations(hymn).forEach(variation => {
                 next.variations[variationKey(service, hymn, variation)] = checked;
             });
@@ -350,6 +383,7 @@ function toggleHymnSelection(
     setSelection(selection => {
         const next = cloneSelection(selection);
         next.hymns[hymnKey(service, hymn)] = checked;
+        delete next.formats?.[hymnKey(service, hymn)];
         getSelectableVariations(hymn).forEach(variation => {
             next.variations[variationKey(service, hymn, variation)] = checked;
         });
@@ -363,11 +397,26 @@ function toggleVariationSelection(
     service: IServiceInfo,
     hymn: IHymnInfo,
     variation: BookletVariation,
-    checked: boolean
+    checked: boolean,
+    defaultFormats: BookletFormatKind[]
 ) {
     setSelection(selection => {
         const next = cloneSelection(selection);
+        const key = hymnKey(service, hymn);
+        const kind = formatKindFromId(variation.formatId);
+        const hymnWasSelected = isHymnSelected(selection, service, hymn);
+        const requested = hymnWasSelected ? selection.formats?.[key] ?? defaultFormats : [];
+        if (checked && !hymnWasSelected) {
+            getSelectableVariations(hymn).forEach(candidate => { next.variations[variationKey(service, hymn, candidate)] = false; });
+        }
+        const sameFormat = getSelectableVariations(hymn).filter(candidate => candidate.formatId === variation.formatId &&
+            hasBookletVariationContent(candidate, kind));
+        if (checked && !requested.includes(kind)) {
+            sameFormat.forEach(candidate => { next.variations[variationKey(service, hymn, candidate)] = false; });
+        }
         next.variations[variationKey(service, hymn, variation)] = checked;
+        const includeFormat = checked || sameFormat.some(candidate => next.variations[variationKey(service, hymn, candidate)] !== false);
+        next.formats = { ...next.formats, [key]: bookletFormatKinds.filter(candidate => candidate === kind ? includeFormat : requested.includes(candidate)) };
 
         if (checked) {
             next.hymns[hymnKey(service, hymn)] = true;
@@ -388,11 +437,12 @@ function cloneSelection(selection: BookletSelectionState): BookletSelectionState
     return {
         services: { ...selection.services },
         hymns: { ...selection.hymns },
-        variations: { ...selection.variations }
+        variations: { ...selection.variations },
+        formats: { ...selection.formats }
     };
 }
 
-export function getSelectedBookletServices(services: IServiceInfo[], selection: BookletSelectionState): IServiceInfo[] {
+export function getSelectedBookletServices(services: IServiceInfo[], selection: BookletSelectionState, formats: BookletFormatKind[] = bookletFormatKinds): IServiceInfo[] {
     const selectedServices: IServiceInfo[] = [];
 
     services
@@ -406,9 +456,11 @@ export function getSelectedBookletServices(services: IServiceInfo[], selection: 
                     const selectedFormats: IFormatInfo[] = [];
 
                     getBookletFormats(hymn)
+                        .filter(format => (selection.formats?.[hymnKey(service, hymn)] ?? formats).includes(formatKindFromId(format.id)))
                         .forEach(format => {
                             const variations = (format.variations || [])
-                                .filter(variation => isVariationSelected(selection, service, hymn, { ...variation, formatId: format.id }));
+                                .filter(variation => isVariationSelected(selection, service, hymn, { ...variation, formatId: format.id }) &&
+                                    hasBookletVariationContent(variation, formatKindFromId(format.id)));
 
                             if (variations.length > 0) {
                                 selectedFormats.push({ ...format, variations, variationCount: variations.length });
@@ -456,13 +508,16 @@ function hasSelectedHymnContent(selection: BookletSelectionState, service: IServ
     }
 
     const selectableVariations = getSelectableVariations(hymn);
+    const requested = selection.formats?.[hymnKey(service, hymn)];
+    if (requested && requested.length === 0) return false;
     return selectableVariations.length === 0 ||
-        selectableVariations.some(variation => selection.variations[variationKey(service, hymn, variation)] !== false);
+        selectableVariations.some(variation => (!requested || requested.includes(formatKindFromId(variation.formatId))) &&
+            selection.variations[variationKey(service, hymn, variation)] !== false);
 }
 
 function getBookletFormats(hymn: IHymnInfo): IFormatInfo[] {
     return [...(hymn.formats || [])]
-        .filter(format => format.id === "2" || format.id === "3")
+        .filter(format => ["1", "2", "3", "4"].includes(format.id))
         .sort((a, b) => a.order - b.order);
 }
 
@@ -483,12 +538,12 @@ function getVariationDisplayName(variation: BookletVariation): string {
     return variation.displayName || variation.name || variation.id;
 }
 
-function getBookletDisabledMessage(formatExists: boolean): string {
-    if (!formatExists) {
-        return strings.bookletUnavailable;
-    }
+function formatKindFromId(id: string): BookletFormatKind {
+    return id === "4" ? "musical" : id === "1" ? "text" : id === "2" ? "regular" : "vertical";
+}
 
-    return strings.bookletNoSelectedContent;
+function getFormatName(kind: BookletFormatKind): string {
+    return kind === "musical" ? strings.musicalNotesLinkSuffix : kind === "text" ? strings.textFormatName : kind === "regular" ? strings.hazzatFormatName : strings.verticalHazzatFormatName;
 }
 
 export default BookletDetails;
