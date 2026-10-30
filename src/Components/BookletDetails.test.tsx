@@ -5,7 +5,7 @@ import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvi
 import { ContentLanguage, ContentType } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { strings } from "../l8n";
-import BookletDetails, { getMissingBookletFormats, getSelectedBookletServices } from "./BookletDetails";
+import BookletDetails, { getSelectedBookletServices } from "./BookletDetails";
 
 jest.mock("axios", () => ({ create: jest.fn() }));
 
@@ -65,15 +65,16 @@ describe("booklet builder", () => {
         expect(revokeUrl).toHaveBeenCalledTimes(2);
     });
 
-    it("requires an explicit choice before omitting unavailable formats and disables empty booklets", async () => {
+    it("automatically omits unavailable formats and still disables empty booklets", async () => {
         const partial = { ...service, hymns: [...service.hymns!, { ...service.hymns![0], id: "second", name: "Second hymn", displayName: "Second hymn", formats: [service.hymns![0].formats![1]] }] };
         jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue([partial]);
         await openBuilder();
         fireEvent.click(screen.getByRole("button", { name: "Text + Hazzat" }));
-        expect(screen.getByRole("button", { name: "Review booklet" })).toBeDisabled();
-        expect(screen.getByRole("status")).toHaveTextContent("Second hymn: Text");
-        fireEvent.click(screen.getByLabelText(/Include available content/));
         expect(screen.getByRole("button", { name: "Review booklet" })).toBeEnabled();
+        expect(screen.queryByLabelText(/Include available content/)).not.toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+        await screen.findByRole("link", { name: "Download PDF" });
+        expect(generator.mock.calls[0][0].services[0].hymns!.map(hymn => hymn.formats!.map(format => format.id))).toEqual([["1", "2"], ["2"]]);
         fireEvent.click(screen.getByRole("button", { name: "Hazzat", exact: true }));
         expect(screen.queryByText(/Some selected formats/)).not.toBeInTheDocument();
         fireEvent.click(screen.getByRole("checkbox", { name: "Vespers" }));
@@ -83,13 +84,15 @@ describe("booklet builder", () => {
     it("supports per-hymn overrides, format grouping, and resets overrides when applying a preset", async () => {
         const { container } = await openBuilder();
         const hymn = container.querySelector('.bookletHymnSelector') as HTMLElement;
-        fireEvent.click(within(hymn).getByRole("checkbox", { name: "Hazzat", exact: true }));
+        expect(hymn.querySelector('.bookletFormatChoices')).not.toBeInTheDocument();
+        expect(within(hymn).getByRole("checkbox", { name: "Text words (Text)", exact: true })).toBeChecked();
+        fireEvent.click(within(hymn).getByRole("checkbox", { name: "Notation (Hazzat)", exact: true }));
         fireEvent.change(screen.getByLabelText("Group content"), { target: { value: "format" } });
         fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
         await screen.findByRole("link", { name: "Download PDF" });
         expect(generator).toHaveBeenLastCalledWith(expect.objectContaining({ formatKinds: ["text"], groupingKind: "format" }));
         fireEvent.click(screen.getByRole("button", { name: "Text + Hazzat" }));
-        expect(within(hymn).getByRole("checkbox", { name: "Hazzat", exact: true })).toBeChecked();
+        expect(within(hymn).getByRole("checkbox", { name: "Notation (Hazzat)", exact: true })).toBeChecked();
     });
 
     it("shows generation errors and permits retry", async () => {
@@ -101,6 +104,44 @@ describe("booklet builder", () => {
         expect(screen.getByRole("button", { name: "Review booklet" })).toBeEnabled();
         fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
         await screen.findByRole("link", { name: "Download PDF" });
+    });
+
+    it("lets a variation outside the preset add its format without selecting its sibling alternatives", async () => {
+        const alternatives = JSON.parse(JSON.stringify(service)) as IServiceInfo;
+        const notation = alternatives.hymns![0].formats![1];
+        notation.variations!.push({ ...notation.variations![0], id: "second", name: "Long tune", displayName: "Long tune" });
+        notation.variationCount = 2;
+        jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue([alternatives]);
+        const { container } = await openBuilder();
+        fireEvent.click(screen.getByRole("button", { name: "Text Only" }));
+        const hymn = container.querySelector('.bookletHymnSelector') as HTMLElement;
+        const first = within(hymn).getByRole("checkbox", { name: "Notation (Hazzat)", exact: true });
+        const second = within(hymn).getByRole("checkbox", { name: "Long tune (Hazzat)", exact: true });
+        expect(first).not.toBeChecked();
+        expect(second).not.toBeChecked();
+        fireEvent.click(second);
+        expect(first).not.toBeChecked();
+        expect(second).toBeChecked();
+        fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+        await screen.findByRole("link", { name: "Download PDF" });
+        const options = generator.mock.calls[0][0];
+        expect(options.formatKinds).toEqual(["text", "regular"]);
+        expect(options.services[0].hymns![0].formats![1].variations!.map(v => v.id)).toEqual(["second"]);
+        fireEvent.click(second);
+        expect(screen.queryByText(/Some selected formats/)).not.toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Review booklet" })).toBeEnabled();
+        fireEvent.click(within(hymn).getByRole("checkbox", { name: "Text words (Text)" }));
+        expect(screen.getByRole("button", { name: "Review booklet" })).toBeDisabled();
+        fireEvent.click(within(hymn).getByRole("checkbox", { name: "First hymn", exact: true }));
+        expect(within(hymn).getByRole("checkbox", { name: "Text words (Text)" })).toBeChecked();
+        expect(first).not.toBeChecked();
+        expect(second).not.toBeChecked();
+        fireEvent.click(screen.getByRole("checkbox", { name: "Vespers", exact: true }));
+        fireEvent.click(screen.getByRole("button", { name: "All Formats" }));
+        fireEvent.click(second);
+        expect(second).toBeChecked();
+        expect(first).not.toBeChecked();
+        expect(within(hymn).getByRole("checkbox", { name: "Text words (Text)" })).not.toBeChecked();
     });
 
     it("locks selection during generation and releases an unfinished preview on unmount", async () => {
@@ -119,8 +160,7 @@ describe("booklet builder", () => {
         const selection = { services: {}, hymns: {}, variations: {}, formats: { "annual/vespers/first": ["text" as const] } };
         const selected = getSelectedBookletServices([service, other], selection, ["regular"]);
         expect(selected.map(s => s.hymns![0].formats!.map(f => f.id))).toEqual([["1"], ["2"]]);
-        expect(getMissingBookletFormats([service, other], selection, ["regular"])).toEqual([]);
-        expect(getMissingBookletFormats([service], { ...selection, formats: { "annual/vespers/first": [] } }, ["regular"])).toHaveLength(1);
+        expect(getSelectedBookletServices([service], { ...selection, formats: { "annual/vespers/first": [] } }, ["regular"])).toEqual([]);
     });
 
     it("allows a musical-notes-only booklet from its preset", async () => {
