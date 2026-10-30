@@ -8,6 +8,7 @@ import {
     generateSeasonBookletPdf,
     getBookletFileName,
     getBookletSections,
+    hasBookletFormat,
     hasBookletVariationContent
 } from "../Booklets/BookletPdfGenerator";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
@@ -73,6 +74,9 @@ function BookletDetails() {
                 setSeasonInfo(seasonResponse);
                 setServices(sorted);
                 setSelection(createDefaultSelection(sorted));
+                const available = bookletFormatKinds.filter(kind => hasBookletFormat(sorted, kind));
+                const preferred = available.filter(kind => kind === "text" || kind === "regular");
+                setFormats(preferred.length ? preferred : available.slice(0, 1));
                 setErrorMessage(undefined);
             }
         } catch {
@@ -149,6 +153,16 @@ function BookletDetails() {
     const sections = getBookletSections(selectedServices, bookletFormatKinds, grouping);
     const missing = getMissingBookletFormats(services, selection, formats);
     const busy = !!activeDownload;
+    const availableFormats = bookletFormatKinds.filter(kind => hasBookletFormat(services, kind));
+    const presets: { kinds: BookletFormatKind[]; label: string }[] = [
+        { kinds: ["text"], label: strings.bookletTextOnly },
+        { kinds: ["regular"], label: strings.hazzatFormatName },
+        { kinds: ["vertical"], label: strings.verticalHazzatFormatName },
+        { kinds: ["musical"], label: strings.musicalNotesLinkSuffix },
+        { kinds: ["text", "regular"], label: strings.bookletTextHazzat },
+        { kinds: ["text", "vertical"], label: strings.bookletTextVerticalHazzat },
+        { kinds: availableFormats, label: strings.bookletAllFormats }
+    ];
     const applyFormats = (next: BookletFormatKind[]) => {
         setFormats(next);
         setSelection(current => ({ ...current, formats: {} }));
@@ -176,15 +190,15 @@ function BookletDetails() {
                 <fieldset disabled={busy}>
                 <legend>{strings.bookletChooseFormats}</legend>
                 <div className="bookletPresetRow">
-                    {[["text"], ["text", "regular"], bookletFormatKinds].map((preset, i) => (
-                        <button key={i} type="button" className="bookletChoice" aria-pressed={preset.join() === formats.join()}
-                            onClick={() => applyFormats(preset as BookletFormatKind[])}>
-                            {[strings.bookletTextOnly, strings.bookletTextHazzat, strings.bookletAllFormats][i]}
+                    {presets.filter(preset => preset.kinds.length > 0 && preset.kinds.every(kind => availableFormats.includes(kind))).map(preset => (
+                        <button key={preset.label} type="button" className="bookletChoice" aria-pressed={preset.kinds.join() === formats.join()}
+                            onClick={() => applyFormats(preset.kinds)}>
+                            {preset.label}
                         </button>
                     ))}
                 </div>
                 <div className="bookletFormatChoices">
-                    {bookletFormatKinds.map(kind => <label key={kind}>
+                    {availableFormats.map(kind => <label key={kind}>
                         <input type="checkbox" checked={formats.includes(kind)} onChange={event =>
                             applyFormats(bookletFormatKinds.filter(k => k === kind ? event.target.checked : formats.includes(k)))} />
                         {getFormatName(kind)}
@@ -196,6 +210,7 @@ function BookletDetails() {
                     selection={selection}
                     onSelectionChange={setSelection}
                     formats={formats}
+                    availableFormats={availableFormats}
                 />
                 <h3>{strings.bookletArrange}</h3>
                 <div className="bookletLayoutChoices">
@@ -256,6 +271,7 @@ interface BookletContentSelectorProps {
     selection: BookletSelectionState;
     onSelectionChange: React.Dispatch<React.SetStateAction<BookletSelectionState>>;
     formats: BookletFormatKind[];
+    availableFormats: BookletFormatKind[];
 }
 
 function BookletContentSelector(props: BookletContentSelectorProps) {
@@ -300,7 +316,7 @@ function BookletContentSelector(props: BookletContentSelectorProps) {
                                     </label>
 
                                     <div className="bookletFormatChoices">
-                                        {bookletFormatKinds.map(kind => <label key={kind}>
+                                        {props.availableFormats.map(kind => <label key={kind}>
                                             <input type="checkbox" checked={(props.selection.formats?.[hymnKey(service, hymn)] ?? props.formats).includes(kind)}
                                                 onChange={event => {
                                                     const checked = event.target.checked;
