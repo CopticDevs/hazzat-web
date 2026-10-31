@@ -815,25 +815,19 @@ class BookletWriter {
         });
     }
 
-    public drawHeading(text: string, size: number, extraSpace = 18, showRule = true) {
+    public drawHeading(text: string, size: number, extraSpace = 18, extraPadding = true) {
         this.ensureSpace(size + extraSpace);
         drawWrappedPlainText(this, text, "title", size, size + 5, black, true);
-        if (showRule) {
-            this.drawHeadingRule(8, Math.max(12, extraSpace));
+        if (extraPadding) {
+            this.addHeadingSpacing(8, Math.max(12, extraSpace));
         } else {
             this.cursorY -= Math.max(4, extraSpace / 3);
         }
     }
 
-    public drawHeadingRule(spacingBefore = 5, spacingAfter = 9) {
+    public addHeadingSpacing(spacingBefore = 5, spacingAfter = 9) {
         this.ensureSpace(spacingBefore + 1 + spacingAfter);
         this.cursorY -= spacingBefore;
-        this.page.drawLine({
-            start: { x: PAGE_MARGIN_X + 44, y: this.cursorY },
-            end: { x: LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - 44, y: this.cursorY },
-            thickness: 0.45,
-            color: lightGray
-        });
         this.cursorY -= spacingAfter;
     }
 
@@ -970,10 +964,10 @@ function drawInsideFrontCover(writer: BookletWriter, generatedAt: Date) {
     writer.drawCenteredText(`Generated ${formatGeneratedMonthYear(generatedAt)}`, "english", 9, 72, gray);
 }
 
-function measureHeading(writer: BookletWriter, text: string, size: number, extraSpace: number, showRule = true): number {
+function measureHeading(writer: BookletWriter, text: string, size: number, extraSpace: number, extraPadding = true): number {
     const font = arabicUnicodePattern.test(text) ? writer.fonts.arabic : writer.fonts.title;
     return wrapPlainText(text, font, size, CONTENT_WIDTH).length * (size + 5)
-        + (showRule ? 8 + Math.max(12, extraSpace) : Math.max(4, extraSpace / 3));
+        + (extraPadding ? 8 + Math.max(12, extraSpace) : Math.max(4, extraSpace / 3));
 }
 
 function measureVariationTitle(writer: BookletWriter, variation: BookletContentVariation): number {
