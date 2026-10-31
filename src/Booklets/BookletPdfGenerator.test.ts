@@ -1,4 +1,6 @@
-import { PDFArray, PDFDocument, PDFPage, PDFRawStream, decodePDFRawStream } from "pdf-lib";
+import { PDFArray, PDFDocument, PDFName, PDFNumber, PDFPage, PDFRawStream, decodePDFRawStream } from "pdf-lib";
+import { loadCoverCenterVineArtwork } from "./BookletCenterVineRenderer";
+import { loadCoverCornerArtwork } from "./BookletCornerRenderer";
 import fs from "fs";
 import path from "path";
 import {
@@ -7,8 +9,11 @@ import {
     EmbeddedFonts,
     TextRun,
     calculateTocPageCount,
+    layoutBookletToc,
+    TocEntry,
     generateSeasonBookletPdf,
     getBookletSections,
+    filterBookletServicesLanguages,
     getBookletFileName,
     hasBookletVariationContent,
     layoutBookletTextTable,
@@ -21,7 +26,6 @@ import {
     hasBookletFormat,
     normalizeFontKey,
     parseHazzatHtmlToLines,
-    shouldDrawLanguageMarker,
     wrapRuns
 } from "./BookletPdfGenerator";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
@@ -30,6 +34,9 @@ import { ContentLanguage, ContentType, ITextContent } from "../Providers/HymnsDa
 import { renderBookletMusic } from "./BookletMusicRenderer";
 
 jest.mock("./BookletMusicRenderer", () => ({ renderBookletMusic: jest.fn() }));
+
+beforeAll(() => Promise.all([loadCoverCornerArtwork(readImage("bookletCoverCorner.bin")),
+    loadCoverCenterVineArtwork(readImage("bookletCoverCenterVine.bin"))]));
 
 function createFakeFonts(): EmbeddedFonts {
     const fakeFont = {
@@ -88,8 +95,6 @@ function createSeason(id = "nativity", displayName = "Nativity"): ISeasonInfo {
         id,
         name: displayName,
         displayName,
-        verse: "",
-        displayVerse: "",
         order: 1,
         isDateSpecific: false,
         serviceIds: ["vespers"]
@@ -157,6 +162,52 @@ function createService(): IServiceInfo {
 }
 
 describe("BookletPdfGenerator", () => {
+    it.each(["display", "print"] as const)("filters booklet languages before pagination and omits format labels (%s)", async layoutKind => {
+        const service = withText();
+        const original = JSON.stringify(service);
+        const filtered = filterBookletServicesLanguages([service], [ContentLanguage.Arabic]);
+        expect(filtered[0].hymns![0].formats!.map(format => format.id)).toEqual(["1", "2", "3"]);
+        const text = filtered[0].hymns![0].formats!.find(format => format.id === "1")!.variations![0].content as ITextContent;
+        expect(text.paragraphs[0].columns.map(column => column.language)).toEqual([ContentLanguage.Arabic]);
+        expect(filterBookletServicesLanguages([service], [])).toEqual([]);
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text", "regular", "vertical"], layoutKind,
+                languages: [ContentLanguage.Arabic], fontSources: createFontSources(), imageSources: createImageSources() });
+            const words = draws.mock.calls.map(([text]) => text);
+            expect(words).not.toContain("Mercy");
+            expect(words).not.toContain("Lord");
+            expect(words.some(word => /[\u0600-\u06ff]/.test(word))).toBe(true);
+            expect(words).not.toEqual(expect.arrayContaining(["TEXT", "HAZZAT", "VERTICAL HAZZAT"]));
+            expect(words.filter(word => ["TEXT", "HAZZAT", "VERTICAL HAZZAT"].includes(word))).toEqual([]);
+            expect(JSON.stringify(service)).toBe(original);
+        } finally { draws.mockRestore(); }
+    });
+
+    it.each(["hymn", "format"] as const)("keeps wrapped hymn headings with their opening content (%s grouping)", async groupingKind => {
+        const service = withText();
+        const base = service.hymns![0];
+        service.hymns = Array.from({ length: 12 }, (_, index) => ({ ...base, id: `hymn-${index}`, order: index,
+            displayName: `Heading${index} with a sufficiently long name to wrap across multiple lines of the page`,
+            formats: [{ ...base.formats!.find(format => format.id === "1")!, variations: [{ id: "verse", name: "Verse", displayName: "Verse", content: {
+                contentType: ContentType.TextContent, paragraphs: [{ columns: [{ language: ContentLanguage.English,
+                    content: `Body${index} ` + "mercy upon us ".repeat(20 + index * 5) }] }]
+            } }] }]
+        }));
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text"], groupingKind, layoutKind: "display",
+                fontSources: createFontSources(), imageSources: { ...createImageSources(), serviceDivider: readImage("bookletBackCoverBackground.jpg") } });
+            for (let index = 0; index < 12; index++) {
+                const heading = draws.mock.calls.findIndex(([text, options]) => text.startsWith(`Heading${index} `) && options?.size === 11.5);
+                const body = draws.mock.calls.findIndex(([text]) => text === `Body${index}`);
+                expect(heading).toBeGreaterThan(-1);expect(body).toBeGreaterThan(-1);
+                expect(draws.mock.instances[heading]).toBe(draws.mock.instances[body]);
+                expect(draws.mock.calls[body][1]!.x).toBe(24);
+            }
+            expect(draws.mock.calls.filter(([text, options]) => text === "Text" && options?.size !== 11)).toHaveLength(0);
+        } finally { draws.mockRestore(); }
+    });
     it.each(["display", "print"] as const)("exports independent text and notation colors while keeping comments distinct (%s)", async layoutKind => {
         const service = withText();
         service.hymns![0].formats![0].variations![0].content = { contentType: ContentType.TextContent, paragraphs: [
@@ -178,7 +229,7 @@ describe("BookletPdfGenerator", () => {
                 calls.forEach(([, options]) => expect(options?.color).toEqual({ type: "RGB", red: 0, green: 0, blue: 128 / 255 }));
             }
             const notes = draws.mock.calls.filter(([text]) => text === "x");
-            expect(notes.length).toBeGreaterThanOrEqual(4);
+            expect(notes.length).toBeGreaterThanOrEqual(3);
             notes.forEach(([, options]) => expect(options?.color).toEqual({ type: "RGB", red: 128 / 255, green: 0, blue: 0 }));
             expect(draws.mock.calls.find(([text]) => text === "CommentInk")![1]!.color).toEqual({ type: "RGB", red: .55, green: .16, blue: .14 });
         } finally { draws.mockRestore(); }
@@ -250,7 +301,9 @@ describe("BookletPdfGenerator", () => {
             await generateSeasonBookletPdf({ season: createSeason(), services: [first, second], formatKinds: ["regular"], layoutKind: "display",
                 fontSources: createFontSources(), imageSources: { ...createImageSources(), serviceDivider: readImage("logo.png"), variationDivider: fs.readFileSync(path.join(process.cwd(), "src", "images", "crossline.svg")) } });
             expect(images.mock.calls.filter(([, options]) => options?.opacity === .8)).toHaveLength(3);
-            expect(paths).not.toHaveBeenCalled(); // The grapevine replaces the final variation's cross.
+            const crossPaths = Array.from(new DOMParser().parseFromString(fs.readFileSync(path.join(process.cwd(), "src", "images", "crossline.svg"), "utf8"), "image/svg+xml").querySelectorAll("path")).filter(path => path.getAttribute("d")?.trim()).length;
+            // Two language transitions per service; no extra final cross before its grapevine.
+            expect(paths.mock.calls.filter(([, options]) => options?.opacity === .65)).toHaveLength(4 * crossPaths);
         } finally { images.mockRestore(); paths.mockRestore(); }
     });
 
@@ -283,8 +336,8 @@ describe("BookletPdfGenerator", () => {
         const lines = jest.spyOn(PDFPage.prototype, "drawLine");
         try {
             await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text"], layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
-            expect(lines.mock.calls.some(([line]) => line.start.y === line.end.y && line.start.x === 36 && line.end.x === 360 && line.thickness === .35)).toBe(false);
-            expect(lines.mock.calls.filter(([line]) => line.thickness === .7).length).toBeGreaterThanOrEqual(4);
+            expect(lines.mock.calls.some(([line]) => line.start.y === line.end.y && line.start.x === 24 && line.end.x === 372 && line.thickness === .35)).toBe(false);
+            expect(lines.mock.calls.filter(([line]) => line.thickness === .7).length).toBeGreaterThanOrEqual(3);
         } finally { lines.mockRestore(); }
     });
     it("lays out aligned text columns in English, Coptic, Arabic order without language heading rows", () => {
@@ -299,7 +352,7 @@ describe("BookletPdfGenerator", () => {
         expect(table.rows[0].columns.map(words)).toEqual(["Mercy", "Nai", "ارحمنا"]);
         expect(table.rows[1].columns.map(words)).toEqual(["Next paragraph"]);
         expect(table.rows[1].languages).toEqual([ContentLanguage.English]);
-        expect(table.rows[1].columnWidth).toBe(324);
+        expect(table.rows[1].columnWidth).toBe(348);
         expect(table.rows.flatMap(row => row.columns.flat(2)).map(run => run.text)).not.toEqual(expect.arrayContaining(["ENGLISH", "COPTIC", "ARABIC"]));
     });
 
@@ -317,7 +370,7 @@ describe("BookletPdfGenerator", () => {
             [ContentLanguage.Coptic, ContentLanguage.Arabic], [ContentLanguage.English, ContentLanguage.Coptic, ContentLanguage.Arabic],
             [ContentLanguage.Arabic], [ContentLanguage.English, ContentLanguage.Coptic]
         ]);
-        expect(table.rows.map(row => row.columnWidth)).toEqual([100, 324, 156, 100, 324, 156]);
+        expect(table.rows.map(row => row.columnWidth)).toEqual([108, 348, 168, 108, 348, 168]);
     });
 
     it.each([
@@ -329,7 +382,7 @@ describe("BookletPdfGenerator", () => {
         const table = layoutBookletTextTable(content, createFakeFonts());
         expect(table.rows.map(row => row.languages.length)).toEqual(counts);
         table.rows.filter(row => row.languages.length === 1).forEach(row => {
-            expect(row.columnWidth).toBe(324);
+            expect(row.columnWidth).toBe(348);
             expect(row.languages).toEqual([file.startsWith("asomen") ? ContentLanguage.Coptic : ContentLanguage.English]);
         });
         expect(JSON.stringify(content)).toBe(original);
@@ -607,25 +660,66 @@ describe("BookletPdfGenerator", () => {
         expect(getDrawableRunText(line, 1)).toBe("نزا");
     });
 
-    it("draws language markers only when multiple languages are present", () => {
-        const copticOnlyBlocks = [
-            { html: "content", defaultFontKey: "coptic" as const, languageName: "Coptic" }
-        ];
-        const englishOnlyBlocks = [
-            { html: "content", defaultFontKey: "english" as const, languageName: "English" }
-        ];
-        const arabicOnlyBlocks = [
-            { html: "content", defaultFontKey: "arabic" as const, languageName: "Arabic" }
-        ];
-        const mixedBlocks = [
-            { html: "content", defaultFontKey: "coptic" as const, languageName: "Coptic" },
-            { html: "content", defaultFontKey: "english" as const, languageName: "English" }
-        ];
+    it.each(["regular", "vertical"] as const)("renders every selected language without language labels (%s)", async formatKind => {
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [createService()], formatKind,
+                layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
+            const words = draws.mock.calls.map(([text]) => text);
+            expect(words.filter(word => ["COPTIC", "ENGLISH", "ARABIC", "Coptic", "English", "Arabic"].includes(word))).toEqual([]);
+            expect(words.some(word => /[\u0600-\u06ff]/.test(word))).toBe(true);
+            const body = draws.mock.calls.filter(([, options]) => options?.size === 10.5);
+            expect(body.length).toBeGreaterThan(0);
+        } finally { draws.mockRestore(); }
+    });
 
-        expect(shouldDrawLanguageMarker(copticOnlyBlocks)).toBe(false);
-        expect(shouldDrawLanguageMarker(englishOnlyBlocks)).toBe(false);
-        expect(shouldDrawLanguageMarker(arabicOnlyBlocks)).toBe(false);
-        expect(shouldDrawLanguageMarker(mixedBlocks)).toBe(true);
+    it.each(["regular", "vertical"] as const)("draws crosses only between selected language blocks (%s)", async formatKind => {
+        const imageSources = { ...createImageSources(), serviceDivider: readImage("logo.png"), variationDivider: readImage("crossline.svg") };
+        const pathCount = Array.from(new DOMParser().parseFromString(fs.readFileSync(path.join(process.cwd(), "src", "images", "crossline.svg"), "utf8"), "image/svg+xml").querySelectorAll("path")).filter(path => path.getAttribute("d")?.trim()).length;
+        const paths = jest.spyOn(PDFPage.prototype, "drawSvgPath");
+        try {
+            for (const languages of [undefined, [ContentLanguage.English]]) {
+                paths.mockClear();
+                await generateSeasonBookletPdf({ season: createSeason(), services: [createService()], formatKind,
+                    layoutKind: "display", languages, fontSources: createFontSources(), imageSources });
+                expect(paths.mock.calls.filter(([, options]) => options?.opacity === .65)).toHaveLength(languages ? 0 : 2 * pathCount);
+            }
+        } finally { paths.mockRestore(); }
+    });
+
+    it.each(["en", "ar"] as const)("groups format-ordered contents under localized format headings (%s)", async localeName => {
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            for (const groupingKind of ["format", "hymn"] as const) {
+                draws.mockClear();
+                await generateSeasonBookletPdf({ season: createSeason(), services: [withText()],
+                    formatKinds: ["text", "regular", "vertical", "musical"], groupingKind, localeName,
+                    layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
+                const headings = draws.mock.calls.filter(([, options]) => options?.size === 11).map(([text]) => text).join("|");
+                if (groupingKind === "hymn") expect(headings).toBe("");
+                else for (const title of localeName === "ar" ? ["نص", "هزّات", "عمودية"] : ["Text", "Hazzat", "Vertical Hazzat"]) expect(headings).toContain(title);
+                expect(headings).not.toContain("Musical Notes");
+                expect(headings).not.toContain("نوتة");
+            }
+        } finally { draws.mockRestore(); }
+    });
+
+    it("paginates format headings with their service and first hymn", () => {
+        const entries: TocEntry[] = [];
+        for (let group = 0; group < 4; group++) {
+            entries.push({ title: `Format ${group}`, pageNumber: group + 4, level: "format" });
+            for (let service = 0; service < 16; service++) entries.push(
+                { title: `Service ${service}`, pageNumber: 4, level: "service" },
+                { title: `Hymn ${service}`, pageNumber: 4, level: "hymn" });
+        }
+        const layout = layoutBookletToc(entries);
+        expect(layout.pageCount).toBeGreaterThan(1);
+        expect(layout.rows).toHaveLength(entries.length);
+        layout.rows.forEach((row, index) => {
+            expect(row.y).toBeGreaterThan(30);
+            if (row.entry.level === "format") expect(layout.rows.slice(index, index + 3).map(r => r.pageIndex)).toEqual([row.pageIndex, row.pageIndex, row.pageIndex]);
+            if (row.entry.level === "service") expect(layout.rows[index + 1].pageIndex).toBe(row.pageIndex);
+        });
     });
 
     it("calculates stable TOC pages, padding, and print imposition order", () => {
@@ -679,7 +773,7 @@ describe("BookletPdfGenerator", () => {
         expect(pdfText).toContain("/Subtype /Image");
     });
 
-    it("keeps the supplied SVG logo as vector curves on both booklet covers", async () => {
+    it("keeps the logo and frame as vector curves alongside the SVG-backed ornaments", async () => {
         const logo = fs.readFileSync(path.join(process.cwd(), "src", "images", "logo.svg"));
         expect(logo.toString()).not.toMatch(/<image\b|data:image/);
         const bytes = await generateSeasonBookletPdf({
@@ -689,7 +783,17 @@ describe("BookletPdfGenerator", () => {
                 frontCoverLogo: new Uint8Array(logo), backCoverLogo: new Uint8Array(logo) }
         });
         const pdf = await PDFDocument.load(bytes);
-        expect(Buffer.from(bytes).toString("latin1")).not.toContain("/Subtype /Image");
+        const imageObjects = pdf.context.enumerateIndirectObjects().map(([, object]) => object)
+            .filter((object): object is PDFRawStream => object instanceof PDFRawStream
+                && object.dict.get(PDFName.of("Subtype"))?.toString() === "/Image");
+        // Corners and the approved center vine each share one color/alpha pair.
+        // The official black logo and frame remain native vector curves.
+        expect(imageObjects).toHaveLength(4);
+        imageObjects.forEach(image => {
+            expect([[1122, 1402], [2138, 736]]).toContainEqual([
+                image.dict.lookup(PDFName.of("Width"), PDFNumber).asNumber(),
+                image.dict.lookup(PDFName.of("Height"), PDFNumber).asNumber()]);
+        });
         for (const index of [0, pdf.getPageCount() - 1]) {
             const streams = pdf.getPage(index).node.Contents() as PDFArray;
             const operators = Array.from({ length: streams.size() }, (_, i) => {
@@ -697,8 +801,27 @@ describe("BookletPdfGenerator", () => {
                 if (!(stream instanceof PDFRawStream)) throw new Error("Expected a PDF content stream");
                 return Buffer.from(decodePDFRawStream(stream).decode()).toString("latin1");
             }).join("\n");
-            expect((operators.match(/ c\n/g) || []).length).toBeGreaterThan(50);
+            expect((operators.match(/ c\n/g) || []).length).toBeGreaterThan(index === 0 ? 50 : 1);
+            expect(operators).toContain("/HazzatEucharisticCenterVine Do");
         }
+    });
+
+    it("centers a quiet website and page-number footer only on TOC and content pages", async () => {
+        const drawText = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [createService()],
+                formatKind: "regular", layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
+            const footers = drawText.mock.calls.filter(([text]) => text.startsWith("hazzat.com  ·  "));
+            expect(footers.length).toBeGreaterThanOrEqual(2);
+            footers.forEach(([text, options]) => {
+                expect(text).toMatch(/^hazzat\.com  ·  \d+$/);
+                expect(options?.y).toBe(14);
+                expect(options?.size).toBe(8);
+                const width = options!.font!.widthOfTextAtSize(text, options!.size!);
+                expect(options!.x! + width / 2).toBeCloseTo(198);
+            });
+            expect(drawText.mock.calls.some(([text]) => text === "hazzat.com  ·  1")).toBe(false);
+        } finally { drawText.mockRestore(); }
     });
 
     it("draws supplied front and back cover image resources", async () => {
@@ -715,7 +838,7 @@ describe("BookletPdfGenerator", () => {
         const pdfText = Buffer.from(pdfBytes).toString("latin1");
 
         expect(pdf.getPageCount()).toBe(4);
-        expect((pdfText.match(/\/Subtype \/Image/g) || []).length).toBeGreaterThanOrEqual(4);
+        expect((pdfText.match(/\/Subtype \/Image/g) || []).length).toBeGreaterThanOrEqual(3);
     });
 
     it("pads display PDFs to a multiple of four pages with a final back cover", async () => {
@@ -764,4 +887,22 @@ describe("BookletPdfGenerator", () => {
             expect(page.getHeight()).toBe(612);
         });
     });
+});
+
+
+it("shares the SVG-backed cover image across all folded print sheets", async () => {
+    const bytes = await generateSeasonBookletPdf({
+        season: createSeason(), services: [createService()], formatKinds: ["text", "regular"],
+        layoutKind: "print", fontSources: createFontSources(), imageSources: createImageSources()
+    });
+    const doc = await PDFDocument.load(bytes);
+    const corners = doc.context.enumerateIndirectObjects().map(([, object]) => object).filter(object => {
+        if (!(object instanceof PDFRawStream)) return false;
+        return object.dict.get(PDFName.of("Subtype"))?.toString() === "/Image"
+            && object.dict.get(PDFName.of("ColorSpace"))?.toString() === "/DeviceRGB"
+            && object.dict.lookupMaybe(PDFName.of("Width"), PDFNumber)?.asNumber() === 1122
+            && object.dict.lookupMaybe(PDFName.of("Height"), PDFNumber)?.asNumber() === 1402;
+    });
+    expect(doc.getPageCount()).toBeGreaterThanOrEqual(2);
+    expect(corners).toHaveLength(1);
 });

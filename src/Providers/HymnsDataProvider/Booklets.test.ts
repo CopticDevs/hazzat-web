@@ -30,8 +30,6 @@ describe("HymnsDataProvider - season booklet data", () => {
                 id: "nativity",
                 name: "Nativity",
                 displayName: "Nativity",
-                verse: "",
-                displayVerse: "",
                 order: 1,
                 isDateSpecific: false,
                 serviceIds: ["vespers"]
@@ -53,8 +51,6 @@ describe("HymnsDataProvider - season booklet data", () => {
                 id: "nativity",
                 name: "Nativity",
                 displayName: "Nativity",
-                verse: "",
-                displayVerse: "",
                 order: 1,
                 isDateSpecific: false,
                 serviceIds: ["vespers"]
