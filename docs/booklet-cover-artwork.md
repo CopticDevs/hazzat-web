@@ -17,7 +17,7 @@ Regression checks cover asset hashes, exact source RGBA recovery, unchanged PDF 
 
 ## Matching center vine
 
-The approved less-leafy center ornament is `src/images/bookletCoverCenterVine.svg` (2138 x 736 cells). It uses two smaller gold leaves and a central maroon grape cluster, matching the arches’ dark ink contours and botanical veins. Both covers reuse this ornament at 138 points wide, approximately 1115 source pixels per printed inch. The original black-and-white logo and interior dividers are unchanged.
+The approved less-leafy center ornament is `src/images/bookletCoverCenterVine.svg` (2138 x 736 cells). It uses two smaller muted antique-gold leaves and a central maroon grape cluster, matching the arches’ dark ink contours and botanical veins. Both covers reuse this ornament at 138 points wide, approximately 1115 source pixels per printed inch. The original black-and-white logo and interior dividers are unchanged.
 
 Like the corner master, this is a pixel-preserving SVG with no embedded bitmap. It retains the approved drawing exactly; it is not a smooth-curve tracing and does not add resolution. Its 1.1 MB packed color/alpha data loads only for PDF generation, once across exports, with one image shared between both covers and print sheets.
 
