@@ -7,6 +7,8 @@ import {
     EmbeddedFonts,
     TextRun,
     calculateTocPageCount,
+    layoutBookletToc,
+    TocEntry,
     generateSeasonBookletPdf,
     getBookletSections,
     filterBookletServicesLanguages,
@@ -200,7 +202,7 @@ describe("BookletPdfGenerator", () => {
                 expect(draws.mock.instances[heading]).toBe(draws.mock.instances[body]);
                 expect(draws.mock.calls[body][1]!.x).toBe(24);
             }
-            expect(draws.mock.calls.filter(([text]) => text === "Text")).toEqual([]);
+            expect(draws.mock.calls.filter(([text, options]) => text === "Text" && options?.size !== 11)).toHaveLength(0);
         } finally { draws.mockRestore(); }
     });
     it.each(["display", "print"] as const)("exports independent text and notation colors while keeping comments distinct (%s)", async layoutKind => {
@@ -680,6 +682,41 @@ describe("BookletPdfGenerator", () => {
                 expect(paths.mock.calls.filter(([, options]) => options?.opacity === .65)).toHaveLength(languages ? 0 : 2 * pathCount);
             }
         } finally { paths.mockRestore(); }
+    });
+
+    it.each(["en", "ar"] as const)("groups format-ordered contents under localized format headings (%s)", async localeName => {
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            for (const groupingKind of ["format", "hymn"] as const) {
+                draws.mockClear();
+                await generateSeasonBookletPdf({ season: createSeason(), services: [withText()],
+                    formatKinds: ["text", "regular", "vertical", "musical"], groupingKind, localeName,
+                    layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
+                const headings = draws.mock.calls.filter(([, options]) => options?.size === 11).map(([text]) => text).join("|");
+                if (groupingKind === "hymn") expect(headings).toBe("");
+                else for (const title of localeName === "ar" ? ["نص", "هزّات", "عمودية"] : ["Text", "Hazzat", "Vertical Hazzat"]) expect(headings).toContain(title);
+                expect(headings).not.toContain("Musical Notes");
+                expect(headings).not.toContain("نوتة");
+            }
+        } finally { draws.mockRestore(); }
+    });
+
+    it("paginates format headings with their service and first hymn", () => {
+        const entries: TocEntry[] = [];
+        for (let group = 0; group < 4; group++) {
+            entries.push({ title: `Format ${group}`, pageNumber: group + 4, level: "format" });
+            for (let service = 0; service < 16; service++) entries.push(
+                { title: `Service ${service}`, pageNumber: 4, level: "service" },
+                { title: `Hymn ${service}`, pageNumber: 4, level: "hymn" });
+        }
+        const layout = layoutBookletToc(entries);
+        expect(layout.pageCount).toBeGreaterThan(1);
+        expect(layout.rows).toHaveLength(entries.length);
+        layout.rows.forEach((row, index) => {
+            expect(row.y).toBeGreaterThan(30);
+            if (row.entry.level === "format") expect(layout.rows.slice(index, index + 3).map(r => r.pageIndex)).toEqual([row.pageIndex, row.pageIndex, row.pageIndex]);
+            if (row.entry.level === "service") expect(layout.rows[index + 1].pageIndex).toBe(row.pageIndex);
+        });
     });
 
     it("calculates stable TOC pages, padding, and print imposition order", () => {
