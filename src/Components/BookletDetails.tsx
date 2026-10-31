@@ -222,7 +222,7 @@ function BookletDetails() {
                 <legend>{strings.bookletPresetHeading}</legend>
                 <div className="bookletPresetRow">
                     {availablePresets.map(preset => (
-                        <button key={preset.id} type="button" className="bookletChoice"
+                        <button key={preset.id} type="button" className="bookletChoice" aria-pressed={matchingPreset?.id === preset.id}
                             onClick={() => applyFormats(preset.kinds, preset.id)}>
                             {preset.label}
                         </button>

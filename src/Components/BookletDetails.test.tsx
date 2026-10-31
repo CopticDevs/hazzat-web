@@ -240,31 +240,43 @@ describe("booklet builder", () => {
         const onlyMusic = { ...service, hymns: [{ ...service.hymns![0], formats: [{ id: "4", name: "Musical Notes", order: 4, variationCount: 1, variations: [{ id: "score", name: "Score", displayName: "Score", content: { contentType: ContentType.MusicalNotesContent, musicXml: "<score-partwise />" } }] }] }] };
         jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue([onlyMusic]);
         await openBuilder();
-        expect(screen.getByRole("button", { name: "Musical Notes", exact: true })).not.toHaveAttribute("aria-pressed");
+        expect(screen.getByRole("button", { name: "Musical Notes", exact: true })).toHaveAttribute("aria-pressed", "true");
         expect(screen.getByRole("status")).toHaveTextContent("Selection: Musical Notes");
         expect(screen.queryByRole("button", { name: "Text Only" })).not.toBeInTheDocument();
         expect(screen.getByRole("button", { name: "Review booklet" })).toBeEnabled();
     });
 
-    it("treats presets as apply actions and derives Custom selection from actual content", async () => {
+    it("highlights the matching preset and follows manual changes, empty selections and equivalent presets", async () => {
         const multiple = JSON.parse(JSON.stringify(service)) as IServiceInfo;
         multiple.hymns![0].formats![1].variations!.push({ ...multiple.hymns![0].formats![1].variations![0], id: "alternate", displayName: "Alternative" });
         jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue([multiple]);
-        const { container } = await openBuilder();
+        await openBuilder();
         expect(screen.getByRole("status")).toHaveTextContent("Selection: Text + Hazzat");
-        expect(container.querySelectorAll('.bookletChoice[aria-pressed]')).toHaveLength(0);
+        expect(screen.getByRole("button", { name: "Text + Hazzat", exact: true })).toHaveAttribute("aria-pressed", "true");
         fireEvent.click(screen.getByRole("checkbox", { name: "Notation (Hazzat)" }));
         expect(screen.getByRole("status")).toHaveTextContent("Custom selection");
         expect(screen.getByRole("status")).toHaveTextContent("Started with Text + Hazzat");
+        expect(screen.queryAllByRole("button", { pressed: true })).toHaveLength(0);
+        fireEvent.click(screen.getByRole("checkbox", { name: "Alternative (Hazzat)" }));
+        expect(screen.getByRole("button", { name: "Text Only", exact: true })).toHaveAttribute("aria-pressed", "true");
+        fireEvent.click(screen.getByRole("checkbox", { name: "Alternative (Hazzat)" }));
+        expect(screen.queryAllByRole("button", { pressed: true })).toHaveLength(0);
         fireEvent.click(screen.getByRole("checkbox", { name: "Notation (Hazzat)" }));
         expect(screen.getByRole("status")).toHaveTextContent("Selection: Text + Hazzat");
+        expect(screen.getByRole("button", { name: "Text + Hazzat", exact: true })).toHaveAttribute("aria-pressed", "true");
         fireEvent.click(screen.getByRole("checkbox", { name: "First hymn", exact: true }));
         expect(screen.getAllByRole("status")[0]).toHaveTextContent("Custom selection");
+        expect(screen.queryAllByRole("button", { pressed: true })).toHaveLength(0);
         fireEvent.click(screen.getByRole("button", { name: "Text + Hazzat", exact: true }));
         expect(screen.getByRole("checkbox", { name: "First hymn", exact: true })).toBeChecked();
         expect(screen.getByRole("status")).toHaveTextContent("Selection: Text + Hazzat");
         fireEvent.click(screen.getByRole("button", { name: "All Formats", exact: true }));
         expect(screen.getByRole("status")).toHaveTextContent("Selection: All Formats");
+        expect(screen.getAllByRole("button", { pressed: true })).toEqual([screen.getByRole("button", { name: "All Formats", exact: true })]);
+        fireEvent.click(screen.getByRole("checkbox", { name: "Notation (Hazzat)" }));
+        expect(screen.queryAllByRole("button", { pressed: true })).toHaveLength(0);
+        fireEvent.click(screen.getByRole("checkbox", { name: "Notation (Hazzat)" }));
+        expect(screen.getByRole("button", { name: "All Formats", exact: true })).toHaveAttribute("aria-pressed", "true");
     });
 
     it("keeps booklet colors independent, copies reader preferences explicitly and invalidates stale PDFs", async () => {
