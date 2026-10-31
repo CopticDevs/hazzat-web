@@ -21,6 +21,7 @@ import bookletServiceDividerUrl from "../images/bookletServiceDivider.svg";
 import bookletVariationDividerUrl from "../images/crossline.svg";
 import { BookletAppearance, bookletColors, defaultBookletAppearance, normalizeBookletColor } from "./BookletAppearance";
 import { filterContentLanguages } from "../ContentLanguages";
+import { formatDisplayName } from "../Providers/HymnsDataProvider/FormatNames";
 
 export type BookletFormatKind = "text" | "regular" | "vertical" | "musical";
 export type BookletLayoutKind = "display" | "print";
@@ -69,10 +70,10 @@ export interface SizedTextRun extends TextRun {
     size: number;
 }
 
-interface TocEntry {
+export interface TocEntry {
     title: string;
     pageNumber: number;
-    level: "service" | "hymn";
+    level: "format" | "service" | "hymn";
 }
 
 interface PageMeta {
@@ -399,7 +400,7 @@ export async function generateSeasonBookletPdf(options: GenerateBookletPdfOption
     if (options.languages) options = { ...options, services: filterBookletServicesLanguages(options.services, options.languages) };
     const scores = new Map<string, Promise<BookletScorePage[]>>();
     let logicalResult = await renderLogicalBooklet(options, 1, scores);
-    const requiredTocPageCount = calculateTocPageCount(logicalResult.tocEntries.length);
+    const requiredTocPageCount = layoutBookletToc(logicalResult.tocEntries).pageCount;
 
     if (requiredTocPageCount !== 1) {
         logicalResult = await renderLogicalBooklet(options, requiredTocPageCount, scores);
@@ -437,6 +438,7 @@ async function renderLogicalBooklet(options: GenerateBookletPdfOptions, tocPageC
     }
 
     const tocEntries: TocEntry[] = [];
+    const arabic = options.localeName ? options.localeName === "ar" : arabicUnicodePattern.test(options.season.displayName || options.season.name);
     const kinds = options.formatKinds ?? (options.formatKind ? [options.formatKind] : []);
     const sections = getBookletSections(options.services, kinds, options.groupingKind);
     if (sections.length) {
@@ -461,6 +463,9 @@ async function renderLogicalBooklet(options: GenerateBookletPdfOptions, tocPageC
                 + (showHymn ? measureHeading(writer, hymn.displayName || hymn.name, 11.5, 10) : 0);
             const variationTitleHeight = variations.length > 1 ? measureVariationTitle(writer, variations[0]) : 0;
             writer.ensureSpace(headingHeight + variationTitleHeight + measureOpeningContent(writer, variations[0], formatKind) + 2);
+            if (newGroup) {
+                tocEntries.push({ title: formatDisplayName(getFormatId(formatKind), arabic ? "ar" : "en"), pageNumber: writer.pageNumber, level: "format" });
+            }
             if (newService) {
                 tocEntries.push({ title: service.displayName || service.name, pageNumber: writer.pageNumber, level: "service" });
                 writer.drawHeading(service.displayName || service.name, 15, 12, false);
@@ -477,7 +482,7 @@ async function renderLogicalBooklet(options: GenerateBookletPdfOptions, tocPageC
             previousKind = formatKind;
         }
     }
-    drawToc(tocPages, fonts, tocEntries, options.layoutKind === "display", options.localeName ? options.localeName === "ar" : arabicUnicodePattern.test(options.season.displayName || options.season.name), writer.serviceDivider);
+    drawToc(tocPages, fonts, tocEntries, options.layoutKind === "display", arabic, writer.serviceDivider);
 
     return {
         doc,
@@ -1169,32 +1174,46 @@ function drawServiceOrnament(page: PDFPage, image: PDFImage, top: number, maxHei
     page.drawImage(image, { x: (LOGICAL_PAGE_WIDTH - width) / 2, y: top - height, width, height, opacity: .8 });
 }
 
-function drawToc(tocPages: PDFPage[], fonts: EmbeddedFonts, entries: TocEntry[], linkTargets: boolean, arabic: boolean, serviceDivider?: PDFImage) {
+export function layoutBookletToc(entries: TocEntry[]) {
     let pageIndex = 0;
-    let cursorY = LOGICAL_PAGE_HEIGHT - PAGE_TOP;
-    const currentPage = () => tocPages[Math.min(pageIndex, tocPages.length - 1)];
-
-    drawPlainHeadingLine(currentPage(), fonts, arabic ? "جدول المحتويات" : "Table of Contents", "title", 16,
-        PAGE_MARGIN_X, LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X, cursorY, black, false);
-    cursorY -= 30;
-
-    entries.forEach(entry => {
-        if (cursorY < PAGE_BOTTOM + TOC_LINE_HEIGHT) {
+    let cursorY = LOGICAL_PAGE_HEIGHT - PAGE_TOP - 30;
+    const rows = entries.map((entry, index) => {
+        const height = entry.level === "format" ? TOC_LINE_HEIGHT * 2 : TOC_LINE_HEIGHT;
+        const keepNext = entry.level === "format" ? Math.min(2, entries.length - index - 1) * TOC_LINE_HEIGHT
+            : entry.level === "service" && entries[index + 1]?.level === "hymn" ? TOC_LINE_HEIGHT : 0;
+        if (cursorY - height - keepNext < PAGE_BOTTOM) {
             pageIndex += 1;
             cursorY = LOGICAL_PAGE_HEIGHT - PAGE_TOP;
         }
+        const row = { entry, pageIndex, y: cursorY - (entry.level === "format" ? 5 : 0) };
+        cursorY -= height;
+        return row;
+    });
+    return { rows, pageCount: pageIndex + 1, lastCursorY: cursorY };
+}
 
-        const page = currentPage();
-        const size = entry.level === "service" ? 9.5 : 8.5;
+function drawToc(tocPages: PDFPage[], fonts: EmbeddedFonts, entries: TocEntry[], linkTargets: boolean, arabic: boolean, serviceDivider?: PDFImage) {
+    const layout = layoutBookletToc(entries);
+    const grouped = entries.some(entry => entry.level === "format");
+    const currentPage = () => tocPages[0];
+    const cursorY = LOGICAL_PAGE_HEIGHT - PAGE_TOP;
+
+    drawPlainHeadingLine(currentPage(), fonts, arabic ? "جدول المحتويات" : "Table of Contents", "title", 16,
+        PAGE_MARGIN_X, LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X, cursorY, black, false);
+    layout.rows.forEach(({ entry, pageIndex, y: cursorY }) => {
+        // The initial pagination pass may have fewer TOC pages; it is discarded and rerendered.
+        const page = tocPages[pageIndex];
+        if (!page) return;
+        const size = entry.level === "format" ? 11 : entry.level === "service" ? 9.5 : 8.5;
         const rtl = arabicUnicodePattern.test(entry.title);
-        const font = rtl ? fonts.arabic : entry.level === "service" ? fonts.title : fonts.english;
-        const indent = entry.level === "service" ? 0 : 12;
+        const font = rtl ? fonts.arabic : entry.level !== "hymn" ? fonts.title : fonts.english;
+        const indent = entry.level === "format" ? 0 : entry.level === "service" ? (grouped ? 12 : 0) : (grouped ? 24 : 12);
         const title = truncateToWidth(entry.title, font, size, CONTENT_WIDTH - 52 - indent);
         const pageNumber = arabic ? `${entry.pageNumber}`.replace(/[0-9]/g, digit => "٠١٢٣٤٥٦٧٨٩"[Number(digit)]) : `${entry.pageNumber}`;
         const numberFont = arabic ? fonts.arabic : fonts.english;
         const pageNumberWidth = safeTextWidth(numberFont, pageNumber, 8.5);
 
-        drawPlainHeadingLine(page, fonts, title, entry.level === "service" ? "title" : "english", size,
+        drawPlainHeadingLine(page, fonts, title, entry.level !== "hymn" ? "title" : "english", size,
             PAGE_MARGIN_X + (arabic ? 52 : indent), LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - (arabic ? indent : 52), cursorY, black, false);
         let numberX = arabic ? PAGE_MARGIN_X : LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - pageNumberWidth;
         // The Arabic font shapes digit strings right-to-left; place digits individually to preserve ١٣ rather than ٣١.
@@ -1205,9 +1224,9 @@ function drawToc(tocPages: PDFPage[], fonts: EmbeddedFonts, entries: TocEntry[],
         if (linkTargets) {
             addPageLinkAnnotation(page, entry.pageNumber, PAGE_MARGIN_X + (arabic ? 0 : indent), cursorY - 2, CONTENT_WIDTH - indent, TOC_LINE_HEIGHT);
         }
-        cursorY -= TOC_LINE_HEIGHT;
     });
-    if (serviceDivider && cursorY - 64 >= PAGE_BOTTOM) drawServiceOrnament(currentPage(), serviceDivider, cursorY - 10, 48);
+    const lastPage = tocPages[layout.pageCount - 1];
+    if (serviceDivider && lastPage && layout.lastCursorY - 64 >= PAGE_BOTTOM) drawServiceOrnament(lastPage, serviceDivider, layout.lastCursorY - 10, 48);
 }
 
 function addPageLinkAnnotation(page: PDFPage, targetPageNumber: number, x: number, y: number, width: number, height: number) {
