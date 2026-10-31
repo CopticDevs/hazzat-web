@@ -1,12 +1,17 @@
-import { concatTransformationMatrix, decodePDFRawStream, PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFPage, PDFRawStream } from "pdf-lib";
+import { decodePDFRawStream, PDFArray, PDFDict, PDFDocument, PDFName, PDFNumber, PDFPage, PDFRawStream } from "pdf-lib";
 import fs from "fs";
 import path from "path";
+import { createHash } from "crypto";
+import { inflateSync } from "zlib";
 import { drawCoverFrame } from "./BookletCoverArtwork";
 import { coverArchPaths } from "./BookletCoverFrame";
-import artwork from "./BookletCoverCorners.json";
-import { loadCoverCornerArtwork } from "./BookletCornerRenderer";
+import asset from "./BookletCornerAsset.json";
+import { coverCornerPlacement, loadCoverCornerArtwork } from "./BookletCornerRenderer";
 
-beforeAll(loadCoverCornerArtwork);
+const packed = fs.readFileSync(path.join(process.cwd(), "src/images/bookletCoverCorner.bin"));
+const source = packed.buffer.slice(packed.byteOffset, packed.byteOffset + packed.byteLength);
+beforeAll(() => loadCoverCornerArtwork(source));
+const hash = (bytes: Buffer | Uint8Array) => createHash("sha256").update(bytes).digest("hex");
 
 it("keeps the gold arch a constant normal inset of the maroon arch", () => {
     const points = Array.from(coverArchPaths[1].matchAll(/[ML]([0-9.]+) ([0-9.]+)/g), m => [Number(m[1]), Number(m[2])]);
@@ -37,136 +42,105 @@ it("draws the same two crisp vector arches on either cover", async () => {
     } finally { draws.mockRestore(); }
 });
 
-it("draws colored, mirrored corner paths directly in the PDF, with no bitmap fallback", async () => {
-    const doc = await PDFDocument.create();
-    const page = doc.addPage([396, 612]);
-    const image = jest.spyOn(page, "drawImage");
-    const operators = jest.spyOn(page, "pushOperators");
-    drawCoverFrame(page);
-    expect(image).not.toHaveBeenCalled();
-    expect(operators.mock.calls.flat().map(op => op.toString())).toContain(concatTransformationMatrix(-1, 0, 0, 1, 396, 0).toString());
-    const bytes = await doc.save();
-    expect(Buffer.from(bytes).toString("latin1")).not.toContain("/Subtype /Image");
-    const saved = await PDFDocument.load(bytes);
-    const streams = saved.getPage(0).node.Contents() as PDFArray;
-    const content = Array.from({ length: streams.size() }, (_, i) => {
-        const stream = saved.context.lookup(streams.get(i));
-        if (!(stream instanceof PDFRawStream)) throw new Error("Expected PDF drawing operators");
-        return Buffer.from(decodePDFRawStream(stream).decode()).toString("latin1");
-    }).join("\n");
-    expect(content).toContain(" rg\n");
-    expect((content.match(/ c\n/g) || []).length).toBeGreaterThan(100);
+it("keeps the selected SVG and its lossless PDF data synchronized", () => {
+    const svg = fs.readFileSync(path.join(process.cwd(), "src/images/bookletCoverCorners.svg"));
+    expect(hash(svg)).toBe(asset.sourceSha256);
+    expect(hash(packed)).toBe(asset.streamSha256);
+    expect(packed.length).toBe(asset.compressedBytes);
+    const text = svg.toString("utf8");
+    expect(text).not.toMatch(/<image\b|data:image|<filter\b/);
+    expect(text).toContain(`viewBox="0 0 ${asset.width} ${asset.height}"`);
+    expect(text.match(/<path\b/g)).toHaveLength(asset.pathCount);
+    const colors = inflateSync(packed.subarray(0, asset.colorBytes));
+    const alpha = inflateSync(packed.subarray(asset.colorBytes));
+    expect(colors.length).toBe(asset.width * asset.height * 3);
+    expect(alpha.length).toBe(asset.width * asset.height);
+    const rgba = Buffer.alloc(alpha.length * 4);
+    for (let i = 0; i < alpha.length; i++) {
+        colors.copy(rgba, i * 4, i * 3, i * 3 + 3);
+        rgba[i * 4 + 3] = alpha[i];
+    }
+    expect(hash(rgba)).toBe(asset.rgbaSha256);
 });
 
-it("keeps the reusable SVG and the PDF artwork in sync without embedded raster images", () => {
-    const svg = fs.readFileSync(path.join(process.cwd(), "src/images/bookletCoverCorners.svg"), "utf8");
-    expect(svg).not.toMatch(/<image\b|data:image|<filter\b/);
-    expect(svg).toContain('viewBox="0 0 1009 1559"');
-    expect(svg).toContain('transform="translate(1009 0) scale(-1 1)"');
-    expect(svg).toContain('<use href="#corner"');
-    expect(svg.match(/<path\b/g)?.length).toBe(artwork.paths.length + Object.values(artwork.clips).reduce((total, paths) => total + paths.length, 0));
-    for (const p of artwork.paths) {
-        expect(svg).toContain(`d="${p.d}"`);
-        if (p.fill) expect(svg).toContain(`fill="${p.fill}"`);
-        if (p.stroke) expect(svg).toContain(`stroke="${p.stroke}"`);
-        if (p.paint) expect(svg).toContain(`fill="url(#${p.paint})"`);
-        if (p.clip) expect(svg).toContain(`clip-path="url(#${p.clip})"`);
-    }
-    for (const gradient of Object.values(artwork.gradients)) {
-        expect(["linear", "radial"]).toContain(gradient.kind);
-        expect(gradient.coords).toHaveLength(gradient.kind === "linear" ? 4 : 6);
-        expect(gradient.stops[0][0]).toBe(0);
-        expect(gradient.stops[gradient.stops.length - 1][0]).toBe(1);
-        let previous = -1;
-        for (const [offset, color] of gradient.stops) {
-            expect(typeof offset).toBe("number");
-            expect(offset).toBeGreaterThan(previous);
-            expect(color).toMatch(/^#[\da-f]{6}$/i);
-            previous = Number(offset);
-        }
-    }
-});
-
-it("preserves smooth gold and grape shading as native PDF resources on both covers", async () => {
+it("shares the same original colors and transparency between both mirrored covers", async () => {
     const doc = await PDFDocument.create();
-    const pages = [doc.addPage([396, 612]), doc.addPage([396, 612])];
-    pages.forEach(page => drawCoverFrame(page));
+    for (let i = 0; i < 2; i++) drawCoverFrame(doc.addPage([396, 612]));
     const saved = await PDFDocument.load(await doc.save());
-    const references: string[][] = [];
+    const refs: string[] = [];
     for (const page of saved.getPages()) {
-        const resources = page.node.Resources()!.lookup(PDFName.of("Shading"), PDFDict);
-        expect(resources.keys()).toHaveLength(Object.keys(artwork.gradients).length);
-        const kinds = resources.values().map(ref => saved.context.lookup(ref, PDFDict).lookup(PDFName.of("ShadingType"), PDFNumber).asNumber());
-        expect(kinds).toContain(2); // Smooth axial gold folds.
-        expect(kinds).toContain(3); // Smooth radial grape volume.
-        references.push(resources.values().map(ref => ref.toString()));
+        const objects = page.node.Resources()!.lookup(PDFName.of("XObject"), PDFDict);
+        const ref = objects.get(PDFName.of("HazzatEucharisticCorner"))!;
+        refs.push(ref.toString());
+        const image = saved.context.lookup(ref) as PDFRawStream;
+        expect(image.dict.lookup(PDFName.of("Width"), PDFNumber).asNumber()).toBe(asset.width);
+        expect(image.dict.lookup(PDFName.of("Height"), PDFNumber).asNumber()).toBe(asset.height);
+        expect(image.dict.get(PDFName.of("ColorSpace"))!.toString()).toBe("/DeviceRGB");
+        const mask = image.dict.lookup(PDFName.of("SMask")) as PDFRawStream;
+        expect(Buffer.from(decodePDFRawStream(image).decode())).toEqual(inflateSync(packed.subarray(0, asset.colorBytes)));
+        expect(Buffer.from(decodePDFRawStream(mask).decode())).toEqual(inflateSync(packed.subarray(asset.colorBytes)));
         const streams = page.node.Contents() as PDFArray;
-        const operators = Array.from({ length: streams.size() }, (_, i) => {
-            const stream = saved.context.lookup(streams.get(i));
-            if (!(stream instanceof PDFRawStream)) throw new Error("Expected a PDF content stream");
+        const content = Array.from({ length: streams.size() }, (_, i) => {
+            const stream = saved.context.lookup(streams.get(i)) as PDFRawStream;
             return Buffer.from(decodePDFRawStream(stream).decode()).toString("latin1");
         }).join("\n");
-        expect(operators).toMatch(/\/HazzatCorner_\w+ sh/);
-        expect(operators.match(/^q$/gm)?.length).toBe(operators.match(/^Q$/gm)?.length);
-        expect(operators).toContain("W\nn"); // Leaf details remain inside the connected silhouette.
+        expect(content.match(/\/HazzatEucharisticCorner Do/g)).toHaveLength(2);
+        expect(content).toContain("-1 0 0 1 396 0 cm");
+        expect(content.match(/^q$/gm)?.length).toBe(content.match(/^Q$/gm)?.length);
     }
-    expect(references[0]).toEqual(references[1]); // Share shading objects across the covers.
+    expect(new Set(refs).size).toBe(1);
 });
 
-it("uses a symmetric cross and constant-width concentric medallion instead of traced edges", () => {
-    const cross = artwork.paths.find(p => p.role === "cross")!;
-    const ring = artwork.paths.find(p => p.role === "medallion")!;
-    const curves = (d: string) => Array.from(d.matchAll(/C([^MCZ]+)/g), m => m[1].trim().split(/\s+/).map(Number));
-    const quarters = curves(cross.d);
-    expect(quarters).toHaveLength(36);
-    for (let turn = 1; turn < 4; turn++) {
-        for (let n = 0; n < 9; n++) {
-            for (let point = 0; point < 6; point += 2) {
-                let x = quarters[n][point] - 191, y = quarters[n][point + 1] - 175;
-                for (let r = 0; r < turn; r++) [x, y] = [-y, x];
-                expect(quarters[turn * 9 + n][point]).toBeCloseTo(191 + x, 3);
-                expect(quarters[turn * 9 + n][point + 1]).toBeCloseTo(175 + y, 3);
+it("places all visible foliage outside the arch and inside the frame", () => {
+    const alpha = inflateSync(packed.subarray(asset.colorBytes));
+    const scale = coverCornerPlacement.width / asset.width, frameScale = 396 / 1009;
+    const arch = (t: number) => {
+        const q = 1 - t;
+        return [q ** 3 * 171 + 3 * q * q * t * 171 + 3 * q * t * t * 325 + t ** 3 * 504.5,
+            q ** 3 * 512 + 3 * q * q * t * 342 + 3 * q * t * t * 216 + t ** 3 * 156].map(n => n * frameScale);
+    };
+    let minimumGap = Infinity, minimumLeft = Infinity, minimumTop = Infinity;
+    for (let y = 0; y < asset.height; y++) {
+        let right = -1, left = Infinity;
+        for (let x = 0; x < asset.width; x++) {
+            if (alpha[y * asset.width + x] > 64) {
+                right = x + 1;
+                left = Math.min(left, x);
             }
         }
-    }
-    expect(cross.paint).toBeUndefined();
-    const rings = curves(ring.d);
-    expect(rings).toHaveLength(8);
-    for (let boundary = 0; boundary < 2; boundary++) {
-        const radius = boundary === 0 ? 63 : 54.5;
-        let start = [191 + radius, 175];
-        for (const segment of rings.slice(boundary * 4, boundary * 4 + 4)) {
-            for (let t = 0; t <= 1; t += .05) {
-                const q = 1 - t;
-                const x = q ** 3 * start[0] + 3 * q * q * t * segment[0] + 3 * q * t * t * segment[2] + t ** 3 * segment[4];
-                const y = q ** 3 * start[1] + 3 * q * q * t * segment[1] + 3 * q * t * t * segment[3] + t ** 3 * segment[5];
-                expect(Math.abs(Math.hypot(x - 191, y - 175) - radius)).toBeLessThan(.02);
-            }
-            start = segment.slice(4);
+        if (right >= 0) {
+            minimumLeft = Math.min(minimumLeft, coverCornerPlacement.x + left * scale);
+            minimumTop = Math.min(minimumTop, coverCornerPlacement.top + y * scale);
         }
+        const bottom = coverCornerPlacement.top + (y + 1) * scale;
+        if (right < 0 || bottom < 156 * frameScale) continue;
+        let low = 0, high = 1;
+        for (let i = 0; i < 24; i++) {
+            const mid = (low + high) / 2;
+            if (arch(mid)[1] > bottom) low = mid; else high = mid;
+        }
+        minimumGap = Math.min(minimumGap, arch((low + high) / 2)[0] - coverCornerPlacement.x - right * scale);
     }
-    expect(ring.paint).toBeUndefined();
+    expect(minimumGap).toBeGreaterThan(1.5);
+    expect(minimumLeft).toBeGreaterThan(32.5);
+    expect(minimumTop).toBeGreaterThan(32.5);
 });
 
-it("uses monotonic matte tones without alternating specular bands", () => {
-    for (const gradient of Object.values(artwork.gradients)) {
-        const luminance = gradient.stops.map(([, hex]) => {
-            const color = String(hex);
-            return .2126 * parseInt(color.slice(1, 3), 16) + .7152 * parseInt(color.slice(3, 5), 16) + .0722 * parseInt(color.slice(5, 7), 16);
-        });
-        const differences = luminance.slice(1).map((value, i) => value - luminance[i]);
-        expect(differences.every(v => v <= 0) || differences.every(v => v >= 0)).toBe(true);
-    }
-    const veins = artwork.paths.filter(p => p.role === "leaf-vein");
-    expect(veins.length).toBeGreaterThan(30);
-    expect(veins.every(p => p.clip === "body" && !p.fill && !p.paint)).toBe(true);
-});
 
-it("keeps the illustrated vines flat and uses the lower grapevine gold", () => {
-    expect(artwork.paths.some(p => p.role === "emboss-shading" || p.role === "contact-shadow")).toBe(false);
-    expect(artwork.gradients.gold.stops.map(([, color]) => color)).toContain("#927344");
-    expect(artwork.paths.find(p => p.role === "medallion")!.fill).toBe("#927344");
-    const washes = artwork.paths.filter(p => p.fill === "#6e542f");
-    expect(washes.length).toBeGreaterThan(0);
-    expect(washes.every(p => p.clip === "body" && Number(p.opacity) <= .15)).toBe(true);
+it("preserves the approved center-vine SVG colors and alpha in its packed PDF image", () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/Booklets/BookletCenterVineAsset.json"), "utf8"));
+    const source = fs.readFileSync(path.join(process.cwd(), "src/images/bookletCoverCenterVine.svg"));
+    const bytes = fs.readFileSync(path.join(process.cwd(), "src/images/bookletCoverCenterVine.bin"));
+    expect(hash(source)).toBe(manifest.sourceSha256);
+    expect(hash(bytes)).toBe(manifest.streamSha256);
+    expect(source.toString()).not.toMatch(/<image\b|data:image|<filter\b/);
+    const colors = inflateSync(bytes.subarray(0, manifest.colorBytes));
+    const alpha = inflateSync(bytes.subarray(manifest.colorBytes));
+    const rgba = Buffer.alloc(alpha.length * 4);
+    for (let i = 0; i < alpha.length; i++) {
+        colors.copy(rgba, i * 4, i * 3, i * 3 + 3);
+        rgba[i * 4 + 3] = alpha[i];
+    }
+    expect(hash(rgba)).toBe(manifest.rgbaSha256);
+    expect([manifest.width, manifest.height]).toEqual([2138, 736]);
 });

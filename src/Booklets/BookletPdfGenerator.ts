@@ -11,6 +11,7 @@ import trajanFontUrl from "../fonts/TrajanPro-Regular.ttf";
 import bookletLogoUrl from "../images/logo.svg";
 import bookletCoverPaperUrl from "../images/bookletLimestonePaper.png";
 import { drawCoverFrame, drawCoverVine } from "./BookletCoverArtwork";
+import { loadCoverCenterVineArtwork } from "./BookletCenterVineRenderer";
 import { loadCoverCornerArtwork } from "./BookletCornerRenderer";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
@@ -398,7 +399,7 @@ function sanitizeTextForFont(text: string, fontKey: FontKey): string {
 }
 
 export async function generateSeasonBookletPdf(options: GenerateBookletPdfOptions): Promise<Uint8Array> {
-    await loadCoverCornerArtwork();
+    await Promise.all([loadCoverCornerArtwork(), loadCoverCenterVineArtwork()]);
     if (options.languages) options = { ...options, services: filterBookletServicesLanguages(options.services, options.languages) };
     const scores = new Map<string, Promise<BookletScorePage[]>>();
     let logicalResult = await renderLogicalBooklet(options, 1, scores);
@@ -815,25 +816,19 @@ class BookletWriter {
         });
     }
 
-    public drawHeading(text: string, size: number, extraSpace = 18, showRule = true) {
+    public drawHeading(text: string, size: number, extraSpace = 18, extraPadding = true) {
         this.ensureSpace(size + extraSpace);
         drawWrappedPlainText(this, text, "title", size, size + 5, black, true);
-        if (showRule) {
-            this.drawHeadingRule(8, Math.max(12, extraSpace));
+        if (extraPadding) {
+            this.addHeadingSpacing(8, Math.max(12, extraSpace));
         } else {
             this.cursorY -= Math.max(4, extraSpace / 3);
         }
     }
 
-    public drawHeadingRule(spacingBefore = 5, spacingAfter = 9) {
+    public addHeadingSpacing(spacingBefore = 5, spacingAfter = 9) {
         this.ensureSpace(spacingBefore + 1 + spacingAfter);
         this.cursorY -= spacingBefore;
-        this.page.drawLine({
-            start: { x: PAGE_MARGIN_X + 44, y: this.cursorY },
-            end: { x: LOGICAL_PAGE_WIDTH - PAGE_MARGIN_X - 44, y: this.cursorY },
-            thickness: 0.45,
-            color: lightGray
-        });
         this.cursorY -= spacingAfter;
     }
 
@@ -880,7 +875,7 @@ function drawCoverTitle(writer: BookletWriter, season: ISeasonInfo) {
         drawPlainHeadingLine(writer.page, writer.fonts, line, "title", size, 0, LOGICAL_PAGE_WIDTH, y, black, true);
         y -= lineHeight;
     });
-    if (arabic) drawPlainHeadingLine(writer.page, writer.fonts, "علم الألحان القبطية", "arabic", 12, 0, LOGICAL_PAGE_WIDTH, 217, black, true);
+    if (arabic) drawPlainHeadingLine(writer.page, writer.fonts, "الألحان القبطية", "arabic", 12, 0, LOGICAL_PAGE_WIDTH, 217, black, true);
     else drawSpacedCenteredText(writer.page, writer.fonts.english, "COPTIC HYMNOLOGY", 8.5, 217, black, 1.6);
 }
 
@@ -970,10 +965,10 @@ function drawInsideFrontCover(writer: BookletWriter, generatedAt: Date) {
     writer.drawCenteredText(`Generated ${formatGeneratedMonthYear(generatedAt)}`, "english", 9, 72, gray);
 }
 
-function measureHeading(writer: BookletWriter, text: string, size: number, extraSpace: number, showRule = true): number {
+function measureHeading(writer: BookletWriter, text: string, size: number, extraSpace: number, extraPadding = true): number {
     const font = arabicUnicodePattern.test(text) ? writer.fonts.arabic : writer.fonts.title;
     return wrapPlainText(text, font, size, CONTENT_WIDTH).length * (size + 5)
-        + (showRule ? 8 + Math.max(12, extraSpace) : Math.max(4, extraSpace / 3));
+        + (extraPadding ? 8 + Math.max(12, extraSpace) : Math.max(4, extraSpace / 3));
 }
 
 function measureVariationTitle(writer: BookletWriter, variation: BookletContentVariation): number {
@@ -1306,10 +1301,15 @@ async function createPrintPdf(logicalDoc: PDFDocument, logicalPageCount: number)
     const impositionOrder = getBookletImpositionOrder(logicalPageCount);
     const logicalPdfBytes = await logicalDoc.save({ useObjectStreams: false });
 
+    // Import once so all imposed pages share the same cover drawing and fonts.
+    const embeddedPages = await printDoc.embedPdf(logicalPdfBytes,
+        Array.from({ length: logicalPageCount }, (_, index) => index));
+
     for (const spread of impositionOrder) {
         const [leftPageNumber, rightPageNumber] = spread;
         const sheet = printDoc.addPage([PRINT_PAGE_WIDTH, PRINT_PAGE_HEIGHT]);
-        const [embeddedLeft, embeddedRight] = await printDoc.embedPdf(logicalPdfBytes, [leftPageNumber - 1, rightPageNumber - 1]);
+        const embeddedLeft = embeddedPages[leftPageNumber - 1];
+        const embeddedRight = embeddedPages[rightPageNumber - 1];
 
         sheet.drawPage(embeddedLeft, {
             x: 0,

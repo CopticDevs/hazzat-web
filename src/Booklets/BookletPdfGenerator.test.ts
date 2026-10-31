@@ -1,4 +1,6 @@
-import { PDFArray, PDFDocument, PDFPage, PDFRawStream, decodePDFRawStream } from "pdf-lib";
+import { PDFArray, PDFDocument, PDFName, PDFNumber, PDFPage, PDFRawStream, decodePDFRawStream } from "pdf-lib";
+import { loadCoverCenterVineArtwork } from "./BookletCenterVineRenderer";
+import { loadCoverCornerArtwork } from "./BookletCornerRenderer";
 import fs from "fs";
 import path from "path";
 import {
@@ -32,6 +34,9 @@ import { ContentLanguage, ContentType, ITextContent } from "../Providers/HymnsDa
 import { renderBookletMusic } from "./BookletMusicRenderer";
 
 jest.mock("./BookletMusicRenderer", () => ({ renderBookletMusic: jest.fn() }));
+
+beforeAll(() => Promise.all([loadCoverCornerArtwork(readImage("bookletCoverCorner.bin")),
+    loadCoverCenterVineArtwork(readImage("bookletCoverCenterVine.bin"))]));
 
 function createFakeFonts(): EmbeddedFonts {
     const fakeFont = {
@@ -768,7 +773,7 @@ describe("BookletPdfGenerator", () => {
         expect(pdfText).toContain("/Subtype /Image");
     });
 
-    it("keeps the front logo and both covers as vector curves", async () => {
+    it("keeps the logo and frame as vector curves alongside the SVG-backed ornaments", async () => {
         const logo = fs.readFileSync(path.join(process.cwd(), "src", "images", "logo.svg"));
         expect(logo.toString()).not.toMatch(/<image\b|data:image/);
         const bytes = await generateSeasonBookletPdf({
@@ -778,7 +783,17 @@ describe("BookletPdfGenerator", () => {
                 frontCoverLogo: new Uint8Array(logo), backCoverLogo: new Uint8Array(logo) }
         });
         const pdf = await PDFDocument.load(bytes);
-        expect(Buffer.from(bytes).toString("latin1")).not.toContain("/Subtype /Image");
+        const imageObjects = pdf.context.enumerateIndirectObjects().map(([, object]) => object)
+            .filter((object): object is PDFRawStream => object instanceof PDFRawStream
+                && object.dict.get(PDFName.of("Subtype"))?.toString() === "/Image");
+        // Corners and the approved center vine each share one color/alpha pair.
+        // The official black logo and frame remain native vector curves.
+        expect(imageObjects).toHaveLength(4);
+        imageObjects.forEach(image => {
+            expect([[1122, 1402], [2138, 736]]).toContainEqual([
+                image.dict.lookup(PDFName.of("Width"), PDFNumber).asNumber(),
+                image.dict.lookup(PDFName.of("Height"), PDFNumber).asNumber()]);
+        });
         for (const index of [0, pdf.getPageCount() - 1]) {
             const streams = pdf.getPage(index).node.Contents() as PDFArray;
             const operators = Array.from({ length: streams.size() }, (_, i) => {
@@ -786,7 +801,8 @@ describe("BookletPdfGenerator", () => {
                 if (!(stream instanceof PDFRawStream)) throw new Error("Expected a PDF content stream");
                 return Buffer.from(decodePDFRawStream(stream).decode()).toString("latin1");
             }).join("\n");
-            expect((operators.match(/ c\n/g) || []).length).toBeGreaterThan(50);
+            expect((operators.match(/ c\n/g) || []).length).toBeGreaterThan(index === 0 ? 50 : 1);
+            expect(operators).toContain("/HazzatEucharisticCenterVine Do");
         }
     });
 
@@ -871,4 +887,22 @@ describe("BookletPdfGenerator", () => {
             expect(page.getHeight()).toBe(612);
         });
     });
+});
+
+
+it("shares the SVG-backed cover image across all folded print sheets", async () => {
+    const bytes = await generateSeasonBookletPdf({
+        season: createSeason(), services: [createService()], formatKinds: ["text", "regular"],
+        layoutKind: "print", fontSources: createFontSources(), imageSources: createImageSources()
+    });
+    const doc = await PDFDocument.load(bytes);
+    const corners = doc.context.enumerateIndirectObjects().map(([, object]) => object).filter(object => {
+        if (!(object instanceof PDFRawStream)) return false;
+        return object.dict.get(PDFName.of("Subtype"))?.toString() === "/Image"
+            && object.dict.get(PDFName.of("ColorSpace"))?.toString() === "/DeviceRGB"
+            && object.dict.lookupMaybe(PDFName.of("Width"), PDFNumber)?.asNumber() === 1122
+            && object.dict.lookupMaybe(PDFName.of("Height"), PDFNumber)?.asNumber() === 1402;
+    });
+    expect(doc.getPageCount()).toBeGreaterThanOrEqual(2);
+    expect(corners).toHaveLength(1);
 });
