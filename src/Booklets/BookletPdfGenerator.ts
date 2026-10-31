@@ -9,7 +9,7 @@ import hazzatFontUrl from "../fonts/hazzat1_10a.ttf";
 import arabicFontUrl from "../fonts/NotoNaskhArabic-Regular.ttf";
 import trajanFontUrl from "../fonts/TrajanPro-Regular.ttf";
 import bookletLogoUrl from "../images/logo.svg";
-import bookletCoverPaperUrl from "../images/bookletIlluminatedBackground.png";
+import bookletCoverPaperUrl from "../images/bookletLimestonePaper.png";
 import { drawCoverFrame, drawCoverVine } from "./BookletCoverArtwork";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
