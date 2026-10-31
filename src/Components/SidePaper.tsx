@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { ReactComponent as YoutubeIcon } from "../images/youtube.svg";
 import { ReactComponent as TwitterIcon } from "../images/twitter.svg";
 import { ReactComponent as FacebookIcon } from "../images/facebook.svg";
+import { ReactComponent as SoundCloudIcon } from "../images/soundcloud.svg";
 import { LanguageContext } from "../LanguageContext";
 import HymnTitle from "./HymnTitle";
 import { strings } from "../l8n";
@@ -58,6 +59,10 @@ function SidePaper() {
 
                     <a aria-label="YouTube" href="https://www.youtube.com/CopticHazzat" target="_blank" rel="noreferrer">
                         <YoutubeIcon aria-hidden="true" focusable="false" />
+                    </a>
+
+                    <a aria-label="SoundCloud" href="https://soundcloud.com/coptichazzat" target="_blank" rel="noreferrer">
+                        <SoundCloudIcon aria-hidden="true" focusable="false" />
                     </a>
 
                 </div>
