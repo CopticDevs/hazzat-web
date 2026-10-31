@@ -1,6 +1,6 @@
-import { concatTransformationMatrix, LineCapStyle, LineJoinStyle, PDFImage, PDFPage, popGraphicsState, pushGraphicsState, rgb, setLineJoin } from "pdf-lib";
+import { PDFImage, PDFPage, rgb } from "pdf-lib";
 import { coverArchPaths, coverFrameWidth } from "./BookletCoverFrame";
-import cornerPaths from "./BookletCoverCorners.json";
+import { drawCoverCorners } from "./BookletCornerRenderer";
 
 // Original Hazzat logo grapevine paths; keep berries maroon and foliage gold.
 const vinePaths = [
@@ -41,25 +41,6 @@ export function drawCoverFrame(page: PDFPage, paper?: PDFImage) {
         x: 0, y: 612, scale: 396 / coverFrameWidth,
         borderColor: index === 0 ? maroon : gold, borderWidth: index === 0 ? 2 : 1.5
     }));
-}
-
-function cornerColor(hex?: string) {
-    return hex ? rgb(parseInt(hex.slice(1, 3), 16) / 255, parseInt(hex.slice(3, 5), 16) / 255, parseInt(hex.slice(5, 7), 16) / 255) : undefined;
-}
-
-function drawCoverCorners(page: PDFPage) {
-    for (const mirrored of [false, true]) {
-        page.pushOperators(pushGraphicsState(), setLineJoin(LineJoinStyle.Round));
-        if (mirrored) page.pushOperators(concatTransformationMatrix(-1, 0, 0, 1, 396, 0));
-        for (const path of cornerPaths) {
-            page.drawSvgPath(path.d, {
-                x: 0, y: 612, scale: 396 / coverFrameWidth,
-                color: cornerColor(path.fill), borderColor: cornerColor(path.stroke),
-                borderWidth: path.strokeWidth, borderLineCap: LineCapStyle.Round
-            });
-        }
-        page.pushOperators(popGraphicsState());
-    }
 }
 
 export function drawCoverVine(page: PDFPage, x: number, top: number, width: number) {
