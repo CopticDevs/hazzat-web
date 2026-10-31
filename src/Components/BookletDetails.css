@@ -136,6 +136,7 @@
     text-decoration: none;
     display: inline-block;
 }
+.bookletChoice[aria-pressed="true"] { background: var(--ink, #302c26); border-color: var(--ink, #302c26); color: #fff; }
 .bookletBuilder .bookletPrimaryAction, .bookletBuilder .bookletPrimaryAction:hover { background: var(--ink, #302c26); color: #fff; }
 .bookletPrimaryAction:disabled { opacity: .5; cursor: not-allowed; }
 .bookletHint { color: var(--muted-ink, #625e55); font-size: .9rem; }
@@ -164,7 +165,7 @@
 .bookletColorSample .HazzatFont { font-size: 1.7rem; margin-block: 8px; }
 .bookletSampleComment { color: #8c2924; font-size: .9em; font-style: italic; margin-top: 12px; }
 @media screen {
-    :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction, :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction:hover { color: #202526; }
+    :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction, :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction:hover, :root[data-theme="dark"] .bookletChoice[aria-pressed="true"] { color: #202526; }
 }
 @media (max-width: 576px) {
     .bookletBuilder { padding-inline: 0; }
