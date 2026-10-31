@@ -875,7 +875,7 @@ function drawCoverTitle(writer: BookletWriter, season: ISeasonInfo) {
         drawPlainHeadingLine(writer.page, writer.fonts, line, "title", size, 0, LOGICAL_PAGE_WIDTH, y, black, true);
         y -= lineHeight;
     });
-    if (arabic) drawPlainHeadingLine(writer.page, writer.fonts, "علم الألحان القبطية", "arabic", 12, 0, LOGICAL_PAGE_WIDTH, 217, black, true);
+    if (arabic) drawPlainHeadingLine(writer.page, writer.fonts, "الألحان القبطية", "arabic", 12, 0, LOGICAL_PAGE_WIDTH, 217, black, true);
     else drawSpacedCenteredText(writer.page, writer.fonts.english, "COPTIC HYMNOLOGY", 8.5, 217, black, 1.6);
 }
 
