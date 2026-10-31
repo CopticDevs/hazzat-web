@@ -12,7 +12,7 @@ import YouTube from "./YoutubeVideo";
 
 jest.mock("axios", () => ({ create: jest.fn() }));
 
-const season: ISeasonInfo = { id: "annual", name: "Annual", displayName: "Annual", verse: "", displayVerse: "", order: 1, isDateSpecific: false };
+const season: ISeasonInfo = { id: "annual", name: "Annual", displayName: "Annual", order: 1, isDateSpecific: false };
 const hazzat = (id: string, text: string) => ({ id, name: "Standard", displayName: "Standard", content: { contentType: ContentType.HazzatContent, englishHazzat: text, copticHazzat: "", arabicHazzat: "" } });
 const service: IServiceInfo = { id: "basil", name: "Basil", displayName: "Basil", seasonId: "annual", order: 1, verse: "", isDateSpecific: false,
     hymns: [

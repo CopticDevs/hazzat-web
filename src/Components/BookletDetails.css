@@ -6,15 +6,6 @@
     line-height: 1.35;
     padding: 12px;
 }
-.bookletDetailsIntro {
-    margin: 20px auto 24px;
-    max-width: 760px;
-    text-align: center;
-}
-.bookletSeasonVerse {
-    color: #5f584c;
-    font-size: 15px;
-}
 .bookletSelectionPanel {
     border-bottom: 1px solid #d7d2c7;
     border-top: 1px solid #d7d2c7;

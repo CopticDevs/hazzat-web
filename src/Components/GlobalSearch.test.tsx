@@ -32,8 +32,6 @@ describe('GlobalSearch - Search Functionality', () => {
       id: 'nativity',
       name: 'Nativity',
       displayName: 'Nativity',
-      verse: 'Glory to God in the highest',
-      displayVerse: 'Glory to God in the highest',
       order: 1,
       isDateSpecific: false
     },
@@ -41,8 +39,6 @@ describe('GlobalSearch - Search Functionality', () => {
       id: 'resurrection',
       name: 'Resurrection',
       displayName: 'Resurrection',
-      verse: 'Christ is risen',
-      displayVerse: 'Christ is risen',
       order: 2,
       isDateSpecific: false
     }

@@ -29,8 +29,6 @@ describe('HymnsDataProvider - Seasons List Loading', () => {
         id: 'nativity',
         name: 'Nativity',
         displayName: 'Nativity',
-        verse: 'Glory to God in the highest',
-        displayVerse: 'Glory to God in the highest',
         order: 1,
         isDateSpecific: false
       },
@@ -38,8 +36,6 @@ describe('HymnsDataProvider - Seasons List Loading', () => {
         id: 'resurrection',
         name: 'Resurrection',
         displayName: 'Resurrection',
-        verse: 'Christ is risen',
-        displayVerse: 'Christ is risen',
         order: 2,
         isDateSpecific: false
       }
@@ -52,7 +48,6 @@ describe('HymnsDataProvider - Seasons List Loading', () => {
     expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v5/metadata/seasons.json');
     expect(result).toHaveLength(2);
     expect(result[0].displayName).toBe('Nativity');
-    expect(result[0].displayVerse).toBe('Glory to God in the highest');
   });
 
   it('should display all season data correctly', async () => {
@@ -60,8 +55,6 @@ describe('HymnsDataProvider - Seasons List Loading', () => {
       id: 'nativity',
       name: 'Nativity',
       displayName: 'Nativity',
-      verse: 'Glory to God in the highest',
-      displayVerse: 'Glory to God in the highest',
       order: 1,
       isDateSpecific: false
     };
@@ -72,7 +65,6 @@ describe('HymnsDataProvider - Seasons List Loading', () => {
 
     expect(result[0]).toHaveProperty('id', 'nativity');
     expect(result[0]).toHaveProperty('displayName', 'Nativity');
-    expect(result[0]).toHaveProperty('displayVerse', 'Glory to God in the highest');
   });
 
   it('should handle seasons with date ranges', async () => {
@@ -80,8 +72,6 @@ describe('HymnsDataProvider - Seasons List Loading', () => {
       id: 'great-lent',
       name: 'Great Lent',
       displayName: 'Great Lent',
-      verse: 'Repent and believe',
-      displayVerse: 'Repent and believe',
       order: 3,
       isDateSpecific: true,
       dateRanges: [

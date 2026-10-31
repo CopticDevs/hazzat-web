@@ -62,7 +62,7 @@ describe("booklet builder", () => {
     beforeEach(() => {
         createUrl.mockReturnValue("blob:booklet-preview");
         strings.setLanguage("en");
-        jest.spyOn(HymnsDataProvider.prototype, "getSeason").mockResolvedValue({ id: "annual", name: "Annual", displayName: "Annual", verse: "", displayVerse: "", order: 1, isDateSpecific: false });
+        jest.spyOn(HymnsDataProvider.prototype, "getSeason").mockResolvedValue({ id: "annual", name: "Annual", displayName: "Annual", order: 1, isDateSpecific: false });
         jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue([service]);
         Object.defineProperty(URL, "createObjectURL", { configurable: true, value: createUrl });
         Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: revokeUrl });

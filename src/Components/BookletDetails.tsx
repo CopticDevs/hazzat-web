@@ -207,12 +207,6 @@ function BookletDetails() {
                 { title: strings.booklets, path: "/Booklets" },
                 { title: seasonInfo.displayName }]} />
 
-            <div className="bookletDetailsIntro">
-                {seasonInfo.displayVerse && (
-                    <div className="bookletSeasonVerse" dangerouslySetInnerHTML={{ __html: seasonInfo.displayVerse }} />
-                )}
-            </div>
-
             {errorMessage && <div role="alert" className="alert alert-danger">{errorMessage}</div>}
 
             <div className="container bookletBuilder">

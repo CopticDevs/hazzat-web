@@ -33,11 +33,6 @@
     color: var(--muted-ink);
     margin-bottom: 5px;
 }
-.season-card-verse {
-    font-size: 14px;
-    font-style: italic;
-    color: var(--muted-ink);
-}
 .other-links-section {
     margin-top: 40px;
     padding-top: 20px;
