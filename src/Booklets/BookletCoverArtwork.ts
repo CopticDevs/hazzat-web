@@ -28,7 +28,7 @@ const gold = rgb(146 / 255, 115 / 255, 68 / 255);
 
 export function drawCoverFrame(page: PDFPage, paper?: PDFImage) {
     if (paper) {
-        // Only the intentional paper texture is raster; every ornament is vector.
+        // Keep the paper separate from the approved SVG-backed corner artwork.
         page.drawImage(paper, { x: 0, y: 0, width: 396, height: 612 });
     } else {
         page.drawRectangle({ x: 18, y: 18, width: 360, height: 576, color: rgb(225 / 255, 222 / 255, 212 / 255) });

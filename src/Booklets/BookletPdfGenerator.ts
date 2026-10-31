@@ -1306,10 +1306,15 @@ async function createPrintPdf(logicalDoc: PDFDocument, logicalPageCount: number)
     const impositionOrder = getBookletImpositionOrder(logicalPageCount);
     const logicalPdfBytes = await logicalDoc.save({ useObjectStreams: false });
 
+    // Import once so all imposed pages share the same cover drawing and fonts.
+    const embeddedPages = await printDoc.embedPdf(logicalPdfBytes,
+        Array.from({ length: logicalPageCount }, (_, index) => index));
+
     for (const spread of impositionOrder) {
         const [leftPageNumber, rightPageNumber] = spread;
         const sheet = printDoc.addPage([PRINT_PAGE_WIDTH, PRINT_PAGE_HEIGHT]);
-        const [embeddedLeft, embeddedRight] = await printDoc.embedPdf(logicalPdfBytes, [leftPageNumber - 1, rightPageNumber - 1]);
+        const embeddedLeft = embeddedPages[leftPageNumber - 1];
+        const embeddedRight = embeddedPages[rightPageNumber - 1];
 
         sheet.drawPage(embeddedLeft, {
             x: 0,
