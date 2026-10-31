@@ -2,7 +2,7 @@
 
 Authoring only: Pillow, numpy and vtracer==0.6.15. No runtime tracing or raster
 fallback. Smooth source contours retain the full acanthus silhouettes and joints;
-vector bevels, leaf folds and radial grapes supply clean, scalable carved detail.
+matte tonal fields and botanical veins supply clean, scalable depth.
 Intermediates stay under the ignored .audit directory for visual inspection.
 """
 
@@ -38,6 +38,60 @@ mask = (
     )
     >= 110
 )
+# Fill only tiny enclosed pigment gaps; keep the larger natural scroll counters.
+seen = np.zeros(mask.shape, dtype=bool)
+for start_y, start_x in zip(*np.where(~mask)):
+    if seen[start_y, start_x]:
+        continue
+    queue = deque([(start_y, start_x)])
+    seen[start_y, start_x] = True
+    component = []
+    touches_edge = False
+    while queue:
+        y, x = queue.popleft()
+        component.append((y, x))
+        touches_edge |= y in (0, mask.shape[0] - 1) or x in (0, mask.shape[1] - 1)
+        for dy, dx in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+            ny, nx = y + dy, x + dx
+            if (
+                0 <= ny < mask.shape[0]
+                and 0 <= nx < mask.shape[1]
+                and not mask[ny, nx]
+                and not seen[ny, nx]
+            ):
+                seen[ny, nx] = True
+                queue.append((ny, nx))
+    if not touches_edge and len(component) <= 20:
+        for y, x in component:
+            mask[y, x] = True
+# Remove the raster-derived medallion and cross entirely. Their replacements
+# below are exact concentric circles and a cross with four identical quarters.
+yy, xx = np.indices(mask.shape)
+mask[((xx + 88 - 191) ** 2 + (yy + 84 - 175) ** 2) < 63**2] = False
+# Small isolated paint remnants are not part of the connected branchwork.
+seen = np.zeros(mask.shape, dtype=bool)
+for start_y, start_x in zip(*np.where(mask)):
+    if seen[start_y, start_x]:
+        continue
+    queue = deque([(start_y, start_x)])
+    seen[start_y, start_x] = True
+    component = []
+    while queue:
+        y, x = queue.popleft()
+        component.append((y, x))
+        for dy, dx in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+            ny, nx = y + dy, x + dx
+            if (
+                0 <= ny < mask.shape[0]
+                and 0 <= nx < mask.shape[1]
+                and mask[ny, nx]
+                and not seen[ny, nx]
+            ):
+                seen[ny, nx] = True
+                queue.append((ny, nx))
+    if len(component) < 36:
+        for y, x in component:
+            mask[y, x] = False
 paths = []
 gradients = {}
 
@@ -114,17 +168,11 @@ def circle(cx, cy, rx, ry, paint):
     )
 
 
+# Muted, monotonic tones model a matte illuminated surface; no bright bands.
 gradients["gold"] = {
     "kind": "linear",
     "coords": [100, 95, 370, 530],
-    "stops": [
-        [0, "#af8b4c"],
-        [0.2, "#d7bd83"],
-        [0.38, "#b08a49"],
-        [0.56, "#d9bd81"],
-        [0.8, "#b68c49"],
-        [1, "#d3b578"],
-    ],
+    "stops": [[0, "#c2ab7b"], [1, "#b59b6b"]],
 }
 trace(
     mask,
@@ -132,39 +180,21 @@ trace(
     "body",
     blur=0.95,
     threshold=110,
-    stroke="#78532c",
+    stroke="#80673e",
     width=0.9,
     paint="gold",
 )
 body_paths = [p["d"] for p in paths]
 
 
-# Nested contours form a continuous raised gold bevel along the full silhouette.
-def inset(radius):
-    high = Image.fromarray(mask.astype("uint8") * 255).resize(
-        (1568, 2044), Image.Resampling.BICUBIC
+# Broad, low-contrast tonal changes follow each leaf plane. These have no
+# alternating light bands, bright rims or specular highlights.
+interior = (
+    np.array(
+        Image.fromarray(mask.astype("uint8") * 255).filter(ImageFilter.MinFilter(3))
     )
-    high = high.filter(ImageFilter.MinFilter(int(radius * 4) * 2 + 1))
-    return np.array(high.resize(im.size, Image.Resampling.LANCZOS)) >= 128
-
-
-for radius, color, paint in [
-    (0.5, "#cba96b", None),
-    (1.1, "#ebd49a", None),
-    (1.9, "#ac8344", None),
-    (2.7, None, "gold"),
-]:
-    trace(
-        inset(radius),
-        color,
-        "bevel" + str(radius),
-        blur=0.45,
-        threshold=116,
-        paint=paint,
-        speckle=9,
-    )
-interior = inset(2.3)
-# Independent, smooth metallic folds follow each original leaf silhouette.
+    > 128
+)
 leaf_regions = [
     (
         "top",
@@ -224,45 +254,153 @@ for name, points, coords in leaf_regions:
     gradients[name] = {
         "kind": "linear",
         "coords": coords,
-        "stops": [
-            [0, "#936b34"],
-            [0.18, "#c9a262"],
-            [0.39, "#e4ca92"],
-            [0.51, "#a57a3e"],
-            [0.7, "#d8b97d"],
-            [0.88, "#b18a48"],
-            [1, "#d6b77b"],
-        ],
+        "stops": [[0, "#c9b284"], [1, "#a98d5f"]],
     }
+    before = len(paths)
     trace(
         interior & (np.array(region) > 0),
         None,
         "leaf-" + name,
-        blur=0.95,
-        threshold=110,
+        blur=0.9,
+        threshold=116,
         paint=name,
         speckle=12,
     )
-# Keep the substantial source folds and bevel glints, remove isolated pigment specks.
-shadow = interior & (r < 151) & (g < 120) & (r > g * 1.22) & (b < g * 1.12)
-trace(shadow, "#925a2c", "shadow", blur=0.9, threshold=128, speckle=29)
-for p in paths:
-    if p.get("fill") == "#925a2c":
-        p["opacity"] = 0.6
-highlight = interior & (r > 194) & (g > 159) & (b < r * 0.81) & (b > r * 0.43)
-trace(highlight, "#ead39e", "highlight", blur=0.8, threshold=128, speckle=29)
-# Tapered leaf folds follow the original, asymmetric acanthus rather than a template.
-for d in [
-    "M299 98 C327 111 335 139 332 168 C331 187 322 208 312 221 C325 204 336 184 336 166 C339 135 326 109 299 98 Z",
-    "M330 133 C352 145 376 136 390 115 C373 133 352 138 330 133 Z",
-    "M334 143 C350 156 372 164 391 157 C370 159 352 152 334 143 Z",
-    "M334 154 C348 170 356 182 360 195 C359 176 347 160 334 154 Z",
-    "M203 235 C219 260 216 300 201 337 C220 303 226 262 203 235 Z",
-    "M126 331 C145 343 166 355 182 370 C166 352 145 338 126 331 Z",
-    "M127 468 C134 482 137 496 141 507 C139 488 133 474 127 468 Z",
+    for p in paths[before:]:
+        p["clip"] = "body"
+
+# Every vein starts on its leaf's midrib and follows a lobe. The secondary
+# branches taper toward the edge; there are no sampled pigment marks or glints.
+vein_guides = []
+
+
+def curve_samples(d):
+    tokens = re.findall(r"[MC]|-?\d+(?:\.\d+)?", d)
+    current = None
+    result = []
+    i = 0
+    while i < len(tokens):
+        cmd = tokens[i]
+        i += 1
+        if cmd == "M":
+            current = np.array(list(map(float, tokens[i : i + 2])))
+            i += 2
+        elif cmd == "C":
+            controls = np.array(list(map(float, tokens[i : i + 6]))).reshape((3, 2))
+            i += 6
+            for t in np.linspace(0, 1, 151):
+                q = 1 - t
+                result.append(
+                    q**3 * current
+                    + 3 * q * q * t * controls[0]
+                    + 3 * q * t * t * controls[1]
+                    + t**3 * controls[2]
+                )
+            current = controls[2]
+    return result
+
+
+def vein(d, width=0.72, primary=False):
+    # Snap secondary origins to the nearest point on an existing parent vein.
+    # This preserves the authored lobe directions without micro-gaps at joins.
+    global vein_guides
+    if primary:
+        vein_guides = []
+    start = np.array(
+        list(map(float, re.match(r"M(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)", d).groups()))
+    )
+    if vein_guides:
+        candidates = np.array(vein_guides)
+        distances = np.sum((candidates - start) ** 2, axis=1)
+        closest = candidates[np.argmin(distances)]
+        if np.min(distances) < 3.5**2:
+            d = re.sub(
+                r"^M-?\d+(?:\.\d+)? -?\d+(?:\.\d+)?",
+                f"M{closest[0]:.3f} {closest[1]:.3f}",
+                d,
+            )
+    vein_guides.extend(curve_samples(d))
+    path(d, stroke="#8e7547", width=width)
+    paths[-1].update(clip="body", opacity=0.86 if primary else 0.67, role="leaf-vein")
+
+
+# Asymmetric upper acanthus: petiole at upper left, long terminal lobe below.
+vein("M302 102 C324 118 337 142 333 169 C330 190 322 207 312 220", 1.55, True)
+for d, w in [
+    ("M328 131 C344 139 368 133 386 118", 0.95),
+    ("M333 147 C351 157 371 161 388 155", 0.9),
+    ("M334 161 C345 171 353 183 358 192", 0.85),
+    ("M331 176 C325 185 320 196 317 207", 0.65),
+    ("M331 151 C323 160 315 166 305 169", 0.8),
+    ("M328 184 C321 187 317 192 313 198", 0.65),
+    ("M350 135 C356 127 366 121 376 117", 0.52),
+    ("M364 157 C371 152 377 150 384 149", 0.5),
+    ("M344 172 C348 174 352 178 356 184", 0.5),
+    ("M322 160 C318 159 313 159 310 161", 0.5),
 ]:
-    path(d, "#916130")
-    paths[-1]["clip"] = "body"
+    vein(d, w)
+
+# Descending acanthus: one continuous midrib and alternating lateral veins.
+vein("M201 235 C217 255 220 282 211 307 C206 321 201 333 198 340", 1.45, True)
+for d, w in [
+    ("M212 259 C220 261 228 258 234 252", 0.8),
+    ("M216 276 C224 281 233 279 238 273", 0.8),
+    ("M214 292 C222 296 227 302 228 308", 0.75),
+    ("M209 312 C213 316 214 321 213 325", 0.6),
+    ("M210 255 C203 258 197 256 193 251", 0.75),
+    ("M216 273 C207 273 200 270 196 266", 0.7),
+    ("M215 289 C205 292 198 296 193 301", 0.75),
+    ("M225 280 C228 284 231 287 234 288", 0.45),
+    ("M205 293 C203 291 200 289 197 288", 0.45),
+]:
+    vein(d, w)
+
+# Low diagonal and tail leaves, each with its own petiole and branching axis.
+vein("M125 330 C144 340 165 356 180 370", 1.15, True)
+for d in [
+    "M141 340 C150 338 161 337 171 338",
+    "M151 348 C159 348 170 348 178 350",
+    "M141 340 C137 345 134 348 132 351",
+    "M156 351 C157 358 160 363 165 367",
+]:
+    vein(d, 0.65)
+vein("M128 469 C135 481 138 495 141 508", 1.0, True)
+for d in [
+    "M134 481 C139 478 143 478 146 479",
+    "M137 491 C142 490 146 491 148 494",
+    "M134 483 C130 482 127 483 124 486",
+]:
+    vein(d, 0.55)
+
+# Small palmate leaves fan out from their actual stalk junctions.
+for d in [
+    "M116 129 C111 119 105 108 101 99",
+    "M114 125 C119 116 123 108 128 103",
+    "M113 123 C106 122 101 119 98 116",
+    "M204 112 C203 104 204 96 204 91",
+    "M204 106 C198 101 195 98 194 95",
+    "M204 104 C209 100 212 97 214 95",
+    "M116 221 C111 212 109 204 109 198",
+    "M112 214 C104 213 101 211 99 208",
+    "M112 211 C117 208 122 205 125 201",
+    "M124 394 C117 387 113 378 111 371",
+    "M118 386 C111 385 105 384 102 381",
+    "M115 381 C121 377 126 376 130 376",
+    "M442 127 C454 122 462 112 466 102",
+    "M452 120 C449 112 451 106 453 102",
+    "M459 114 C465 116 470 117 473 117",
+]:
+    vein(d, 0.68)
+
+# Restrained fold shadows sit beside the midrib rather than forming stripes.
+for d in [
+    "M303 104 C326 123 337 148 333 172 C330 192 321 209 312 220 C326 204 339 183 339 162 C338 137 325 115 303 104 Z",
+    "M202 237 C218 259 219 285 211 307 C206 324 201 334 198 340 C212 325 225 296 223 276 C222 259 214 245 202 237 Z",
+    "M126 331 C146 342 165 357 180 370 C165 354 147 338 126 331 Z",
+]:
+    path(d, fill="#927b50")
+    paths[-1].update(clip="body", opacity=0.24)
+
 # Berry locations/radii come from their separate red cores in the original.
 red = (r > g * 1.8) & (b > g * 1.05) & (r > 25) & mask
 for box in [(255, 101, 307, 173), (115, 243, 167, 321)]:
@@ -300,18 +438,12 @@ for box in [(255, 101, 307, 173), (115, 243, 167, 321)]:
             "kind": "radial",
             "coords": [cx - rx * 0.28, cy - ry * 0.32, 0, cx, cy, max(rx, ry)],
             "stops": [
-                [0, "#c6637f"],
-                [0.22, "#a51e4e"],
-                [0.65, "#800024"],
-                [1, "#4e0016"],
+                [0, "#90304a"],
+                [0.65, "#86233d"],
+                [1, "#701a30"],
             ],
         }
         circle(cx, cy, rx, ry, key)
-        path(
-            f"M{cx-rx*.34} {cy-ry*.26} C{cx-rx*.50} {cy-ry*.58} {cx-rx*.05} {cy-ry*.72} {cx+rx*.11} {cy-ry*.48}",
-            stroke="#e1b2ba",
-            width=0.55,
-        )
 for cx, cy, rx, ry in [
     (116, 419, 7, 7),
     (101.5, 422, 7, 7),
@@ -325,7 +457,7 @@ for cx, cy, rx, ry in [
     gradients[key] = {
         "kind": "radial",
         "coords": [cx - rx * 0.28, cy - ry * 0.32, 0, cx, cy, max(rx, ry)],
-        "stops": [[0, "#c6637f"], [0.22, "#a51e4e"], [0.65, "#800024"], [1, "#4e0016"]],
+        "stops": [[0, "#90304a"], [0.65, "#86233d"], [1, "#701a30"]],
     }
     circle(cx, cy, rx, ry, key)
 
@@ -337,50 +469,50 @@ def circle_d(cx, cy, r, reverse=False):
     return f"M{cx+r} {cy} C{cx+r} {cy+k*v} {cx+k} {cy+r*v} {cx} {cy+r*v} C{cx-k} {cy+r*v} {cx-r} {cy+k*v} {cx-r} {cy} C{cx-r} {cy-k*v} {cx-k} {cy-r*v} {cx} {cy-r*v} C{cx+k} {cy-r*v} {cx+r} {cy-k*v} {cx+r} {cy} Z"
 
 
-gradients["medallion"] = {
-    "kind": "linear",
-    "coords": [145, 132, 238, 217],
-    "stops": [
-        [0, "#b79555"],
-        [0.2, "#eedba6"],
-        [0.38, "#bb9655"],
-        [0.55, "#8b632e"],
-        [0.72, "#e0c78b"],
-        [1, "#aa7f3c"],
-    ],
-}
+# One matte ring of constant width: both boundaries use the exact same
+# center and four cubic circle quadrants. No traced edge or bevel survives.
+CX, CY = 191, 175
 path(
-    circle_d(190.8, 174.2, 61.2) + circle_d(190.8, 174.2, 50.8, True),
-    stroke="#89602e",
-    width=0.7,
-    paint="medallion",
+    circle_d(CX, CY, 63) + circle_d(CX, CY, 54.5, True),
+    fill="#b19763",
+    stroke="#80673e",
+    width=0.85,
 )
-path(circle_d(190.8, 174.2, 60.1), stroke="#ead7a5", width=0.75)
-path(circle_d(190.8, 174.2, 52), stroke="#dfc38a", width=0.6)
-# The original cross outline, including its rounded, lobed arm terminals.
-y, x = np.indices(mask.shape)
-cross = red & ((x + 88 - 191) ** 2 + (y + 84 - 175) ** 2 < 48**2)
-gradients["cross"] = {
-    "kind": "linear",
-    "coords": [150, 132, 228, 216],
-    "stops": [
-        [0, "#ab2750"],
-        [0.3, "#76001e"],
-        [0.53, "#b12443"],
-        [0.8, "#71001d"],
-        [1, "#a52843"],
-    ],
-}
-trace(
-    cross,
-    None,
-    "cross",
-    blur=0.65,
-    threshold=118,
-    stroke="#620020",
-    width=0.6,
-    paint="cross",
-)
+
+paths[-1]["role"] = "medallion"
+
+# A Coptic cross assembled from one smooth quarter, rotated exactly four
+# times. Handles are tangent at each cardinal join, producing crisp symmetry.
+quarter = [
+    [(3, -44), (3, -38), (7, -36)],
+    [(10, -34), (15, -36), (15, -33)],
+    [(15, -30), (10, -29), (8, -25)],
+    [(5, -20), (5, -14), (5, -9)],
+    [(5, -6), (6, -5), (9, -5)],
+    [(14, -5), (20, -5), (25, -8)],
+    [(29, -10), (30, -15), (33, -15)],
+    [(36, -15), (34, -10), (36, -7)],
+    [(38, -3), (44, -3), (44, 0)],
+]
+
+
+def turn(x, y, n):
+    for _ in range(n):
+        x, y = -y, x
+    return CX + x * 0.95, CY + y * 0.95
+
+
+cross_d = f"M{CX} {CY-44*.95}"
+for n in range(4):
+    for segment in quarter:
+        cross_d += " C" + " ".join(
+            f"{x:.3f} {y:.3f}" for x, y in (turn(x, y, n) for x, y in segment)
+        )
+cross_d += " Z"
+path(cross_d, fill="#800018", stroke="#a68d5c", width=1.5)
+
+paths[-1]["role"] = "cross"
+
 defs = [
     '<clipPath id="body">'
     + "".join(f'<path d="{d}"/>' for d in body_paths)
@@ -408,7 +540,7 @@ markup = "\n".join(
     for p in paths
 )
 svg = (
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1009 1559"><title>Hazzat illuminated corner vines</title><desc>Full original acanthus silhouettes, continuous gold bevels and shaded maroon grapes; all paths and shading are vector.</desc><defs>'
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1009 1559"><title>Hazzat illuminated corner vines</title><desc>Full acanthus silhouettes with botanical veins, a symmetric Coptic cross, exact concentric medallion and matte tonal depth; all artwork is vector.</desc><defs>'
     + "".join(defs)
     + '</defs><g id="corner">'
     + markup
@@ -427,5 +559,5 @@ print(
     len(paths),
     "paths",
     len(gradients),
-    "native gradients; source silhouettes and connected bevels preserved",
+    "native matte gradients; precise cross and concentric medallion",
 )
