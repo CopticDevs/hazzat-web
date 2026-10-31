@@ -4,6 +4,9 @@ import path from "path";
 import { drawCoverFrame } from "./BookletCoverArtwork";
 import { coverArchPaths } from "./BookletCoverFrame";
 import artwork from "./BookletCoverCorners.json";
+import { loadCoverCornerArtwork } from "./BookletCornerRenderer";
+
+beforeAll(loadCoverCornerArtwork);
 
 it("keeps the gold arch a constant normal inset of the maroon arch", () => {
     const points = Array.from(coverArchPaths[1].matchAll(/[ML]([0-9.]+) ([0-9.]+)/g), m => [Number(m[1]), Number(m[2])]);
@@ -37,16 +40,22 @@ it("draws the same two crisp vector arches on either cover", async () => {
 it("draws colored, mirrored corner paths directly in the PDF, with no bitmap fallback", async () => {
     const doc = await PDFDocument.create();
     const page = doc.addPage([396, 612]);
-    const draw = jest.spyOn(page, "drawSvgPath");
     const image = jest.spyOn(page, "drawImage");
     const operators = jest.spyOn(page, "pushOperators");
     drawCoverFrame(page);
     expect(image).not.toHaveBeenCalled();
-    const corners = draw.mock.calls.filter(([d]) => !coverArchPaths.includes(d));
-    expect(corners.every(([, options]) => options?.color || options?.borderColor)).toBe(true);
-    expect(corners.length).toBeGreaterThan(50);
     expect(operators.mock.calls.flat().map(op => op.toString())).toContain(concatTransformationMatrix(-1, 0, 0, 1, 396, 0).toString());
-    expect(Buffer.from(await doc.save()).toString("latin1")).not.toContain("/Subtype /Image");
+    const bytes = await doc.save();
+    expect(Buffer.from(bytes).toString("latin1")).not.toContain("/Subtype /Image");
+    const saved = await PDFDocument.load(bytes);
+    const streams = saved.getPage(0).node.Contents() as PDFArray;
+    const content = Array.from({ length: streams.size() }, (_, i) => {
+        const stream = saved.context.lookup(streams.get(i));
+        if (!(stream instanceof PDFRawStream)) throw new Error("Expected PDF drawing operators");
+        return Buffer.from(decodePDFRawStream(stream).decode()).toString("latin1");
+    }).join("\n");
+    expect(content).toContain(" rg\n");
+    expect((content.match(/ c\n/g) || []).length).toBeGreaterThan(100);
 });
 
 it("keeps the reusable SVG and the PDF artwork in sync without embedded raster images", () => {
@@ -55,7 +64,7 @@ it("keeps the reusable SVG and the PDF artwork in sync without embedded raster i
     expect(svg).toContain('viewBox="0 0 1009 1559"');
     expect(svg).toContain('transform="translate(1009 0) scale(-1 1)"');
     expect(svg).toContain('<use href="#corner"');
-    expect(svg.match(/<path\b/g)?.length).toBe(artwork.paths.length + artwork.clips.body.length);
+    expect(svg.match(/<path\b/g)?.length).toBe(artwork.paths.length + Object.values(artwork.clips).reduce((total, paths) => total + paths.length, 0));
     for (const p of artwork.paths) {
         expect(svg).toContain(`d="${p.d}"`);
         if (p.fill) expect(svg).toContain(`fill="${p.fill}"`);
@@ -151,4 +160,13 @@ it("uses monotonic matte tones without alternating specular bands", () => {
     const veins = artwork.paths.filter(p => p.role === "leaf-vein");
     expect(veins.length).toBeGreaterThan(30);
     expect(veins.every(p => p.clip === "body" && !p.fill && !p.paint)).toBe(true);
+});
+
+it("keeps the illustrated vines flat and uses the lower grapevine gold", () => {
+    expect(artwork.paths.some(p => p.role === "emboss-shading" || p.role === "contact-shadow")).toBe(false);
+    expect(artwork.gradients.gold.stops.map(([, color]) => color)).toContain("#927344");
+    expect(artwork.paths.find(p => p.role === "medallion")!.fill).toBe("#927344");
+    const washes = artwork.paths.filter(p => p.fill === "#6e542f");
+    expect(washes.length).toBeGreaterThan(0);
+    expect(washes.every(p => p.clip === "body" && Number(p.opacity) <= .15)).toBe(true);
 });

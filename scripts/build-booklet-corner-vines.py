@@ -2,7 +2,7 @@
 
 Authoring only: Pillow, numpy and vtracer==0.6.15. No runtime tracing or raster
 fallback. Smooth source contours retain the full acanthus silhouettes and joints;
-matte tonal fields and botanical veins supply clean, scalable depth.
+flat antique-gold illustration uses botanical linework and restrained crease washes.
 Intermediates stay under the ignored .audit directory for visual inspection.
 """
 
@@ -172,7 +172,7 @@ def circle(cx, cy, rx, ry, paint):
 gradients["gold"] = {
     "kind": "linear",
     "coords": [100, 95, 370, 530],
-    "stops": [[0, "#c2ab7b"], [1, "#b59b6b"]],
+    "stops": [[0, "#98794a"], [1, "#927344"]],
 }
 trace(
     mask,
@@ -180,94 +180,12 @@ trace(
     "body",
     blur=0.95,
     threshold=110,
-    stroke="#80673e",
+    stroke="#705633",
     width=0.9,
     paint="gold",
 )
 body_paths = [p["d"] for p in paths]
 
-
-# Broad, low-contrast tonal changes follow each leaf plane. These have no
-# alternating light bands, bright rims or specular highlights.
-interior = (
-    np.array(
-        Image.fromarray(mask.astype("uint8") * 255).filter(ImageFilter.MinFilter(3))
-    )
-    > 128
-)
-leaf_regions = [
-    (
-        "top",
-        [
-            (285, 89),
-            (404, 89),
-            (407, 174),
-            (379, 175),
-            (377, 220),
-            (304, 236),
-            (296, 201),
-            (291, 180),
-            (283, 174),
-            (286, 138),
-            (302, 143),
-            (313, 137),
-            (317, 125),
-            (309, 107),
-        ],
-        [307, 131, 382, 163],
-    ),
-    (
-        "middle",
-        [
-            (192, 231),
-            (225, 224),
-            (244, 245),
-            (248, 301),
-            (219, 346),
-            (194, 352),
-            (191, 324),
-            (184, 305),
-            (179, 288),
-            (185, 275),
-            (178, 258),
-        ],
-        [181, 271, 239, 283],
-    ),
-    (
-        "lower",
-        [(111, 320), (144, 321), (181, 333), (190, 382), (155, 387), (131, 364)],
-        [139, 330, 158, 373],
-    ),
-    (
-        "tail",
-        [(116, 463), (144, 462), (158, 495), (144, 524), (119, 506)],
-        [119, 477, 143, 491],
-    ),
-    ("terminal", [(435, 88), (480, 88), (480, 143), (441, 141)], [439, 100, 471, 123]),
-    ("sprigA", [(90, 90), (137, 90), (143, 138), (91, 144)], [96, 102, 133, 127]),
-    ("sprigB", [(90, 183), (132, 182), (143, 234), (90, 234)], [96, 198, 129, 222]),
-    ("sprigC", [(90, 360), (134, 359), (143, 404), (90, 405)], [96, 371, 135, 391]),
-]
-for name, points, coords in leaf_regions:
-    region = Image.new("L", im.size)
-    ImageDraw.Draw(region).polygon([(x - 88, y - 84) for x, y in points], fill=255)
-    gradients[name] = {
-        "kind": "linear",
-        "coords": coords,
-        "stops": [[0, "#c9b284"], [1, "#a98d5f"]],
-    }
-    before = len(paths)
-    trace(
-        interior & (np.array(region) > 0),
-        None,
-        "leaf-" + name,
-        blur=0.9,
-        threshold=116,
-        paint=name,
-        speckle=12,
-    )
-    for p in paths[before:]:
-        p["clip"] = "body"
 
 # Every vein starts on its leaf's midrib and follows a lobe. The secondary
 # branches taper toward the edge; there are no sampled pigment marks or glints.
@@ -320,8 +238,8 @@ def vein(d, width=0.72, primary=False):
                 d,
             )
     vein_guides.extend(curve_samples(d))
-    path(d, stroke="#8e7547", width=width)
-    paths[-1].update(clip="body", opacity=0.86 if primary else 0.67, role="leaf-vein")
+    path(d, stroke="#6e542f", width=width)
+    paths[-1].update(clip="body", opacity=0.82 if primary else 0.63, role="leaf-vein")
 
 
 # Asymmetric upper acanthus: petiole at upper left, long terminal lobe below.
@@ -398,8 +316,8 @@ for d in [
     "M202 237 C218 259 219 285 211 307 C206 324 201 334 198 340 C212 325 225 296 223 276 C222 259 214 245 202 237 Z",
     "M126 331 C146 342 165 357 180 370 C165 354 147 338 126 331 Z",
 ]:
-    path(d, fill="#927b50")
-    paths[-1].update(clip="body", opacity=0.24)
+    path(d, fill="#6e542f")
+    paths[-1].update(clip="body", opacity=0.15)
 
 # Berry locations/radii come from their separate red cores in the original.
 red = (r > g * 1.8) & (b > g * 1.05) & (r > 25) & mask
@@ -474,8 +392,8 @@ def circle_d(cx, cy, r, reverse=False):
 CX, CY = 191, 175
 path(
     circle_d(CX, CY, 63) + circle_d(CX, CY, 54.5, True),
-    fill="#b19763",
-    stroke="#80673e",
+    fill="#927344",
+    stroke="#705633",
     width=0.85,
 )
 
@@ -509,7 +427,7 @@ for n in range(4):
             f"{x:.3f} {y:.3f}" for x, y in (turn(x, y, n) for x, y in segment)
         )
 cross_d += " Z"
-path(cross_d, fill="#800018", stroke="#a68d5c", width=1.5)
+path(cross_d, fill="#800018", stroke="#927344", width=1.5)
 
 paths[-1]["role"] = "cross"
 
@@ -540,7 +458,7 @@ markup = "\n".join(
     for p in paths
 )
 svg = (
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1009 1559"><title>Hazzat illuminated corner vines</title><desc>Full acanthus silhouettes with botanical veins, a symmetric Coptic cross, exact concentric medallion and matte tonal depth; all artwork is vector.</desc><defs>'
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1009 1559"><title>Hazzat illuminated corner vines</title><desc>Full acanthus silhouettes with botanical veins, a symmetric Coptic cross, exact concentric medallion and flat illustrated shading; all artwork is vector.</desc><defs>'
     + "".join(defs)
     + '</defs><g id="corner">'
     + markup
@@ -559,5 +477,5 @@ print(
     len(paths),
     "paths",
     len(gradients),
-    "native matte gradients; precise cross and concentric medallion",
+    "flat illustrated paths; precise cross and concentric medallion",
 )

@@ -11,6 +11,7 @@ import trajanFontUrl from "../fonts/TrajanPro-Regular.ttf";
 import bookletLogoUrl from "../images/logo.svg";
 import bookletCoverPaperUrl from "../images/bookletLimestonePaper.png";
 import { drawCoverFrame, drawCoverVine } from "./BookletCoverArtwork";
+import { loadCoverCornerArtwork } from "./BookletCornerRenderer";
 import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
@@ -397,6 +398,7 @@ function sanitizeTextForFont(text: string, fontKey: FontKey): string {
 }
 
 export async function generateSeasonBookletPdf(options: GenerateBookletPdfOptions): Promise<Uint8Array> {
+    await loadCoverCornerArtwork();
     if (options.languages) options = { ...options, services: filterBookletServicesLanguages(options.services, options.languages) };
     const scores = new Map<string, Promise<BookletScorePage[]>>();
     let logicalResult = await renderLogicalBooklet(options, 1, scores);

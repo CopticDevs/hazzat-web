@@ -1,9 +1,9 @@
 import {
-    appendBezierCurve, clip, closePath, concatTransformationMatrix, endPath, LineCapStyle, LineJoinStyle,
+    appendBezierCurve, clip, closePath, concatTransformationMatrix, endPath, fill, fillAndStroke, LineCapStyle, LineJoinStyle,
     lineTo, moveTo, PDFDict, PDFDocument, PDFName, PDFOperator, PDFOperatorNames, PDFPage, PDFRef,
-    popGraphicsState, pushGraphicsState, rgb, scale, setLineJoin, translate
+    popGraphicsState, pushGraphicsState, scale, setFillingRgbColor, setGraphicsState, setLineCap, setLineJoin,
+    setLineWidth, setStrokingRgbColor, stroke, translate
 } from "pdf-lib";
-import source from "./BookletCoverCorners.json";
 import { coverFrameWidth } from "./BookletCoverFrame";
 
 interface CornerPath {
@@ -20,28 +20,39 @@ interface CornerGradient {
     coords: number[];
     stops: [number, string][];
 }
-// JSON imports widen tuple/literal types; the generated asset contract is
-// checked alongside SVG/PDF shading and geometry in the artwork tests.
-const artwork = source as unknown as {
+interface CornerArtwork {
     paths: CornerPath[];
     gradients: Record<string, CornerGradient>;
     clips: Record<string, string[]>;
-};
+}
+let loadedArtwork: CornerArtwork | undefined;
+let pendingArtwork: Promise<CornerArtwork> | undefined;
+
+export async function loadCoverCornerArtwork(): Promise<void> {
+    if (loadedArtwork) return;
+    if (!pendingArtwork) pendingArtwork = import("./BookletCoverCorners.json").then(module => module.default as unknown as CornerArtwork);
+    try { loadedArtwork = await pendingArtwork; }
+    catch (error) { pendingArtwork = undefined; throw error; }
+}
+
+function getArtwork(): CornerArtwork {
+    if (!loadedArtwork) throw new Error("Load the booklet cover artwork before drawing it");
+    return loadedArtwork;
+}
 const artworkScale = 396 / coverFrameWidth;
 const shadingCache = new WeakMap<PDFDocument, Record<string, PDFRef>>();
+const opacityCache = new WeakMap<PDFDocument, Map<number, PDFRef>>();
+const geometryCache = new Map<string, PDFOperator[]>();
 
 function channels(hex: string) {
     return [1, 3, 5].map(start => parseInt(hex.slice(start, start + 2), 16) / 255);
 }
-function color(hex?: string) {
-    if (!hex) return undefined;
-    const [r, g, b] = channels(hex);
-    return rgb(r, g, b);
-}
-
 // The authored asset uses only absolute M/L/C/Z commands. Keep these curves
 // native while clipping PDF shading; no SVG-to-canvas conversion is involved.
 function pathOperators(d: string, pageCoordinates = false): PDFOperator[] {
+    const key = pageCoordinates ? `page:${d}` : d;
+    const cached = geometryCache.get(key);
+    if (cached) return cached;
     const tokens = d.match(/[A-Za-z]|[-+]?(?:\d*\.)?\d+(?:e[-+]?\d+)?/g) || [];
     const result: PDFOperator[] = [];
     for (let i = 0; i < tokens.length;) {
@@ -62,10 +73,12 @@ function pathOperators(d: string, pageCoordinates = false): PDFOperator[] {
         else if (command === "L") result.push(lineTo(values[0], values[1]));
         else result.push(appendBezierCurve(values[0], values[1], values[2], values[3], values[4], values[5]));
     }
+    geometryCache.set(key, result);
     return result;
 }
 
 function registerShadings(page: PDFPage) {
+    const artwork = getArtwork();
     const context = page.doc.context;
     let refs = shadingCache.get(page.doc);
     if (!refs) {
@@ -97,7 +110,34 @@ function registerShadings(page: PDFPage) {
     return names;
 }
 
+function drawColoredPath(page: PDFPage, path: CornerPath) {
+    const operators = [pushGraphicsState(), translate(0, 612), scale(artworkScale, -artworkScale), setLineCap(LineCapStyle.Round)];
+    const filled = !path.paint && !!path.fill;
+    if (filled) {
+        const [r, g, b] = channels(path.fill!);
+        operators.push(setFillingRgbColor(r, g, b));
+    }
+    if (path.stroke) {
+        const [r, g, b] = channels(path.stroke);
+        operators.push(setStrokingRgbColor(r, g, b), setLineWidth(path.strokeWidth ?? 1));
+    }
+    if (path.opacity !== undefined) {
+        let refs = opacityCache.get(page.doc);
+        if (!refs) { refs = new Map(); opacityCache.set(page.doc, refs); }
+        let ref = refs.get(path.opacity);
+        if (!ref) {
+            ref = page.doc.context.register(page.doc.context.obj({ Type: "ExtGState", ca: path.opacity, CA: path.opacity }));
+            refs.set(path.opacity, ref);
+        }
+        const name = PDFName.of(`HazzatCornerOpacity_${path.opacity}`);
+        page.node.setExtGState(name, ref);
+        operators.push(setGraphicsState(name));
+    }
+    page.pushOperators(...operators, ...pathOperators(path.d), filled ? path.stroke ? fillAndStroke() : fill() : stroke(), popGraphicsState());
+}
+
 export function drawCoverCorners(page: PDFPage) {
+    const artwork = getArtwork();
     const shadings = registerShadings(page);
     for (const mirrored of [false, true]) {
         page.pushOperators(pushGraphicsState(), setLineJoin(LineJoinStyle.Round));
@@ -121,11 +161,7 @@ export function drawCoverCorners(page: PDFPage) {
                 );
             }
             if (!path.paint || path.stroke) {
-                page.drawSvgPath(path.d, {
-                    x: 0, y: 612, scale: artworkScale,
-                    color: path.paint ? undefined : color(path.fill), borderColor: color(path.stroke),
-                    borderWidth: path.strokeWidth, borderLineCap: LineCapStyle.Round, opacity: path.opacity
-                });
+                drawColoredPath(page, path);
             }
         }
         if (activeClip) page.pushOperators(popGraphicsState());
