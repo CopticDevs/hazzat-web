@@ -9,11 +9,13 @@ import {
     getBookletFileName,
     getBookletSections,
     hasBookletFormat,
-    hasBookletVariationContent
+    hasBookletVariationContent,
+    filterBookletServicesLanguages
 } from "../Booklets/BookletPdfGenerator";
+import ContentLanguageChoices from "./ContentLanguageChoices";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { UserSettingsContext } from "../Contexts/UserSettingsContext";
-import { BookletAppearance, bookletColors, bookletColorValues, defaultBookletAppearance, normalizeBookletColor } from "../Booklets/BookletAppearance";
+import { BookletAppearance, bookletColors, bookletColorValues, normalizeBookletColor } from "../Booklets/BookletAppearance";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
@@ -37,7 +39,11 @@ function BookletDetails() {
     const { environmentProperties } = useContext(EnvironmentContext);
     const { userSettings } = useContext(UserSettingsContext);
     const [seasonInfo, setSeasonInfo] = useState<ISeasonInfo | undefined>();
-    const [services, setServices] = useState<IServiceInfo[]>([]);
+    const [allServices, setServices] = useState<IServiceInfo[]>([]);
+    const [languages, setLanguages] = useState(() => [...userSettings.contentLanguages]);
+    const languagesRef = useRef(languages);
+    languagesRef.current = languages;
+    const services = React.useMemo(() => filterBookletServicesLanguages(allServices, languages), [allServices, languages]);
     const [selection, setSelection] = useState<BookletSelectionState>(createEmptySelection());
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [activeDownload, setActiveDownload] = useState<string | undefined>();
@@ -46,7 +52,9 @@ function BookletDetails() {
     const [grouping, setGrouping] = useState<BookletGroupingKind>("hymn");
     const [layout, setLayout] = useState<BookletLayoutKind>("display");
     const [preview, setPreview] = useState<{ url: string; name: string }>();
-    const [appearance, setAppearance] = useState<BookletAppearance>(defaultBookletAppearance);
+    const [appearance, setAppearance] = useState<BookletAppearance>(() => ({
+        textColor: normalizeBookletColor(userSettings.contentFontColor), hazzatColor: normalizeBookletColor(userSettings.hazzatFontColor)
+    }));
     const [lastPresetId, setLastPresetId] = useState("text-regular");
 
     const isMounted = useRef(true);
@@ -63,7 +71,7 @@ function BookletDetails() {
 
     useEffect(() => {
         setPreview(undefined);
-    }, [selection, formats, grouping, layout, appearance]);
+    }, [selection, formats, grouping, layout, appearance, languages]);
 
     useEffect(() => () => {
         if (preview) URL.revokeObjectURL(preview.url);
@@ -85,7 +93,8 @@ function BookletDetails() {
                 setSeasonInfo(seasonResponse);
                 setServices(sorted);
                 setSelection(createDefaultSelection(sorted));
-                const available = bookletFormatKinds.filter(kind => hasBookletFormat(sorted, kind));
+                const localized = filterBookletServicesLanguages(sorted, languagesRef.current);
+                const available = bookletFormatKinds.filter(kind => hasBookletFormat(localized, kind));
                 const preferred = available.filter(kind => kind === "text" || kind === "regular");
                 setFormats(preferred.length ? preferred : available.slice(0, 1));
                 setLastPresetId((preferred.length ? preferred : available.slice(0, 1)).join("-"));
@@ -134,7 +143,8 @@ function BookletDetails() {
                 formatKinds: selectedKinds,
                 groupingKind: grouping,
                 layoutKind: layout,
-                appearance
+                appearance,
+                languages
             });
             const blob = new Blob([pdfBytes], { type: "application/pdf" });
             const objectUrl = URL.createObjectURL(blob);
@@ -197,12 +207,6 @@ function BookletDetails() {
                 { title: strings.booklets, path: "/Booklets" },
                 { title: seasonInfo.displayName }]} />
 
-            <div className="bookletDetailsIntro">
-                {seasonInfo.displayVerse && (
-                    <div className="bookletSeasonVerse" dangerouslySetInnerHTML={{ __html: seasonInfo.displayVerse }} />
-                )}
-            </div>
-
             {errorMessage && <div role="alert" className="alert alert-danger">{errorMessage}</div>}
 
             <div className="container bookletBuilder">
@@ -212,7 +216,7 @@ function BookletDetails() {
                 <legend>{strings.bookletPresetHeading}</legend>
                 <div className="bookletPresetRow">
                     {availablePresets.map(preset => (
-                        <button key={preset.id} type="button" className="bookletChoice"
+                        <button key={preset.id} type="button" className="bookletChoice" aria-pressed={matchingPreset?.id === preset.id}
                             onClick={() => applyFormats(preset.kinds, preset.id)}>
                             {preset.label}
                         </button>
@@ -230,6 +234,8 @@ function BookletDetails() {
                     </label>)}
                 </div>
                 <p className="bookletHint">{strings.bookletFormatsHint}</p>
+                <ContentLanguageChoices included={languages} onChange={setLanguages} hint={strings.bookletLanguagesHint} />
+                <button type="button" className="bookletChoice" onClick={() => setLanguages([...userSettings.contentLanguages])}>{strings.bookletUseWebsiteLanguages}</button>
                 <BookletContentSelector
                     services={services}
                     selection={selection}

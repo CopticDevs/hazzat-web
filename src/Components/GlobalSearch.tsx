@@ -106,9 +106,6 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                                             onClick={() => handleSeasonClick(result.season!)}
                                         >
                                             <h5 className="mb-1">{result.season!.displayName}</h5>
-                                            {result.season!.verse && (
-                                                <p className="mb-0 text-muted">{result.season!.displayVerse}</p>
-                                            )}
                                         </button>
                                     ))}
                                 </div>

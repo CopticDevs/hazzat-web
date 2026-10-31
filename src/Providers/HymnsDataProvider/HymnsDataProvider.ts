@@ -92,14 +92,11 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         return seasons.map(season => {
             const translation = translations[season.id];
             const nameAr = translation?.name;
-            const verseAr = translation?.verse;
             
             return {
                 ...season,
                 nameAr,
-                verseAr,
-                displayName: localizedName({ name: season.name, nameAr }, this.language),
-                displayVerse: this.language === 'ar' && verseAr ? verseAr : season.verse
+                displayName: localizedName({ name: season.name, nameAr }, this.language)
             };
         });
     }

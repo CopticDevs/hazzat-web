@@ -167,7 +167,7 @@ describe("v5 service resolution and contextual titles", () => {
         (files["/v5/hymns/aspasmos-adam/hymn.json"] as any).nameAr = blank;
         (files[`/v5/content/${FIRST}.json`] as SharedLibraryRecord).nameAr = blank;
         source.hymns[0].formats["2"][1].nameAr = blank;
-        files["/v5/metadata/seasons.ar.json"] = { annual: { name: blank, verse: "", services: { basil: blank } } };
+        files["/v5/metadata/seasons.ar.json"] = { annual: { name: blank, services: { basil: blank } } };
         const ar = provider("ar");
         expect((await ar.getSeason("annual"))?.displayName).toBe("Annual");
         expect((await ar.getServiceSummary("annual", "basil"))?.displayName).toBe(source.name);
