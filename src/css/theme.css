@@ -103,7 +103,7 @@
     :root[data-theme="dark"] .season-card:hover, :root[data-theme="dark"] .seasonDownloadPdfsButton:hover, :root[data-theme="dark"] .bookletDownloadButton:hover:not(:disabled) {
         background: #303735;
     }
-    :root[data-theme="dark"] .season-card-date, :root[data-theme="dark"] .season-card-verse, :root[data-theme="dark"] .bookletVariationSelector {
+    :root[data-theme="dark"] .season-card-date, :root[data-theme="dark"] .bookletVariationSelector {
         color: var(--muted-ink);
     }
     :root[data-theme="dark"] .other-links-section, :root[data-theme="dark"] .bookletHymnSelector, :root[data-theme="dark"] .bookletDownloadTitle, :root[data-theme="dark"] .bookletDownloadButton {
@@ -211,9 +211,6 @@
     }
     :root[data-theme="dark"] .format-dropdown-toggle, :root[data-theme="dark"] .bookletSelectionPanel, :root[data-theme="dark"] .bookletSelectionReset, :root[data-theme="dark"] .bookletLinkDiv {
         color: var(--ink);
-    }
-    :root[data-theme="dark"] .bookletSeasonVerse {
-        color: var(--muted-ink);
     }
     :root[data-theme="dark"] .bookletSelectionReset:hover {
         background: #343b36;

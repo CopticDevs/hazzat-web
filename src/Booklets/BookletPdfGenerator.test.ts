@@ -90,8 +90,6 @@ function createSeason(id = "nativity", displayName = "Nativity"): ISeasonInfo {
         id,
         name: displayName,
         displayName,
-        verse: "",
-        displayVerse: "",
         order: 1,
         isDateSpecific: false,
         serviceIds: ["vespers"]

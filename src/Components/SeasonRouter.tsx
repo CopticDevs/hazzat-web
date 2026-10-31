@@ -60,9 +60,9 @@ function SeasonRouter() {
                             <h1 className="pageTitle">{stringFormat(strings.seasonTitle, seasonInfo.displayName)}</h1>
 
                             <Routes>
-                                <Route path="/" element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.displayName} seasonVerse={seasonInfo.displayVerse} />} />
-                                <Route path={`/services/:serviceId`} element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.displayName} seasonVerse={seasonInfo.displayVerse} />} />
-                                <Route path={`/services/:serviceId/hymns/:hymnId`} element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.displayName} seasonVerse={seasonInfo.displayVerse} />} />
+                                <Route path="/" element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.displayName} />} />
+                                <Route path={`/services/:serviceId`} element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.displayName} />} />
+                                <Route path={`/services/:serviceId/hymns/:hymnId`} element={<ServicesMenu seasonId={seasonIdParam} seasonName={seasonInfo.displayName} />} />
                                 <Route path={`/services/:serviceId/hymns/:hymnId/formats/:formatId`} element={<HymnContentFromSeasonService seasonInfo={seasonInfo} />} />
                                 <Route path={`/services/:serviceId/formats/:formatId`} element={<HymnContentFromService seasonInfo={seasonInfo} />} />
                             </Routes>

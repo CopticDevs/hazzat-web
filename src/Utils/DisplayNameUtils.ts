@@ -15,17 +15,6 @@ export function getSeasonDisplayName(season: ISeasonInfo, language: string): str
 }
 
 /**
- * Get the display verse for a season based on the current language
- * Falls back to English if Arabic verse is not available
- */
-export function getSeasonDisplayVerse(season: ISeasonInfo, language: string): string {
-    if (language === 'ar' && season.verseAr) {
-        return season.verseAr;
-    }
-    return season.verse;
-}
-
-/**
  * Get the display name for a service based on the current language
  * Falls back to English if Arabic name is not available
  */

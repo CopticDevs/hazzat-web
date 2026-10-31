@@ -16,7 +16,6 @@ import ServiceContents from "./ServiceContents";
 interface IProps {
     seasonName: string;
     seasonId: string;
-    seasonVerse: string;
 }
 function ServicesMenu(props: IProps) {
     // Get serviceId from URL if present
@@ -84,9 +83,6 @@ function ServicesMenu(props: IProps) {
             {
                 !!services ?
                     <div>
-                        <div>
-                            <div className="seasonVerse" dangerouslySetInnerHTML={{ __html: props.seasonVerse }} />
-                        </div>
                         <div className="seasonDownloadActions">
                             <MyNavLink className="seasonDownloadPdfsButton" to={`/Booklets/${props.seasonId}`}>
                                 {strings.downloadPdfs}

@@ -75,12 +75,6 @@ function Home(props: IProps) {
                                                 {formatDateRange(season.dateStart, season.dateEnd, languageProperties.localeName)}
                                             </p>
                                         )}
-                                        {season.verse && (
-                                            <div 
-                                                className="season-card-verse"
-                                                dangerouslySetInnerHTML={{ __html: season.displayVerse }}
-                                            />
-                                        )}
                                     </div>
                                 </MyNavLink>
                             ))}
@@ -102,12 +96,6 @@ function Home(props: IProps) {
                                                 <p className="season-card-date">
                                                     {formatDateRange(season.dateStart, season.dateEnd, languageProperties.localeName)}
                                                 </p>
-                                            )}
-                                            {season.verse && (
-                                                <div 
-                                                    className="season-card-verse"
-                                                    dangerouslySetInnerHTML={{ __html: season.displayVerse }}
-                                                />
                                             )}
                                         </div>
                                     </MyNavLink>
