@@ -180,11 +180,33 @@ trace(
     "body",
     blur=0.95,
     threshold=110,
-    stroke="#705633",
+    stroke="#3b2417",
     width=0.9,
     paint="gold",
 )
 body_paths = [p["d"] for p in paths]
+
+
+# Dark ink follows the original scroll spines and stalk junctions. These are
+# structural centerlines, not offset highlight/shadow pairs or relief edges.
+for d, width in [
+    ("M140 117 C133 111 131 101 138 97 C144 93 151 98 147 102", 1.2),
+    ("M118 129 C118 142 116 154 111 167", 1.25),
+    ("M112 166 C108 154 97 146 94 151 C88 157 92 165 100 164 C104 163 103 159 100 158", 1.1),
+    ("M334 163 C356 174 388 182 407 159 C422 139 414 119 414 108 C408 102 407 96 413 97 C417 99 416 103 414 104", 1.35),
+    ("M416 121 C427 103 447 92 465 102", 1.15),
+    ("M284 252 C299 242 308 224 304 209 C302 201 296 195 297 189 C299 185 302 189 300 192", 1.35),
+    ("M243 220 C231 199 253 188 272 195 C289 201 288 220 275 225 C264 229 253 220 259 212 C263 207 270 210 269 216", 1.25),
+    ("M141 232 C111 236 91 255 89 276 C88 300 100 322 125 330", 1.35),
+    ("M94 272 C93 283 100 291 107 286", 1),
+    ("M211 293 C203 305 180 307 172 296 C164 285 175 277 181 283 C186 286 184 292 179 292", 1.2),
+    ("M125 350 C138 375 151 398 145 422 C137 449 110 466 105 487 C91 515 100 530 95 551 C92 563 89 575 89 580", 1.4),
+    ("M109 470 C117 467 124 468 128 469", 1.1),
+    ("M145 399 C149 408 166 412 166 401 C166 398 163 397 162 400", 1.05),
+    ("M103 521 C110 536 123 540 126 528 C128 522 119 521 118 526 C117 529 122 531 123 527", 1.15),
+]:
+    path(d, stroke="#3b2417", width=width)
+    paths[-1].update(clip="body", opacity=0.95, role="vine-contour")
 
 
 # Every vein starts on its leaf's midrib and follows a lobe. The secondary
@@ -238,8 +260,8 @@ def vein(d, width=0.72, primary=False):
                 d,
             )
     vein_guides.extend(curve_samples(d))
-    path(d, stroke="#6e542f", width=width)
-    paths[-1].update(clip="body", opacity=0.82 if primary else 0.63, role="leaf-vein")
+    path(d, stroke="#3b2417", width=width)
+    paths[-1].update(clip="body", opacity=1 if primary else 0.95, role="leaf-vein")
 
 
 # Asymmetric upper acanthus: petiole at upper left, long terminal lobe below.
@@ -393,7 +415,7 @@ CX, CY = 191, 175
 path(
     circle_d(CX, CY, 63) + circle_d(CX, CY, 54.5, True),
     fill="#927344",
-    stroke="#705633",
+    stroke="#3b2417",
     width=0.85,
 )
 
@@ -430,6 +452,14 @@ cross_d += " Z"
 path(cross_d, fill="#800018", stroke="#927344", width=1.5)
 
 paths[-1]["role"] = "cross"
+
+# Keep a fine gold keyline, then add dark ink around and through the cross.
+# The center strokes are flat ornament, without offset lighting or relief.
+path(cross_d, fill="#800018", stroke="#3b2417", width=0.7)
+paths[-1]["role"] = "cross-outline"
+for d in ["M191 138 C191 161 191 189 191 212", "M154 175 C177 175 205 175 228 175"]:
+    path(d, stroke="#330b16", width=0.95)
+    paths[-1].update(role="cross-line", opacity=0.95)
 
 defs = [
     '<clipPath id="body">'
