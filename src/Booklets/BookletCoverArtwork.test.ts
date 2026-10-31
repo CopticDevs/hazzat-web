@@ -125,3 +125,22 @@ it("places all visible foliage outside the arch and inside the frame", () => {
     expect(minimumLeft).toBeGreaterThan(32.5);
     expect(minimumTop).toBeGreaterThan(32.5);
 });
+
+
+it("preserves the approved center-vine SVG colors and alpha in its packed PDF image", () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(process.cwd(), "src/Booklets/BookletCenterVineAsset.json"), "utf8"));
+    const source = fs.readFileSync(path.join(process.cwd(), "src/images/bookletCoverCenterVine.svg"));
+    const bytes = fs.readFileSync(path.join(process.cwd(), "src/images/bookletCoverCenterVine.bin"));
+    expect(hash(source)).toBe(manifest.sourceSha256);
+    expect(hash(bytes)).toBe(manifest.streamSha256);
+    expect(source.toString()).not.toMatch(/<image\b|data:image|<filter\b/);
+    const colors = inflateSync(bytes.subarray(0, manifest.colorBytes));
+    const alpha = inflateSync(bytes.subarray(manifest.colorBytes));
+    const rgba = Buffer.alloc(alpha.length * 4);
+    for (let i = 0; i < alpha.length; i++) {
+        colors.copy(rgba, i * 4, i * 3, i * 3 + 3);
+        rgba[i * 4 + 3] = alpha[i];
+    }
+    expect(hash(rgba)).toBe(manifest.rgbaSha256);
+    expect([manifest.width, manifest.height]).toEqual([2138, 736]);
+});

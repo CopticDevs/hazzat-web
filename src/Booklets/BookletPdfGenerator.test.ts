@@ -1,4 +1,5 @@
 import { PDFArray, PDFDocument, PDFName, PDFNumber, PDFPage, PDFRawStream, decodePDFRawStream } from "pdf-lib";
+import { loadCoverCenterVineArtwork } from "./BookletCenterVineRenderer";
 import { loadCoverCornerArtwork } from "./BookletCornerRenderer";
 import fs from "fs";
 import path from "path";
@@ -34,7 +35,8 @@ import { renderBookletMusic } from "./BookletMusicRenderer";
 
 jest.mock("./BookletMusicRenderer", () => ({ renderBookletMusic: jest.fn() }));
 
-beforeAll(() => loadCoverCornerArtwork(readImage("bookletCoverCorner.bin")));
+beforeAll(() => Promise.all([loadCoverCornerArtwork(readImage("bookletCoverCorner.bin")),
+    loadCoverCenterVineArtwork(readImage("bookletCoverCenterVine.bin"))]));
 
 function createFakeFonts(): EmbeddedFonts {
     const fakeFont = {
@@ -784,12 +786,13 @@ describe("BookletPdfGenerator", () => {
         const imageObjects = pdf.context.enumerateIndirectObjects().map(([, object]) => object)
             .filter((object): object is PDFRawStream => object instanceof PDFRawStream
                 && object.dict.get(PDFName.of("Subtype"))?.toString() === "/Image");
-        // The color data and its alpha mask are the only images; the official
-        // logo, frame, arches and lower vine still render as vector curves.
-        expect(imageObjects).toHaveLength(2);
+        // Corners and the approved center vine each share one color/alpha pair.
+        // The official black logo and frame remain native vector curves.
+        expect(imageObjects).toHaveLength(4);
         imageObjects.forEach(image => {
-            expect(image.dict.lookup(PDFName.of("Width"), PDFNumber).asNumber()).toBe(1122);
-            expect(image.dict.lookup(PDFName.of("Height"), PDFNumber).asNumber()).toBe(1402);
+            expect([[1122, 1402], [2138, 736]]).toContainEqual([
+                image.dict.lookup(PDFName.of("Width"), PDFNumber).asNumber(),
+                image.dict.lookup(PDFName.of("Height"), PDFNumber).asNumber()]);
         });
         for (const index of [0, pdf.getPageCount() - 1]) {
             const streams = pdf.getPage(index).node.Contents() as PDFArray;
@@ -798,7 +801,8 @@ describe("BookletPdfGenerator", () => {
                 if (!(stream instanceof PDFRawStream)) throw new Error("Expected a PDF content stream");
                 return Buffer.from(decodePDFRawStream(stream).decode()).toString("latin1");
             }).join("\n");
-            expect((operators.match(/ c\n/g) || []).length).toBeGreaterThan(50);
+            expect((operators.match(/ c\n/g) || []).length).toBeGreaterThan(index === 0 ? 50 : 1);
+            expect(operators).toContain("/HazzatEucharisticCenterVine Do");
         }
     });
 

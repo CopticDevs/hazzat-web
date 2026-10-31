@@ -21,8 +21,8 @@ NS = "{http://www.w3.org/2000/svg}"
 CELL = re.compile(r"M(\d+) (\d+)h(\d+)v1h-(\d+)z")
 
 
-def compile_artwork():
-    source = SVG.read_bytes()
+def compile_artwork(svg_path=SVG):
+    source = svg_path.read_bytes()
     svg = ET.fromstring(source)
     width, height = int(svg.attrib["width"]), int(svg.attrib["height"])
     if svg.get("viewBox") != f"0 0 {width} {height}":
@@ -88,14 +88,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    stream, manifest = compile_artwork()
-    for target, expected in [(STREAM, stream), (MANIFEST, manifest)]:
-        if args.check:
-            actual = target.read_bytes()
-            if target == MANIFEST:
-                actual = actual.replace(b"\r\n", b"\n")
-            if actual != expected:
-                raise SystemExit(f"Stale compiled artwork: {target.relative_to(ROOT)}")
-        else:
-            target.write_bytes(expected)
-    print(f"Verified SVG artwork; lossless PDF color/alpha streams: {len(stream):,} bytes")
+    artworks = [
+        (SVG, STREAM, MANIFEST),
+        (ROOT / "src/images/bookletCoverCenterVine.svg", ROOT / "src/images/bookletCoverCenterVine.bin",
+         ROOT / "src/Booklets/BookletCenterVineAsset.json"),
+    ]
+    for svg_path, stream_path, manifest_path in artworks:
+        stream, manifest = compile_artwork(svg_path)
+        for target, expected in [(stream_path, stream), (manifest_path, manifest)]:
+            if args.check:
+                actual = target.read_bytes()
+                if target == manifest_path:
+                    actual = actual.replace(b"\r\n", b"\n")
+                if actual != expected:
+                    raise SystemExit(f"Stale compiled artwork: {target.relative_to(ROOT)}")
+            else:
+                target.write_bytes(expected)
+        print(f"Verified {svg_path.name}; lossless PDF color/alpha streams: {len(stream):,} bytes")
