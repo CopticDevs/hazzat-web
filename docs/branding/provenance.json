@@ -4,7 +4,7 @@
   "preparation": "Direct Bezier tracing of the supplied artwork. SVG masters contain only paths, with no embedded bitmap. Android uses VectorDrawable; iOS uses a vector-preserving SVG image asset. Store/legacy icons are raster exports from these masters.",
   "lightInk": "#303030",
   "darkInk": "#BCC2BA",
-  "logoSvgSha256": "c6e3a90b88326320db9e4cd25b66a749210fef6aa6dece61598b81b3a77710b2",
+  "logoSvgSha256": "a95d094b66c1fc068305bf0808110e04a0b5df0dc7dcd52447d38b1beece0324",
   "markSvgSha256": "fe2742e0b286d80c8826eda1b7ee68e71036f35ef7af9c936da47bcc118988be",
-  "spellingCorrection": "HYMNLOGY corrected to HYMNOLOGY using existing SVG glyphs; approved tagline fill #808080. All artwork outside the tagline is unchanged."
+  "spellingCorrection": "HYMNLOGY corrected to HYMNOLOGY using existing SVG glyphs; tagline follows the original theme-aware logo ink. All artwork outside the corrected word is unchanged."
 }

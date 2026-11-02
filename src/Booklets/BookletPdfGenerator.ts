@@ -111,7 +111,7 @@ interface BackCoverImages {
     background?: PDFImage;
 }
 
-interface VectorBookletLogo { width: number; height: number; paths: { d: string; color: RGB }[]; }
+interface VectorBookletLogo { width: number; height: number; paths: string[]; }
 type BookletLogo = PDFImage | VectorBookletLogo;
 
 const LOGICAL_PAGE_WIDTH = 396;
@@ -583,13 +583,7 @@ async function tryEmbedLogo(doc: PDFDocument, source?: BookletImageSource): Prom
             const xml = Array.from(bytes, byte => String.fromCharCode(byte)).join("");
             const root = new DOMParser().parseFromString(xml, "image/svg+xml").documentElement;
             const box = (root.getAttribute("viewBox") || "").trim().split(/[\s,]+/).map(Number);
-            const paths = Array.from(root.querySelectorAll("path"), node => {
-                const fill = node.getAttribute("fill") || "currentColor";
-                const color = /^#[0-9a-f]{6}$/i.test(fill)
-                    ? rgb(parseInt(fill.slice(1, 3), 16) / 255, parseInt(fill.slice(3, 5), 16) / 255, parseInt(fill.slice(5, 7), 16) / 255)
-                    : black;
-                return { d: node.getAttribute("d") || "", color };
-            }).filter(path => path.d);
+            const paths = Array.from(root.querySelectorAll("path"), node => node.getAttribute("d") || "").filter(Boolean);
             if (box.length === 4 && box[0] === 0 && box[1] === 0 && box[2] > 0 && box[3] > 0 && paths.length &&
                 !root.querySelector("parsererror, image, text, use, [transform]")) {
                 return { width: box[2], height: box[3], paths };
@@ -604,8 +598,8 @@ async function tryEmbedLogo(doc: PDFDocument, source?: BookletImageSource): Prom
 function drawBookletLogo(page: PDFPage, logo: BookletLogo, x: number, y: number, width: number, opacity = 1) {
     const height = width * logo.height / logo.width;
     if ("paths" in logo) {
-        logo.paths.forEach(path => page.drawSvgPath(path.d, {
-            x, y: y + height, scale: width / logo.width, color: path.color, opacity
+        logo.paths.forEach(path => page.drawSvgPath(path, {
+            x, y: y + height, scale: width / logo.width, color: black, opacity
         }));
     } else {
         page.drawImage(logo, { x, y, width, height, opacity });

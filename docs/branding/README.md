@@ -18,6 +18,6 @@ The theme-matched version on the left is implemented. The neutral-gray version o
 
 ## Approved spelling correction
 
-The tagline now reads COPTIC HYMNOLOGY & MORE in medium grey (#808080). The missing O reuses the original O outline, and only the corrected word was respaced to keep its original bounds. All non-tagline paths are unchanged. PDF logo rendering preserves the grey path fills as vector curves.
+The tagline now reads COPTIC HYMNOLOGY & MORE in the original theme-aware logo ink. The missing O reuses the original O outline, and only the corrected word was respaced to keep its original bounds. All paths outside the corrected word are unchanged. PDF logo rendering remains black vector curves.
 
 Social exports are in `docs/branding/social/`: 1080px square and 1200x630 banners, in light and dark themes. These are downloadable artwork, not posts to social accounts. Regenerate PNG fallbacks and social exports with `node scripts/export-brand-assets.cjs` (Playwright and Edge required; set `PLAYWRIGHT_MODULE` to an installed module path if needed).

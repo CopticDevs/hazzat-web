@@ -906,18 +906,3 @@ it("shares the SVG-backed cover image across all folded print sheets", async () 
     expect(doc.getPageCount()).toBeGreaterThanOrEqual(2);
     expect(corners).toHaveLength(1);
 });
-
-
-it("keeps the approved grey logo tagline as vector paths in booklet exports", async () => {
-    const draws = jest.spyOn(PDFPage.prototype, "drawSvgPath");
-    try {
-        await generateSeasonBookletPdf({ season: createSeason(), services: [], formatKinds: ["text"],
-            layoutKind: "display", fontSources: createFontSources(),
-            imageSources: { ...createImageSources(), frontCoverLogo: readImage("logo.svg") } });
-        const grey = draws.mock.calls.filter(([, options]) => {
-            const color = options?.color;
-            return color?.type === "RGB" && color.red === 128 / 255 && color.green === 128 / 255 && color.blue === 128 / 255;
-        });
-        expect(grey).toHaveLength(20);
-    } finally { draws.mockRestore(); }
-});
