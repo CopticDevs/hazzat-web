@@ -15,3 +15,9 @@ The native implementation is in draft HazzatApp PR #47. Native Android uses Vect
 ![Current dark theme ink on the left and neutral-gray comparison on the right](dark-ink-comparison.png)
 
 The theme-matched version on the left is implemented. The neutral-gray version on the right is a comparison only. The app retains its existing `#C0B8A6` artwork ink; the website retains its existing `#BCC2BA` theme ink.
+
+## Approved spelling correction
+
+The tagline now reads COPTIC HYMNOLOGY & MORE in the original theme-aware logo ink. The missing O reuses the original O outline, and only the corrected word was respaced to keep its original bounds. All paths outside the corrected word are unchanged. PDF logo rendering remains black vector curves.
+
+Social exports are in `docs/branding/social/`: 1080px square and 1200x630 banners, in light and dark themes. These are downloadable artwork, not posts to social accounts. Regenerate PNG fallbacks and social exports with `node scripts/export-brand-assets.cjs` (Playwright and Edge required; set `PLAYWRIGHT_MODULE` to an installed module path if needed).
