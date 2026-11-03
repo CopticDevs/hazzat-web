@@ -162,6 +162,79 @@ function createService(): IServiceInfo {
 }
 
 describe("BookletPdfGenerator", () => {
+    it.each([
+        ["hymn", "display"], ["format", "display"], ["hymn", "print"], ["format", "print"]
+    ] as const)("starts device hymns on fresh pages and packs print hymns (%s, %s)", async (groupingKind, layoutKind) => {
+        const service = createService();
+        service.hymns = ["Alpha", "Beta"].map((name, order) => ({ ...service.hymns![0], id: name, name, displayName: name, order,
+            formats: [
+                { id: "1", name: "Text", order: 1, variationCount: 1, variations: [{ id: "text", name: "Text", displayName: "Text",
+                    content: { contentType: ContentType.TextContent, paragraphs: [{ columns: [{ language: ContentLanguage.English, content: `${name}Text` }] }] } }] },
+                { id: "2", name: "Hazzat", order: 2, variationCount: 1, variations: [{ id: "regular", name: "Regular", displayName: "Regular",
+                    content: { contentType: ContentType.HazzatContent, englishHazzat: `${name}Notes`, copticHazzat: "", arabicHazzat: "" } }] },
+                { id: "3", name: "Vertical", order: 3, variationCount: 1, variations: [{ id: "vertical", name: "Vertical", displayName: "Vertical",
+                    content: { contentType: ContentType.VerticalHazzatContent, englishVerticalHazzat: `${name}Vertical`, copticVerticalHazzat: "", arabicVerticalHazzat: "" } }] }
+            ] }));
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            const bytes = await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text", "regular", "vertical"],
+                groupingKind, layoutKind, fontSources: createFontSources(), imageSources: createImageSources() });
+            const headings = draws.mock.calls.flatMap(([text, options], index) => options?.size === 11.5 && ["Alpha", "Beta"].includes(text) ? [index] : []);
+            expect(headings).toHaveLength(groupingKind === "hymn" ? 2 : 6);
+            const pages = headings.map(index => draws.mock.instances[index] as unknown as PDFPage);
+            if (layoutKind === "display") {
+                expect(new Set(pages).size).toBe(headings.length);
+                // The first content page is immediately after the cover, inside cover, and TOC.
+                expect(pages[0].doc.getPages().indexOf(pages[0])).toBe(3);
+                expect(pages.map(page => page.doc.getPages().indexOf(page))).toEqual(headings.map((_, index) => index + 3));
+            } else {
+                expect(new Set(pages).size).toBeLessThan(headings.length);
+            }
+            if (groupingKind === "hymn" && layoutKind === "display") for (const name of ["Alpha", "Beta"]) {
+                const bodyPages = ["Text", "Notes", "Vertical"].map(suffix => draws.mock.instances[draws.mock.calls.findIndex(([text]) => text === name + suffix)]);
+                expect(new Set(bodyPages).size).toBe(1);
+            }
+            const pdf = await PDFDocument.load(bytes);
+            expect(pdf.getPages().every(page => page.getWidth() === (layoutKind === "print" ? 792 : 396))).toBe(true);
+            if (process.env.BOOKLET_PDF_REVIEW_DIR) {
+                fs.mkdirSync(process.env.BOOKLET_PDF_REVIEW_DIR, { recursive: true });
+                fs.writeFileSync(path.join(process.env.BOOKLET_PDF_REVIEW_DIR, `${groupingKind}-${layoutKind}.pdf`), bytes);
+            }
+        } finally { draws.mockRestore(); }
+    });
+
+    it.each(["display", "print"] as const)("flows multi-page variations and keeps their titles with the opening text (%s)", async layoutKind => {
+        const service = createService();
+        service.hymns![0].formats = [{ id: "1", name: "Text", order: 1, variationCount: 2,
+            variations: ["FirstVariation", "SecondVariation"].map(name => ({ id: name, name, displayName: name, content: {
+                contentType: ContentType.TextContent, paragraphs: [{ columns: [{ language: ContentLanguage.English,
+                    content: `${name}Opening ` + "mercy upon us ".repeat(700) + ` ${name}Ending` }] }]
+            } })) }];
+        const nextService = { ...service, id: "next-service", name: "NextService", displayName: "NextService", order: 2,
+            hymns: [{ ...service.hymns![0], formats: [{ ...service.hymns![0].formats[0], variationCount: 1,
+                variations: [{ id: "next", name: "Next", displayName: "Next", content: { contentType: ContentType.TextContent,
+                    paragraphs: [{ columns: [{ language: ContentLanguage.English, content: "NextServiceOpening" }] }] } }] }] }] };
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            await generateSeasonBookletPdf({ season: createSeason(), services: [service, nextService], formatKinds: ["text"], layoutKind,
+                fontSources: createFontSources(), imageSources: createImageSources() });
+            const pageFor = (word: string) => draws.mock.instances[draws.mock.calls.findIndex(([text]) => text === word)] as unknown as PDFPage;
+            for (const name of ["FirstVariation", "SecondVariation"]) {
+                expect(pageFor(name)).toBeDefined();
+                expect(pageFor(name)).toBe(pageFor(`${name}Opening`));
+                expect(pageFor(name)).not.toBe(pageFor(`${name}Ending`));
+            }
+            const last = pageFor("SecondVariationEnding"), next = pageFor("NextServiceOpening");
+            expect(pageFor("NextService")).toBe(next);
+            if (layoutKind === "display") expect(next.doc.getPages().indexOf(next)).toBe(last.doc.getPages().indexOf(last) + 1);
+            const pages = last.doc.getPages();
+            // No empty content page is inserted between long sections.
+            for (const page of pages.slice(3, pages.indexOf(next) + 1)) {
+                expect(draws.mock.calls.some(([, options], index) => draws.mock.instances[index] as unknown === page && options?.size === 10.5)).toBe(true);
+            }
+        } finally { draws.mockRestore(); }
+    });
+
     it.each(["display", "print"] as const)("independently filters text and both Hazzat formats before rendering (%s)", async layoutKind => {
         const service = withText();
         const regular = service.hymns![0].formats!.find(f => f.id === "2")!.variations![0];
@@ -224,7 +297,9 @@ describe("BookletPdfGenerator", () => {
         } finally { draws.mockRestore(); }
     });
 
-    it.each(["hymn", "format"] as const)("keeps wrapped hymn headings with their opening content (%s grouping)", async groupingKind => {
+    it.each([
+        ["hymn", "display"], ["format", "display"], ["hymn", "print"], ["format", "print"]
+    ] as const)("keeps wrapped hymn headings with their opening content (%s grouping, %s)", async (groupingKind, layoutKind) => {
         const service = withText();
         const base = service.hymns![0];
         service.hymns = Array.from({ length: 12 }, (_, index) => ({ ...base, id: `hymn-${index}`, order: index,
@@ -236,7 +311,7 @@ describe("BookletPdfGenerator", () => {
         }));
         const draws = jest.spyOn(PDFPage.prototype, "drawText");
         try {
-            await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text"], groupingKind, layoutKind: "display",
+            await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text"], groupingKind, layoutKind,
                 fontSources: createFontSources(), imageSources: { ...createImageSources(), serviceDivider: readImage("bookletBackCoverBackground.jpg") } });
             for (let index = 0; index < 12; index++) {
                 const heading = draws.mock.calls.findIndex(([text, options]) => text.startsWith(`Heading${index} `) && options?.size === 11.5);
