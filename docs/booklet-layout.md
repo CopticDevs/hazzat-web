@@ -6,6 +6,8 @@ The website Settings panel saves English, Coptic, and Arabic choices on this dev
 
 Generated pages omit format headings and markers, including format suffixes in the contents. Hymn and variation titles remain. Before placing a service/hymn heading, the renderer measures its wrapped height together with the opening content and ending-ornament reservation. Variation titles receive the same treatment. Long opening paragraphs can flow naturally across pages. Logical page margins are 24 pt at each side, 36 pt at the top, and 30 pt at the bottom, in both device and folded-print layouts.
 
+Device booklets start each hymn on a fresh content page. With hymn grouping, consecutive formats and variations of the same hymn continue naturally; with format grouping, each hymn starts fresh within each format group. Long hymns can span pages. Print booklets retain compact flow and measured heading/content protection. Musical scores keep their existing dedicated pages in both layouts. Cover, contents, final padding, and folded-print imposition rules are unchanged.
+
 Presets are apply actions, with no persistent pressed state. Applying one replaces the content selection with its complete available starting selection. The status compares the actual included variation IDs with those complete presets, showing “Custom selection” for individual changes and the preset name when restored exactly. Equivalent presets retain the most recently applied name. Color and layout changes do not change the content-selection status.
 
 Every season cover includes “Hymns” (for example, “Kiahk Hymns”), with the corresponding Arabic wording. Existing Passion Week title shortening is preserved, and titles that already include “Hymns” are not duplicated.
