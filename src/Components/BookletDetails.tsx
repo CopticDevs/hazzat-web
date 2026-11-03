@@ -12,6 +12,7 @@ import {
     hasBookletVariationContent,
     filterBookletServicesLanguages
 } from "../Booklets/BookletPdfGenerator";
+import { filterContentLanguages } from "../ContentLanguages";
 import ContentLanguageChoices from "./ContentLanguageChoices";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { UserSettingsContext } from "../Contexts/UserSettingsContext";
@@ -23,7 +24,7 @@ import { IFormatInfo } from "../Providers/HymnsDataProvider/Models/IFormatInfo";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
-import { IHymnContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
+import { ContentLanguage, IHymnContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./BookletDetails.css";
 import BreadCrumb from "./BreadCrumb";
 import InvalidAddressMessage from "./InvalidAddressMessage";
@@ -41,9 +42,10 @@ function BookletDetails() {
     const [seasonInfo, setSeasonInfo] = useState<ISeasonInfo | undefined>();
     const [allServices, setServices] = useState<IServiceInfo[]>([]);
     const [languages, setLanguages] = useState(() => [...userSettings.contentLanguages]);
-    const languagesRef = useRef(languages);
-    languagesRef.current = languages;
-    const services = React.useMemo(() => filterBookletServicesLanguages(allServices, languages), [allServices, languages]);
+    const [separateHazzatLanguages, setSeparateHazzatLanguages] = useState(false);
+    const [hazzatLanguages, setHazzatLanguages] = useState(languages);
+    const effectiveHazzatLanguages = separateHazzatLanguages ? hazzatLanguages : languages;
+    const services = React.useMemo(() => filterBookletServicesLanguages(allServices, languages, effectiveHazzatLanguages), [allServices, languages, effectiveHazzatLanguages]);
     const [selection, setSelection] = useState<BookletSelectionState>(createEmptySelection());
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [activeDownload, setActiveDownload] = useState<string | undefined>();
@@ -62,16 +64,18 @@ function BookletDetails() {
     const [loadFailed, setLoadFailed] = useState(false);
     const selectedServices = React.useMemo(() => getSelectedBookletServices(services, selection, formats), [services, selection, formats]);
     const sections = React.useMemo(() => getBookletSections(selectedServices, bookletFormatKinds, grouping), [selectedServices, grouping]);
-    const availableFormats = React.useMemo(() => bookletFormatKinds.filter(kind => hasBookletFormat(services, kind)), [services]);
+    const availableFormats = React.useMemo(() => bookletFormatKinds.filter(kind => hasBookletFormat(allServices, kind)), [allServices]);
     const selectableChoices = React.useMemo(() => services.flatMap(service => (service.hymns || []).flatMap(hymn =>
         getSelectableVariations(hymn).filter(variation => hasBookletVariationContent(variation, formatKindFromId(variation.formatId)))
             .map(variation => ({ key: variationKey(service, hymn, variation), kind: formatKindFromId(variation.formatId) })))), [services]);
     const selectedSignature = React.useMemo(() => JSON.stringify(selectedServices.flatMap(service => (service.hymns || []).flatMap(hymn =>
         getSelectableVariations(hymn).map(variation => variationKey(service, hymn, variation)))).sort()), [selectedServices]);
+    const requestedFormats = bookletFormatKinds.filter(kind => formats.includes(kind) ||
+        Object.values(selection.formats || {}).some(kinds => kinds.includes(kind)));
 
     useEffect(() => {
         setPreview(undefined);
-    }, [selection, formats, grouping, layout, appearance, languages]);
+    }, [selection, formats, grouping, layout, appearance, languages, effectiveHazzatLanguages]);
 
     useEffect(() => () => {
         if (preview) URL.revokeObjectURL(preview.url);
@@ -93,8 +97,7 @@ function BookletDetails() {
                 setSeasonInfo(seasonResponse);
                 setServices(sorted);
                 setSelection(createDefaultSelection(sorted));
-                const localized = filterBookletServicesLanguages(sorted, languagesRef.current);
-                const available = bookletFormatKinds.filter(kind => hasBookletFormat(localized, kind));
+                const available = bookletFormatKinds.filter(kind => hasBookletFormat(sorted, kind));
                 const preferred = available.filter(kind => kind === "text" || kind === "regular");
                 setFormats(preferred.length ? preferred : available.slice(0, 1));
                 setLastPresetId((preferred.length ? preferred : available.slice(0, 1)).join("-"));
@@ -144,7 +147,8 @@ function BookletDetails() {
                 groupingKind: grouping,
                 layoutKind: layout,
                 appearance,
-                languages
+                languages,
+                hazzatLanguages: separateHazzatLanguages ? hazzatLanguages : undefined
             });
             const blob = new Blob([pdfBytes], { type: "application/pdf" });
             const objectUrl = URL.createObjectURL(blob);
@@ -193,10 +197,8 @@ function BookletDetails() {
     const applyFormats = (next: BookletFormatKind[], presetId?: string) => {
         setFormats(next);
         if (presetId) setLastPresetId(presetId);
-        setSelection(current => {
-            const nextSelection = createDefaultSelection(services);
-            return presetId ? nextSelection : { ...current, formats: {}, variations: nextSelection.variations };
-        });
+        // Preserve hymn and variation choices; global formats replace per-hymn format overrides.
+        setSelection(current => ({ ...current, formats: {} }));
     };
 
     return (
@@ -213,7 +215,8 @@ function BookletDetails() {
                 <h2>{strings.buildBooklet}</h2>
                 <p>{strings.buildBookletDescription}</p>
                 <fieldset disabled={busy}>
-                <legend>{strings.bookletPresetHeading}</legend>
+                <section className="bookletStep" aria-labelledby="bookletFormatsTitle">
+                <h3 id="bookletFormatsTitle">{strings.bookletPresetHeading}</h3>
                 <div className="bookletPresetRow">
                     {availablePresets.map(preset => (
                         <button key={preset.id} type="button" className="bookletChoice" aria-pressed={matchingPreset?.id === preset.id}
@@ -226,6 +229,7 @@ function BookletDetails() {
                     <strong>{matchingPreset ? strings.formatString(strings.bookletSelectionPreset, matchingPreset.label) : strings.bookletCustomSelection}</strong>
                     {!matchingPreset && startingPreset && <span className="bookletHint">{strings.formatString(strings.bookletStartedWith, startingPreset.label)}</span>}
                 </p>
+                <details className="bookletFormatCustomization"><summary>{strings.bookletCustomizeFormats}</summary>
                 <div className="bookletFormatChoices">
                     {availableFormats.map(kind => <label key={kind}>
                         <input type="checkbox" checked={formats.includes(kind)} onChange={event =>
@@ -233,16 +237,39 @@ function BookletDetails() {
                         {getFormatName(kind)}
                     </label>)}
                 </div>
+                </details>
                 <p className="bookletHint">{strings.bookletFormatsHint}</p>
-                <ContentLanguageChoices included={languages} onChange={setLanguages} hint={strings.bookletLanguagesHint} />
-                <button type="button" className="bookletChoice" onClick={() => setLanguages([...userSettings.contentLanguages])}>{strings.bookletUseWebsiteLanguages}</button>
+                </section>
+                <section className="bookletStep" aria-labelledby="bookletLanguagesTitle">
+                <div className="bookletStepHeader">
+                    <h3 id="bookletLanguagesTitle">{strings.bookletLanguagesHeading}</h3>
+                    <button type="button" className="bookletChoice" onClick={() => { setLanguages([...userSettings.contentLanguages]); setHazzatLanguages([...userSettings.contentLanguages]); }}>{strings.bookletUseWebsiteLanguages}</button>
+                </div>
+                <ContentLanguageChoices included={languages} onChange={setLanguages} hint={strings.bookletLanguagesHint}
+                    legend={separateHazzatLanguages ? strings.bookletTextLanguages : undefined} />
+                {((requestedFormats.includes("text") && requestedFormats.some(kind => kind === "regular" || kind === "vertical")) || separateHazzatLanguages) && <label className="bookletSeparateLanguages">
+                    <input type="checkbox" checked={separateHazzatLanguages} onChange={event => {
+                        if (event.target.checked) setHazzatLanguages([...languages]);
+                        else if (hazzatLanguages.join() !== languages.join() && !window.confirm(strings.bookletSharedLanguagesConfirm)) return;
+                        setSeparateHazzatLanguages(event.target.checked);
+                    }} />{strings.bookletSeparateHazzatLanguages}
+                </label>}
+                {separateHazzatLanguages && <ContentLanguageChoices included={hazzatLanguages} onChange={setHazzatLanguages}
+                    legend={strings.bookletHazzatLanguages} hint={strings.bookletHazzatLanguagesHint} />}
+                </section>
+                <section className="bookletStep" aria-labelledby="bookletHymnsTitle">
+                <h3 id="bookletHymnsTitle">{strings.bookletHymnsHeading}</h3>
                 <BookletContentSelector
-                    services={services}
+                    services={allServices}
+                    languages={languages}
+                    hazzatLanguages={effectiveHazzatLanguages}
                     selection={selection}
                     onSelectionChange={setSelection}
                     formats={formats}
                 />
-                <h3>{strings.bookletArrange}</h3>
+                </section>
+                <section className="bookletStep" aria-labelledby="bookletArrangeTitle">
+                <h3 id="bookletArrangeTitle">{strings.bookletArrange}</h3>
                 <div className="bookletLayoutChoices">
                     <label>{strings.bookletGroupContent}
                         <select value={grouping} onChange={event => setGrouping(event.target.value as BookletGroupingKind)}>
@@ -282,8 +309,12 @@ function BookletDetails() {
                     </div>
                     <p className="bookletHint">{strings.bookletColorScope}</p>
                 </details>
-                <section className="bookletReview" aria-labelledby="bookletReviewTitle">
+                </section>
+                <section className="bookletReview bookletStep" aria-labelledby="bookletReviewTitle">
                     <h3 id="bookletReviewTitle">{strings.bookletAtGlance}</h3>
+                    <dl className="bookletLanguageSummary">{bookletFormatKinds.filter(kind => formats.includes(kind) || sections.some(section => section.formatKind === kind)).map(kind =>
+                        <div key={kind}><dt>{getFormatName(kind)}</dt><dd>{kind === "musical" ? strings.bookletScoresAsPublished :
+                            (kind === "text" ? languages : effectiveHazzatLanguages).map(languageName).join(", ") || strings.bookletNoLanguages}</dd></div>)}</dl>
                     <p aria-live="polite">{selectedServices.reduce((sum, service) => sum + (service.hymns?.length || 0), 0)} {strings.bookletHymnsSelected} · {strings.bookletOnePdf}</p>
                     <details><summary>{strings.bookletContentOrder}</summary>
                         <ol>{sections.map((section, i) => <li key={i}>{section.service.displayName || section.service.name} / {section.hymn.displayName || section.hymn.name} · {getFormatName(section.formatKind)}</li>)}</ol>
@@ -292,8 +323,6 @@ function BookletDetails() {
                     <button type="button" className="bookletPrimaryAction" disabled={!sections.length} onClick={reviewBooklet}>
                         {busy ? strings.generatingBooklet : strings.bookletReviewPdf}
                     </button>
-                </section>
-                </fieldset>
                 {preview && <section className="bookletPdfPreview" aria-labelledby="bookletPreviewTitle">
                     <h3 id="bookletPreviewTitle">{strings.bookletPdfPreview}</h3>
                     <div className="bookletPresetRow">
@@ -304,6 +333,8 @@ function BookletDetails() {
                         <p>{strings.bookletPreviewFallback}</p>
                     </object>
                 </section>}
+                </section>
+                </fieldset>
             </div>
         </div>
     );
@@ -321,10 +352,14 @@ interface BookletContentSelectorProps {
     selection: BookletSelectionState;
     onSelectionChange: React.Dispatch<React.SetStateAction<BookletSelectionState>>;
     formats: BookletFormatKind[];
+    languages: ContentLanguage[];
+    hazzatLanguages: ContentLanguage[];
 }
 
 function BookletContentSelector(props: BookletContentSelectorProps) {
-    const resetSelection = () => props.onSelectionChange(createDefaultSelection(props.services));
+    const resetSelection = () => {
+        if (window.confirm(strings.bookletResetConfirm)) props.onSelectionChange(createDefaultSelection(props.services));
+    };
 
     return (
         <div className="bookletSelectionPanel">
@@ -364,19 +399,32 @@ function BookletContentSelector(props: BookletContentSelectorProps) {
                                         {hymn.displayName || hymn.name}
                                     </label>
 
+                                    {(props.selection.formats?.[hymnKey(service, hymn)] ?? props.formats).filter(kind =>
+                                        !selectableVariations.some(variation => formatKindFromId(variation.formatId) === kind)).map(kind =>
+                                        <p className="bookletUnavailable" key={kind}>{strings.formatString(strings.bookletUnavailableLanguages, getFormatName(kind))}</p>)}
+
                                     {selectableVariations.length > 0 && (
                                         <div className="bookletVariationSelectorGroup">
-                                            {selectableVariations.map(variation => (
+                                            {selectableVariations.map(variation => {
+                                                const kind = formatKindFromId(variation.formatId);
+                                                const included = kind === "text" ? props.languages : props.hazzatLanguages;
+                                                const available = kind === "musical" || hasBookletVariationContent({ ...variation, content: filterContentLanguages(variation.content, included) }, kind);
+                                                const missing = kind === "musical" ? [] : included.filter(language => !hasBookletVariationContent({ ...variation, content: filterContentLanguages(variation.content, [language]) }, kind));
+                                                return (
                                                 <label key={variationKey(service, hymn, variation)} className="bookletVariationSelector">
                                                     <input
                                                         type="checkbox"
-                                                        checked={isVariationSelected(props.selection, service, hymn, variation) &&
+                                                        aria-label={`${getVariationDisplayName(variation)} (${getFormatName(kind)})`}
+                                                        aria-describedby={`availability-${variationKey(service, hymn, variation)}`}
+                                                        disabled={!available}
+                                                        checked={available && isVariationSelected(props.selection, service, hymn, variation) &&
                                                             (props.selection.formats?.[hymnKey(service, hymn)] ?? props.formats).includes(formatKindFromId(variation.formatId))}
                                                         onChange={event => toggleVariationSelection(props.onSelectionChange, service, hymn, variation, event.target.checked, props.formats)}
                                                     />
-                                                    <span>{getVariationDisplayName(variation)} ({getFormatName(formatKindFromId(variation.formatId))})</span>
+                                                    <span>{getVariationDisplayName(variation)} ({getFormatName(kind)})</span>
+                                                    <small id={`availability-${variationKey(service, hymn, variation)}`} className="bookletUnavailable">{(!available || missing.length > 0) && strings.formatString(strings.bookletUnavailableLanguages, missing.map(languageName).join(", ") || strings.bookletNoLanguages)}</small>
                                                 </label>
-                                            ))}
+                                            ); })}
                                         </div>
                                     )}
                                 </div>
@@ -387,6 +435,10 @@ function BookletContentSelector(props: BookletContentSelectorProps) {
             </div>
         </div>
     );
+}
+
+function languageName(language: ContentLanguage): string {
+    return language === ContentLanguage.English ? strings.languageEnglish : language === ContentLanguage.Coptic ? strings.languageCoptic : strings.languageArabic;
 }
 
 function createEmptySelection(): BookletSelectionState {
