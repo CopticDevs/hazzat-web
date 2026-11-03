@@ -10,7 +10,7 @@ import "./SitePreferences.css";
 
 export default function SitePreferences() {
     const { theme, setTheme } = useTheme();
-    const { languageProperties } = useContext(LanguageContext);
+    const { languageProperties, setNavigationLanguage } = useContext(LanguageContext);
     const location = useLocation();
     const nextLanguage = languageProperties.localeName === 'en' ? 'ar' : 'en';
     const search = new URLSearchParams(location.search);
@@ -20,7 +20,10 @@ export default function SitePreferences() {
     return <div className="site-preferences" role="group" aria-label={strings.sitePreferences}>
         <MyNavLink className="preference-toggle language-toggle" to={`${location.pathname}?${search}${location.hash}`}
             aria-label={languageAction} title={languageAction}
-            onClick={() => window.gtag?.('event', 'change_nav_lang', { event_category: 'Customization', event_label: `${nextLanguage} Language Selected` })}>
+            onClick={() => {
+                setNavigationLanguage?.(nextLanguage);
+                window.gtag?.('event', 'change_nav_lang', { event_category: 'Customization', event_label: `${nextLanguage} Language Selected` });
+            }}>
             <FontAwesomeIcon icon={faGlobe} aria-hidden="true" />
             <span lang={languageProperties.localeName} aria-hidden="true">{languageProperties.localeName === 'en' ? 'EN' : 'ع'}</span>
         </MyNavLink>
