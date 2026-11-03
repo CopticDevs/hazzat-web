@@ -465,7 +465,11 @@ async function renderLogicalBooklet(options: GenerateBookletPdfOptions, tocPageC
             const showHymn = newHymn || formatKind === "musical";
             const variations = getOrderedBookletVariations(format).filter(variation => hasBookletVariationContent(variation, formatKind));
             writer.reservedBottom = writer.serviceDivider && endsService && variations.length === 1 ? 110 : 40;
-            if (formatKind === "musical" && writer.cursorY < LOGICAL_PAGE_HEIGHT - PAGE_TOP) writer.addPage("content");
+            // In format grouping each return to a hymn is a new reading section.
+            // Keep consecutive formats/variations together in hymn grouping, and
+            // preserve the existing dedicated score pages in both layouts.
+            if (((options.layoutKind === "display" && newHymn) || formatKind === "musical")
+                && writer.cursorY < LOGICAL_PAGE_HEIGHT - PAGE_TOP) writer.addPage("content");
             const headingHeight = (newService ? measureHeading(writer, service.displayName || service.name, 15, 12, false) : 0)
                 + (showHymn ? measureHeading(writer, hymn.displayName || hymn.name, 11.5, 10) : 0);
             const variationTitleHeight = variations.length > 1 ? measureVariationTitle(writer, variations[0]) : 0;
