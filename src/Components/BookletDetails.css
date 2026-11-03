@@ -125,6 +125,9 @@
 .bookletBuilder fieldset { min-width: 0; }
 .bookletStep { border: 1px solid var(--rule, #d7d2c7); border-radius: 8px; padding: 20px; margin-block: 20px; }
 .bookletStep > h3:first-child { margin-block-start: 0; }
+.bookletStepHeader { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; margin-block-end: 14px; }
+.bookletBuilder .bookletStepHeader h3 { margin: 0; }
+.bookletStepHeader .bookletChoice { font-size: .9rem; max-width: 100%; text-align: start; }
 .bookletFormatCustomization summary { cursor: pointer; }
 .bookletSeparateLanguages { margin-block: 12px; }
 .bookletLanguageSummary > div { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-block: 8px; }

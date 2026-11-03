@@ -241,7 +241,10 @@ function BookletDetails() {
                 <p className="bookletHint">{strings.bookletFormatsHint}</p>
                 </section>
                 <section className="bookletStep" aria-labelledby="bookletLanguagesTitle">
-                <h3 id="bookletLanguagesTitle">{strings.bookletLanguagesHeading}</h3>
+                <div className="bookletStepHeader">
+                    <h3 id="bookletLanguagesTitle">{strings.bookletLanguagesHeading}</h3>
+                    <button type="button" className="bookletChoice" onClick={() => { setLanguages([...userSettings.contentLanguages]); setHazzatLanguages([...userSettings.contentLanguages]); }}>{strings.bookletUseWebsiteLanguages}</button>
+                </div>
                 <ContentLanguageChoices included={languages} onChange={setLanguages} hint={strings.bookletLanguagesHint}
                     legend={separateHazzatLanguages ? strings.bookletTextLanguages : undefined} />
                 {((requestedFormats.includes("text") && requestedFormats.some(kind => kind === "regular" || kind === "vertical")) || separateHazzatLanguages) && <label className="bookletSeparateLanguages">
@@ -253,7 +256,6 @@ function BookletDetails() {
                 </label>}
                 {separateHazzatLanguages && <ContentLanguageChoices included={hazzatLanguages} onChange={setHazzatLanguages}
                     legend={strings.bookletHazzatLanguages} hint={strings.bookletHazzatLanguagesHint} />}
-                <button type="button" className="bookletChoice" onClick={() => { setLanguages([...userSettings.contentLanguages]); setHazzatLanguages([...userSettings.contentLanguages]); }}>{strings.bookletUseWebsiteLanguages}</button>
                 </section>
                 <section className="bookletStep" aria-labelledby="bookletHymnsTitle">
                 <h3 id="bookletHymnsTitle">{strings.bookletHymnsHeading}</h3>

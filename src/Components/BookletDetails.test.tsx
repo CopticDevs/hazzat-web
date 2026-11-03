@@ -54,7 +54,7 @@ describe("booklet builder", () => {
         expect(screen.queryByRole("link", { name: "Download PDF" })).not.toBeInTheDocument();
         expect(screen.getByRole("button", { name: "Text Only", exact: true })).toBeInTheDocument();
         expect(screen.getByRole("button", { name: "Review booklet", exact: true })).toBeDisabled();
-        fireEvent.click(screen.getByRole("button", { name: "Use my website languages", exact: true }));
+        fireEvent.click(screen.getByRole("button", { name: "Reset all languages to website settings", exact: true }));
         expect(screen.getByRole("button", { name: "Text Only", exact: true })).toBeInTheDocument();
         expect(settings.setContentLanguages).not.toHaveBeenCalled();
         expect(settings.userSettings.contentLanguages).toEqual([ContentLanguage.English]);
@@ -79,6 +79,8 @@ describe("booklet builder", () => {
         expect(screen.getAllByRole("heading", { level: 3 }).map(h => h.textContent)).toEqual([
             "1. Choose formats", "2. Choose languages", "3. Choose hymns", "4. Arrange your booklet", "5. Review and download"
         ]);
+        const languageHeading = screen.getByRole("heading", { name: "2. Choose languages", exact: true });
+        expect(within(languageHeading.parentElement!).getByRole("button", { name: "Reset all languages to website settings", exact: true })).toBeEnabled();
         const shared = within(screen.getByRole("group", { name: "Content languages", exact: true }));
         fireEvent.click(shared.getByRole("checkbox", { name: "Arabic", exact: true }));
         fireEvent.click(screen.getByLabelText("Choose Hazzat languages separately"));
@@ -121,7 +123,7 @@ describe("booklet builder", () => {
             fireEvent.click(screen.getByLabelText("Choose Hazzat languages separately"));
             fireEvent.click(within(screen.getByRole("group", { name: "Hazzat languages", exact: true })).getByLabelText("English"));
         }
-        fireEvent.click(screen.getByRole("button", { name: "Use my website languages", exact: true }));
+        fireEvent.click(screen.getByRole("button", { name: "Reset all languages to website settings", exact: true }));
         const groups = separate ? ["Text languages", "Hazzat languages"] : ["Content languages"];
         groups.forEach(name => {
             const choices = within(screen.getByRole("group", { name, exact: true }));
