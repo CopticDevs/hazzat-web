@@ -162,6 +162,46 @@ function createService(): IServiceInfo {
 }
 
 describe("BookletPdfGenerator", () => {
+    it.each(["display", "print"] as const)("independently filters text and both Hazzat formats before rendering (%s)", async layoutKind => {
+        const service = withText();
+        const regular = service.hymns![0].formats!.find(f => f.id === "2")!.variations![0];
+        regular.content = { ...regular.content, englishHazzat: '<span class="EnglishFont">ExcludedNotesEnglish</span>' };
+        const vertical = service.hymns![0].formats!.find(f => f.id === "3")!.variations![0];
+        vertical.content = { ...vertical.content, englishVerticalHazzat: '<span class="EnglishFont">ExcludedVerticalEnglish</span>' };
+        const original = JSON.stringify(service);
+        const filtered = filterBookletServicesLanguages([service], [ContentLanguage.English], [ContentLanguage.Coptic]);
+        const formats = filtered[0].hymns![0].formats!;
+        expect((formats.find(f => f.id === "1")!.variations![0].content as ITextContent).paragraphs[0].columns.map(c => c.language)).toEqual([ContentLanguage.English]);
+        expect(formats.find(f => f.id === "2")!.variations![0].content).toEqual(expect.objectContaining({ englishHazzat: "", arabicHazzat: "" }));
+        expect(formats.find(f => f.id === "3")!.variations![0].content).toEqual(expect.objectContaining({ englishVerticalHazzat: "", arabicVerticalHazzat: "" }));
+        expect(filterBookletServicesLanguages([service], [], [ContentLanguage.Coptic])[0].hymns![0].formats!.map(f => f.id)).toEqual(["2", "3"]);
+        expect(filterBookletServicesLanguages([service], [ContentLanguage.English], [])[0].hymns![0].formats!.map(f => f.id)).toEqual(["1"]);
+        const draws = jest.spyOn(PDFPage.prototype, "drawText");
+        try {
+            const bytes = await generateSeasonBookletPdf({ season: createSeason(), services: [service], formatKinds: ["text", "regular", "vertical"], layoutKind,
+                languages: [ContentLanguage.English], hazzatLanguages: [ContentLanguage.Coptic], fontSources: createFontSources(), imageSources: createImageSources() });
+            expect((await PDFDocument.load(bytes)).getPageCount()).toBeGreaterThan(0);
+            const words = draws.mock.calls.map(([text]) => text);
+            expect(words).toContain("Text-only");
+            expect(words).not.toContain("ExcludedNotesEnglish");
+            expect(words).not.toContain("ExcludedVerticalEnglish");
+            expect(words.some(word => /[\u0600-\u06ff]/.test(word))).toBe(false);
+            expect(draws.mock.calls.some(([, options]) => options?.font?.name.includes("Hazzat"))).toBe(true);
+            expect(JSON.stringify(service)).toBe(original);
+        } finally { draws.mockRestore(); }
+    });
+
+    it("retains scores as published with empty language selections and supports legacy shared filtering", () => {
+        const service = withText();
+        const score = { contentType: ContentType.MusicalNotesContent, musicXml: "<score-partwise />" };
+        service.hymns![0].formats!.push({ id: "4", name: "Score", order: 4, variationCount: 1,
+            variations: [{ id: "score", name: "Score", displayName: "Score", content: score }] });
+        const result = filterBookletServicesLanguages([service], [], []);
+        expect(result[0].hymns![0].formats!.map(f => f.id)).toEqual(["4"]);
+        expect(result[0].hymns![0].formats![0].variations![0].content).toBe(score);
+        expect(filterBookletServicesLanguages([service], [ContentLanguage.Coptic])).toEqual(filterBookletServicesLanguages([service], [ContentLanguage.Coptic], [ContentLanguage.Coptic]));
+    });
+
     it.each(["display", "print"] as const)("filters booklet languages before pagination and omits format labels (%s)", async layoutKind => {
         const service = withText();
         const original = JSON.stringify(service);

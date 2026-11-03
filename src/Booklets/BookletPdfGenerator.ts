@@ -49,6 +49,8 @@ export interface GenerateBookletPdfOptions {
     generatedAt?: Date;
     appearance?: Partial<BookletAppearance>;
     languages?: ContentLanguage[];
+    /** Shared by regular and vertical Hazzat; omitted means use languages. */
+    hazzatLanguages?: ContentLanguage[];
 }
 
 export type FontKey =
@@ -185,10 +187,11 @@ export interface BookletSection {
     formatKind: BookletFormatKind;
 }
 
-export function filterBookletServicesLanguages(services: IServiceInfo[], languages: ContentLanguage[]): IServiceInfo[] {
+export function filterBookletServicesLanguages(services: IServiceInfo[], languages: ContentLanguage[], hazzatLanguages = languages): IServiceInfo[] {
     return services.map(service => ({ ...service, hymns: (service.hymns || []).map(hymn => ({ ...hymn,
         formats: (hymn.formats || []).map(format => ({ ...format, variations: (format.variations || []).map(variation => ({
-            ...variation, content: filterContentLanguages(variation.content, languages)
+            ...variation, content: format.id === "4" ? variation.content : filterContentLanguages(variation.content,
+                format.id === "2" || format.id === "3" ? hazzatLanguages : languages)
         })) })).map(format => ({ ...format, variations: format.variations.filter(variation => {
             const kind = bookletFormatKinds.find(value => getFormatId(value) === format.id);
             return !!kind && hasBookletVariationContent(variation, kind);
@@ -400,7 +403,8 @@ function sanitizeTextForFont(text: string, fontKey: FontKey): string {
 
 export async function generateSeasonBookletPdf(options: GenerateBookletPdfOptions): Promise<Uint8Array> {
     await Promise.all([loadCoverCornerArtwork(), loadCoverCenterVineArtwork()]);
-    if (options.languages) options = { ...options, services: filterBookletServicesLanguages(options.services, options.languages) };
+    if (options.languages || options.hazzatLanguages) options = { ...options, services: filterBookletServicesLanguages(options.services,
+        options.languages ?? [ContentLanguage.English, ContentLanguage.Coptic, ContentLanguage.Arabic], options.hazzatLanguages) };
     const scores = new Map<string, Promise<BookletScorePage[]>>();
     let logicalResult = await renderLogicalBooklet(options, 1, scores);
     const requiredTocPageCount = layoutBookletToc(logicalResult.tocEntries).pageCount;
