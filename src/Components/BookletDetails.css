@@ -123,6 +123,18 @@
     color: var(--ink, #302c26);
 }
 .bookletBuilder fieldset { min-width: 0; }
+.bookletStep { border: 1px solid var(--rule, #d7d2c7); border-radius: 8px; padding: 20px; margin-block: 20px; }
+.bookletStep > h3:first-child { margin-block-start: 0; }
+.bookletStepHeader { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; margin-block-end: 14px; }
+.bookletBuilder .bookletStepHeader h3 { margin: 0; }
+.bookletStepHeader .bookletChoice { font-size: .9rem; max-width: 100%; text-align: start; }
+.bookletFormatCustomization summary { cursor: pointer; }
+.bookletSeparateLanguages { margin-block: 12px; }
+.bookletLanguageSummary > div { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-block: 8px; }
+.bookletLanguageSummary dt { min-width: 140px; }
+.bookletLanguageSummary dd { margin: 0; }
+.bookletUnavailable { color: var(--muted-ink, #625e55); }
+.bookletBuilder .bookletSelectionPanel { border: 0; margin-bottom: 0; padding: 0; }
 .bookletBuilder legend, .bookletBuilder h3 { font-size: 1.15rem; margin-block: 20px 14px; }
 .bookletPresetRow, .bookletFormatChoices { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin-block: 14px; }
 .bookletBuilder label { display: inline-flex; align-items: center; gap: 8px; }
@@ -168,6 +180,7 @@
     :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction, :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction:hover, :root[data-theme="dark"] .bookletChoice[aria-pressed="true"] { color: #202526; }
 }
 @media (max-width: 576px) {
+    .bookletStep { padding: 14px; }
     .bookletBuilder { padding-inline: 0; }
     .bookletBuilder button, .bookletBuilder select, .bookletBuilder label { min-height: 44px; }
     .bookletPdfPreview object { height: 480px; }
