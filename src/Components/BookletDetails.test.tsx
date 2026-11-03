@@ -91,9 +91,7 @@ describe("booklet builder", () => {
         expect(lines).toHaveLength(2);
         expect(lines[0]).toHaveTextContent("TextEnglish, Coptic");
         expect(lines[1]).toHaveTextContent("HazzatCoptic");
-        const missing = screen.getByText(/Unavailable content will be omitted/).closest("details")!;
-        expect(missing).toHaveTextContent("Text words: Coptic");
-        expect(missing).not.toHaveTextContent("Notation");
+        expect(screen.queryByText(/Unavailable content will be omitted/)).not.toBeInTheDocument();
         fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
         await screen.findByRole("link", { name: "Download PDF" });
         const options = generator.mock.calls[0][0];
@@ -112,6 +110,28 @@ describe("booklet builder", () => {
         confirm.mockReturnValue(true);
         fireEvent.click(screen.getByLabelText("Choose Hazzat languages separately"));
         expect(screen.queryByRole("group", { name: "Hazzat languages" })).not.toBeInTheDocument();
+    });
+
+    it.each([false, true])("copies website languages to the booklet without changing separate mode or saved preferences (separate: %s)", async separate => {
+        const settings = { userSettings: { contentFontColor: "NAVY", hazzatFontColor: "MAROON", englishFontSize: "18px", arabicFontSize: "22px", contentLanguages: [ContentLanguage.English] },
+            setContentFontColor: jest.fn(), setHazzatFontColor: jest.fn(), setContentFontSize: jest.fn(), setContentLanguages: jest.fn() };
+        await openBuilder(settings);
+        fireEvent.click(within(screen.getByRole("group", { name: "Content languages", exact: true })).getByLabelText("Coptic"));
+        if (separate) {
+            fireEvent.click(screen.getByLabelText("Choose Hazzat languages separately"));
+            fireEvent.click(within(screen.getByRole("group", { name: "Hazzat languages", exact: true })).getByLabelText("English"));
+        }
+        fireEvent.click(screen.getByRole("button", { name: "Use my website languages", exact: true }));
+        const groups = separate ? ["Text languages", "Hazzat languages"] : ["Content languages"];
+        groups.forEach(name => {
+            const choices = within(screen.getByRole("group", { name, exact: true }));
+            expect(choices.getByLabelText("English")).toBeChecked();
+            expect(choices.getByLabelText("Coptic")).not.toBeChecked();
+            expect(choices.getByLabelText("Arabic")).not.toBeChecked();
+        });
+        expect((screen.getByLabelText("Choose Hazzat languages separately") as HTMLInputElement).checked).toBe(separate);
+        expect(settings.setContentLanguages).not.toHaveBeenCalled();
+        expect(settings.userSettings.contentLanguages).toEqual([ContentLanguage.English]);
     });
 
     it("warns before resetting hymn choices and preserves excluded hymns across presets", async () => {

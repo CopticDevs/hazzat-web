@@ -72,18 +72,6 @@ function BookletDetails() {
         getSelectableVariations(hymn).map(variation => variationKey(service, hymn, variation)))).sort()), [selectedServices]);
     const requestedFormats = bookletFormatKinds.filter(kind => formats.includes(kind) ||
         Object.values(selection.formats || {}).some(kinds => kinds.includes(kind)));
-    const unavailableContent = allServices.flatMap(service => (service.hymns || []).filter(hymn => isHymnSelected(selection, service, hymn)).flatMap(hymn =>
-        (selection.formats?.[hymnKey(service, hymn)] ?? formats).flatMap(kind => {
-            const variations = getSelectableVariations(hymn).filter(variation => formatKindFromId(variation.formatId) === kind && isVariationSelected(selection, service, hymn, variation));
-            const prefix = `${service.displayName || service.name} / ${hymn.displayName || hymn.name} (${getFormatName(kind)})`;
-            if (!getSelectableVariations(hymn).some(variation => formatKindFromId(variation.formatId) === kind)) return [prefix];
-            if (kind === "musical") return [];
-            const included = kind === "text" ? languages : effectiveHazzatLanguages;
-            return variations.flatMap(variation => {
-                const missing = included.filter(language => !hasBookletVariationContent({ ...variation, content: filterContentLanguages(variation.content, [language]) }, kind));
-                return missing.length || !included.length ? [`${prefix} / ${getVariationDisplayName(variation)}: ${missing.map(languageName).join(", ") || strings.bookletNoLanguages}`] : [];
-            });
-        })));
 
     useEffect(() => {
         setPreview(undefined);
@@ -326,10 +314,6 @@ function BookletDetails() {
                         <div key={kind}><dt>{getFormatName(kind)}</dt><dd>{kind === "musical" ? strings.bookletScoresAsPublished :
                             (kind === "text" ? languages : effectiveHazzatLanguages).map(languageName).join(", ") || strings.bookletNoLanguages}</dd></div>)}</dl>
                     <p aria-live="polite">{selectedServices.reduce((sum, service) => sum + (service.hymns?.length || 0), 0)} {strings.bookletHymnsSelected} · {strings.bookletOnePdf}</p>
-                    {!!unavailableContent.length && <details className="bookletUnavailableReview">
-                        <summary>{strings.bookletUnavailableReview} ({unavailableContent.length})</summary>
-                        <ul>{unavailableContent.map((item, index) => <li key={index}>{item}</li>)}</ul>
-                    </details>}
                     <details><summary>{strings.bookletContentOrder}</summary>
                         <ol>{sections.map((section, i) => <li key={i}>{section.service.displayName || section.service.name} / {section.hymn.displayName || section.hymn.name} · {getFormatName(section.formatKind)}</li>)}</ol>
                     </details>
