@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { ReactComponent as YoutubeIcon } from "../images/youtube.svg";
-import { ReactComponent as TwitterIcon } from "../images/twitter.svg";
+import { ReactComponent as XIcon } from "../images/x.svg";
 import { ReactComponent as FacebookIcon } from "../images/facebook.svg";
 import { ReactComponent as SoundCloudIcon } from "../images/soundcloud.svg";
 import { LanguageContext } from "../LanguageContext";
@@ -53,8 +53,8 @@ function SidePaper() {
                         <FacebookIcon aria-hidden="true" focusable="false" />
                     </a>
 
-                    <a aria-label="Twitter" href="https://www.twitter.com/CopticHazzat" target="_blank" rel="noreferrer">
-                        <TwitterIcon aria-hidden="true" focusable="false" />
+                    <a aria-label="X" href="https://x.com/CopticHazzat" target="_blank" rel="noreferrer">
+                        <XIcon aria-hidden="true" focusable="false" />
                     </a>
 
                     <a aria-label="YouTube" href="https://www.youtube.com/CopticHazzat" target="_blank" rel="noreferrer">
