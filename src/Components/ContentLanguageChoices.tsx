@@ -3,10 +3,10 @@ import { ContentLanguage } from "../Providers/HymnsDataProvider/Models/IVariatio
 import { strings } from "../l8n";
 import "./ContentLanguageChoices.css";
 
-export default function ContentLanguageChoices({ included, onChange, hint }: {
-    included: ContentLanguage[]; onChange: (languages: ContentLanguage[]) => void; hint: string;
+export default function ContentLanguageChoices({ included, onChange, hint, legend }: {
+    included: ContentLanguage[]; onChange: (languages: ContentLanguage[]) => void; hint: string; legend?: string;
 }) {
-    return <fieldset className="content-language-settings"><legend>{strings.contentLanguages}</legend>
+    return <fieldset className="content-language-settings"><legend>{legend || strings.contentLanguages}</legend>
         <div className="content-language-choices">{contentLanguages.map(language => <label key={language}>
             <input type="checkbox" checked={included.includes(language)} onChange={event => onChange(contentLanguages.filter(value =>
                 value === language ? event.target.checked : included.includes(value)))} />
