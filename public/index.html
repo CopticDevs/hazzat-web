@@ -3,8 +3,25 @@
 <head>
     <meta charset="utf-8" />
     <script>
-      try { document.documentElement.dataset.theme = localStorage.getItem("hazzat.theme") === "dark" ? "dark" : "light"; }
-      catch (_) { document.documentElement.dataset.theme = "light"; }
+      (function () {
+        function read(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
+        function languageTag(value) {
+          return value && /^(en|ar)(-[a-z0-9]{1,8})*$/i.test(value) ? value.split("-")[0].toLowerCase() : null;
+        }
+        var theme = read("hazzat.theme");
+        if (theme !== "light" && theme !== "dark") {
+          try { theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
+          catch (_) { theme = "light"; }
+        }
+        document.documentElement.dataset.theme = theme;
+        var language = languageTag(new URLSearchParams(window.location.search).get("lang"));
+        var saved = read("hazzat.navigation-language");
+        if (!language && (saved === "en" || saved === "ar")) language = saved;
+        var languages = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+        for (var i = 0; !language && i < languages.length; i++) language = languageTag(languages[i]);
+        document.documentElement.lang = language || "en";
+        document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+      }());
     </script>
     <link rel="icon" type="image/png" href="%PUBLIC_URL%/logo192.png" />
     <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />

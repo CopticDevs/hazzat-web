@@ -1,5 +1,6 @@
 /* Dark appearance is screen-only: printed pages retain light paper and dark ink. */
 @media screen {
+    :root[data-theme="light"] { color-scheme: light; }
     :root[data-theme="dark"] {
         color-scheme: dark;
         --ink: #e7e3d9;
