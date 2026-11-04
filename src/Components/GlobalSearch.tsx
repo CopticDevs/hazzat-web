@@ -11,6 +11,7 @@ import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { searchContent } from "../Providers/HymnsDataProvider/Search";
 import ContentLoadError from "./ContentLoadError";
 import LoadingSpinner from "./LoadingSpinner";
+import { normalizeSearch } from "../Providers/HymnsDataProvider/SearchMatching";
 import MainPaper, { Size } from "./MainPaper";
 import MyNavLink from "./MyNavLink";
 
@@ -22,9 +23,12 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<ISearchResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [wordsLoading, setWordsLoading] = useState(false);
+    const [wordsFailed, setWordsFailed] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
     const [failed, setFailed] = useState(false);
     const [retry, setRetry] = useState(0);
+    const [includeText, setIncludeText] = useState(false);
     const navigate = useNavigate();
     const { languageProperties } = useContext(LanguageContext);
     useEffect(() => { document.title = `${strings.search} - hazzat.com`; }, [languageProperties.localeName]);
@@ -32,25 +36,36 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
     useEffect(() => {
         let active = true;
         setFailed(false);
+        setWordsFailed(false);
+        setWordsLoading(false);
         setResults([]);
         setHasSearched(false);
-        if (query.trim().length < 2) {
+        if (normalizeSearch(query).length < 2) {
             setIsLoading(false);
             return;
         }
         setIsLoading(true);
         const timer = setTimeout(async () => {
+            let titlesReady = false;
             try {
-                const found = await searchContent(dataProvider, query, languageProperties.localeName);
+                const found = await searchContent(dataProvider, query, languageProperties.localeName, includeText, titles => {
+                    titlesReady = true;
+                    if (active) {
+                        setResults(titles);
+                        setHasSearched(true);
+                        setIsLoading(false);
+                        setWordsLoading(true);
+                    }
+                });
                 if (active) { setResults(found); setHasSearched(true); }
             } catch {
-                if (active) setFailed(true);
+                if (active) { if (titlesReady) setWordsFailed(true); else setFailed(true); }
             } finally {
-                if (active) setIsLoading(false);
+                if (active) { setIsLoading(false); setWordsLoading(false); }
             }
         }, 300);
         return () => { active = false; clearTimeout(timer); };
-    }, [query, dataProvider, languageProperties.localeName, retry]);
+    }, [query, dataProvider, languageProperties.localeName, retry, includeText]);
 
     const handleSeasonClick = (season: ISeasonInfo) => {
         navigate(`/Seasons/${season.id}`);
@@ -69,6 +84,8 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                         <input 
                             type="search"
                             aria-label={strings.search}
+                            aria-describedby="search-help"
+                            maxLength={200}
                             className="form-control"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
@@ -76,6 +93,24 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                             autoFocus
                         />
                     </div>
+                    <p id="search-help" className="text-muted mt-2 mb-2">
+                        {languageProperties.localeName === 'ar' ? 'ابحث بالعنوان أو بتهجئة تقريبية. للبحث بكلمات تتذكرها، فعّل البحث في نصوص الألحان.'
+                            : 'Search by title or approximate spelling. To find words you remember, include hymn text.'}
+                    </p>
+                    {dataProvider.getSearchTextIndex && <div className="form-check">
+                        <input id="search-hymn-text" type="checkbox" className="form-check-input" checked={includeText}
+                            onChange={event => setIncludeText(event.target.checked)} />
+                        <label htmlFor="search-hymn-text" className="form-check-label">
+                            {languageProperties.localeName === 'ar' ? 'البحث في نصوص الألحان (قد يستغرق التحميل الأول وقتًا أطول)' : 'Search hymn words (first search may take longer)'}
+                        </label>
+                    </div>}
+                </div>
+
+                <div role="status" aria-live="polite" aria-atomic="true" className={wordsLoading ? 'alert alert-info' : 'visually-hidden'}>
+                    {wordsLoading ? (languageProperties.localeName === 'ar' ? `عدد نتائج العناوين: ${results.length}. جارٍ البحث في كلمات الألحان…`
+                        : `${results.length} title ${results.length === 1 ? 'match' : 'matches'}. Still searching hymn words…`)
+                        : isLoading ? (languageProperties.localeName === 'ar' ? 'جارٍ البحث' : 'Searching')
+                        : hasSearched && !failed && !wordsFailed ? (languageProperties.localeName === 'ar' ? `عدد النتائج: ${results.length}` : `${results.length} ${results.length === 1 ? 'result' : 'results'}`) : ''}
                 </div>
 
                 {isLoading && (
@@ -85,8 +120,15 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                 )}
 
                 {failed && <ContentLoadError retry={() => setRetry(value => value + 1)} />}
+                {wordsFailed && <div role="alert" className="alert alert-warning">
+                    <p>{languageProperties.localeName === 'ar' ? 'تعذر إكمال البحث في كلمات الألحان. نتائج العناوين فقط متاحة الآن.'
+                        : 'Hymn-word search could not be completed. Only title matches are available.'}</p>
+                    <button type="button" className="btn btn-outline-secondary" onClick={() => setRetry(value => value + 1)}>
+                        {languageProperties.localeName === 'ar' ? 'إعادة المحاولة' : 'Retry'}
+                    </button>
+                </div>}
 
-                {!isLoading && !failed && hasSearched && results.length === 0 && (
+                {!isLoading && !wordsLoading && !failed && !wordsFailed && hasSearched && results.length === 0 && (
                     <div className="alert alert-info">
                         <LocalizedMessage of="noSearchResults" />
                     </div>
@@ -120,6 +162,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                                     {results.filter(r => r.type === 'hymn').map(result => (
                                         <div key={result.hymn!.id} className="list-group-item">
                                             <h5 className="mb-2">{result.hymn!.name}</h5>
+                                            {result.hymn!.snippet && <p dir="auto" className="mb-2">{result.hymn!.snippet}</p>}
                                             <div className="hymn-references">
                                                 <small className="text-muted">
                                                     <LocalizedMessage of="foundIn" />:

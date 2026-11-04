@@ -4,6 +4,7 @@ import { IReferenceIndex } from "./Models/IReferenceIndex";
 import { ISeasonInfo } from "./Models/ISeasonInfo";
 import { IServiceInfo } from "./Models/IServiceInfo";
 import { IHymnContent, IVariationInfo } from "./Models/IVariationInfo";
+import { SearchTextDocument } from "./SearchMatching";
 
 export interface IHymnsDataProvider {
     getSeasonList(): Promise<ISeasonInfo[]>;
@@ -23,4 +24,5 @@ export interface IHymnsDataProvider {
     getServiceHymnsFormatVariationList<T extends IHymnContent>(seasonId: string, serviceId: string, hymnId: string, formatId: string): Promise<IVariationInfo<T>[]>;
 
     getReferenceIndex(): Promise<IReferenceIndex>;
+    getSearchTextIndex?(): Promise<SearchTextDocument[]>;
 }
