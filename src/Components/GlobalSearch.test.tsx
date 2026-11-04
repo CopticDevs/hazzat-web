@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import GlobalSearch from './GlobalSearch';
 import { IHymnsDataProvider } from '../Providers/HymnsDataProvider/IHymnsDataProvider';
@@ -122,6 +122,56 @@ describe('GlobalSearch - Search Functionality', () => {
     }, { timeout: 500 });
 
     expect(mockDataProvider.getSeasonList).toHaveBeenCalled();
+  });
+
+  it('offers opt-in phrase search with plain text snippets and an accessible result count', async () => {
+    const textIndex = jest.fn().mockResolvedValue([{ hymnId: 'doxology', seasonId: 'nativity', serviceId: 'vespers', passages: ['Glory to God in the highest'] }]);
+    mockDataProvider.getSearchTextIndex = textIndex;
+    render(<BrowserRouter><LanguageContext.Provider value={mockLanguageContext}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>);
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'glory to god' } });
+    await screen.findByText(/No results found/i);
+    expect(textIndex).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('checkbox', { name: /Search hymn words/i }));
+    await screen.findByText('Glory to God in the highest');
+    expect(screen.getByRole('status')).toHaveTextContent('1 result');
+    expect(screen.getByRole('link', { name: /Vespers/ })).toHaveAttribute('href', '/Seasons/nativity/services/vespers/hymns/doxology');
+    fireEvent.click(screen.getByRole('checkbox'));
+    await screen.findByText(/No results found/i);
+  });
+
+  it('ignores an old search response after the query changes', async () => {
+    let finish: (value: IReferenceIndex) => void = () => {};
+    mockDataProvider.getReferenceIndex.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    render(<BrowserRouter><LanguageContext.Provider value={mockLanguageContext}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>);
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'psalm' } });
+    await waitFor(() => expect(mockDataProvider.getReferenceIndex).toHaveBeenCalledTimes(1));
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'doxology' } });
+    await screen.findByText('Doxology');
+    await act(async () => { finish(mockReferenceIndex); });
+    expect(screen.queryByText('Psalm 150')).not.toBeInTheDocument();
+    expect(screen.getByText('Doxology')).toBeInTheDocument();
+  });
+
+  it('shows an explicit failure for text loading and supports retry', async () => {
+    const textIndex = jest.fn().mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce([
+      { hymnId: 'doxology', seasonId: 'nativity', serviceId: 'vespers', passages: ['Glory to God'] }
+    ]);
+    mockDataProvider.getSearchTextIndex = textIndex;
+    render(<BrowserRouter><LanguageContext.Provider value={mockLanguageContext}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>);
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'glory to god' } });
+    expect(await screen.findByRole('alert')).toHaveTextContent('could not be loaded');
+    expect(screen.queryByText(/No results found/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    await screen.findByText('Glory to God');
+    expect(textIndex).toHaveBeenCalledTimes(2);
+  });
+
+  it('clears results for punctuation-only input without fetching', async () => {
+    render(<BrowserRouter><LanguageContext.Provider value={mockLanguageContext}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>);
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: '!!!' } });
+    expect(mockDataProvider.getReferenceIndex).not.toHaveBeenCalled();
+    expect(screen.getByRole('searchbox')).toHaveAttribute('maxLength', '200');
   });
 
   it('should search hymns using reference index', async () => {
