@@ -1,0 +1,70 @@
+.global-search {
+    --search-highlight-bg: #ffe59a;
+    --search-highlight-ink: #332400;
+    --search-control-bg: #fff;
+    --search-control-ink: #253d50;
+    --search-control-border: #617582;
+    --search-focus: #145b9b;
+}
+.global-search mark.search-match {
+    background: var(--search-highlight-bg);
+    color: var(--search-highlight-ink);
+    padding: 0;
+    border-radius: 2px;
+    font-weight: inherit;
+}
+.global-search .list-group-item, .global-search .input-group-text {
+    background: var(--search-control-bg);
+    color: var(--search-control-ink);
+    border-color: var(--search-control-border);
+}
+.global-search .list-group-item a { color: var(--search-control-ink); }
+.search-loading { display: flex; align-items: center; gap: .75rem; }
+.search-spinner {
+    flex: 0 0 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 3px solid currentColor;
+    border-inline-end-color: transparent;
+    border-radius: 50%;
+    animation: search-spin .85s linear infinite;
+}
+@keyframes search-spin { to { transform: rotate(360deg); } }
+.search-pagination { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; margin-block: 1rem; }
+.search-pagination button {
+    min-height: 44px;
+    padding: .5rem .9rem;
+    border: 1px solid var(--search-control-border);
+    border-radius: 4px;
+    background: var(--search-control-bg);
+    color: var(--search-control-ink);
+}
+.search-pagination button:hover:not(:disabled) { text-decoration: underline; }
+.search-pagination button:disabled { opacity: .5; cursor: default; }
+.search-pagination button:focus-visible, .search-page-summary:focus {
+    outline: 3px solid var(--search-focus);
+    outline-offset: 3px;
+}
+.search-page-summary { margin-block: .75rem; }
+@media (prefers-reduced-motion: reduce) {
+    .search-spinner { animation: none; }
+}
+@media screen {
+    :root[data-theme="dark"] .global-search {
+        --search-highlight-bg: #71551d;
+        --search-highlight-ink: #fff2ce;
+        --search-control-bg: #292f2d;
+        --search-control-ink: #e7e3d9;
+        --search-control-border: #a2aca3;
+        --search-focus: #f4d493;
+    }
+    :root[data-theme="dark"] .global-search .alert-warning {
+        background: #493a20;
+        color: #ffe9b1;
+        border-color: #a68a4e;
+    }
+    :root[data-theme="dark"] .global-search .alert-warning button {
+        color: #ffe9b1;
+        border-color: #a68a4e;
+    }
+}
