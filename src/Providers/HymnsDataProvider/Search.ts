@@ -1,29 +1,82 @@
 import { IHymnsDataProvider } from "./IHymnsDataProvider";
-import { IReferenceIndex } from "./Models/IReferenceIndex";
 import { ISearchResult } from "./Models/ISearchResult";
+import { IReferenceIndex } from "./Models/IReferenceIndex";
 import { ISeasonInfo } from "./Models/ISeasonInfo";
 import { localizedName } from "./SharedContent";
+import { normalizeSearch, normalizeCopticSearch, validSearchQuery, asSearchPassage, isCopticPassage, SearchPassage, SearchTextDocument, titleMatchScore } from "./SearchMatching";
 
-/** Search uses titles and service summaries; it never needs shared payloads. */
-export async function searchContent(provider: IHymnsDataProvider, query: string, language: string): Promise<ISearchResult[]> {
-    const needle = query.trim().toLowerCase();
-    const matches = (value?: string) => !!value && value.toLowerCase().includes(needle);
-    const [seasons, index]: [ISeasonInfo[], IReferenceIndex] = await Promise.all([provider.getSeasonList(), provider.getReferenceIndex()]);
-    const results: ISearchResult[] = seasons.filter(s => matches(s.name) || matches(s.nameAr)).map(season => ({ type: "season", season }));
+const normalizedPassages = new WeakMap<SearchTextDocument, string[]>();
+
+function excerpt(passage: string, query: string, coptic = false): string {
+    const normalize = coptic ? normalizeCopticSearch : normalizeSearch;
+    if (passage.length <= 240) return passage;
+    const words = passage.split(" ");
+    const count = query.split(" ").length;
+    const position = words.findIndex((_, i) => normalize(words.slice(i, i + count + 4).join(" ")).includes(query));
+    const start = Math.max(0, position - 3);
+    const text = words.slice(start).join(" ");
+    return (start ? "…" : "") + text.slice(0, 240) + (text.length > 240 ? "…" : "");
+}
+
+/** Title search stays lightweight; full text is an explicit, cached opt-in. */
+export async function searchContent(provider: IHymnsDataProvider, query: string, language: string, includeText = false,
+    onTitleResults?: (results: ISearchResult[]) => void): Promise<ISearchResult[]> {
+    const needle = normalizeSearch(query);
+    if (!validSearchQuery(query)) return [];
+    // Attach rejection handling immediately: text may fail before metadata/titles finish.
+    const text = includeText && provider.getSearchTextIndex
+        ? provider.getSearchTextIndex().then(documents => ({ documents, error: undefined }), error => ({ documents: undefined, error }))
+        : Promise.resolve({ documents: [] as SearchTextDocument[], error: undefined });
+    const [seasons, index] = await Promise.all([provider.getSeasonList(), provider.getReferenceIndex()]);
     const serviceNames = new Map<string, ReturnType<IHymnsDataProvider["getService"]>>();
-    for (const [id, entry] of Object.entries(index)) {
-        const canonicalMatch = matches(id) || matches(entry.name) || matches(entry.nameAr);
+    if (includeText && onTitleResults) {
+        onTitleResults(await rankResults(provider, needle, normalizeCopticSearch(query), language, seasons, index, [], serviceNames));
+    }
+    const outcome = await text;
+    if (!outcome.documents) throw outcome.error;
+    return rankResults(provider, needle, normalizeCopticSearch(query), language, seasons, index, outcome.documents, serviceNames);
+}
+
+async function rankResults(provider: IHymnsDataProvider, needle: string, copticNeedle: string, language: string, seasons: ISeasonInfo[],
+    index: IReferenceIndex, documents: SearchTextDocument[], serviceNames: Map<string, ReturnType<IHymnsDataProvider["getService"]>>): Promise<ISearchResult[]> {
+    const score = (...values: (string | undefined)[]) => Math.max(0, ...values.map(value => titleMatchScore(needle, value)));
+    const ranked: { score: number; result: ISearchResult }[] = seasons.flatMap(season => {
+        const rank = score(season.id, season.name, season.nameAr);
+        return rank ? [{ score: rank, result: { type: "season" as const, season } }] : [];
+    });
+    const textMatches = new Map<string, Map<string, SearchPassage>>();
+    for (const doc of documents) {
+        let normalized = normalizedPassages.get(doc);
+        if (!normalized) { normalized = doc.passages.map(value => { const p = asSearchPassage(value); return (isCopticPassage(p.language) ? normalizeCopticSearch : normalizeSearch)(p.text); }); normalizedPassages.set(doc, normalized); }
+        const position = normalized.findIndex((value, i) => {
+            const query = isCopticPassage(asSearchPassage(doc.passages[i]).language) ? copticNeedle : needle;
+            return query.length >= 2 && (` ${value} `).includes(` ${query} `);
+        });
+        if (position < 0) continue;
+        const passage = asSearchPassage(doc.passages[position]);
+        if (!textMatches.has(doc.hymnId)) textMatches.set(doc.hymnId, new Map());
+        textMatches.get(doc.hymnId)!.set(`${doc.seasonId}/${doc.serviceId}`, passage);
+    }
+    const candidates = Object.entries(index).flatMap(([id, entry]) => {
+        const canonicalScore = score(id, entry.name, entry.nameAr);
         const uses = entry.usages ?? entry.services.map(path => {
             const [seasonId, serviceId] = path.split("/");
             return { seasonId, serviceId, name: entry.name, nameAr: entry.nameAr };
         });
-        const matchingUses = canonicalMatch ? uses : uses.filter(use => matches(use.name) || matches(use.nameAr));
-        if (!matchingUses.length) continue;
+        const text = textMatches.get(id);
+        const matchingUses = uses.filter(use => canonicalScore || score(use.name, use.nameAr) || text?.has(`${use.seasonId}/${use.serviceId}`));
+        const rank = Math.max(canonicalScore, ...matchingUses.map(use => score(use.name, use.nameAr)), text ? 80 : 0);
+        return matchingUses.length ? [{ id, entry, matchingUses, rank, snippet: text?.values().next().value as SearchPassage | undefined }] : [];
+    }).sort((a, b) => b.rank - a.rank || a.id.localeCompare(b.id));
+    for (const { id, entry, matchingUses, rank, snippet } of candidates) {
         const references = [];
+        const seen = new Set<string>();
         for (const use of matchingUses) {
             const season = seasons.find(s => s.id === use.seasonId);
             if (!season) continue;
             const path = `${use.seasonId}/${use.serviceId}`;
+            if (seen.has(path)) continue;
+            seen.add(path);
             let request = serviceNames.get(path);
             if (!request) {
                 request = provider.getServiceSummary
@@ -36,7 +89,8 @@ export async function searchContent(provider: IHymnsDataProvider, query: string,
             references.push({ seasonId: use.seasonId, seasonName: season.displayName,
                 serviceId: use.serviceId, serviceName: service.displayName, hymnName: localizedName(use, language) });
         }
-        if (references.length) results.push({ type: "hymn", hymn: { id, name: localizedName(entry, language), references } });
+        if (references.length) ranked.push({ score: rank, result: { type: "hymn", hymn: { id, name: localizedName(entry, language), references,
+            ...(snippet ? { snippet: excerpt(snippet.text, isCopticPassage(snippet.language) ? copticNeedle : needle, isCopticPassage(snippet.language)), snippetLanguage: snippet.language } : {}) } } });
     }
-    return results;
+    return ranked.sort((a, b) => b.score - a.score).map(item => item.result);
 }

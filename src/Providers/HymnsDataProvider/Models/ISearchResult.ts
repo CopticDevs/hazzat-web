@@ -12,6 +12,8 @@ export interface ISearchResult {
 export interface IHymnSearchResult {
     id: string;
     name: string;
+    snippet?: string;
+    snippetLanguage?: string;
     references: IHymnReference[];
 }
 

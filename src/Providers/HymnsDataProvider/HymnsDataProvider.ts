@@ -5,7 +5,8 @@ import { IHymnInfo } from "./Models/IHymnInfo";
 import { IReferenceIndex } from "./Models/IReferenceIndex";
 import { ISeasonInfo } from "./Models/ISeasonInfo";
 import { IServiceInfo } from "./Models/IServiceInfo";
-import { IHymnContent, IVariationInfo } from "./Models/IVariationInfo";
+import { IHymnContent, ITextContent, IVariationInfo } from "./Models/IVariationInfo";
+import { SearchTextDocument, SearchPassage, searchPlainText } from "./SearchMatching";
 import { ISeasonTranslations } from "./Models/ISeasonTranslations";
 import { createContentPaths } from "./ContentPaths";
 import { ContentResourceClient } from "./ContentResourceClient";
@@ -17,6 +18,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
     private readonly paths: ReturnType<typeof createContentPaths>;
     private readonly resources: ContentResourceClient;
     private seasonTranslationsCache: ISeasonTranslations | null = null;
+    private searchText?: { expires: number; promise: Promise<SearchTextDocument[]> };
 
     constructor(language: string, _envBaseUrl: string, cloudFrontUrl: string, options: { useEtags?: boolean } = {}) {
         this.language = language;
@@ -173,6 +175,55 @@ export class HymnsDataProvider implements IHymnsDataProvider {
             this.resources.invalidate();
             throw error;
         }
+    }
+
+    /** Opt-in text search only: deduplicate shared records and never fetch media or scores. */
+    public getSearchTextIndex(): Promise<SearchTextDocument[]> {
+        if (this.searchText && this.searchText.expires > Date.now()) return this.searchText.promise;
+        const promise = this.loadSearchTextIndex();
+        const cached = { expires: Infinity, promise };
+        this.searchText = cached;
+        promise.then(() => { cached.expires = Date.now() + 5 * 60_000; }, () => {
+            if (this.searchText === cached) this.searchText = undefined;
+            this.resources.invalidate();
+        });
+        return promise;
+    }
+
+    private async loadSearchTextIndex(): Promise<SearchTextDocument[]> {
+        const index = await this.getReferenceIndex();
+        const paths = Array.from(new Set(Object.values(index).flatMap(entry => (entry.usages || []).map(use => `${use.seasonId}/${use.serviceId}`))));
+        const documents: SearchTextDocument[] = [];
+        const records = new Map<string, Promise<SearchPassage[]>>();
+        // Limit the work queue as well as HTTP concurrency. No request per keystroke.
+        let next = 0;
+        const worker = async () => {
+            while (next < paths.length) {
+                const [seasonId, serviceId] = paths[next++].split("/");
+                const service = await this.readSharedService(seasonId, serviceId);
+                for (const hymn of service.hymns) {
+                    const passages: SearchPassage[] = [];
+                    for (const ref of hymn.formats["1"] || []) {
+                        let record = records.get(ref.contentId);
+                        if (!record) {
+                            record = this.read(this.paths.content(ref.contentId), data => validateLibraryRecord(data, ref.contentId)).then(value => {
+                                if (value.contentType !== "Text") throw new Error("Invalid search text assignment");
+                                return (value.content as unknown as ITextContent).paragraphs.filter(p => !p.isComment)
+                                    .flatMap(p => p.columns.map(column => ({ text: searchPlainText(column.content), language: column.language }))).filter(p => p.text);
+                            });
+                            records.set(ref.contentId, record);
+                        }
+                        passages.push(...await record);
+                    }
+                    if (passages.length) documents.push({ hymnId: hymn.hymnId, seasonId, serviceId, passages: Array.from(new Map(passages.map(p => [JSON.stringify([p.language, p.text]), p])).values()) });
+                }
+            }
+        };
+        // Wait for every worker even on failure, so retry cannot overlap an old batch.
+        const outcomes = await Promise.allSettled(Array.from({ length: Math.min(4, paths.length) }, worker));
+        const failed = outcomes.find(outcome => outcome.status === "rejected") as PromiseRejectedResult | undefined;
+        if (failed) throw failed.reason;
+        return documents;
     }
 
     public async getReferenceIndex(): Promise<IReferenceIndex> {
