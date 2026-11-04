@@ -12,7 +12,7 @@ import { searchContent } from "../Providers/HymnsDataProvider/Search";
 import ContentLoadError from "./ContentLoadError";
 import SearchHighlight from "./SearchHighlight";
 import "./GlobalSearch.css";
-import { normalizeSearch } from "../Providers/HymnsDataProvider/SearchMatching";
+import { validSearchQuery, isCopticPassage } from "../Providers/HymnsDataProvider/SearchMatching";
 import MainPaper, { Size } from "./MainPaper";
 import MyNavLink from "./MyNavLink";
 
@@ -22,6 +22,7 @@ interface GlobalSearchProps {
 
 const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
     const [page, setPage] = useState(1);
+    const [copticInput, setCopticInput] = useState(false);
     const pageSummary = useRef<HTMLParagraphElement>(null);
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<ISearchResult[]>([]);
@@ -44,7 +45,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
         setResults([]);
         setPage(1);
         setHasSearched(false);
-        if (normalizeSearch(query).length < 2) {
+        if (!validSearchQuery(query)) {
             setIsLoading(false);
             return;
         }
@@ -91,6 +92,12 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                 <h1 className="pageTitle"><LocalizedMessage of="search" /></h1>
                 
                 <div className="search-input-container mb-4">
+                    <fieldset className="search-font-choice">
+                        <legend>{arabic ? 'خط الإدخال' : 'Input font'}</legend>
+                        <label><input type="radio" name="search-font" checked={!copticInput} onChange={() => setCopticInput(false)} />{arabic ? 'عادي' : 'Normal'}</label>
+                        <label><input type="radio" name="search-font" checked={copticInput} onChange={() => setCopticInput(true)} />{arabic ? 'قبطي' : 'Coptic'}</label>
+                    </fieldset>
+                    <p id="search-font-help" className="text-muted small">{arabic ? 'يغيّر الخط فقط. كلا الوضعين يبحثان في نفس اللغات. فعّل البحث في نصوص الألحان للبحث عن كلمات قبطية.' : 'Changes the font only. Both modes search the same languages. Include hymn words to search Coptic text.'}</p>
                     <div className="input-group">
                         <span className="input-group-text">
                             <FontAwesomeIcon icon={faSearch} />
@@ -98,9 +105,11 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                         <input 
                             type="search"
                             aria-label={strings.search}
-                            aria-describedby="search-help"
+                            aria-describedby="search-help search-font-help"
+                            dir={copticInput ? "ltr" : "auto"}
+                            spellCheck={!copticInput}
                             maxLength={200}
-                            className="form-control"
+                            className={`form-control${copticInput ? " CopticFont search-coptic-input" : ""}`}
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder={languageProperties.localeName === 'ar' ? 'ابحث عن المواسم والألحان...' : 'Search seasons and hymns...'}
@@ -180,7 +189,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                                     {visibleResults.filter(r => r.type === 'hymn').map(result => (
                                         <div key={result.hymn!.id} className="list-group-item">
                                             <h5 className="mb-2"><SearchHighlight text={result.hymn!.name} query={query} /></h5>
-                                            {result.hymn!.snippet && <p dir="auto" className="mb-2"><SearchHighlight text={result.hymn!.snippet} query={query} /></p>}
+                                            {result.hymn!.snippet && <p dir={isCopticPassage(result.hymn!.snippetLanguage) ? "ltr" : "auto"} lang={isCopticPassage(result.hymn!.snippetLanguage) ? "cop" : undefined} className={`mb-2 search-snippet${isCopticPassage(result.hymn!.snippetLanguage) ? " CopticFont" : ""}`}><SearchHighlight text={result.hymn!.snippet} query={query} coptic={isCopticPassage(result.hymn!.snippetLanguage)} /></p>}
                                             <div className="hymn-references">
                                                 <small className="text-muted">
                                                     <LocalizedMessage of="foundIn" />:

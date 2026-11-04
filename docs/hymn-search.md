@@ -17,3 +17,11 @@ Titles, snippets, and service references highlight normalized query matches, or 
 Both initial and background searches show a decorative spinner alongside the announced loading text. Reduced-motion preferences disable its rotation while preserving the visible indicator and message. Search cards, highlights, pagination controls, loading messages, and word-search errors support both light and dark themes.
 
 The first text search can be expensive on a slow/mobile connection. Progressive rendering improves time to title results but does not reduce the text download. A production-catalog browser check on 2026-11-04 loaded 428 assigned Text records, followed by zero additional text requests on the next query. A publisher-generated, versioned search index would be the appropriate next optimization if the catalog grows.
+
+## Coptic input and matching
+
+The Normal/Coptic input-font radio group changes only the search box font. Coptic mode uses the existing `CopticFont` and left-to-right input; it does not convert characters, open a keyboard, change the query, reset results/pagination, or issue requests. Both modes search the same languages. The existing **Search hymn words** checkbox is still required for passage searches.
+
+Published Coptic Text columns use legacy CS-font keys such as `P[oic Vnou]`, `Acpazec;e`, `Pi,rictoc`, and `nen'u,y`. The text index retains column language alongside plain text. Coptic matching folds letter case and whitespace and treats the published `@`/period sentence separators as boundaries, but preserves letter keys such as brackets, semicolon, comma, apostrophe, backtick, colon, and equals. It does not transliterate, convert to Unicode, or apply English fuzzy-word matching to Coptic passages. English/Arabic title and passage normalization remains independent.
+
+Snippets retain the matched passage language, so Coptic snippets always use `CopticFont` with left-to-right layout, regardless of the selected input font or navigation language. Their highlights use the same Coptic normalization and original text offsets. Equal passage text in different language columns remains distinct in the index. Normalized passages remain cached per document, and request concurrency/cache behavior is unchanged.

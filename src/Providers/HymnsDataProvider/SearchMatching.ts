@@ -41,11 +41,28 @@ export function titleMatchScore(query: string, value?: string): number {
     return terms.every(term => words.some(word => similarWord(term, word))) ? 100 : 0;
 }
 
+/** CS font keys are letters, not English punctuation. Do not apply this to titles or other languages. */
+export function normalizeCopticSearch(value: string): string {
+    return value.toLowerCase().replace(new RegExp("\\p{M}", "gu"), "").replace(/[\u0640\u200b-\u200f\u202a-\u202e\u2066-\u2069]/g, "")
+        .replace(/[\s@.!?]+/g, " ").trim();
+}
+
+export function validSearchQuery(value: string): boolean {
+    const lengths = [normalizeSearch(value).length, normalizeCopticSearch(value).length];
+    return Math.max(...lengths) >= 2 && Math.max(...lengths) <= 200;
+}
+
+export interface SearchPassage { text: string; language?: string; }
+export function asSearchPassage(value: string | SearchPassage): SearchPassage {
+    return typeof value === "string" ? { text: value } : value;
+}
+export function isCopticPassage(language?: string): boolean { return language?.trim().toLowerCase() === "coptic"; }
+
 export interface SearchTextDocument {
     hymnId: string;
     seasonId: string;
     serviceId: string;
-    passages: string[];
+    passages: Array<string | SearchPassage>;
 }
 
 /** Parse in an inert document; never insert published HTML into the results UI. */

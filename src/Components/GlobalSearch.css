@@ -68,3 +68,13 @@
         border-color: #a68a4e;
     }
 }
+
+.search-font-choice { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin-bottom: .5rem; }
+.search-font-choice legend { float: none; width: auto; font-size: 1rem; margin: 0; }
+.search-font-choice label { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; cursor: pointer; }
+.search-font-choice input { accent-color: var(--search-focus); }
+.search-font-choice input:focus-visible { outline: 3px solid var(--search-focus); outline-offset: 3px; }
+.global-search .search-coptic-input { color: var(--search-control-ink); background: var(--search-control-bg); }
+.global-search .search-coptic-input::placeholder { font-family: Arial, sans-serif; }
+.global-search .search-snippet { overflow-wrap: anywhere; }
+.global-search .search-snippet.CopticFont { color: inherit; }
