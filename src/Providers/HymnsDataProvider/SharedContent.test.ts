@@ -108,6 +108,63 @@ describe("v5 service resolution and contextual titles", () => {
         expect(summaries[0].hymns).toBeUndefined();
     });
 
+    it("retains Coptic language when equal text exists in different columns and excludes comments", async () => {
+        files[`/v5/content/${TEXT}.json`] = record(TEXT, "Text", { paragraphs: [
+            { columns: [{ language: "English", content: "Pi,rictoc" }, { language: "coptic", content: "Pi,rictoc" }] },
+            { columns: [{ language: "coptic", content: "Pi,rictoc" }] },
+            { isComment: true, columns: [{ language: "Coptic", content: "Hidden comment" }] }
+        ] });
+        const source = provider();
+        const docs = await source.getSearchTextIndex();
+        expect(docs[0].passages).toEqual([{ text: "Pi,rictoc", language: "English" }, { text: "Pi,rictoc", language: "coptic" }]);
+        const result = await searchContent(source, "pi rictoc", "en", true);
+        expect(result[0].hymn?.snippetLanguage).toBe("English");
+        expect(get.mock.calls.filter(([path]) => path.includes("/content/"))).toHaveLength(1);
+    });
+
+    it("loads only unique assigned text records and shares the text index between searches", async () => {
+        const source = provider();
+        const [first, second] = await Promise.all([source.getSearchTextIndex(), source.getSearchTextIndex()]);
+        expect(first).toBe(second);
+        expect(first).toHaveLength(2);
+        expect(first.map(doc => doc.passages)).toEqual([[{ text: "Shared text", language: "English" }], [{ text: "Shared text", language: "English" }]]);
+        await source.getSearchTextIndex();
+        expect(get.mock.calls.filter(([path]) => path.includes("/content/")).map(([path]) => path)).toEqual([`/v5/content/${TEXT}.json`]);
+        expect(get.mock.calls.some(([path]) => path.includes("/hymns/"))).toBe(false);
+        expect((await searchContent(source, "shared text", "en", true))[0].hymn?.references).toHaveLength(2);
+    });
+
+    it.each(["missing", "wrong-type", "malformed"])("rejects incomplete text indexes and retries after %s content", async mode => {
+        const source = provider(), path = `/v5/content/${TEXT}.json`, original = files[path];
+        if (mode === "missing") delete files[path];
+        if (mode === "wrong-type") files[path] = record(TEXT, "Audio", { audioFilePath: "https://example.com/a" });
+        if (mode === "malformed") files[path] = record(TEXT, "Text", { paragraphs: [{ columns: [{ language: "English", content: 42 }] }] });
+        await expect(source.getSearchTextIndex()).rejects.toThrow();
+        files[path] = original;
+        expect(await source.getSearchTextIndex()).toHaveLength(2);
+    });
+
+    it("omits comments and preserves each language/paragraph as a separate passage", async () => {
+        files[`/v5/content/${TEXT}.json`] = record(TEXT, "Text", { paragraphs: [
+            { isComment: true, columns: [{ language: "English", content: "Instruction" }] },
+            { columns: [{ language: "English", content: "<p>Lord &amp; God</p>" }, { language: "Arabic", content: "يا رب ارحم" }] }
+        ] });
+        expect((await provider().getSearchTextIndex())[0].passages).toEqual([{ text: "Lord & God", language: "English" }, { text: "يا رب ارحم", language: "Arabic" }]);
+    });
+
+    it("refreshes the text index after five minutes and isolates feeds", async () => {
+        const source = provider();
+        const initial = await source.getSearchTextIndex();
+        expect(await provider("en", "https://other.example").getSearchTextIndex()).not.toBe(initial);
+        const clock = jest.spyOn(Date, "now").mockReturnValue(Date.now() + 301_000);
+        try {
+            files[`/v5/content/${TEXT}.json`] = record(TEXT, "Text", { paragraphs: [{ columns: [{ language: "English", content: "Updated text" }] }] });
+            const updated = await source.getSearchTextIndex();
+            expect(updated).not.toBe(initial);
+            expect(updated[0].passages).toEqual([{ text: "Updated text", language: "English" }]);
+        } finally { clock.mockRestore(); }
+    });
+
     it.each(["missing", "wrong-id", "wrong-type", "malformed"])("rejects %s dependencies and recovers on retry without partial services", async mode => {
         const path = `/v5/content/${FIRST}.json`;
         const original = files[path];
