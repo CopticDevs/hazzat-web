@@ -23,6 +23,8 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<ISearchResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [wordsLoading, setWordsLoading] = useState(false);
+    const [wordsFailed, setWordsFailed] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
     const [failed, setFailed] = useState(false);
     const [retry, setRetry] = useState(0);
@@ -34,6 +36,8 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
     useEffect(() => {
         let active = true;
         setFailed(false);
+        setWordsFailed(false);
+        setWordsLoading(false);
         setResults([]);
         setHasSearched(false);
         if (normalizeSearch(query).length < 2) {
@@ -42,13 +46,22 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
         }
         setIsLoading(true);
         const timer = setTimeout(async () => {
+            let titlesReady = false;
             try {
-                const found = await searchContent(dataProvider, query, languageProperties.localeName, includeText);
+                const found = await searchContent(dataProvider, query, languageProperties.localeName, includeText, titles => {
+                    titlesReady = true;
+                    if (active) {
+                        setResults(titles);
+                        setHasSearched(true);
+                        setIsLoading(false);
+                        setWordsLoading(true);
+                    }
+                });
                 if (active) { setResults(found); setHasSearched(true); }
             } catch {
-                if (active) setFailed(true);
+                if (active) { if (titlesReady) setWordsFailed(true); else setFailed(true); }
             } finally {
-                if (active) setIsLoading(false);
+                if (active) { setIsLoading(false); setWordsLoading(false); }
             }
         }, 300);
         return () => { active = false; clearTimeout(timer); };
@@ -93,9 +106,11 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                     </div>}
                 </div>
 
-                <div role="status" aria-live="polite" aria-atomic="true" className="visually-hidden">
-                    {isLoading ? (languageProperties.localeName === 'ar' ? 'جارٍ البحث' : 'Searching')
-                        : hasSearched && !failed ? (languageProperties.localeName === 'ar' ? `عدد النتائج: ${results.length}` : `${results.length} ${results.length === 1 ? 'result' : 'results'}`) : ''}
+                <div role="status" aria-live="polite" aria-atomic="true" className={wordsLoading ? 'alert alert-info' : 'visually-hidden'}>
+                    {wordsLoading ? (languageProperties.localeName === 'ar' ? `عدد نتائج العناوين: ${results.length}. جارٍ البحث في كلمات الألحان…`
+                        : `${results.length} title ${results.length === 1 ? 'match' : 'matches'}. Still searching hymn words…`)
+                        : isLoading ? (languageProperties.localeName === 'ar' ? 'جارٍ البحث' : 'Searching')
+                        : hasSearched && !failed && !wordsFailed ? (languageProperties.localeName === 'ar' ? `عدد النتائج: ${results.length}` : `${results.length} ${results.length === 1 ? 'result' : 'results'}`) : ''}
                 </div>
 
                 {isLoading && (
@@ -105,8 +120,15 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                 )}
 
                 {failed && <ContentLoadError retry={() => setRetry(value => value + 1)} />}
+                {wordsFailed && <div role="alert" className="alert alert-warning">
+                    <p>{languageProperties.localeName === 'ar' ? 'تعذر إكمال البحث في كلمات الألحان. نتائج العناوين فقط متاحة الآن.'
+                        : 'Hymn-word search could not be completed. Only title matches are available.'}</p>
+                    <button type="button" className="btn btn-outline-secondary" onClick={() => setRetry(value => value + 1)}>
+                        {languageProperties.localeName === 'ar' ? 'إعادة المحاولة' : 'Retry'}
+                    </button>
+                </div>}
 
-                {!isLoading && !failed && hasSearched && results.length === 0 && (
+                {!isLoading && !wordsLoading && !failed && !wordsFailed && hasSearched && results.length === 0 && (
                     <div className="alert alert-info">
                         <LocalizedMessage of="noSearchResults" />
                     </div>

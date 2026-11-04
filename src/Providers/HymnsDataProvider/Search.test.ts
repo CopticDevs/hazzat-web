@@ -48,6 +48,33 @@ describe("search matching", () => {
 });
 
 describe("ranked search", () => {
+    it("publishes title results before text settles and reuses service summaries", async () => {
+        const p = provider();
+        let finish!: (value: any[]) => void;
+        (p.getSearchTextIndex as jest.Mock).mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+        let publish!: () => void;
+        const published = new Promise<void>(resolve => { publish = resolve; });
+        const titles = jest.fn(() => publish());
+        const result = searchContent(p, "doxology", "en", true, titles);
+        await published;
+        expect(titles.mock.calls).toHaveLength(1);
+        expect(p.getServiceSummary).toHaveBeenCalledTimes(1);
+        finish([{ hymnId: "alternate", seasonId: "annual", serviceId: "matins", passages: ["Sing doxology"] }]);
+        const final = await result;
+        expect(final[0].hymn?.id).toBe("doxology");
+        expect(final[final.length - 1].hymn?.id).toBe("alternate");
+        expect(p.getServiceSummary).toHaveBeenCalledTimes(2);
+        expect(p.getReferenceIndex).toHaveBeenCalledTimes(1);
+    });
+
+    it("still publishes titles when text fails before title metadata arrives", async () => {
+        const p = provider(), titles = jest.fn();
+        (p.getSearchTextIndex as jest.Mock).mockRejectedValue(new Error("offline"));
+        await expect(searchContent(p, "doxology", "en", true, titles)).rejects.toThrow("offline");
+        expect(titles).toHaveBeenCalledTimes(1);
+        expect(titles.mock.calls[0][0][0].hymn.id).toBe("doxology");
+    });
+
     it("keeps exact title results ahead of fuzzy matches without loading text", async () => {
         const p = provider();
         const results = await searchContent(p, "doxolgy", "en");

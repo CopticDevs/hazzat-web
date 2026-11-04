@@ -160,7 +160,7 @@ describe('GlobalSearch - Search Functionality', () => {
     render(<BrowserRouter><LanguageContext.Provider value={mockLanguageContext}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>);
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'glory to god' } });
-    expect(await screen.findByRole('alert')).toHaveTextContent('could not be loaded');
+    expect(await screen.findByRole('alert')).toHaveTextContent('could not be completed');
     expect(screen.queryByText(/No results found/i)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     await screen.findByText('Glory to God');
@@ -172,6 +172,85 @@ describe('GlobalSearch - Search Functionality', () => {
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: '!!!' } });
     expect(mockDataProvider.getReferenceIndex).not.toHaveBeenCalled();
     expect(screen.getByRole('searchbox')).toHaveAttribute('maxLength', '200');
+  });
+
+  it('shows title matches while words load, then merges ranked results without duplicates', async () => {
+    let finish!: (value: any[]) => void;
+    mockDataProvider.getSearchTextIndex = jest.fn(() => new Promise(resolve => { finish = resolve; }));
+    render(<BrowserRouter><LanguageContext.Provider value={mockLanguageContext}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>);
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'doxology' } });
+    await screen.findByText('Doxology');
+    expect(screen.getByRole('status')).toHaveTextContent('1 title match. Still searching hymn words');
+    expect(screen.queryByText(/No results found/i)).not.toBeInTheDocument();
+    await act(async () => { finish([
+      { hymnId: 'psalm-150', seasonId: 'nativity', serviceId: 'vespers', passages: ['Sing the doxology'] },
+      { hymnId: 'doxology', seasonId: 'nativity', serviceId: 'vespers', passages: ['Doxology words'] }
+    ]); });
+    await screen.findByText('Psalm 150');
+    expect(screen.getAllByText('Doxology')).toHaveLength(1);
+    expect(screen.getByRole('status')).toHaveTextContent('2 results');
+    expect(screen.getAllByRole('heading', { level: 5 }).map(node => node.textContent)).toEqual(['Doxology', 'Psalm 150']);
+  });
+
+  it('waits for word completion before reporting no results when titles are empty', async () => {
+    let finish!: (value: any[]) => void;
+    mockDataProvider.getSearchTextIndex = jest.fn(() => new Promise(resolve => { finish = resolve; }));
+    render(<BrowserRouter><LanguageContext.Provider value={mockLanguageContext}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>);
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'unknown phrase' } });
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('0 title matches. Still searching hymn words'));
+    expect(screen.queryByText(/No results found/i)).not.toBeInTheDocument();
+    await act(async () => { finish([]); });
+    await screen.findByText(/No results found/i);
+  });
+
+  it('keeps title results visible if word loading fails', async () => {
+    let fail!: (error: Error) => void;
+    mockDataProvider.getSearchTextIndex = jest.fn(() => new Promise((_, reject) => { fail = reject; }));
+    render(<BrowserRouter><LanguageContext.Provider value={mockLanguageContext}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>);
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'doxology' } });
+    await screen.findByText('Doxology');
+    await act(async () => { fail(new Error('offline')); });
+    expect(await screen.findByRole('alert')).toHaveTextContent('Only title matches are available');
+    expect(screen.getByText('Doxology')).toBeInTheDocument();
+    expect(screen.queryByText(/No results found/i)).not.toBeInTheDocument();
+  });
+
+  it('ignores stale word completion after changing the query or turning word search off', async () => {
+    const finishes: Array<(value: any[]) => void> = [];
+    mockDataProvider.getSearchTextIndex = jest.fn(() => new Promise(resolve => { finishes.push(resolve); }));
+    render(<BrowserRouter><LanguageContext.Provider value={mockLanguageContext}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>);
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'psalm' } });
+    await screen.findByText('Psalm 150');
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'doxology' } });
+    await screen.findByText('Doxology');
+    await act(async () => { finishes[0]([]); });
+    expect(screen.queryByText('Psalm 150')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Still searching hymn words');
+    fireEvent.click(screen.getByRole('checkbox'));
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('1 result'));
+    await act(async () => { finishes[1]([{ hymnId: 'psalm-150', seasonId: 'nativity', serviceId: 'vespers', passages: ['doxology'] }]); });
+    expect(screen.queryByText('Psalm 150')).not.toBeInTheDocument();
+  });
+
+  it('ignores old-language results and shows the current localized loading state', async () => {
+    const finishes: Array<(value: any[]) => void> = [];
+    mockDataProvider.getSearchTextIndex = jest.fn(() => new Promise(resolve => { finishes.push(resolve); }));
+    const view = (localeName: string) => <BrowserRouter><LanguageContext.Provider value={{ ...mockLanguageContext,
+      languageProperties: { ...mockLanguageContext.languageProperties, localeName } }}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>;
+    const rendered = render(view('en'));
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'doxology' } });
+    await screen.findByText('Doxology');
+    rendered.rerender(view('ar'));
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('جارٍ البحث في كلمات الألحان'));
+    await act(async () => { finishes[0]([]); });
+    expect(screen.queryByText('Doxology')).not.toBeInTheDocument();
+    await act(async () => { finishes[1]([]); });
+    expect(screen.getByRole('status')).toHaveTextContent('عدد النتائج: 1');
   });
 
   it('should search hymns using reference index', async () => {

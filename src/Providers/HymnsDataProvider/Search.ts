@@ -1,5 +1,7 @@
 import { IHymnsDataProvider } from "./IHymnsDataProvider";
 import { ISearchResult } from "./Models/ISearchResult";
+import { IReferenceIndex } from "./Models/IReferenceIndex";
+import { ISeasonInfo } from "./Models/ISeasonInfo";
 import { localizedName } from "./SharedContent";
 import { normalizeSearch, SearchTextDocument, titleMatchScore } from "./SearchMatching";
 
@@ -16,11 +18,26 @@ function excerpt(passage: string, query: string): string {
 }
 
 /** Title search stays lightweight; full text is an explicit, cached opt-in. */
-export async function searchContent(provider: IHymnsDataProvider, query: string, language: string, includeText = false): Promise<ISearchResult[]> {
+export async function searchContent(provider: IHymnsDataProvider, query: string, language: string, includeText = false,
+    onTitleResults?: (results: ISearchResult[]) => void): Promise<ISearchResult[]> {
     const needle = normalizeSearch(query);
     if (needle.length < 2 || needle.length > 200) return [];
-    const [seasons, index, documents] = await Promise.all([provider.getSeasonList(), provider.getReferenceIndex(),
-        includeText && provider.getSearchTextIndex ? provider.getSearchTextIndex() : Promise.resolve([])]);
+    // Attach rejection handling immediately: text may fail before metadata/titles finish.
+    const text = includeText && provider.getSearchTextIndex
+        ? provider.getSearchTextIndex().then(documents => ({ documents, error: undefined }), error => ({ documents: undefined, error }))
+        : Promise.resolve({ documents: [] as SearchTextDocument[], error: undefined });
+    const [seasons, index] = await Promise.all([provider.getSeasonList(), provider.getReferenceIndex()]);
+    const serviceNames = new Map<string, ReturnType<IHymnsDataProvider["getService"]>>();
+    if (includeText && onTitleResults) {
+        onTitleResults(await rankResults(provider, needle, language, seasons, index, [], serviceNames));
+    }
+    const outcome = await text;
+    if (!outcome.documents) throw outcome.error;
+    return rankResults(provider, needle, language, seasons, index, outcome.documents, serviceNames);
+}
+
+async function rankResults(provider: IHymnsDataProvider, needle: string, language: string, seasons: ISeasonInfo[],
+    index: IReferenceIndex, documents: SearchTextDocument[], serviceNames: Map<string, ReturnType<IHymnsDataProvider["getService"]>>): Promise<ISearchResult[]> {
     const score = (...values: (string | undefined)[]) => Math.max(0, ...values.map(value => titleMatchScore(needle, value)));
     const ranked: { score: number; result: ISearchResult }[] = seasons.flatMap(season => {
         const rank = score(season.id, season.name, season.nameAr);
@@ -47,7 +64,6 @@ export async function searchContent(provider: IHymnsDataProvider, query: string,
         const rank = Math.max(canonicalScore, ...matchingUses.map(use => score(use.name, use.nameAr)), text ? 80 : 0);
         return matchingUses.length ? [{ id, entry, matchingUses, rank, snippet: text?.values().next().value as string | undefined }] : [];
     }).sort((a, b) => b.rank - a.rank || a.id.localeCompare(b.id));
-    const serviceNames = new Map<string, ReturnType<IHymnsDataProvider["getService"]>>();
     for (const { id, entry, matchingUses, rank, snippet } of candidates) {
         const references = [];
         const seen = new Set<string>();
