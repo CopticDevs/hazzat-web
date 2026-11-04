@@ -108,12 +108,26 @@ describe("v5 service resolution and contextual titles", () => {
         expect(summaries[0].hymns).toBeUndefined();
     });
 
+    it("retains Coptic language when equal text exists in different columns and excludes comments", async () => {
+        files[`/v5/content/${TEXT}.json`] = record(TEXT, "Text", { paragraphs: [
+            { columns: [{ language: "English", content: "Pi,rictoc" }, { language: "coptic", content: "Pi,rictoc" }] },
+            { columns: [{ language: "coptic", content: "Pi,rictoc" }] },
+            { isComment: true, columns: [{ language: "Coptic", content: "Hidden comment" }] }
+        ] });
+        const source = provider();
+        const docs = await source.getSearchTextIndex();
+        expect(docs[0].passages).toEqual([{ text: "Pi,rictoc", language: "English" }, { text: "Pi,rictoc", language: "coptic" }]);
+        const result = await searchContent(source, "pi rictoc", "en", true);
+        expect(result[0].hymn?.snippetLanguage).toBe("English");
+        expect(get.mock.calls.filter(([path]) => path.includes("/content/"))).toHaveLength(1);
+    });
+
     it("loads only unique assigned text records and shares the text index between searches", async () => {
         const source = provider();
         const [first, second] = await Promise.all([source.getSearchTextIndex(), source.getSearchTextIndex()]);
         expect(first).toBe(second);
         expect(first).toHaveLength(2);
-        expect(first.map(doc => doc.passages)).toEqual([["Shared text"], ["Shared text"]]);
+        expect(first.map(doc => doc.passages)).toEqual([[{ text: "Shared text", language: "English" }], [{ text: "Shared text", language: "English" }]]);
         await source.getSearchTextIndex();
         expect(get.mock.calls.filter(([path]) => path.includes("/content/")).map(([path]) => path)).toEqual([`/v5/content/${TEXT}.json`]);
         expect(get.mock.calls.some(([path]) => path.includes("/hymns/"))).toBe(false);
@@ -135,7 +149,7 @@ describe("v5 service resolution and contextual titles", () => {
             { isComment: true, columns: [{ language: "English", content: "Instruction" }] },
             { columns: [{ language: "English", content: "<p>Lord &amp; God</p>" }, { language: "Arabic", content: "يا رب ارحم" }] }
         ] });
-        expect((await provider().getSearchTextIndex())[0].passages).toEqual(["Lord & God", "يا رب ارحم"]);
+        expect((await provider().getSearchTextIndex())[0].passages).toEqual([{ text: "Lord & God", language: "English" }, { text: "يا رب ارحم", language: "Arabic" }]);
     });
 
     it("refreshes the text index after five minutes and isolates feeds", async () => {
@@ -147,7 +161,7 @@ describe("v5 service resolution and contextual titles", () => {
             files[`/v5/content/${TEXT}.json`] = record(TEXT, "Text", { paragraphs: [{ columns: [{ language: "English", content: "Updated text" }] }] });
             const updated = await source.getSearchTextIndex();
             expect(updated).not.toBe(initial);
-            expect(updated[0].passages).toEqual(["Updated text"]);
+            expect(updated[0].passages).toEqual([{ text: "Updated text", language: "English" }]);
         } finally { clock.mockRestore(); }
     });
 

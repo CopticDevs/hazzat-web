@@ -6,7 +6,7 @@ import { IReferenceIndex } from "./Models/IReferenceIndex";
 import { ISeasonInfo } from "./Models/ISeasonInfo";
 import { IServiceInfo } from "./Models/IServiceInfo";
 import { IHymnContent, ITextContent, IVariationInfo } from "./Models/IVariationInfo";
-import { SearchTextDocument, searchPlainText } from "./SearchMatching";
+import { SearchTextDocument, SearchPassage, searchPlainText } from "./SearchMatching";
 import { ISeasonTranslations } from "./Models/ISeasonTranslations";
 import { createContentPaths } from "./ContentPaths";
 import { ContentResourceClient } from "./ContentResourceClient";
@@ -194,7 +194,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         const index = await this.getReferenceIndex();
         const paths = Array.from(new Set(Object.values(index).flatMap(entry => (entry.usages || []).map(use => `${use.seasonId}/${use.serviceId}`))));
         const documents: SearchTextDocument[] = [];
-        const records = new Map<string, Promise<string[]>>();
+        const records = new Map<string, Promise<SearchPassage[]>>();
         // Limit the work queue as well as HTTP concurrency. No request per keystroke.
         let next = 0;
         const worker = async () => {
@@ -202,20 +202,20 @@ export class HymnsDataProvider implements IHymnsDataProvider {
                 const [seasonId, serviceId] = paths[next++].split("/");
                 const service = await this.readSharedService(seasonId, serviceId);
                 for (const hymn of service.hymns) {
-                    const passages: string[] = [];
+                    const passages: SearchPassage[] = [];
                     for (const ref of hymn.formats["1"] || []) {
                         let record = records.get(ref.contentId);
                         if (!record) {
                             record = this.read(this.paths.content(ref.contentId), data => validateLibraryRecord(data, ref.contentId)).then(value => {
                                 if (value.contentType !== "Text") throw new Error("Invalid search text assignment");
                                 return (value.content as unknown as ITextContent).paragraphs.filter(p => !p.isComment)
-                                    .flatMap(p => p.columns.map(column => searchPlainText(column.content))).filter(Boolean);
+                                    .flatMap(p => p.columns.map(column => ({ text: searchPlainText(column.content), language: column.language }))).filter(p => p.text);
                             });
                             records.set(ref.contentId, record);
                         }
                         passages.push(...await record);
                     }
-                    if (passages.length) documents.push({ hymnId: hymn.hymnId, seasonId, serviceId, passages: Array.from(new Set(passages)) });
+                    if (passages.length) documents.push({ hymnId: hymn.hymnId, seasonId, serviceId, passages: Array.from(new Map(passages.map(p => [JSON.stringify([p.language, p.text]), p])).values()) });
                 }
             }
         };

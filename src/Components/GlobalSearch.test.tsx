@@ -105,6 +105,34 @@ describe('GlobalSearch - Search Functionality', () => {
     } as any;
   });
 
+  it('changes only the input font while a legacy Coptic word search is pending', async () => {
+    let finish!: (value: any[]) => void;
+    mockDataProvider.getSearchTextIndex = jest.fn(() => new Promise(resolve => { finish = resolve; }));
+    render(<BrowserRouter><LanguageContext.Provider value={mockLanguageContext}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>);
+    const input = screen.getByRole('searchbox');
+    expect(screen.getByRole('radio', { name: 'Normal' })).toBeChecked();
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.change(input, { target: { value: 'P[oic Vnou]' } });
+    await screen.findByText(/0 title matches/);
+    fireEvent.click(screen.getByRole('radio', { name: 'Coptic' }));
+    expect(input).toHaveClass('CopticFont');
+    expect(input).toHaveAttribute('dir', 'ltr');
+    expect(input).toHaveValue('P[oic Vnou]');
+    expect(screen.getByRole('checkbox')).toBeChecked();
+    expect(mockDataProvider.getSearchTextIndex).toHaveBeenCalledTimes(1);
+    await act(async () => finish([{ hymnId: 'doxology', seasonId: 'nativity', serviceId: 'vespers', passages: [{ text: 'P[oic Vnou] `nte nijom@', language: 'Coptic' }] }]));
+    const snippet = document.querySelector('.search-snippet')!;
+    expect(snippet).toHaveClass('CopticFont');
+    expect(snippet).toHaveAttribute('lang', 'cop');
+    expect(snippet.querySelector('mark')).toHaveTextContent('P[oic Vnou]');
+    fireEvent.click(screen.getByRole('radio', { name: 'Normal' }));
+    expect(input).not.toHaveClass('CopticFont');
+    expect(input).toHaveValue('P[oic Vnou]');
+    expect(snippet).toHaveClass('CopticFont');
+    expect(mockDataProvider.getReferenceIndex).toHaveBeenCalledTimes(1);
+    expect(mockDataProvider.getSearchTextIndex).toHaveBeenCalledTimes(1);
+  });
+
   it('should search seasons by name', async () => {
     render(
       <BrowserRouter>

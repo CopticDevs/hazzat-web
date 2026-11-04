@@ -32,3 +32,15 @@ describe('search highlighting', () => {
         expect(searchHighlightRanges('Doxology', 'a'.repeat(201))).toEqual([]);
     });
 });
+
+it.each(["P[oic Vnou]", "Acpazec;e", "Pi,rictoc", "nen'u,y", "`nte nijom"])("highlights original legacy Coptic letters: %s", query => {
+    const text = `Allylouia@ ${query}.`;
+    const { container } = render(<SearchHighlight text={text} query={query.toLowerCase()} coptic />);
+    expect(container.textContent).toBe(text);
+    expect(container.querySelector('mark')?.textContent).toBe(query);
+});
+it('does not highlight erased Coptic punctuation or approximate English tokens in a Coptic snippet', () => {
+    expect(searchHighlightRanges("Aspasmos Watos (O Lord)", "P[oic Vnou]")).toEqual([]);
+    expect(searchHighlightRanges("Pi,rictoc", "pi rictoc", true)).toEqual([]);
+    expect(searchHighlightRanges("Acpazec;e", "acpazec e", true)).toEqual([]);
+});

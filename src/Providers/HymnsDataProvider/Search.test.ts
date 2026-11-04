@@ -125,3 +125,44 @@ describe("ranked search", () => {
         await expect(searchContent(p, "mercy", "en", true)).rejects.toThrow("Unavailable");
     });
 });
+
+// Excerpts from published annual basil liturgy and midnight psalmody Text columns.
+describe("legacy Coptic text search", () => {
+    const passages = [
+        "P[oic Vnou] `nte nijom@ kotk ouoh joust `ebolqen `tve@",
+        "Acpazec;e allylouc en vilymati `agiw@",
+        "`amyn Kuri`e `ele`ycon@ Ete vai pe Iycouc Pi,rictoc@",
+        "Hopwc `ntefer`hmot nan `m`pcw] `nte nen'u,y.",
+        "Ec`ewnq `nje ta'u,y ouoh ec`e`cmou `erok@"
+    ].map(text => ({ text, language: "Coptic" }));
+    const source = () => {
+        const p = provider();
+        (p.getSearchTextIndex as jest.Mock).mockResolvedValue([{ hymnId: "alternate", seasonId: "annual", serviceId: "matins", passages }]);
+        return p;
+    };
+    it.each(["P[oic Vnou]", "Acpazec;e", "Pi,rictoc", "nen'u,y", "ta'u,y", "`nte nijom"])("finds legacy keys in %s and preserves snippet language", async query => {
+        const result = await searchContent(source(), query, "en", true);
+        expect(result).toHaveLength(1);
+        expect(result[0].hymn?.snippet).toContain(query);
+        expect(result[0].hymn?.snippetLanguage).toBe("Coptic");
+        expect(await searchContent(source(), query, "ar", true)).toHaveLength(1);
+    });
+    it.each(["p oic vnou", "acpazec e", "pi rictoc", "nen u y", "ta u y", "rictoc"])("does not erase Coptic letters to match %s", async query => {
+        expect(await searchContent(source(), query, "en", true)).toEqual([]);
+    });
+    it("keeps normal punctuation semantics separate from Coptic", async () => {
+        const p = source();
+        (p.getSearchTextIndex as jest.Mock).mockResolvedValue([{ hymnId: "alternate", seasonId: "annual", serviceId: "matins", passages: [
+            { text: "Lord, have mercy; on us.", language: "English" }, ...passages
+        ] }]);
+        expect((await searchContent(p, "lord have mercy", "en", true))[0].hymn?.snippetLanguage).toBe("English");
+        expect(await searchContent(p, "pi rictoc", "en", true)).toEqual([]);
+    });
+    it("finds and excerpts late legacy matches using the same normalizer", async () => {
+        const p = source();
+        (p.getSearchTextIndex as jest.Mock).mockResolvedValue([{ hymnId: "alternate", seasonId: "annual", serviceId: "matins", passages: [
+            { text: "Allylouia ".repeat(80) + "P[oic Vnou] `nte nijom@", language: " coptic " }
+        ] }]);
+        expect((await searchContent(p, "P[oic Vnou]", "en", true))[0].hymn?.snippet).toContain("P[oic Vnou]");
+    });
+});
