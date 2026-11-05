@@ -4,6 +4,11 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 See [shared content v4](docs/shared-content-v4.md) for schema compatibility, local feed configuration, format views, and rollout validation.
 
+See [Azure release migration](docs/azure-release-migration.md) for the manual PPE
+deployment scaffold, verified artifact contract, and cutover prerequisites.
+The separate [manual dev release runbook](docs/azure-dev-release.md) records the
+successful dev validation, restricted secret setup, and controlled deployment steps.
+
 ## Available Scripts
 
 In the project directory, you can run:
