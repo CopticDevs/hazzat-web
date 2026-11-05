@@ -38,7 +38,7 @@ steps:
   inputs:
     command: 'custom'
     verbose: false
-    customCommand: 'run test-unit'
+    customCommand: 'run test-unit -- --coverage --coverageReporters=cobertura --coverageReporters=lcov --coverageReporters=text'
 
 - task: PublishTestResults@2
   condition: succeededOrFailed()
@@ -48,3 +48,17 @@ steps:
     failTaskOnFailedTests: true
     failTaskOnFailureToPublishResults: true
     failTaskOnMissingResultsFile: true
+
+- task: UseDotNet@2
+  displayName: 'Install .NET for coverage publishing'
+  condition: succeededOrFailed()
+  inputs:
+    packageType: 'sdk'
+    version: '8.x'
+
+- task: PublishCodeCoverageResults@2
+  condition: succeededOrFailed()
+  inputs:
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
+    pathToSources: '$(System.DefaultWorkingDirectory)'
+    failIfCoverageEmpty: true
