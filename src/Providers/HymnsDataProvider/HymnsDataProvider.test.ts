@@ -15,6 +15,24 @@ describe('HymnsDataProvider - Seasons List Loading', () => {
     get: jest.fn(),
   };
 
+  let consoleSpy: jest.SpyInstance | undefined;
+
+  const captureExpectedError = (error: Error) => {
+    const originalLog = console.log;
+    consoleSpy = jest.spyOn(console, 'log').mockImplementation((...args) => {
+      // Only silence the exact error deliberately triggered by this test.
+      if (args.length !== 1 || args[0] !== error) {
+        originalLog.apply(console, args);
+      }
+    });
+    return consoleSpy;
+  };
+
+  afterEach(() => {
+    consoleSpy?.mockRestore();
+    consoleSpy = undefined;
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockedAxios.create = jest.fn()
@@ -103,10 +121,13 @@ describe('HymnsDataProvider - Seasons List Loading', () => {
   });
 
   it('should return empty array on error', async () => {
-    mockCloudFrontClient.get.mockRejectedValue(new Error('Network error'));
+    const error = new Error('Network error');
+    const logSpy = captureExpectedError(error);
+    mockCloudFrontClient.get.mockRejectedValue(error);
 
     const result = await provider.getSeasonList();
 
     expect(result).toEqual([]);
+    expect(logSpy.mock.calls).toEqual([[error]]);
   });
 });

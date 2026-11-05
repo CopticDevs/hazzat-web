@@ -14,6 +14,24 @@ describe('Error Handling Tests', () => {
     get: jest.fn(),
   };
 
+  let consoleSpy: jest.SpyInstance | undefined;
+
+  const captureExpectedError = (error: Error) => {
+    const originalLog = console.log;
+    consoleSpy = jest.spyOn(console, 'log').mockImplementation((...args) => {
+      // Only silence the exact error deliberately triggered by this test.
+      if (args.length !== 1 || args[0] !== error) {
+        originalLog.apply(console, args);
+      }
+    });
+    return consoleSpy;
+  };
+
+  afterEach(() => {
+    consoleSpy?.mockRestore();
+    consoleSpy = undefined;
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockedAxios.create = jest.fn()
@@ -23,12 +41,15 @@ describe('Error Handling Tests', () => {
   });
 
   it('should handle network offline gracefully', async () => {
-    mockCloudFrontClient.get.mockRejectedValue(new Error('Network Error'));
+    const error = new Error('Network Error');
+    const logSpy = captureExpectedError(error);
+    mockCloudFrontClient.get.mockRejectedValue(error);
 
     const result = await provider.getSeasonList();
 
     // Should return empty array instead of throwing
     expect(result).toEqual([]);
+    expect(logSpy.mock.calls).toEqual([[error]]);
   });
 
   it('should handle invalid season ID (404)', async () => {
@@ -38,23 +59,26 @@ describe('Error Handling Tests', () => {
   });
 
   it('should handle malformed JSON data', async () => {
-    mockCloudFrontClient.get.mockRejectedValue(new Error('JSON Parse Error'));
+    const error = new Error('JSON Parse Error');
+    const logSpy = captureExpectedError(error);
+    mockCloudFrontClient.get.mockRejectedValue(error);
 
     const result = await provider.getSeasonList();
 
     // Should handle parse errors gracefully
     expect(result).toEqual([]);
+    expect(logSpy.mock.calls).toEqual([[error]]);
   });
 
   it('should log errors for debugging', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    mockCloudFrontClient.get.mockRejectedValue(new Error('Test Error'));
+    const error = new Error('Test Error');
+    const logSpy = captureExpectedError(error);
+    mockCloudFrontClient.get.mockRejectedValue(error);
 
     await provider.getSeasonList();
 
     // Should log error
-    expect(consoleSpy).toHaveBeenCalled();
-    consoleSpy.mockRestore();
+    expect(logSpy.mock.calls).toEqual([[error]]);
   });
 
   it('should handle timeout errors', async () => {
