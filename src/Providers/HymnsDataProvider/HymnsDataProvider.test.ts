@@ -94,6 +94,14 @@ describe('HymnsDataProvider - Seasons List Loading', () => {
     expect(result[0].dateRanges![0]).toHaveProperty('dateEnd');
   });
 
+  it('keeps route validation failures distinct from absent season IDs', async () => {
+    mockCloudFrontClient.get.mockRejectedValue(new Error('offline'));
+    await expect(provider.getSeasonList({ throwOnError: true })).rejects.toThrow('offline');
+    await expect(provider.getSeason('annual', { throwOnError: true })).rejects.toThrow('offline');
+    mockCloudFrontClient.get.mockResolvedValue({ data: [] });
+    await expect(provider.getSeason('unknown', { throwOnError: true })).resolves.toBeUndefined();
+  });
+
   it('should return empty array on error', async () => {
     mockCloudFrontClient.get.mockRejectedValue(new Error('Network error'));
 

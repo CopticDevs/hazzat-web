@@ -1,3 +1,4 @@
+import InvalidAddressMessage from "./InvalidAddressMessage";
 import { LanguageContext } from "../LanguageContext";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -34,6 +35,7 @@ function FontsPage() {
                 </MainPaper>
             } />
             <Route path={`/HazzatFont`} element={<HazzatFont />} />
+            <Route path="*" element={<MainPaper size={Size.Wide}><InvalidAddressMessage /></MainPaper>} />
         </Routes>
     );
 }
