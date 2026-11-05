@@ -1,3 +1,4 @@
+import InvalidAddressMessage from "./InvalidAddressMessage";
 import MyNavLink from "./MyNavLink";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -77,6 +78,8 @@ function ServicesMenu(props: IProps) {
     if (isLoading || !isMounted.current) {
         return <LoadingSpinner />;
     }
+
+    if (serviceIdParam && !services.some(service => service.id === serviceIdParam)) return <InvalidAddressMessage />;
 
     return (
         <>

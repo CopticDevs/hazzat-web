@@ -1,3 +1,4 @@
+import InvalidAddressMessage from "./InvalidAddressMessage";
 import { Route, Routes } from "react-router-dom";
 import BookletDetails from "./BookletDetails";
 import BookletsMenu from "./BookletsMenu";
@@ -9,7 +10,8 @@ function BookletsPage() {
         <MainPaper size={Size.Wide}>
             <Routes>
                 <Route path="/" element={<BookletsMenu />} />
-                <Route path={`/:bookletId/*`} element={<BookletDetails />} />
+                <Route path={`/:bookletId`} element={<BookletDetails />} />
+                <Route path="*" element={<InvalidAddressMessage />} />
             </Routes>
         </MainPaper>
     );

@@ -121,7 +121,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
         };
     }
 
-    public async getSeasonList(): Promise<ISeasonInfo[]> {
+    public async getSeasonList(options?: { throwOnError?: boolean }): Promise<ISeasonInfo[]> {
         try {
             const seasons = await this.readSeasons();
             
@@ -129,12 +129,13 @@ export class HymnsDataProvider implements IHymnsDataProvider {
             const translations = await this.getSeasonTranslations();
             return this.mergeSeasonTranslations(seasons, translations);
         } catch (ex) {
+            if (options?.throwOnError) throw ex;
             console.log(ex);
             return [];
         }
     }
 
-    public async getSeason(seasonId: string): Promise<ISeasonInfo | undefined> {
+    public async getSeason(seasonId: string, options?: { throwOnError?: boolean }): Promise<ISeasonInfo | undefined> {
         try {
             const season = (await this.readSeasons()).find(s => s.id === seasonId);
             
@@ -147,6 +148,7 @@ export class HymnsDataProvider implements IHymnsDataProvider {
             const mergedSeasons = this.mergeSeasonTranslations([season], translations);
             return mergedSeasons[0];
         } catch (ex) {
+            if (options?.throwOnError) throw ex;
             console.log(ex);
             return undefined;
         }

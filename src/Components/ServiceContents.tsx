@@ -1,3 +1,4 @@
+import InvalidAddressMessage from "./InvalidAddressMessage";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
@@ -40,6 +41,7 @@ export default function ServiceContents({ seasonId, serviceId, serviceName }: Pr
 
     if (loading) return <LoadingSpinner />;
     if (failed) return <ContentLoadError retry={() => setRetry(value => value + 1)} />;
+    if (hymnId && !hymns.some(hymn => hymn.id === hymnId)) return <InvalidAddressMessage />;
     const formatsMap: StringMap<string | undefined> = {};
     for (const hymn of hymns) {
         for (const format of hymn.formats ?? []) formatsMap[format.id] = `/seasons/${seasonId}/services/${serviceId}/formats/${format.id}`;
