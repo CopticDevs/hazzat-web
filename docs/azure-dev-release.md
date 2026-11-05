@@ -2,7 +2,7 @@
 
 This separate manual release pipeline targets **https://dev.hazzat.com/**. Its first
 controlled deployment succeeded in pipeline 16, run 3614. The current candidate replaces typed build parameters with Azure’s manual resource
-version picker. Replacement verification and disabling classic are still pending;
+version picker. The revised picker deployment succeeded in run 3617; disabling classic is still pending;
 no automatic triggers are enabled. The classic release remains in place; the PPE scaffold remains blocked, and production is unchanged.
 
 ## Successful controlled validation (2026-11-05)
@@ -33,6 +33,29 @@ Independent HTTP 200 responses from dev matched the retained artifact:
 
 This records actual deployment-task execution, not only unchanged content. It does
 not establish full interactive application coverage, PPE validation, or cutover.
+
+## Successful manual-picker validation (2026-11-05)
+
+[Run 3617](https://dev.azure.com/CopticDevs/hazzat-api/_build/results?buildId=3617&view=results)
+succeeded at `2026-11-05T23:13:44Z` in definition 16 with code commit
+`3d8afe1dc1cb5b0fe3c9b0ff49117e8b8ceff63c`. In **Run → Pipeline artifacts →
+devBuild**, the default was build 3599 (successful, develop); explicitly selecting
+3354 updated the summary correctly. The browser queued exactly one controlled run
+with 3354 after the owner confirmed the test window.
+
+Provenance and download logs confirm build 3354, source branch
+`refs/heads/codex/public-skin-cleanup` and commit
+`4a98e8d2451d23de23102bd47fb2df87f4775ec0`. The published manifest matched all
+81 retained artifact files. The AzureStaticWebApp task completed deployment to the
+verified dev hostname, without Oryx or API build. Pipeline live comparison and
+independent homepage/main JS/main CSS HTTP 200 hashes matched the table above.
+
+Compiled YAML retained `lockBehavior: sequential` and the stage succeeded. The
+authenticated browser showed the Exclusive lock check Passed with "Lock acquired".
+The public timeline/log inspection did not expose that acquisition record.
+One run does not demonstrate concurrent-run serialization; no second run was queued
+to manufacture contention. This validation does not itself merge the PR, switch the
+code default branch or disable classic.
 
 ## Verified dev contract
 
@@ -85,28 +108,27 @@ The selected resource version is pinned for the entire run. Provenance checks co
 its ID, source branch and commit with build metadata; the download uses that same ID,
 never a later lookup of Latest. No rebuilding occurs.
 
-**Eligibility is not yet proven identical to classic.** Microsoft documents YAML's
+**Accepted safety distinction:** the owner explicitly accepted rejecting failed and PR builds after the picker revision was published. Eligibility is not claimed identical to classic. Microsoft documents YAML's
 default as the latest successful pipeline run. The manual picker can display failed
 and in-progress versions as well. The existing validator intentionally permits only
 completed successful builds with reason `manual`, `individualCI` or `batchedCI`,
 with a `refs/heads/...` source branch and the expected Container artifact. PR,
 partially successful, failed, canceled and other build reasons remain rejected before
 deployment. Classic's saved Latest setting does not establish its result/reason
-eligibility. Confirm this restriction is acceptable before declaring full parity;
-do not silently broaden it or claim exact eligibility equivalence.
+eligibility. Preserve this accepted restriction; do not silently broaden it or claim exact
+eligibility equivalence.
 
 The latest observed successful definition-12 build was **3599**, on develop, commit
-`66e85d4070738eea89d3d39658a0a9b4afc8b12e`. Recheck current classic and YAML picker
-defaults side by side without queueing; defaults may advance. Microsoft's resource
-guide also describes default resolution in terms of successful CI runs, so specifically
-verify selection of these existing manual builds in Azure. For a no-content-change
+`66e85d4070738eea89d3d39658a0a9b4afc8b12e`. The browser verified the YAML picker default was 3599 and allowed selection of
+3354 across branches; defaults may advance. Microsoft's resource
+guide describes default resolution in terms of successful CI runs; run 3617
+independently establishes selection of existing manual build 3354. For a no-content-change
 validation, explicitly select retained build **3354** after rechecking the live baseline.
 
 `DeployDev` has `lockBehavior: sequential`. Azure documents an automatically created
 stage-level lock for a named stage with this setting. It serializes this pipeline's
-runs; it does not lock classic or other writers. Azure compilation, picker behavior
-and this new stage arrangement still require service validation. Run 3614 tested the
-previous typed-parameter job, not this revision.
+runs; it does not lock classic or other writers. Run 3617 validated Azure compilation, picker selection and this stage arrangement.
+Concurrent-run contention remains untested; compilation alone does not demonstrate it.
 
 ## Queue and verify a controlled manual deployment
 
@@ -119,7 +141,7 @@ previous typed-parameter job, not this revision.
    retain its artifact. Recheck that build 3354 is still the live baseline before
    treating it as rollback. Record existing trigger/settings snapshots for comparison.
 3. Open **Run pipeline** on definition 16 using the reviewed pipeline-code ref.
-   Under **Resources**, open **devBuild** and inspect the default version, or select
+   Under **Pipeline artifacts**, open **devBuild** and inspect the default version, or select
    an explicit existing definition-12 version across branches. Record its run ID.
    Branch and commit come from the resource metadata; there is nothing to type.
    If Azure requests resource permission, authorize only pipeline 16 to build 12
@@ -163,8 +185,10 @@ Latest may have changed. Record ownership transitions and deployed artifact IDs.
 `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s .pipelines/tests -v`
 tests metadata selection, rejection paths, downloaded layout and mocked live checks.
 These tests do not establish Azure YAML compilation, manual picker defaults or locking.
-Run 3614 established actual execution of the earlier dev YAML. The current resource
-picker revision requires a controlled Azure validation before classic is disabled.
+Run 3614 established actual execution of the earlier dev YAML. Run 3617 additionally validated the resource-picker revision and actual deployment.
+Classic retirement and switching the default code branch remain separate actions;
+keep the candidate code ref until the reviewed YAML exists in develop after an
+explicitly authorized merge.
 PPE execution and full interactive smoke testing remain separate unfinished work.
 
 References:

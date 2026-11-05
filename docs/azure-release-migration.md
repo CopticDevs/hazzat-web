@@ -185,7 +185,14 @@ It succeeded using code commit `3a0aac7df575e3f2c4657b70b7fa971c7a6930d9` and
 artifact build 3354. The actual deployment task completed, skipped Oryx, and deployed
 no API. Its 81-file manifest matched the retained artifact; homepage, main JS and
 main CSS matched live dev responses. See the [dev release runbook](azure-dev-release.md)
-for exact provenance, hashes and the subsequent permanent naming plan.
+for exact provenance and hashes. After permanent naming, the manual-picker revision
+also succeeded in [run 3617](https://dev.azure.com/CopticDevs/hazzat-api/_build/results?buildId=3617&view=results),
+using code commit `3d8afe1dc1cb5b0fe3c9b0ff49117e8b8ceff63c` and the same build
+3354. Its 81-file manifest and live homepage/JS/CSS matched the retained artifact.
+The owner accepted rejecting failed and PR builds. The browser verified the
+**Run → Pipeline artifacts → devBuild** picker default and explicit version selection.
+The compiled sequential stage succeeded; the authenticated browser verified the
+Exclusive lock check Passed with "Lock acquired". Concurrent-run contention remains untested.
 
 This is a successful dev-only migration test, not PPE cutover. Future dev deployments
 still require current target/rollback verification and an exclusive window. The
@@ -197,7 +204,8 @@ value was retrieved or committed.
 Local tests: `python3 -m unittest discover -s .pipelines/tests -v`. Parse the YAML
 with a YAML parser and review the exact-build inputs and literal deployment block.
 Local parsing alone is not Azure validation. Run 3614 validates the pre-rename dev
-pipeline's actual execution; PPE schema/runtime validation and deployment remain
+pipeline's actual execution, and run 3617 validates the manual-picker revision;
+PPE schema/runtime validation and deployment remain
 unperformed. No application build is needed for the naming/documentation update.
 
 #274 remains open until a known PPE artifact is deployed successfully through YAML,
