@@ -3,15 +3,13 @@
 trigger: none
 pr: none
 
-parameters:
-- name: inspectArtifact
-  displayName: Inspect a selected PPE build (deployment remains blocked)
-  type: boolean
-  default: false
-- name: buildId
-  displayName: Existing successful PPE build ID (not a build number)
-  type: string
-  default: '0'
+resources:
+  pipelines:
+  - pipeline: ppeBuild
+    source: '\hazzat-web\CopticDevs.hazzat-web-ppe'
+    # Deliberately disabled until classic is retired after controlled validation.
+    # Final completion branch filter must be refs/heads/develop; see PPE plan.
+    trigger: none
 
 pool:
   vmImage: ubuntu-26.04
@@ -19,16 +17,22 @@ pool:
 stages:
 - stage: InspectArtifact
   displayName: Verify the selected existing PPE artifact
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual'), ${{ eq(parameters.inspectArtifact, true) }})
+  condition: and(succeeded(), in(variables['Build.Reason'], 'Manual', 'ResourceTrigger'))
   jobs:
   - job: Inspect
     steps:
     - checkout: self
       persistCredentials: false
-    - bash: python3 scripts/verify-ppe-release-build.py
+    - bash: python3 scripts/verify-ppe-release-build.py metadata
       displayName: Reject invalid, failed, or unrelated build runs
       env:
-        PPE_BUILD_ID: ${{ parameters.buildId }}
+        PPE_BUILD_ID: $(resources.pipeline.ppeBuild.runID)
+        PPE_SOURCE_BRANCH: $(resources.pipeline.ppeBuild.sourceBranch)
+        PPE_SOURCE_COMMIT: $(resources.pipeline.ppeBuild.sourceCommit)
+        PPE_RUN_REASON: $(Build.Reason)
+        PPE_TRIGGER_ALIAS: $(Resources.TriggeringAlias)
+        PPE_CODE_BRANCH: $(Build.SourceBranch)
+        PPE_CODE_COMMIT: $(Build.SourceVersion)
     - task: DownloadBuildArtifacts@1
       displayName: Download the exact selected build artifact
       inputs:
@@ -37,39 +41,46 @@ stages:
         pipeline: '14'
         specificBuildWithTriggering: false
         buildVersionToDownload: specific
-        buildId: ${{ parameters.buildId }}
+        buildId: $(resources.pipeline.ppeBuild.runID)
         downloadType: single
         artifactName: HazzatWebBuildPpe
         downloadPath: $(Pipeline.Workspace)/ppe-release/_CopticDevs.hazzat-web-ppe
         cleanDestinationFolder: true
-    - bash: |
-        set -euo pipefail
-        test -s "$ARTIFACT_ROOT/index.html"
-        test -d "$ARTIFACT_ROOT/static"
-        cd "$ARTIFACT_ROOT"
-        find . -type f -print0 | sort -z | xargs -0 sha256sum > "$MANIFEST"
-        echo 'Verified static output; no build or transformation performed.'
-      displayName: Check output layout and record file hashes
+    - bash: python3 scripts/verify-ppe-release-build.py layout
+      displayName: Check output layout and record unmodified file hashes
       env:
-        ARTIFACT_ROOT: $(Pipeline.Workspace)/ppe-release/_CopticDevs.hazzat-web-ppe/HazzatWebBuildPpe
-        MANIFEST: $(Pipeline.Workspace)/ppe-artifact-sha256.txt
+        PPE_ARTIFACT_ROOT: $(Pipeline.Workspace)/ppe-release/_CopticDevs.hazzat-web-ppe/HazzatWebBuildPpe
+        PPE_MANIFEST: $(Pipeline.Workspace)/ppe-artifact-sha256.json
     - task: PublishPipelineArtifact@1
       displayName: Preserve inspection evidence (not a replacement build artifact)
       inputs:
-        targetPath: $(Pipeline.Workspace)/ppe-artifact-sha256.txt
+        targetPath: $(Pipeline.Workspace)/ppe-artifact-sha256.json
         artifact: ppe-artifact-inspection
 
 # Intentional literal block. No queue-time parameter or variable unlocks deployment.
-# Before removing it, replace this job with a deployment job bound to the verified,
-# pre-created Azure environment and its reviewed checks/security. See the runbook.
+# Before removing it, verify PPE token/target binding and access controls.
+# No environment/approval gate is invented: classic has automated approvals only.
+# See docs/azure-ppe-release-plan.md for security and cutover decisions.
 - stage: DeployPpe
   displayName: BLOCKED - target and access-control inventory required
   dependsOn: InspectArtifact
+  lockBehavior: sequential
   condition: and(succeeded(), eq(1, 0))
   jobs:
   - job: BlockedDeployment
     steps:
-    - checkout: none
+    - checkout: self
+      persistCredentials: false
+    - bash: python3 scripts/verify-ppe-release-build.py metadata
+      displayName: Reject invalid, failed, or unrelated build runs
+      env:
+        PPE_BUILD_ID: $(resources.pipeline.ppeBuild.runID)
+        PPE_SOURCE_BRANCH: $(resources.pipeline.ppeBuild.sourceBranch)
+        PPE_SOURCE_COMMIT: $(resources.pipeline.ppeBuild.sourceCommit)
+        PPE_RUN_REASON: $(Build.Reason)
+        PPE_TRIGGER_ALIAS: $(Resources.TriggeringAlias)
+        PPE_CODE_BRANCH: $(Build.SourceBranch)
+        PPE_CODE_COMMIT: $(Build.SourceVersion)
     - task: DownloadBuildArtifacts@1
       inputs:
         buildType: specific
@@ -77,11 +88,16 @@ stages:
         pipeline: '14'
         specificBuildWithTriggering: false
         buildVersionToDownload: specific
-        buildId: ${{ parameters.buildId }}
+        buildId: $(resources.pipeline.ppeBuild.runID)
         downloadType: single
         artifactName: HazzatWebBuildPpe
         downloadPath: $(Pipeline.Workspace)/ppe-release/_CopticDevs.hazzat-web-ppe
         cleanDestinationFolder: true
+    - bash: python3 scripts/verify-ppe-release-build.py layout
+      displayName: Check output layout and record unmodified file hashes
+      env:
+        PPE_ARTIFACT_ROOT: $(Pipeline.Workspace)/ppe-release/_CopticDevs.hazzat-web-ppe/HazzatWebBuildPpe
+        PPE_MANIFEST: $(Pipeline.Workspace)/ppe-artifact-sha256.json
     - task: AzureStaticWebApp@0
       displayName: 'Static Web App: hazzat-web-ppe (blocked)'
       inputs:
@@ -100,4 +116,9 @@ stages:
         deployment_environment: ''
         production_branch: ''
         data_api_location: ''
+        default_hostname: brave-field-055faf010.1.azurestaticapps.net
         azure_static_web_apps_api_token: $(deployment_token)
+    - bash: python3 scripts/verify-ppe-release-build.py live
+      displayName: Compare PPE homepage with selected artifact
+      env:
+        PPE_MANIFEST: $(Pipeline.Workspace)/ppe-artifact-sha256.json
