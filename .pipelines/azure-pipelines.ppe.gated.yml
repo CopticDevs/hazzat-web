@@ -43,6 +43,8 @@ steps:
 - task: PublishTestResults@2
   condition: succeededOrFailed()
   inputs:
-    testResultsFormat: 'VSTest'
+    testResultsFormat: 'JUnit'
     testResultsFiles: '**/junit.xml'
-    failTaskOnFailedTests: false
+    failTaskOnFailedTests: true
+    failTaskOnFailureToPublishResults: true
+    failTaskOnMissingResultsFile: true
