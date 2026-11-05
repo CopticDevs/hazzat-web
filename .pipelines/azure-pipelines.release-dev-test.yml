@@ -1,0 +1,84 @@
+# Manual dev-only migration test. Setup: docs/azure-dev-release-test.md.
+trigger: none
+pr: none
+
+parameters:
+- name: deployDev
+  type: boolean
+  default: false
+  displayName: Deploy the selected artifact to dev.hazzat.com
+- name: exclusiveDevWindowConfirmed
+  type: boolean
+  default: false
+  displayName: Owner verified dev token, rollback build, and exclusive deployment window
+- name: buildId
+  type: string
+  default: '0'
+- name: expectedSourceBranch
+  type: string
+  default: UNSET
+  displayName: Exact source ref of selected dev build (refs/heads/...)
+- name: expectedSourceCommit
+  type: string
+  default: UNSET
+  displayName: Exact 40-character commit of selected dev build
+
+pool:
+  vmImage: ubuntu-26.04
+
+jobs:
+- job: DevMigrationTest
+  displayName: Exact-artifact deployment to dev.hazzat.com
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual'), ${{ eq(parameters.deployDev, true) }}, ${{ eq(parameters.exclusiveDevWindowConfirmed, true) }})
+  timeoutInMinutes: 30
+  steps:
+  - checkout: self
+    persistCredentials: false
+  - bash: python3 scripts/verify-dev-release-build.py metadata
+    displayName: Verify selected dev build provenance
+    env:
+      DEV_BUILD_ID: ${{ parameters.buildId }}
+      DEV_SOURCE_BRANCH: ${{ parameters.expectedSourceBranch }}
+      DEV_SOURCE_COMMIT: ${{ parameters.expectedSourceCommit }}
+  - task: DownloadBuildArtifacts@1
+    displayName: Download selected existing dev output without rebuilding
+    inputs:
+      buildType: specific
+      project: c3ad63de-5431-426e-8009-fe5331eea17a
+      pipeline: '12'
+      specificBuildWithTriggering: false
+      buildVersionToDownload: specific
+      buildId: ${{ parameters.buildId }}
+      downloadType: single
+      artifactName: HazzatWebBuildDev
+      downloadPath: $(Pipeline.Workspace)/dev-release/_CopticDevs.hazzat-web-dev
+      cleanDestinationFolder: true
+  - bash: python3 scripts/verify-dev-release-build.py layout
+    displayName: Verify static layout and record unmodified file hashes
+    env:
+      DEV_ARTIFACT_ROOT: $(Pipeline.Workspace)/dev-release/_CopticDevs.hazzat-web-dev/HazzatWebBuildDev
+      DEV_MANIFEST: $(Pipeline.Workspace)/dev-artifact-sha256.json
+  - task: PublishPipelineArtifact@1
+    displayName: Preserve inspection evidence
+    inputs:
+      targetPath: $(Pipeline.Workspace)/dev-artifact-sha256.json
+      artifact: dev-artifact-inspection
+  - task: AzureStaticWebApp@0
+    displayName: Deploy exact artifact to the verified DEV Static Web App
+    inputs:
+      cwd: $(Pipeline.Workspace)/dev-release
+      app_location: _CopticDevs.hazzat-web-dev/HazzatWebBuildDev
+      output_location: ''
+      api_location: ''
+      data_api_location: ''
+      skip_app_build: true
+      skip_api_build: false
+      deployment_environment: ''
+      production_branch: ''
+      default_hostname: yellow-forest-07103e310.1.azurestaticapps.net
+      verbose: false
+      azure_static_web_apps_api_token: $(deployment_token)
+  - bash: python3 scripts/verify-dev-release-build.py live
+    displayName: Compare dev.hazzat.com homepage to deployed artifact
+    env:
+      DEV_MANIFEST: $(Pipeline.Workspace)/dev-artifact-sha256.json
