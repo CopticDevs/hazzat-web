@@ -1021,3 +1021,166 @@ it("shares the SVG-backed cover image across all folded print sheets", async () 
     expect(doc.getPageCount()).toBeGreaterThanOrEqual(2);
     expect(corners).toHaveLength(1);
 });
+
+describe("browser-backed booklet artwork", () => {
+    const originalImage = window.Image;
+    const originalCreate = URL.createObjectURL;
+    const originalRevoke = URL.revokeObjectURL;
+    const originalFetch = global.fetch;
+    let failImage: boolean;
+    let imageSize: number;
+    let draw: jest.Mock;
+    const svg = new Uint8Array(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><path d="M0 0L20 0L20 10Z"/></svg>'));
+    beforeEach(() => {
+        failImage = false;
+        imageSize = 20;
+        draw = jest.fn();
+        URL.createObjectURL = jest.fn().mockReturnValue("blob:booklet");
+        URL.revokeObjectURL = jest.fn();
+        window.Image = class {
+            get naturalWidth() { return imageSize; }
+            get naturalHeight() { return imageSize / 2; }
+            width = 0;
+            height = 0;
+            onload?: () => void;
+            onerror?: () => void;
+            set src(value: string) { Promise.resolve().then(() => failImage ? this.onerror?.() : this.onload?.()); }
+        } as unknown as typeof Image;
+        jest.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage: draw } as unknown as CanvasRenderingContext2D);
+        jest.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation(callback => callback({ arrayBuffer: async () => readImage("logo.png") } as Blob));
+    });
+    afterEach(() => {
+        jest.restoreAllMocks();
+        window.Image = originalImage;
+        URL.createObjectURL = originalCreate;
+        URL.revokeObjectURL = originalRevoke;
+        global.fetch = originalFetch;
+    });
+    const generate = (imageSources: BookletImageSources) => generateSeasonBookletPdf({
+        season: createSeason(), services: [], layoutKind: "display", fontSources: createFontSources(),
+        imageSources: { frontCoverBackground: undefined, frontCoverLogo: undefined, backCoverBackground: undefined, ...imageSources }
+    });
+
+    it("keeps simple SVG logos vector while rasterizing SVG background images", async () => {
+        const paths = jest.spyOn(PDFPage.prototype, "drawSvgPath");
+        const images = jest.spyOn(PDFPage.prototype, "drawImage");
+        const pdf = await PDFDocument.load(await generate({ frontCoverBackground: svg, frontCoverLogo: svg }));
+        expect(pdf.getPageCount()).toBe(4);
+        expect(paths).toHaveBeenCalledWith("M0 0L20 0L20 10Z", expect.objectContaining({ scale: 142 / 20 }));
+        expect(draw).toHaveBeenCalledWith(expect.anything(), 0, 0, 20, 10);
+        expect(images).toHaveBeenCalled();
+        expect(URL.revokeObjectURL).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(["image", "dimensions", "context", "blob"])("omits optional backgrounds and releases resources after %s failure", async failure => {
+        if (failure === "image") failImage = true;
+        if (failure === "dimensions") imageSize = 0;
+        if (failure === "context") (HTMLCanvasElement.prototype.getContext as jest.Mock).mockReturnValue(null);
+        if (failure === "blob") (HTMLCanvasElement.prototype.toBlob as jest.Mock).mockImplementation(callback => callback(null));
+        const images = jest.spyOn(PDFPage.prototype, "drawImage");
+        const pdf = await PDFDocument.load(await generate({ frontCoverBackground: svg }));
+        expect(pdf.getPageCount()).toBe(4);
+        expect(images).not.toHaveBeenCalled();
+        expect(URL.revokeObjectURL).toHaveBeenCalledTimes(1);
+    });
+
+    it("uses a PNG data URL when the browser does not expose canvas.toBlob", async () => {
+        Object.defineProperty(HTMLCanvasElement.prototype, "toBlob", { configurable: true, writable: true, value: undefined });
+        jest.spyOn(HTMLCanvasElement.prototype, "toDataURL").mockReturnValue(`data:image/png;base64,${Buffer.from(readImage("logo.png")).toString("base64")}`);
+        const images = jest.spyOn(PDFPage.prototype, "drawImage");
+        await generate({ frontCoverBackground: svg });
+        expect(HTMLCanvasElement.prototype.toDataURL).toHaveBeenCalledWith("image/png");
+        expect(images).toHaveBeenCalled();
+        expect(URL.revokeObjectURL).toHaveBeenCalledTimes(1);
+    });
+
+    it("rasterizes transformed SVG logos instead of losing their transforms", async () => {
+        const transformed = new Uint8Array(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><path transform="translate(1 1)" d="M0 0L20 0L20 10Z"/></svg>'));
+        const paths = jest.spyOn(PDFPage.prototype, "drawSvgPath");
+        const images = jest.spyOn(PDFPage.prototype, "drawImage");
+        await generate({ frontCoverLogo: transformed });
+        expect(paths.mock.calls.some(([path]) => path === "M0 0L20 0L20 10Z")).toBe(false);
+        expect(images).toHaveBeenCalledTimes(1);
+        expect(URL.revokeObjectURL).toHaveBeenCalledTimes(1);
+    });
+
+    it("loads URL images by their extension and tolerates a missing optional logo", async () => {
+        global.fetch = jest.fn(async (source: RequestInfo) => ({
+            ok: source !== "/missing-logo",
+            arrayBuffer: async () => readImage(String(source).endsWith(".jpg") ? "bookletBackCoverBackground.jpg" : "logo.png")
+        } as Response));
+        const images = jest.spyOn(PDFPage.prototype, "drawImage");
+        await generate({ frontCoverBackground: "/cover.jpg", backCoverBackground: "/back.png", frontCoverLogo: "/missing-logo" });
+        expect(fetch).toHaveBeenCalledWith("/cover.jpg");
+        expect(fetch).toHaveBeenCalledWith("/back.png");
+        expect(fetch).toHaveBeenCalledWith("/missing-logo");
+        expect(images).toHaveBeenCalledTimes(2);
+    });
+});
+
+it("ignores HTML comments, empty directional runs, and preserves separate paragraphs", () => {
+    expect(parseHazzatHtmlToLines('<!-- note --><span>\u200e</span>hello<div>world</div>')).toEqual([
+        [{ text: "hello", fontKey: "english" }], [{ text: "world", fontKey: "english" }]
+    ]);
+    expect(parseHazzatHtmlToLines("")).toEqual([[]]);
+});
+
+it("joins Arabic across transparent marks but not intervening whitespace", () => {
+    const line: TextRun[] = [{ text: "ب", fontKey: "arabic" }, { text: "َ", fontKey: "arabic" }, { text: "ب", fontKey: "arabic" }];
+    expect(getDrawableRunText(line, 0)).toBe("ب\u200d");
+    expect(getDrawableRunText(line, 2)).toBe("\u200dب");
+    line[1].text = " ";
+    expect(getDrawableRunText(line, 0)).toBe("ب");
+    expect(getDrawableRunText(line, 2)).toBe("ب");
+});
+
+it("repaginates an overflowing table of contents and links every hymn to the final content pages", async () => {
+    const service = createService();
+    service.hymns = Array.from({ length: 42 }, (_, index) => ({
+        ...service.hymns![0], id: `hymn-${index}`, name: `Hymn ${index}`, displayName: `Hymn ${index}`, order: index,
+        formats: [{ id: "2", name: "Hazzat", order: 2, variationCount: 1, variations: [{
+            id: "standard", name: "Standard", displayName: "Standard",
+            content: { contentType: ContentType.HazzatContent, englishHazzat: "Lord have mercy", copticHazzat: "", arabicHazzat: "" }
+        }] }]
+    }));
+    const bytes = await generateSeasonBookletPdf({
+        season: createSeason(), services: [service], formatKinds: ["regular"], layoutKind: "display",
+        fontSources: createFontSources(), imageSources: { frontCoverBackground: undefined, frontCoverLogo: undefined, backCoverBackground: undefined, serviceDivider: undefined, variationDivider: undefined }
+    });
+    const pdf = await PDFDocument.load(bytes);
+    const tocPages = pdf.getPages().filter(page => (page.node.Annots()?.size() || 0) > 0);
+    expect(tocPages).toHaveLength(2);
+    expect(tocPages.reduce((sum, page) => sum + page.node.Annots()!.size(), 0)).toBe(43);
+    // Both passes must agree on page numbering: cover, inside cover and two TOC pages precede content.
+    const firstLink = tocPages[0].node.Annots()!.lookup(0) as import("pdf-lib").PDFDict;
+    const action = firstLink.lookup(PDFName.of("A")) as import("pdf-lib").PDFDict;
+    const destination = action.lookup(PDFName.of("D")) as PDFArray;
+    expect(destination.get(0).toString()).toBe(pdf.getPage(4).ref.toString());
+    expect(pdf.getPageCount() % 4).toBe(0);
+});
+
+it.each([false, true])("fits unusually long cover titles within the arch and preserves blank notation lines (hymn suffix: %s)", async hymnSuffix => {
+    const service = createService();
+    service.hymns![0].formats = [{ id: "2", name: "Hazzat", order: 2, variationCount: 1, variations: [{
+        id: "standard", name: "Standard", displayName: "Standard", content: {
+            contentType: ContentType.HazzatContent, englishHazzat: "<br><br>First line<br><br>Second line", copticHazzat: "", arabicHazzat: ""
+        }
+    }] }];
+    const draws = jest.spyOn(PDFPage.prototype, "drawText");
+    try {
+        const title = (hymnSuffix ? "" : "Hymns for ") + "A very long season title with many words ".repeat(10) + (hymnSuffix ? "Hymns" : "Celebration");
+        const bytes = await generateSeasonBookletPdf({
+            season: createSeason("long-season", title), services: [service], formatKind: "regular", layoutKind: "display",
+            fontSources: createFontSources(), imageSources: createImageSources()
+        });
+        const pdf = await PDFDocument.load(bytes);
+        const coverLines = draws.mock.calls.filter(([, options]) => options?.size === 18 && options.y! <= 315 && options.y! > 250);
+        expect(coverLines).toHaveLength(3);
+        expect(coverLines.some(([text]) => text.endsWith("..."))).toBe(true);
+        expect(coverLines[2][0]).toMatch(hymnSuffix ? /^Hymns$/ : /\.\.\.$/);
+        const first = draws.mock.calls.find(([text]) => text === "First")!;
+        const second = draws.mock.calls.find(([text]) => text === "Second")!;
+        expect(first[1]!.y! - second[1]!.y!).toBeGreaterThan(25);
+        expect(pdf.getPageCount() % 4).toBe(0);
+    } finally { draws.mockRestore(); }
+});

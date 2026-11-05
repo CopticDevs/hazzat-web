@@ -117,3 +117,23 @@ test('an identical hymn heading is not repeated but distinct score titles and su
     view.rerender(<MusicXmlScore musicXml="<score-partwise />" hymnTitle="A different hymn title" />);
     expect(screen.getByRole('heading', { name: 'MusicXML score title' })).toBeInTheDocument();
 });
+
+test.each([new Error('Engraving failed'), 'renderer failure'])('reports synchronous engraving errors without leaving a score heading', async error => {
+    render(score());
+    mockInstances[0].render.mockImplementation(() => { throw error; });
+    expect(await screen.findByText(error instanceof Error ? error.message : 'Unable to render musical notes.')).toBeInTheDocument();
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+});
+
+test('uses window resize events when ResizeObserver is unavailable and removes them on unmount', async () => {
+    window.ResizeObserver = undefined as any;
+    const remove = jest.spyOn(window, 'removeEventListener');
+    const view = render(score());
+    await waitFor(() => expect(mockInstances[0].render).toHaveBeenCalled());
+    width = 800;
+    fireEvent(window, new Event('resize'));
+    await waitFor(() => expect(mockInstances[0].Zoom).toBeCloseTo(0.9));
+    view.unmount();
+    expect(remove).toHaveBeenCalledWith('resize', expect.any(Function));
+    expect(mockInstances[0].clear).toHaveBeenCalled();
+});

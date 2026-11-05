@@ -386,4 +386,44 @@ describe("booklet builder", () => {
         expect(settings.setHazzatFontColor).not.toHaveBeenCalled();
         expect(settings.userSettings.contentFontColor).toBe("NAVY");
     });
+    it("applies custom format checkboxes to the generated PDF and invalidates earlier previews", async () => {
+        await openBuilder();
+        fireEvent.click(screen.getByText("Customize formats"));
+        const text = screen.getByRole("checkbox", { name: "Text", exact: true });
+        const hazzat = screen.getByRole("checkbox", { name: "Hazzat", exact: true });
+        expect(text).toBeChecked();
+        expect(hazzat).toBeChecked();
+        fireEvent.click(hazzat);
+        expect(hazzat).not.toBeChecked();
+        expect(screen.getByRole("status")).toHaveTextContent("Selection: Text Only");
+        fireEvent.click(screen.getByRole("button", { name: "Review booklet", exact: true }));
+        await screen.findByRole("link", { name: "Download PDF" });
+        expect(generator).toHaveBeenLastCalledWith(expect.objectContaining({ formatKinds: ["text"] }));
+        fireEvent.click(hazzat);
+        expect(hazzat).toBeChecked();
+        expect(screen.queryByRole("link", { name: "Download PDF" })).not.toBeInTheDocument();
+        fireEvent.click(text);
+        expect(text).not.toBeChecked();
+        fireEvent.click(screen.getByRole("button", { name: "Review booklet", exact: true }));
+        await screen.findByRole("link", { name: "Download PDF" });
+        expect(generator).toHaveBeenLastCalledWith(expect.objectContaining({ formatKinds: ["regular"] }));
+    });
+
+    it("orders service choices and generated booklet services by their metadata", async () => {
+        const later = { ...service, id: "later", name: "Later service", displayName: "Later service", order: 20 };
+        const earlier = { ...service, id: "earlier", name: "Earlier service", displayName: "Earlier service", order: 2 };
+        const response = [later, earlier];
+        jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue(response);
+        await openBuilder();
+        const choices = screen.getAllByRole("checkbox", { name: /^(Earlier|Later) service$/ });
+        expect(choices).toEqual([
+            screen.getByRole("checkbox", { name: "Earlier service", exact: true }),
+            screen.getByRole("checkbox", { name: "Later service", exact: true })
+        ]);
+        fireEvent.click(screen.getByRole("button", { name: "Review booklet", exact: true }));
+        await screen.findByRole("link", { name: "Download PDF" });
+        expect(generator.mock.calls[0][0].services.map(item => item.id)).toEqual(["earlier", "later"]);
+        expect(response.map(item => item.id)).toEqual(["later", "earlier"]);
+    });
+
 });
