@@ -90,7 +90,7 @@ function BookletDetails() {
         setPreview(undefined);
         try {
             const provider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
-            const seasonResponse = await provider.getSeason(seasonIdParam);
+            const seasonResponse = await provider.getSeason(seasonIdParam, { throwOnError: true });
             const serviceResponse = seasonResponse ? await provider.getServiceList(seasonIdParam) : [];
             if (current()) {
                 const sorted = [...serviceResponse].sort((a, b) => a.order - b.order);

@@ -57,7 +57,7 @@ export default function HymnContentFromService({ seasonInfo }: { seasonInfo: ISe
             formatsMap[format.id] = `/seasons/${seasonId}/services/${serviceId}${hymnId ? `/hymns/${hymnId}` : ""}/formats/${format.id}`;
         }
     }
-    if (hymnId && !formatsMap[formatId]) return <InvalidAddressMessage />;
+    if (!formatsMap[formatId]) return <InvalidAddressMessage />;
 
     return <>
         <BreadCrumb items={[
