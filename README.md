@@ -2,6 +2,8 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+See [shared content v4](docs/shared-content-v4.md) for schema compatibility, local feed configuration, format views, and rollout validation.
+
 ## Available Scripts
 
 In the project directory, you can run:

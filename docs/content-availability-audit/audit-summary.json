@@ -1,0 +1,750 @@
+{
+  "source": {
+    "baseUrl": "https://d1zhmhuei1bwco.cloudfront.net",
+    "collectedAtUtc": "2026-10-30T13:47:33Z",
+    "seasons": 34,
+    "services": 84,
+    "hymns": 471,
+    "contentRecords": 850
+  },
+  "sourceObjects": 1411,
+  "snapshotManifestSha256": "552fb50d9bb8ca05d4b6e56d6f52e7ee44f77625805a57dd86374829162a45f4",
+  "before": {
+    "findings": 52,
+    "summary": {
+      "contentRecords": 850,
+      "identities": 471,
+      "services": 84,
+      "hymnPlacements": 657,
+      "variationPlacements": 1216,
+      "printableRecords": 826,
+      "missingInnerType": 446,
+      "noncanonicalLanguageRecords": 52,
+      "noncanonicalLanguageColumns": 156,
+      "readerRenders": 795,
+      "localeServiceResolutions": 168,
+      "types": {
+        "Text": 461,
+        "Hazzat": 331,
+        "VerticalHazzat": 31,
+        "Audio": 17,
+        "MusicalNotes": 3,
+        "Video": 6,
+        "Information": 1
+      }
+    }
+  },
+  "after": {
+    "findings": 0,
+    "summary": {
+      "contentRecords": 850,
+      "identities": 471,
+      "services": 84,
+      "hymnPlacements": 657,
+      "variationPlacements": 1216,
+      "printableRecords": 826,
+      "missingInnerType": 446,
+      "noncanonicalLanguageRecords": 52,
+      "noncanonicalLanguageColumns": 156,
+      "readerRenders": 847,
+      "localeServiceResolutions": 168,
+      "catalogHashesVerified": 850,
+      "types": {
+        "Text": 461,
+        "Hazzat": 331,
+        "VerticalHazzat": 31,
+        "Audio": 17,
+        "MusicalNotes": 3,
+        "Video": 6,
+        "Information": 1
+      }
+    }
+  },
+  "impact": {
+    "contentRecords": 52,
+    "hymnVariationPlacements": 70,
+    "seasons": 24,
+    "services": 39,
+    "paragraphs": 52,
+    "languageLabels": 156,
+    "nonemptyCellsRestored": 85,
+    "nonemptyCellsByLanguage": {
+      "english": 52,
+      "coptic": 26,
+      "arabic": 7
+    },
+    "previouslyBlankVariations": 11,
+    "previouslyPartialVariations": 41
+  },
+  "bookletExports": [
+    {
+      "seasonId": "annual",
+      "name": "Annual",
+      "success": true,
+      "bytes": 4316308,
+      "milliseconds": 10682
+    },
+    {
+      "seasonId": "nairouz",
+      "name": "Nairouz",
+      "success": true,
+      "bytes": 1912250,
+      "milliseconds": 3936
+    },
+    {
+      "seasonId": "feast-of-the-cross",
+      "name": "Feast of the Cross",
+      "success": true,
+      "bytes": 1046140,
+      "milliseconds": 1709
+    },
+    {
+      "seasonId": "kiahk",
+      "name": "Kiahk",
+      "success": true,
+      "bytes": 3374350,
+      "milliseconds": 7157
+    },
+    {
+      "seasonId": "paramoune-of-nativity",
+      "name": "Paramoune of Nativity",
+      "success": true,
+      "bytes": 759356,
+      "milliseconds": 1763
+    },
+    {
+      "seasonId": "nativity",
+      "name": "Nativity",
+      "success": true,
+      "bytes": 2077759,
+      "milliseconds": 5764
+    },
+    {
+      "seasonId": "feast-of-circumcision",
+      "name": "Feast of Circumcision",
+      "success": true,
+      "bytes": 878959,
+      "milliseconds": 1867
+    },
+    {
+      "seasonId": "paramoune-of-epiphany",
+      "name": "Paramoune of Epiphany",
+      "success": true,
+      "bytes": 729359,
+      "milliseconds": 1751
+    },
+    {
+      "seasonId": "epiphany",
+      "name": "Epiphany",
+      "success": true,
+      "bytes": 1940420,
+      "milliseconds": 3669
+    },
+    {
+      "seasonId": "the-wedding-at-cana-of-galilee",
+      "name": "The Wedding at Cana of Galilee",
+      "success": true,
+      "bytes": 792356,
+      "milliseconds": 1816
+    },
+    {
+      "seasonId": "the-lords-entry-into-the-temple",
+      "name": "The Lord's Entry into the Temple",
+      "success": true,
+      "bytes": 860610,
+      "milliseconds": 1858
+    },
+    {
+      "seasonId": "ninevehs-fast",
+      "name": "Nineveh's Fast",
+      "success": true,
+      "bytes": 938548,
+      "milliseconds": 1623
+    },
+    {
+      "seasonId": "ninevehs-feast",
+      "name": "Nineveh's Feast",
+      "success": true,
+      "bytes": 710785,
+      "milliseconds": 1793
+    },
+    {
+      "seasonId": "great-lent-saturdays-sundays",
+      "name": "Great Lent - Saturdays & Sundays",
+      "success": true,
+      "bytes": 1290549,
+      "milliseconds": 2249
+    },
+    {
+      "seasonId": "great-lent-weekdays",
+      "name": "Great Lent - Weekdays",
+      "success": true,
+      "bytes": 1074476,
+      "milliseconds": 2012
+    },
+    {
+      "seasonId": "annunciation",
+      "name": "Annunciation",
+      "success": true,
+      "bytes": 722164,
+      "milliseconds": 1753
+    },
+    {
+      "seasonId": "lazarus-saturday",
+      "name": "Lazarus Saturday",
+      "success": true,
+      "bytes": 993085,
+      "milliseconds": 2043
+    },
+    {
+      "seasonId": "the-lords-entry-into-jerusalem-palm-sunday",
+      "name": "The Lord's Entry into Jerusalem (Palm Sunday)",
+      "success": true,
+      "bytes": 1520689,
+      "milliseconds": 3328
+    },
+    {
+      "seasonId": "passion-week-general-hours",
+      "name": "Passion Week - General Hours",
+      "success": true,
+      "bytes": 1116164,
+      "milliseconds": 2096
+    },
+    {
+      "seasonId": "passion-pascha-week-covenant-thursday",
+      "name": "Passion (Pascha) Week - Covenant Thursday",
+      "success": true,
+      "bytes": 1226692,
+      "milliseconds": 2204
+    },
+    {
+      "seasonId": "passion-pascha-week-good-friday",
+      "name": "Passion (Pascha) Week - Good Friday",
+      "success": true,
+      "bytes": 1454722,
+      "milliseconds": 3254
+    },
+    {
+      "seasonId": "bright-saturday",
+      "name": "Bright Saturday",
+      "success": true,
+      "bytes": 2939572,
+      "milliseconds": 6615
+    },
+    {
+      "seasonId": "resurrection",
+      "name": "Resurrection",
+      "success": true,
+      "bytes": 2291046,
+      "milliseconds": 5841
+    },
+    {
+      "seasonId": "ascension",
+      "name": "Ascension",
+      "success": true,
+      "bytes": 1346034,
+      "milliseconds": 3200
+    },
+    {
+      "seasonId": "pentecost",
+      "name": "Pentecost",
+      "success": true,
+      "bytes": 1547363,
+      "milliseconds": 3450
+    },
+    {
+      "seasonId": "apostles-fast",
+      "name": "Apostles Fast",
+      "success": true,
+      "bytes": 1047087,
+      "milliseconds": 2006
+    },
+    {
+      "seasonId": "apostles-feast",
+      "name": "Apostles Feast",
+      "success": true,
+      "bytes": 781090,
+      "milliseconds": 1859
+    },
+    {
+      "seasonId": "saint-marys-fastfeast",
+      "name": "Saint Mary's Fast/Feast",
+      "success": true,
+      "bytes": 3534832,
+      "milliseconds": 6229
+    },
+    {
+      "seasonId": "transfiguration",
+      "name": "Transfiguration",
+      "success": true,
+      "bytes": 848400,
+      "milliseconds": 1820
+    },
+    {
+      "seasonId": "glorifications",
+      "name": "Glorifications",
+      "success": true,
+      "bytes": 1754126,
+      "milliseconds": 2554
+    },
+    {
+      "seasonId": "coptic-weddings",
+      "name": "Coptic Weddings",
+      "success": true,
+      "bytes": 1679976,
+      "milliseconds": 5022
+    },
+    {
+      "seasonId": "funeral",
+      "name": "Funeral",
+      "success": true,
+      "bytes": 857513,
+      "milliseconds": 1853
+    },
+    {
+      "seasonId": "papal",
+      "name": "Papal",
+      "success": true,
+      "bytes": 2034282,
+      "milliseconds": 3760
+    },
+    {
+      "seasonId": "reception-of-new-priest",
+      "name": "Reception of New Priest",
+      "success": true,
+      "bytes": 1065374,
+      "milliseconds": 1941
+    }
+  ],
+  "restoredParagraphPdfChecks": [
+    {
+      "seasonId": "transfiguration",
+      "contentId": "04b675fd-ac59-4b25-a9d3-8b33431880e6",
+      "hymnId": "gospel-response-transfiguration-liturgy",
+      "present": true
+    },
+    {
+      "seasonId": "transfiguration",
+      "contentId": "0824bd4d-0b73-4bd5-95a2-49b757126e72",
+      "hymnId": "doxology-transfiguration",
+      "present": true
+    },
+    {
+      "seasonId": "transfiguration",
+      "contentId": "1e3710c1-e464-4fc4-ad5c-1474d9b58144",
+      "hymnId": "psalm-response-transfiguration",
+      "present": true
+    },
+    {
+      "seasonId": "transfiguration",
+      "contentId": "1e3710c1-e464-4fc4-ad5c-1474d9b58144",
+      "hymnId": "psalm-response-transfiguration",
+      "present": true
+    },
+    {
+      "seasonId": "transfiguration",
+      "contentId": "375bc365-749c-44d6-af31-9473047bc870",
+      "hymnId": "introduction-to-the-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "transfiguration",
+      "contentId": "4ed5e064-1a5e-4eaa-86aa-04d409c24bc9",
+      "hymnId": "gospel-response-transfiguration",
+      "present": true
+    },
+    {
+      "seasonId": "transfiguration",
+      "contentId": "4fabcabf-9000-493e-b9d6-a172cc4412b4",
+      "hymnId": "psalm-150-transfiguration",
+      "present": true
+    },
+    {
+      "seasonId": "transfiguration",
+      "contentId": "bc2805bf-e698-4990-859d-a304f6d21410",
+      "hymnId": "concluding-hymn-transfiguration",
+      "present": true
+    },
+    {
+      "seasonId": "transfiguration",
+      "contentId": "bc2805bf-e698-4990-859d-a304f6d21410",
+      "hymnId": "concluding-hymn-transfiguration",
+      "present": true
+    },
+    {
+      "seasonId": "transfiguration",
+      "contentId": "cf3c47b6-4893-43c1-b3eb-75f22d9d7794",
+      "hymnId": "verses-of-the-cymbals-transfiguration",
+      "present": true
+    },
+    {
+      "seasonId": "transfiguration",
+      "contentId": "e6b7894b-0db3-4dd8-9a4a-6e255486d229",
+      "hymnId": "acts-response-transfiguration",
+      "present": true
+    },
+    {
+      "seasonId": "feast-of-the-cross",
+      "contentId": "08acdf9f-df79-4ba1-a5eb-0f808658fc1c",
+      "hymnId": "aspasmos-adam",
+      "present": true
+    },
+    {
+      "seasonId": "feast-of-the-cross",
+      "contentId": "175a217a-b721-497c-94a1-ca6be0b25860",
+      "hymnId": "paralex",
+      "present": true
+    },
+    {
+      "seasonId": "feast-of-the-cross",
+      "contentId": "2b9fd3ab-bd3f-41cd-8407-5999094c21c2",
+      "hymnId": "aspasmos-watos-feast-of-the-cross",
+      "present": true
+    },
+    {
+      "seasonId": "feast-of-the-cross",
+      "contentId": "375bc365-749c-44d6-af31-9473047bc870",
+      "hymnId": "introduction-to-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "feast-of-the-cross",
+      "contentId": "7d0247d7-5ff2-4874-bafa-e9ba6b15d055",
+      "hymnId": "hymn-of-constantine-etaven-nieskhai",
+      "present": true
+    },
+    {
+      "seasonId": "feast-of-the-cross",
+      "contentId": "7d0247d7-5ff2-4874-bafa-e9ba6b15d055",
+      "hymnId": "hymn-of-constantine-etaven-nieskhai",
+      "present": true
+    },
+    {
+      "seasonId": "feast-of-the-cross",
+      "contentId": "a81dbad7-16c5-4dbd-9405-89b3e6a56888",
+      "hymnId": "psalm-cross",
+      "present": true
+    },
+    {
+      "seasonId": "passion-week-general-hours",
+      "contentId": "0eb8c740-1f0d-44c5-8ae7-285c81f95528",
+      "hymnId": "friday-3rd-hour-psalm",
+      "present": true
+    },
+    {
+      "seasonId": "passion-week-general-hours",
+      "contentId": "8cce4ea8-a6d1-4e42-ac37-d5bbf44032ec",
+      "hymnId": "friday-eve-1st-hour-psalm",
+      "present": true
+    },
+    {
+      "seasonId": "passion-week-general-hours",
+      "contentId": "a68c83f5-629b-4cd5-b0e0-01bfbb410900",
+      "hymnId": "thursday-eve-6th-hour-psalm",
+      "present": true
+    },
+    {
+      "seasonId": "passion-week-general-hours",
+      "contentId": "e15db80f-bcad-49da-bdc3-94142b58e86f",
+      "hymnId": "wednesday-eve-1st-hour-psalm",
+      "present": true
+    },
+    {
+      "seasonId": "passion-week-general-hours",
+      "contentId": "e579ddde-a1fb-41b1-9ebd-5ea305468d3a",
+      "hymnId": "wednesday-eve-3rd-hour-psalm",
+      "present": true
+    },
+    {
+      "seasonId": "the-lords-entry-into-jerusalem-palm-sunday",
+      "contentId": "0fae38b5-3854-471c-8f85-d4a88da9f15b",
+      "hymnId": "the-pauline-epistle-ethve-tianastasees",
+      "present": true
+    },
+    {
+      "seasonId": "the-lords-entry-into-jerusalem-palm-sunday",
+      "contentId": "375bc365-749c-44d6-af31-9473047bc870",
+      "hymnId": "introduction-to-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "the-lords-entry-into-jerusalem-palm-sunday",
+      "contentId": "375bc365-749c-44d6-af31-9473047bc870",
+      "hymnId": "introduction-to-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "the-lords-entry-into-jerusalem-palm-sunday",
+      "contentId": "7c9d35a6-23aa-473e-b73a-32c2dcd7febb",
+      "hymnId": "verses-of-the-cymbals",
+      "present": true
+    },
+    {
+      "seasonId": "passion-pascha-week-covenant-thursday",
+      "contentId": "10579ef7-dc76-4131-9573-b8c0f711ff11",
+      "hymnId": "of-your-mystical-supper",
+      "present": true
+    },
+    {
+      "seasonId": "passion-pascha-week-covenant-thursday",
+      "contentId": "114ad183-5a5f-4438-bb1a-9664370fb8cf",
+      "hymnId": "procession-of-judas",
+      "present": true
+    },
+    {
+      "seasonId": "passion-pascha-week-covenant-thursday",
+      "contentId": "88e8c6e2-5f22-41bf-9cdb-0a3b43b42b1e",
+      "hymnId": "aspasmos-adam-covenant-thursday-liturgy-of-waters",
+      "present": true
+    },
+    {
+      "seasonId": "apostles-feast",
+      "contentId": "10d54364-ab16-4c4f-bdd7-6cdd31c5b85f",
+      "hymnId": "aspasmos-adam-2-apostles-feast",
+      "present": true
+    },
+    {
+      "seasonId": "glorifications",
+      "contentId": "15802e1a-7c9b-4cf2-9296-d94431a88e06",
+      "hymnId": "o-mother-of-light",
+      "present": true
+    },
+    {
+      "seasonId": "glorifications",
+      "contentId": "300227b7-51ae-45d9-b708-48fbde244fbd",
+      "hymnId": "rejoice-o-theotokos-shere-theotoke",
+      "present": true
+    },
+    {
+      "seasonId": "glorifications",
+      "contentId": "cf229a84-3957-47b9-a815-beec5d2bc81c",
+      "hymnId": "glorification-hymn-for-st-philopater-mercurius",
+      "present": true
+    },
+    {
+      "seasonId": "saint-marys-fastfeast",
+      "contentId": "15802e1a-7c9b-4cf2-9296-d94431a88e06",
+      "hymnId": "o-mother-of-light",
+      "present": true
+    },
+    {
+      "seasonId": "saint-marys-fastfeast",
+      "contentId": "300227b7-51ae-45d9-b708-48fbde244fbd",
+      "hymnId": "rejoice-o-theotokos-shere-theotoke",
+      "present": true
+    },
+    {
+      "seasonId": "saint-marys-fastfeast",
+      "contentId": "32324289-3db2-41aa-a0e0-5ec07fe71e71",
+      "hymnId": "aspasmos-watos-st-mary",
+      "present": true
+    },
+    {
+      "seasonId": "saint-marys-fastfeast",
+      "contentId": "dc13d688-4c73-4fb3-a83a-7a0492e63aa3",
+      "hymnId": "aspasmos-adam-st-mary",
+      "present": true
+    },
+    {
+      "seasonId": "annual",
+      "contentId": "160227fa-35cb-47d7-97cd-981d130707dc",
+      "hymnId": "intro-to-the-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "annual",
+      "contentId": "160227fa-35cb-47d7-97cd-981d130707dc",
+      "hymnId": "intro-to-the-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "annual",
+      "contentId": "4273d0a1-d48a-44f1-990f-5ee7e8f01be8",
+      "hymnId": "gregorian-response-for-introduction-to-the-fraction",
+      "present": true
+    },
+    {
+      "seasonId": "annual",
+      "contentId": "8d6d481c-cc5d-4772-9cbe-351dbf7d1de8",
+      "hymnId": "for-your-people-peklaos-ghar",
+      "present": true
+    },
+    {
+      "seasonId": "annual",
+      "contentId": "b6f1f3ea-b7d1-4d4f-a888-db6ccce7f795",
+      "hymnId": "loose-remit-and-forgive-vol-evol",
+      "present": true
+    },
+    {
+      "seasonId": "annual",
+      "contentId": "f189019a-d993-4f30-81fd-47be97d211b2",
+      "hymnId": "according-to-your-mercy-kata-to-eleos-gregorian",
+      "present": true
+    },
+    {
+      "seasonId": "great-lent-weekdays",
+      "contentId": "24f1dd76-1cd6-44dc-bb19-c32dfc6b9f1f",
+      "hymnId": "psalm-150-intro",
+      "present": true
+    },
+    {
+      "seasonId": "ninevehs-fast",
+      "contentId": "24f1dd76-1cd6-44dc-bb19-c32dfc6b9f1f",
+      "hymnId": "psalm-150-intro",
+      "present": true
+    },
+    {
+      "seasonId": "ascension",
+      "contentId": "375bc365-749c-44d6-af31-9473047bc870",
+      "hymnId": "introduction-to-the-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "ascension",
+      "contentId": "74600c7d-362f-47db-af64-ca6750184400",
+      "hymnId": "coptic-hymn-of-the-ascension-pekhristos-aftonf",
+      "present": true
+    },
+    {
+      "seasonId": "epiphany",
+      "contentId": "375bc365-749c-44d6-af31-9473047bc870",
+      "hymnId": "introduction-to-the-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "epiphany",
+      "contentId": "ee7f068e-a5d9-49c2-8b0d-cca547031da8",
+      "hymnId": "o-king-of-peace",
+      "present": true
+    },
+    {
+      "seasonId": "feast-of-circumcision",
+      "contentId": "375bc365-749c-44d6-af31-9473047bc870",
+      "hymnId": "introduction-to-the-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "nairouz",
+      "contentId": "375bc365-749c-44d6-af31-9473047bc870",
+      "hymnId": "introduction-to-the-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "nativity",
+      "contentId": "375bc365-749c-44d6-af31-9473047bc870",
+      "hymnId": "introduction-to-the-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "nativity",
+      "contentId": "d9ce84d4-3db6-4b7d-b40f-00cdbf70fa0f",
+      "hymnId": "second-adam-aspasmos",
+      "present": true
+    },
+    {
+      "seasonId": "pentecost",
+      "contentId": "375bc365-749c-44d6-af31-9473047bc870",
+      "hymnId": "introduction-to-the-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "pentecost",
+      "contentId": "9ba3aeeb-8fd7-48a8-a2cd-fb4137608007",
+      "hymnId": "psalm-pentecost",
+      "present": true
+    },
+    {
+      "seasonId": "pentecost",
+      "contentId": "e55bfb3e-0ea0-4299-bacd-ba3ceec7a5c5",
+      "hymnId": "coptic-hymn-of-the-pentecost-pekhristos-aftonf",
+      "present": true
+    },
+    {
+      "seasonId": "resurrection",
+      "contentId": "375bc365-749c-44d6-af31-9473047bc870",
+      "hymnId": "introduction-to-the-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "resurrection",
+      "contentId": "6951dcb3-5530-4e32-88be-2f16e0c73b42",
+      "hymnId": "adam-exposition",
+      "present": true
+    },
+    {
+      "seasonId": "resurrection",
+      "contentId": "c6a208ce-867c-44ef-a712-10fa5907c44f",
+      "hymnId": "hymn-for-thomas",
+      "present": true
+    },
+    {
+      "seasonId": "the-lords-entry-into-the-temple",
+      "contentId": "375bc365-749c-44d6-af31-9473047bc870",
+      "hymnId": "introduction-to-the-doxologies",
+      "present": true
+    },
+    {
+      "seasonId": "passion-pascha-week-good-friday",
+      "contentId": "933a6d76-4c25-407c-90ba-c01ac040c903",
+      "hymnId": "blessed-are-you-o-demas",
+      "present": true
+    },
+    {
+      "seasonId": "passion-pascha-week-good-friday",
+      "contentId": "da8b9017-c160-4f42-b0d3-597b8f9116a7",
+      "hymnId": "remember-me-o-lord",
+      "present": true
+    },
+    {
+      "seasonId": "funeral",
+      "contentId": "93de6d64-2389-4d36-b224-dc7e57406483",
+      "hymnId": "funer-funeralservice-processionhymn",
+      "present": true
+    },
+    {
+      "seasonId": "funeral",
+      "contentId": "e28a2e2e-aecf-43d8-8b3e-bbd024350227",
+      "hymnId": "the-pauline-epistle-ethve-tianastasees-funeral",
+      "present": true
+    },
+    {
+      "seasonId": "funeral",
+      "contentId": "ff5ba0d9-5ae8-4fbd-8d9f-1c000ef1f2fb",
+      "hymnId": "exposition",
+      "present": true
+    },
+    {
+      "seasonId": "the-wedding-at-cana-of-galilee",
+      "contentId": "94f3cd4a-d185-4a8b-8c57-dea5beba13a0",
+      "hymnId": "praxis-response-the-wedding-at-cana-of-galilee",
+      "present": true
+    },
+    {
+      "seasonId": "bright-saturday",
+      "contentId": "c46ecbed-544d-425c-8365-4757ba868005",
+      "hymnId": "trisagion",
+      "present": true
+    },
+    {
+      "seasonId": "bright-saturday",
+      "contentId": "c46ecbed-544d-425c-8365-4757ba868005",
+      "hymnId": "trisagion",
+      "present": true
+    },
+    {
+      "seasonId": "great-lent-saturdays-sundays",
+      "contentId": "d4c49b79-9b5e-4dad-a56d-30c31848dbfe",
+      "hymnId": "alleluia-the-thought-of-man",
+      "present": true
+    }
+  ],
+  "validation": {
+    "unitTestsPassed": 177,
+    "existingUnitTestSkips": 2,
+    "typescript": "pass",
+    "productionBuild": "pass",
+    "independentSnapshotsIdentical": true,
+    "arabicDeviceAndPrintExports": "pass",
+    "publishedMusicXmlScoresEngraved": 3
+  }
+}

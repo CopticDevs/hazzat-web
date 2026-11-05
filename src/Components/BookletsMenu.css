@@ -1,6 +1,31 @@
+.bookletMenuContainer {
+    padding-top: 32px;
+}
+
 .bookletDiv {
     align-content: center;
     text-align: center;
-    padding: 3px;
-    height: 250px;
+    padding: 8px;
+    min-height: 110px;
+}
+
+.bookletSeasonCard {
+    border: 1px solid #d7d2c7;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 94px;
+    padding: 14px 10px;
+}
+
+.bookletSeasonCard:hover {
+    background-color: #f3f1eb;
+}
+
+.bookletSeasonName {
+    display: block;
+    font-family: "Trajan Pro";
+    font-size: 16px;
+    font-weight: bold;
 }

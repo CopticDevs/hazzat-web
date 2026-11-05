@@ -1,10 +1,188 @@
 .bookletLinkDiv {
     align-content: center;
     text-align: center;
+    color: #4f4a40;
+    font-size: 13px;
+    line-height: 1.35;
+    padding: 12px;
 }
-
-.bookletFullImgDiv {
-    display: flex;
+.bookletSelectionPanel {
+    border-bottom: 1px solid #d7d2c7;
+    border-top: 1px solid #d7d2c7;
+    color: #302c26;
+    margin-bottom: 28px;
+    padding: 16px 0;
+}
+.bookletSelectionHeader {
     align-items: center;
-    min-width: 215px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+.bookletSelectionTitle {
+    font-family: "Trajan Pro";
+    font-size: 16px;
+    font-weight: bold;
+}
+.bookletSelectionReset {
+    background: transparent;
+    border: 1px solid #bdb6a6;
+    border-radius: 6px;
+    color: #302c26;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+.bookletSelectionReset:hover {
+    background-color: #f3f1eb;
+}
+.bookletSelectionPanel label {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    gap: 8px;
+    margin: 0;
+}
+.bookletSelectionPanel input[type="checkbox"] {
+    accent-color: #6d604c;
+    flex: 0 0 auto;
+}
+.bookletSelectionPanel input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+}
+.bookletServiceSelection {
+    border-top: 1px solid #ece7dd;
+}
+.bookletServiceSelector {
+    border-bottom: 1px solid #ece7dd;
+    padding: 10px 0;
+}
+.bookletServiceSelector summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+.bookletServiceSelector summary label {
+    display: inline-flex;
+}
+.bookletHymnSelector {
+    border-inline-start: 2px solid #e2ddd2;
+    margin-block-start: 10px;
+    margin-inline-start: 18px;
+    padding-inline-start: 14px;
+}
+.bookletHymnSelector > label {
+    font-size: 13px;
+    font-weight: bold;
+}
+.bookletVariationSelectorGroup {
+    margin-top: 8px;
+    padding-inline-start: 24px;
+}
+.bookletVariationSelector {
+    color: #4f4a40;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+.bookletDownloadGroup {
+    margin-bottom: 26px;
+}
+.bookletDownloadTitle {
+    border-bottom: 1px solid #d7d2c7;
+    font-family: "Trajan Pro";
+    font-size: 17px;
+    font-weight: bold;
+    margin: 0 12px 8px;
+    padding-bottom: 8px;
+    text-align: center;
+}
+.bookletDownloadButton {
+    background: transparent;
+    border: 1px solid #d7d2c7;
+    border-radius: 6px;
+    color: #2c2924;
+    min-height: 136px;
+    padding: 14px 10px;
+    width: 100%;
+}
+.bookletDownloadButton:hover:not(:disabled) {
+    background-color: #f3f1eb;
+}
+.bookletDownloadButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+.bookletDownloadButton svg {
+    height: 70px;
+    margin-bottom: 8px;
+    max-width: 100%;
+}
+.bookletBuilder {
+    max-width: 960px;
+    color: var(--ink, #302c26);
+}
+.bookletBuilder fieldset { min-width: 0; }
+.bookletStep { border: 1px solid var(--rule, #d7d2c7); border-radius: 8px; padding: 20px; margin-block: 20px; }
+.bookletStep > h3:first-child { margin-block-start: 0; }
+.bookletStepHeader { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; margin-block-end: 14px; }
+.bookletBuilder .bookletStepHeader h3 { margin: 0; }
+.bookletStepHeader .bookletChoice { font-size: .9rem; max-width: 100%; text-align: start; }
+.bookletFormatCustomization summary { cursor: pointer; }
+.bookletSeparateLanguages { margin-block: 12px; }
+.bookletLanguageSummary > div { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-block: 8px; }
+.bookletLanguageSummary dt { min-width: 140px; }
+.bookletLanguageSummary dd { margin: 0; }
+.bookletUnavailable { color: var(--muted-ink, #625e55); }
+.bookletBuilder .bookletSelectionPanel { border: 0; margin-bottom: 0; padding: 0; }
+.bookletBuilder legend, .bookletBuilder h3 { font-size: 1.15rem; margin-block: 20px 14px; }
+.bookletPresetRow, .bookletFormatChoices { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin-block: 14px; }
+.bookletBuilder label { display: inline-flex; align-items: center; gap: 8px; }
+.bookletBuilder input[type="checkbox"] { accent-color: var(--ink, #6d604c); flex: 0 0 auto; }
+.bookletChoice, .bookletPrimaryAction {
+    border: 1px solid var(--rule, #bdb6a6);
+    border-radius: 6px;
+    padding: 10px 16px;
+    background: transparent;
+    color: inherit;
+    text-decoration: none;
+    display: inline-block;
+}
+.bookletChoice[aria-pressed="true"] { background: var(--ink, #302c26); border-color: var(--ink, #302c26); color: #fff; }
+.bookletBuilder .bookletPrimaryAction, .bookletBuilder .bookletPrimaryAction:hover { background: var(--ink, #302c26); color: #fff; }
+.bookletPrimaryAction:disabled { opacity: .5; cursor: not-allowed; }
+.bookletHint { color: var(--muted-ink, #625e55); font-size: .9rem; }
+.bookletBuilder .bookletVariationSelectorGroup { display: grid; gap: 6px; }
+.bookletBuilder .bookletVariationSelector { justify-content: flex-start; flex-wrap: wrap; }
+.bookletLayoutChoices { display: flex; gap: 20px; flex-wrap: wrap; margin-block-end: 24px; }
+.bookletLayoutChoices label { flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; align-items: stretch; }
+.bookletLayoutChoices select { width: 100%; min-width: 0; padding: 10px; border-radius: 6px; border: 1px solid var(--rule, #bdb6a6); background: transparent; color: inherit; }
+.bookletLayoutChoices option { background: Canvas; color: CanvasText; }
+.bookletReview { border-top: 1px solid var(--rule, #d7d2c7); margin-top: 24px; }
+.bookletReview summary { cursor: pointer; }
+.bookletReview li { padding-block: 5px; overflow-wrap: anywhere; }
+.bookletReview .bookletPrimaryAction { margin-top: 20px; }
+.bookletPdfPreview { margin-block: 24px; }
+.bookletPdfPreview object { width: 100%; height: 680px; border: 1px solid var(--rule, #d7d2c7); }
+.bookletSelectionStatus { display: flex; gap: 6px 14px; flex-wrap: wrap; }
+.bookletAppearance { border: 1px solid var(--rule, #bdb6a6); border-radius: 8px; padding: 14px; margin-block: 24px; }
+.bookletAppearance summary { cursor: pointer; font-weight: 600; }
+.bookletColorGroups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-bottom: 18px; }
+.bookletColorChoices { display: flex; flex-wrap: wrap; gap: 10px 16px; }
+.bookletColorChoices input { accent-color: var(--ink, #302c26); }
+.bookletColorSwatch { width: 14px; height: 14px; border-radius: 2px; border: 1px solid var(--rule, #bdb6a6); }
+.bookletAppearance .bookletHint { margin-top: 14px; }
+.bookletColorSample { color-scheme: light; background: #fff; color: #000; border: 1px solid #c8c3b8; padding: 18px; border-radius: 2px; }
+.bookletColorSample .CopticFont { font-size: 1.4rem; }
+.bookletColorSample .HazzatFont { font-size: 1.7rem; margin-block: 8px; }
+.bookletSampleComment { color: #8c2924; font-size: .9em; font-style: italic; margin-top: 12px; }
+@media screen {
+    :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction, :root[data-theme="dark"] .bookletBuilder .bookletPrimaryAction:hover, :root[data-theme="dark"] .bookletChoice[aria-pressed="true"] { color: #202526; }
+}
+@media (max-width: 576px) {
+    .bookletStep { padding: 14px; }
+    .bookletBuilder { padding-inline: 0; }
+    .bookletBuilder button, .bookletBuilder select, .bookletBuilder label { min-height: 44px; }
+    .bookletPdfPreview object { height: 480px; }
+    .bookletColorGroups { grid-template-columns: 1fr; }
 }

@@ -1,15 +1,16 @@
-.pageTitle {
-    font-family: "Trajan Pro";
-    font-size: 34px;
-    font-weight: 700;
-    text-align: center;
+.seasonDownloadActions {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0 8px;
 }
-
-.seasonVerse {
-    text-align: center;
+.seasonDownloadPdfsButton {
+    border: 1px solid #bdb6a6;
+    border-radius: 6px;
+    color: var(--ink);
+    display: inline-block;
+    font-size: 14px;
+    padding: 10px 16px;
 }
-
-.breadcrumbDiv {
-    margin-top: 40px;
-    margin-bottom: 20px;
+.seasonDownloadPdfsButton:hover {
+    background: #f3f1eb;
 }

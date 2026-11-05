@@ -1,25 +1,12 @@
+import { useLocation } from "react-router-dom";
+import { strings } from "../l8n";
 import MyNavLink from "./MyNavLink";
-
-interface IItem {
-    title: string;
-    path?: string;
+interface Item { title: string; path?: string }
+export default function BreadCrumb({ items }: { items: Item[] }) {
+    const { pathname } = useLocation();
+    return <nav className="breadcrumbDiv" aria-label={strings.breadcrumbs}><ol>
+        {items.map((item, index) => <li key={index}>{item.path
+            ? <MyNavLink to={item.path} end aria-current={item.path.toLowerCase() === pathname.toLowerCase() ? "page" : false}>{item.title}</MyNavLink>
+            : <span aria-current="page">{item.title}</span>}</li>)}
+    </ol></nav>;
 }
-interface IProps {
-    items: IItem[];
-}
-
-function BreadCrumb(props: IProps) {
-    
-    return (
-        <div className="breadcrumbDiv">
-            {props.items.map((item, i) => {
-                if (!!item.path) {
-                    return <span key={i}><MyNavLink to={item.path} className="breadcrumbLink">{item.title}</MyNavLink> {(i === props.items.length - 1) ? "" : " > "}</span>
-                }
-                return item.title
-            })}
-        </div>
-    );
-}
-
-export default BreadCrumb;

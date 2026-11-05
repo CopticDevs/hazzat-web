@@ -4,6 +4,12 @@ export enum ContentLanguage {
     Arabic = "Arabic"
 }
 
+/** Published records contain both title-case and lowercase language labels. */
+export function normalizeContentLanguage(language: string): ContentLanguage | undefined {
+    const normalized = language.trim().toLowerCase();
+    return Object.values(ContentLanguage).find(value => value.toLowerCase() === normalized);
+}
+
 export const enum ContentType {
     TextContent = "TextContent",
     HazzatContent = "HazzatContent",
@@ -45,8 +51,7 @@ export interface IVerticalHazzatContent extends ContentCommon {
 }
 
 export interface IMusicalNotesContent extends ContentCommon {
-    musicFilePath: string;
-    audioFilePath: string;
+    musicXml: string;
 }
 
 export interface IAudioContent extends ContentCommon {
@@ -78,6 +83,9 @@ export declare type IHymnContent =
  */
 export interface IVariationInfo<T extends IHymnContent> {
     id: string;
+    order?: number;
     name: string;
+    nameAr?: string; // Arabic name (optional)
+    displayName: string; // Computed display name based on current language
     content: T;
 }

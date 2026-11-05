@@ -1,0 +1,3 @@
+.content-language-choices { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.content-language-choices label { display: inline-flex; gap: 7px; align-items: center; min-height: 44px; cursor: pointer; }
+.content-language-settings p { font-size: .9rem; color: var(--muted-ink, #625e55); margin-top: 8px; }

@@ -1,27 +1,35 @@
-import { useContext } from "react";
-import { LanguageContext } from "../LanguageContext";
 import { IVariationInfo, IVideoContent } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
+import VariationTitle from "./VariationTitle";
 import YouTubeVideo from "./YoutubeVideo";
 
 interface IProps {
     variations: IVariationInfo<IVideoContent>[];
+    hymnTitle?: string;
 }
 
 function ContentVideo(props: IProps) {
-    const { languageProperties } = useContext(LanguageContext);
-    const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
     return (
         <>
+            {props.hymnTitle && (
+                <>
+                    <div className="content-heading">
+                        <HymnTitle content={props.hymnTitle} />
+                    </div>
+                </>
+            )}
             {props.variations.map((variation) => {
                 return <div key={variation.id}>
-                    <div className={langClassName} style={{ paddingBottom: "20px", paddingTop: "20px" }}>
-                        <HymnTitle content={variation.name} />
-                    </div>
-                    <div className="clear" />
+                    {props.variations.length > 1 && (
+                        <>
+                            <div className="content-heading">
+                                <VariationTitle content={variation.displayName} />
+                            </div>
+                        </>
+                    )}
                     {variation.content.copticVideo ?
                         <div>
                             <YouTubeVideo videoId={variation.content.copticVideo} />

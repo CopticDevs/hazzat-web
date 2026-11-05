@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { LanguageContext } from "../LanguageContext";
+import { useContext, useEffect } from "react";
 import win7_1Img from "../images/win7-1.png";
 import win7_2Img from "../images/win7-2.png";
 import { strings } from "../l8n";
@@ -8,13 +9,14 @@ import MyNavLink from "./MyNavLink";
 
 function FontInstall() {
 
+    const { languageProperties } = useContext(LanguageContext);
     useEffect(() => {
         document.title = strings.instructionsForWin7 + " - hazzat.com";
-    }, []);
+    }, [languageProperties.localeName]);
 
     return (
         <>
-            <div className="pageTitle"><LocalizedMessage of="instructionsForWin7" /></div>
+            <h1 className="pageTitle"><LocalizedMessage of="instructionsForWin7" /></h1>
             <BreadCrumb items={[
                 { title: strings.help, path: "/Help" },
                 { title: strings.instructionsForWin7 }]} />

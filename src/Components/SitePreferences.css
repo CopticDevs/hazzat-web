@@ -1,0 +1,88 @@
+.site-preferences {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.site-preferences .preference-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 6px 10px;
+    border: 1px solid var(--preference-border, #aaa69c);
+    border-radius: 5px;
+    background: transparent;
+    color: var(--ink);
+    font: 700 14px/1.4 "Myriad Pro", Arial, sans-serif;
+    white-space: nowrap;
+}
+.site-preferences .preference-toggle:hover {
+    color: var(--ink);
+    text-decoration: none;
+}
+.site-preferences svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+.site-nav {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    padding-inline: 16px;
+}
+.site-nav > .mobile-menu-toggle {
+    width: auto;
+    min-width: 44px;
+    padding-inline: 0;
+    font-size: 16px;
+}
+.site-nav > .site-preferences {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    padding-block: 6px;
+}
+.site-nav > .site-menu {
+    grid-column: 1 / -1;
+    grid-row: 2;
+}
+@media (min-width: 62rem) {
+    .site-nav {
+        grid-template-columns: minmax(0, 1fr) auto;
+        /* The Christ artwork continues into the physical left of the nav,
+           including when Arabic reverses the menu and preferences. */
+        padding: 3px 48px 3px 96px;
+        gap: 16px;
+    }
+    .site-nav > .site-menu {
+        grid-column: 1;
+        grid-row: 1;
+        gap: 4px 18px;
+    }
+    .site-nav > .site-preferences {
+        padding: 0;
+        gap: 16px;
+    }
+    .site-preferences .preference-toggle {
+        position: relative;
+        border: 0;
+        border-radius: 0;
+        padding: 8px 6px;
+        font: 700 13px/1.4 var(--heading-font);
+    }
+    .site-preferences .theme-toggle::before {
+        content: "";
+        position: absolute;
+        inset-inline-start: -8px;
+        inset-block: 10px;
+        width: 1px;
+        background: var(--rule);
+    }
+    .site-preferences svg {
+        width: 16px;
+        height: 16px;
+    }
+}

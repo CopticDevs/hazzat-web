@@ -2,12 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
+    <script>
+      (function () {
+        function read(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
+        function languageTag(value) {
+          return value && /^(en|ar)(-[a-z0-9]{1,8})*$/i.test(value) ? value.split("-")[0].toLowerCase() : null;
+        }
+        var theme = read("hazzat.theme");
+        if (theme !== "light" && theme !== "dark") {
+          try { theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
+          catch (_) { theme = "light"; }
+        }
+        document.documentElement.dataset.theme = theme;
+        var language = languageTag(new URLSearchParams(window.location.search).get("lang"));
+        var saved = read("hazzat.navigation-language");
+        if (!language && (saved === "en" || saved === "ar")) language = saved;
+        var languages = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+        for (var i = 0; !language && i < languages.length; i++) language = languageTag(languages[i]);
+        document.documentElement.lang = language || "en";
+        document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+      }());
+    </script>
     <link rel="icon" type="image/png" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="stylesheet" href="css/style-sheet_chrome.css" type="text/chrome/safari" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <!--[if IE]>
-        <link rel="stylesheet" type="text/css" href="css/all-ie-only.css" />
-    <![endif]-->
+    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#000000" />
     <meta name="description"
           content="Coptic hymnology & more" />

@@ -1,23 +1,27 @@
+import InvalidAddressMessage from "./InvalidAddressMessage";
+import MyNavLink from "./MyNavLink";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
-import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { HymnUtils } from "../Providers/HymnsDataProvider/Utils/HymnUtils";
-import { getServiceNumberFromId } from "../Utils/ParserUtils";
 import BreadCrumb from "./BreadCrumb";
 import LoadingSpinner from "./LoadingSpinner";
+import ContentLoadError from "./ContentLoadError";
 import "./SeasonDetails.css";
 import ServiceContents from "./ServiceContents";
 
 interface IProps {
     seasonName: string;
     seasonId: string;
-    seasonVerse: string;
 }
 function ServicesMenu(props: IProps) {
+    // Get serviceId from URL if present
+    const { serviceId: serviceIdParam } = useParams();
+    
     const getLoadingSpinnerDiv = () => {
         return <div key="loading"><LoadingSpinner /></div>;
     };
@@ -25,18 +29,28 @@ function ServicesMenu(props: IProps) {
     const loadingDiv = useMemo(() => getLoadingSpinnerDiv(), []);
     const { languageProperties } = useContext(LanguageContext);
     const { environmentProperties } = useContext(EnvironmentContext);
+    const [isLoading, setIsLoading] = useState(true);
     const [services, setServices] = useState<IServiceInfo[]>([]);
     const [servicesNodes, setServicesNodes] = useState<React.ReactNode[]>([loadingDiv]);
     const isMounted = useRef(true);
+    const requestId = useRef(0);
+    const [loadFailed, setLoadFailed] = useState(false);
 
     const fetchFromBackend = React.useCallback(async () => {
-        const hymnsDataProvider: IHymnsDataProvider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl);
-        const servicesResponse = await hymnsDataProvider.getServiceList(props.seasonId);
-
-        if (isMounted.current) {
-            setServices(servicesResponse.sort(HymnUtils.serviceInfoComparer));
+        const request = ++requestId.current;
+        const current = () => isMounted.current && request === requestId.current;
+        setIsLoading(true);
+        setLoadFailed(false);
+        try {
+            const provider = new HymnsDataProvider(languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl);
+            const response = await provider.getServiceSummaryList(props.seasonId);
+            if (current()) setServices([...response].sort(HymnUtils.serviceInfoComparer));
+        } catch {
+            if (current()) setLoadFailed(true);
+        } finally {
+            if (current()) setIsLoading(false);
         }
-    }, [languageProperties, environmentProperties, props.seasonId, isMounted]);
+    }, [languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl, props.seasonId]);
 
     useEffect(() => {
         isMounted.current = true;
@@ -48,29 +62,34 @@ function ServicesMenu(props: IProps) {
     }, [fetchFromBackend]);
 
     useEffect(() => {
-        const theNodes = services.map((service) => {
-            const serviceId = getServiceNumberFromId(service.id);
-            return <ServiceContents key={service.id} seasonId={props.seasonId} serviceId={serviceId} serviceName={service.name} />
+        // If serviceId is specified in URL, only render that service
+        const servicesToRender = serviceIdParam 
+            ? services.filter(s => s.id === serviceIdParam)
+            : services;
+            
+        const theNodes = servicesToRender.map((service) => {
+            return <ServiceContents key={service.id} seasonId={props.seasonId} serviceId={service.id} serviceName={service.displayName} />
         });
 
-        if (theNodes.length === 0) {
-            setServicesNodes([loadingDiv]);
-        } else {
-            setServicesNodes(theNodes);
-        }
-    }, [services, loadingDiv, props.seasonId]);
+        setServicesNodes(theNodes);
+    }, [services, serviceIdParam, loadingDiv, props.seasonId]);
 
-    if (!isMounted.current) {
+    if (loadFailed) return <ContentLoadError retry={fetchFromBackend} />;
+    if (isLoading || !isMounted.current) {
         return <LoadingSpinner />;
     }
+
+    if (serviceIdParam && !services.some(service => service.id === serviceIdParam)) return <InvalidAddressMessage />;
 
     return (
         <>
             {
                 !!services ?
                     <div>
-                        <div>
-                            <div className="seasonVerse" dangerouslySetInnerHTML={{ __html: props.seasonVerse }} />
+                        <div className="seasonDownloadActions">
+                            <MyNavLink className="seasonDownloadPdfsButton" to={`/Booklets/${props.seasonId}`}>
+                                {strings.downloadPdfs}
+                            </MyNavLink>
                         </div>
                         <BreadCrumb items={[
                             { title: strings.seasons, path: "/Seasons" },

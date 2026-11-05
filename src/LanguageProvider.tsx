@@ -1,45 +1,47 @@
-import React from "react";
-import { useEffect, useState } from "react";
-import { ArabicLanguageProperties, EnglishLanguageProperties, ILanguageProperties, strings } from "./l8n";
+import React, { useEffect, useLayoutEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { ArabicLanguageProperties, EnglishLanguageProperties, strings } from "./l8n";
 import { LanguageContext } from "./LanguageContext";
+import { browserLanguage, initialLanguage, languageFromTag, languageStorageKey, NavigationLanguage, readPreference, savePreference, validLanguage } from "./sitePreferences";
 
-interface IProps {
-    children?: React.ReactNode;
-}
-
-const setDefaultLanguage = (interfaceLanguage: string): ILanguageProperties => {
-    switch (interfaceLanguage.toUpperCase().substring(0, 2)) {
-        case "AR":
-            return ArabicLanguageProperties;
-    }
-
-    // fallback:
-    return EnglishLanguageProperties;
-}
-
-function LanguageProvider(props: IProps) {
-    const [languageProperties, setLanguageProperties] = useState<ILanguageProperties>(setDefaultLanguage(strings.getInterfaceLanguage()));
-
-    const setApplicationLanguage = React.useCallback(() => {
-        const urlSearchParams = new URLSearchParams(window.location.search);
-        const lang = urlSearchParams.get('lang') || strings.getInterfaceLanguage();
-        const appLang = setDefaultLanguage(lang);
-
-        setLanguageProperties(appLang);
-    }, []);
-
+function LanguageProvider({ children }: { children?: React.ReactNode }) {
+    const { search } = useLocation();
+    const [manualLanguage, setManualLanguage] = useState(() => validLanguage(readPreference(languageStorageKey)));
+    const [preferredLanguage, setPreferredLanguage] = useState(browserLanguage);
+    const language = languageFromTag(new URLSearchParams(search).get("lang")) || manualLanguage || preferredLanguage;
+    const [appliedLanguage, setAppliedLanguage] = useState(() => {
+        const initial = initialLanguage(search);
+        strings.setLanguage(initial);
+        return initial;
+    });
+    const languageProperties = appliedLanguage === "ar" ? ArabicLanguageProperties : EnglishLanguageProperties;
+    useLayoutEffect(() => {
+        strings.setLanguage(language);
+        document.documentElement.lang = language;
+        document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+        setAppliedLanguage(language);
+    }, [language]);
     useEffect(() => {
-        setApplicationLanguage();
-    }, [setApplicationLanguage]);
-
-    return (
-        <LanguageContext.Provider value={{
-            languageProperties,
-            setLanguageProperties
-        }}>
-            {props.children}
-        </LanguageContext.Provider>
-    )
+        const update = () => setPreferredLanguage(browserLanguage());
+        const sync = (event: StorageEvent) => {
+            if (event.storageArea && event.storageArea !== localStorage) return;
+            if (event.key === languageStorageKey || event.key === null) {
+                setManualLanguage(validLanguage(event.key === null ? null : event.newValue));
+            }
+        };
+        window.addEventListener("languagechange", update);
+        window.addEventListener("storage", sync);
+        return () => {
+            window.removeEventListener("languagechange", update);
+            window.removeEventListener("storage", sync);
+        };
+    }, []);
+    const setNavigationLanguage = (choice: NavigationLanguage) => {
+        setManualLanguage(choice);
+        savePreference(languageStorageKey, choice);
+    };
+    return <LanguageContext.Provider value={{ languageProperties, setNavigationLanguage }}>
+        {children}
+    </LanguageContext.Provider>;
 }
-
 export default LanguageProvider;

@@ -1,27 +1,87 @@
-.modal-toggle {
-    opacity: 0.5;
-    background-color: #fff;
-    border: 2px solid #6c757d;
-    color: #6c757d;
-    transition: opacity 0.2s ease-in-out;
+.reader-tools {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 20;
+    background: #fff;
+    border-block-end: 1px solid var(--rule);
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-block: 8px;
+}
+.reader-tool {
+    min-width: 44px;
+    min-height: 44px;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid #6c757d;
+    border-radius: 4px;
+}
+.reader-tool:hover {
+    background: #eee;
+    color: #000;
+}
+.reader-settings fieldset {
+    margin-block-end: 24px;
+}
+.reader-settings legend {
+    font-size: 18px;
+    font-weight: 700;
+}
+.reader-size-controls {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 8px;
+    align-items: center;
+}
+.reader-size-sample {
+    min-width: 0;
+    border: 1px solid var(--rule);
+    padding: 8px;
+    overflow-wrap: anywhere;
+}
+.size-button {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid #6c757d;
+    border-radius: 50%;
+}
+.reader-colors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.reader-color {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    cursor: pointer;
+    min-width: 60px;
+}
+.reader-color input {
+    position: absolute;
+    opacity: 0;
+    width: 44px;
+    height: 44px;
+}
+.reader-color-swatch {
+    display: block;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px #777;
+}
+.reader-color input:checked + .reader-color-swatch {
+    box-shadow: 0 0 0 3px #245b8c;
+}
+.reader-color input:focus-visible + .reader-color-swatch {
+    outline: 3px solid #245b8c;
+    outline-offset: 5px;
 }
 
-    .modal-toggle:hover {
-        opacity: 1;
-        background-color: #6c757d;
-        border: 2px solid #6c757d;
-        color: #fff;
-    }
-
-    .modal-toggle:focus {
-        opacity: 0.5;
-        background-color: #fff;
-        border: 2px solid #6c757d;
-        color: #6c757d;
-        transition: opacity 0.2s ease-in-out;
-    }
-
-    .size-button {
-        border: 1px solid;
-        border-radius: 50%;
-    }
+.dirRtl .modal-header .btn-close { margin-inline-start: auto; margin-inline-end: -.5rem; }

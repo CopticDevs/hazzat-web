@@ -3,40 +3,21 @@ import { useLocation } from "react-router-dom";
 import { AppSettings } from "../AppSettings";
 import { LanguageContext } from "../LanguageContext";
 import MyNavLink from "./MyNavLink";
+import { validLanguage } from "../sitePreferences";
 
-function LanguageSwitcher() {
+export default function LanguageSwitcher() {
     const location = useLocation();
-    const { languageProperties } = useContext(LanguageContext);
-
-    // Get the current language from the query parameters
-    const searchParams = new URLSearchParams(location.search);
-
-    const collectLangChangeAnalytics = (langCode: string) => {
-        // Track Language change
-        window.gtag('event', `change_nav_lang`, {
-            event_category: 'Customization',
-            event_label: `${langCode} Language Selected`,
-        });
-    };
-
-    // Update the lang query parameter in the URL with the new language code
-    const handleLanguageClick = (langCode: string) => {
-        searchParams.set('lang', langCode);
-        const url = `${location.pathname}?${searchParams.toString()}`;
-        window.location.href = url;
-        collectLangChangeAnalytics(langCode);
-    };
-    
-    return (
-        <>
-            {
-                AppSettings.supportedLanguages.map((langProps) => {
-                    return languageProperties.localeName !== langProps.localeName ?
-                        <li key={langProps.localeName}><MyNavLink to="#" onClick={() => handleLanguageClick(langProps.localeName)}>{langProps.friendlyName}</MyNavLink></li> : null
-                })
-            }
-        </>
-    );
+    const { languageProperties, setNavigationLanguage } = useContext(LanguageContext);
+    return <>{AppSettings.supportedLanguages.filter(lang => lang.localeName !== languageProperties.localeName).map(lang => {
+        const search = new URLSearchParams(location.search);
+        search.set("lang", lang.localeName);
+        return <li key={lang.localeName}><MyNavLink to={`${location.pathname}?${search}${location.hash}`} lang={lang.localeName}
+            onClick={() => {
+                const language = validLanguage(lang.localeName);
+                if (language) setNavigationLanguage?.(language);
+                window.gtag?.("event", "change_nav_lang", { event_category: "Customization", event_label: `${lang.localeName} Language Selected` });
+            }}>
+            {lang.friendlyName}
+        </MyNavLink></li>;
+    })}</>;
 }
-
-export default LanguageSwitcher;

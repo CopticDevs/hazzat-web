@@ -5,14 +5,14 @@ interface IProps {
 }
 
 function HymnTitle(props: IProps) {
-    
+
     return (
         <div className="hymnData">
             <h2><span>{props.content}</span></h2>
             <div>
-                <HeadingBottom />
+                <HeadingBottom preserveAspectRatio="none" aria-hidden="true" />
             </div>
-            
+
         </div>
     );
 }

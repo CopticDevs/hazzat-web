@@ -1,3 +1,4 @@
+import InvalidAddressMessage from "./InvalidAddressMessage";
 import { useContext, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { strings } from "../l8n";
@@ -20,14 +21,14 @@ function HelpPage() {
 
     useEffect(() => {
         document.title = strings.help + " - hazzat.com";
-    }, []);
+    }, [languageProperties.localeName]);
 
     return (
         <MainPaper size={Size.Wide}>
             <Routes>
                 <Route path="/" element={
                     <>
-                        <div className="pageTitle"><LocalizedMessage of="hazzatFontHelp" /></div>
+                        <h1 className="pageTitle"><LocalizedMessage of="hazzatFontHelp" /></h1>
                         <div><LocalizedMessage of="insallingFonts" /></div>
                         <div className={langClassName}>
                             <strong><MyNavLink to="InstallFontWinXP"><LocalizedMessage of="instructionsForWinXP" /></MyNavLink></strong>
@@ -61,6 +62,7 @@ function HelpPage() {
                 <Route path={`/SmallLetters`} element={<img src={mapSmallImg} alt={strings.smallLetters} style={{ maxWidth: "90%" }} />} />
                 <Route path={`/CapitalLetters`} element={<img src={mapCapsImg} alt={strings.capitalLetters} style={{ maxWidth: "90%" }} />} />
                 <Route path={`/HazzatKeyboardMap`} element={<img src={mapImg} alt={strings.hazzatKeybdMap} style={{ maxWidth: "90%" }} />} />
+                <Route path="*" element={<InvalidAddressMessage />} />
             </Routes>
         </MainPaper >
     );

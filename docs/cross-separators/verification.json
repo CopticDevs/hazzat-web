@@ -1,0 +1,51 @@
+{
+  "serviceUrl": "/Seasons/annual",
+  "contentUrl": "/seasons/annual/services/vespers-psalmody/formats/1",
+  "results": [
+    {
+      "kind": "services-desktop",
+      "theme": "light",
+      "fill": "rgb(98, 94, 85)",
+      "ink": "rgb(98, 94, 85)",
+      "opacity": "0.503497",
+      "filter": "none",
+      "width": 508,
+      "overflow": false
+    },
+    {
+      "kind": "services-desktop",
+      "theme": "dark",
+      "fill": "rgb(188, 194, 186)",
+      "ink": "rgb(188, 194, 186)",
+      "opacity": "0.503497",
+      "filter": "none",
+      "width": 508,
+      "overflow": false
+    },
+    {
+      "kind": "text-phone",
+      "theme": "light",
+      "fill": "rgb(98, 94, 85)",
+      "ink": "rgb(98, 94, 85)",
+      "opacity": "1",
+      "filter": "none",
+      "width": 50,
+      "overflow": false
+    },
+    {
+      "kind": "text-phone",
+      "theme": "dark",
+      "fill": "rgb(188, 194, 186)",
+      "ink": "rgb(188, 194, 186)",
+      "opacity": "1",
+      "filter": "none",
+      "width": 50,
+      "overflow": false
+    }
+  ],
+  "print": {
+    "fill": "rgb(98, 94, 85)",
+    "filter": "none"
+  },
+  "errors": []
+}

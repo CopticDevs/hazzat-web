@@ -1,6 +1,7 @@
+import { LanguageContext } from "../LanguageContext";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import hazzatImg from "../images/hazzat.jpg";
 import { strings } from "../l8n";
 import LocalizedMessage from "../LocalizedMessage";
@@ -8,13 +9,14 @@ import MainPaper, { Size } from "./MainPaper";
 
 function HazzatFont() {
 
+    const { languageProperties } = useContext(LanguageContext);
     useEffect(() => {
         document.title = strings.hazzatFontVer + " - hazzat.com";
-    }, []);
+    }, [languageProperties.localeName]);
 
     return (
         <MainPaper size={Size.Wide}>
-            <div className="pageTitle"><LocalizedMessage of="hazzatFontVer" /></div>
+            <h1 className="pageTitle"><LocalizedMessage of="hazzatFontVer" /></h1>
             <p style={{ paddingTop: "33px" }} dangerouslySetInnerHTML={{ __html: strings.hazzatFontReason } } />
             <blockquote>
                 <ul className="BaseFont">

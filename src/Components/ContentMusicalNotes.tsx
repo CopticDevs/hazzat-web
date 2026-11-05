@@ -1,48 +1,40 @@
-import { useContext } from "react";
-import { AppSettings } from "../AppSettings";
-import instrumentalImg from "../images/Instrumental.png";
-import musicImg from "../images/Music.png";
-import { LanguageContext } from "../LanguageContext";
-import LocalizedMessage from "../LocalizedMessage";
 import { IMusicalNotesContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
+import MusicXmlScore from "./MusicXmlScore";
+import VariationTitle from "./VariationTitle";
 
 interface IProps {
     variations: IVariationInfo<IMusicalNotesContent>[];
+    hymnTitle?: string;
 }
 
 function ContentMusicalNotes(props: IProps) {
-    const { languageProperties } = useContext(LanguageContext);
-    const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
     return (
         <>
+            {props.hymnTitle && (
+                <>
+                    <div className="content-heading">
+                        <HymnTitle content={props.hymnTitle} />
+                    </div>
+                </>
+            )}
             {props.variations.map((variation) => {
                 return <div key={variation.id}>
-                    <div className={langClassName} style={{ paddingBottom: "20px", paddingTop: "20px" }}>
-                        <HymnTitle content={variation.name} />
-                    </div>
-                    <div className="clear" />
-                    {variation.content.musicFilePath ?
-                        <div style={{ textAlign: "center" }}>
-                            <a href={variation.content.musicFilePath} target="_blank" rel="noreferrer">
-                                <img className="contentImage" src={musicImg} alt={variation.name} /><br />
-                                {variation.name}<br />
-                                <LocalizedMessage of="musicalNotesLinkSuffix" />
-                            </a>
+                    {props.variations.length > 1 && (
+                        <>
+                            <div className="content-heading">
+                                <VariationTitle content={variation.displayName} />
+                            </div>
+                        </>
+                    )}
+                    {variation.content.musicXml ?
+                        <>
+                            <MusicXmlScore musicXml={variation.content.musicXml} hymnTitle={props.hymnTitle} />
                             <CrossDivider />
-                        </div> : ""}
-                    {AppSettings.showMusicAudio && variation.content.audioFilePath ?
-                        <div style={{ textAlign: "center" }}>
-                            <a href={variation.content.audioFilePath} target="_blank" rel="noreferrer">
-                                <img className="contentImage" src={instrumentalImg} alt={variation.name} /><br />
-                                {variation.name}<br />
-                                <LocalizedMessage of="musicAudioLinkSuffix" />
-                            </a>
-                            <CrossDivider />
-                        </div> : ""}
+                        </> : ""}
                 </div>
             })}
         </>

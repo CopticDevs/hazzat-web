@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { LanguageContext } from "../LanguageContext";
+import { useContext, useEffect } from "react";
 import winxp1Img from "../images/winxp1.jpg";
 import winxp2Img from "../images/winxp2.jpg";
 import winxp3Img from "../images/winxp3.jpg";
@@ -11,13 +12,14 @@ import MyNavLink from "./MyNavLink";
 
 function FontInstallXP() {
 
+    const { languageProperties } = useContext(LanguageContext);
     useEffect(() => {
         document.title = strings.instructionsForWinXP + " - hazzat.com";
-    }, []);
+    }, [languageProperties.localeName]);
 
     return (
         <>
-            <div className="pageTitle"><LocalizedMessage of="instructionsForWinXP" /></div>
+            <h1 className="pageTitle"><LocalizedMessage of="instructionsForWinXP" /></h1>
             <BreadCrumb items={[
                 { title: strings.help, path: "/Help" },
                 { title: strings.instructionsForWinXP }]} />

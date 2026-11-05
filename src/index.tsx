@@ -1,14 +1,20 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
 import ReactDOM from 'react-dom';
 import App from './App';
 import EnvironmentProvider from './Contexts/Environment/EnvironmentProvider';
 import { UserSettingProvider } from './Contexts/UserSettingsContext';
 import LanguageProvider from './LanguageProvider';
 import reportWebVitals from './reportWebVitals';
+import './css/theme.css';
+import './css/print.css';
+import { ThemeProvider } from './Contexts/ThemeContext';
 
 ReactDOM.render(
     <React.StrictMode>
+        <ThemeProvider>
+        <BrowserRouter>
         <EnvironmentProvider>
             <LanguageProvider>
                 <UserSettingProvider>
@@ -16,6 +22,8 @@ ReactDOM.render(
                 </UserSettingProvider>
             </LanguageProvider>
         </EnvironmentProvider>
+        </BrowserRouter>
+        </ThemeProvider>
     </React.StrictMode>,
     document.getElementById('root')
 );

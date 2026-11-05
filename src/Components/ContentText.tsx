@@ -1,14 +1,15 @@
 import { useContext } from "react";
-import { UserSettingsContext } from "../Contexts/UserSettingsContext";
-import { LanguageContext } from "../LanguageContext";
-import { ITextContent, IVariationInfo, TextColumn, TextParagraph } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
+import { readerColor, UserSettingsContext } from "../Contexts/UserSettingsContext";
+import { ContentLanguage, ITextContent, IVariationInfo, TextColumn, TextParagraph, normalizeContentLanguage } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
 import "./ContentText.css";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
+import VariationTitle from "./VariationTitle";
 
 interface IProps {
     variations: IVariationInfo<ITextContent>[];
+    hymnTitle?: string;
 }
 
 interface IContentTable {
@@ -17,9 +18,7 @@ interface IContentTable {
 }
 
 function ContentText(props: IProps) {
-    const { languageProperties } = useContext(LanguageContext);
     const { userSettings } = useContext(UserSettingsContext);
-    const langClassName = languageProperties.isRtl ? "fRight" : "fLeft";
 
     const englishMask: number = 0x100;
     const copticMask: number = 0x010;
@@ -27,26 +26,26 @@ function ContentText(props: IProps) {
 
     const overrideEnglishStyle = {
         '--english-font-size': userSettings.englishFontSize,
-        '--content-font-color': userSettings.contentFontColor,
-        '--hazzat-font-color': userSettings.hazzatFontColor,
+        '--content-font-color': readerColor(userSettings.contentFontColor),
+        '--hazzat-font-color': readerColor(userSettings.hazzatFontColor),
         direction: 'ltr'
     } as React.CSSProperties & { '--english-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
 
     const overrideArabicStyle = {
         '--arabic-font-size': userSettings.arabicFontSize,
-        '--content-font-color': userSettings.contentFontColor,
-        '--hazzat-font-color': userSettings.hazzatFontColor,
+        '--content-font-color': readerColor(userSettings.contentFontColor),
+        '--hazzat-font-color': readerColor(userSettings.hazzatFontColor),
         direction: 'rtl'
     } as React.CSSProperties & { '--arabic-font-size': string; '--content-font-color': string; '--hazzat-font-color': string; };
 
     const getLanguageMask = (language: string): number => {
-        if (language.toUpperCase() === "ENGLISH") {
+        if (normalizeContentLanguage(language) === ContentLanguage.English) {
             return englishMask;
         }
-        if (language.toUpperCase() === "COPTIC") {
+        if (normalizeContentLanguage(language) === ContentLanguage.Coptic) {
             return copticMask;
         }
-        if (language.toUpperCase() === "ARABIC") {
+        if (normalizeContentLanguage(language) === ContentLanguage.Arabic) {
             return arabicMask;
         }
 
@@ -147,7 +146,19 @@ function ContentText(props: IProps) {
     };
 
     const addContentRow = (columns: TextColumn[], isComment: boolean, currentMask: number) => {
-        const cells = columns.map((col) => {
+        // Sort columns to ensure correct order: English, Coptic, Arabic
+        const sortedColumns = [...columns].sort((a, b) => {
+            const orderMap: { [key: string]: number } = {
+                'ENGLISH': 1,
+                'COPTIC': 2,
+                'ARABIC': 3
+            };
+            const orderA = orderMap[normalizeContentLanguage(a.language)?.toUpperCase() || ""] || 999;
+            const orderB = orderMap[normalizeContentLanguage(b.language)?.toUpperCase() || ""] || 999;
+            return orderA - orderB;
+        });
+
+        const cells = sortedColumns.map((col) => {
             return getColCell(col, isComment, currentMask);
         });
 
@@ -163,15 +174,26 @@ function ContentText(props: IProps) {
     };
 
     const generateContentTables = (paragraphs: TextParagraph[]) => {
+        // Each alternative owns its own tables and language grouping.
+        contentTables.length = 0;
+        prevMask = 0;
+        currTableId = 0;
+        currRowId = 0;
+        currCelId = 0;
+        colDefId = 0;
         paragraphs && paragraphs.forEach((paragraph) => {
-            // get current mask
-            const currentMask = getTableMask(paragraph.columns);
+            // Filter out empty columns first
+            const nonEmptyColumns = paragraph.columns.filter(col => col.content && col.content.trim() !== "");
+            
+            // get current mask based on non-empty columns
+            const currentMask = getTableMask(nonEmptyColumns);
+            if (currentMask === 0) return;
 
             // ensure table instantiated
             ensureTableInstantiated(currentMask);
 
-            // add a new row
-            addContentRow(paragraph.columns, !!paragraph.isComment, currentMask);
+            // add a new row with only non-empty columns
+            addContentRow(nonEmptyColumns, !!paragraph.isComment, currentMask);
 
             // update mask
             prevMask = currentMask;
@@ -191,12 +213,22 @@ function ContentText(props: IProps) {
 
     return (
         <>
+            {props.hymnTitle && (
+                <>
+                    <div className="content-heading">
+                        <HymnTitle content={props.hymnTitle} />
+                    </div>
+                </>
+            )}
             {props.variations.map((variation) => {
                 return <div key={variation.id}>
-                    <div className={langClassName} style={{ paddingBottom: "20px", paddingTop: "20px" }}>
-                        <HymnTitle content={variation.name} />
-                    </div>
-                    <div className="clear" />
+                    {props.variations.length > 1 && (
+                        <>
+                            <div className="content-heading">
+                                <VariationTitle content={variation.displayName} />
+                            </div>
+                        </>
+                    )}
                     <div className="table-responsive dirLtr">
                         {
                             generateContentTables(variation.content.paragraphs)

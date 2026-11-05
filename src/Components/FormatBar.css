@@ -1,5 +1,40 @@
 .format-bar {
-    width: 100%;
-    background-color: #f8f9fa;
-    padding: 10px 0;
+    padding: 8px;
+    margin-block: 12px;
+    background: #f8f9fa;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+}
+.format-links > a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 6px;
+    border-radius: 3px;
+}
+.format-links > [aria-current="page"] {
+    background: #e2e9e7;
+    font-weight: 700;
+}
+.format-links > a:hover {
+    background: #e9ecef;
+}
+.format-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px;
+}
+@media (max-width: 37.5rem) {
+    .format-links {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+    .format-links > a {
+        padding: 6px;
+    }
+    .format-option {
+        font-size: 13px;
+        gap: 4px;
+    }
 }
