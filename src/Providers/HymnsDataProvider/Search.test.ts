@@ -166,3 +166,54 @@ describe("legacy Coptic text search", () => {
         expect((await searchContent(p, "P[oic Vnou]", "en", true))[0].hymn?.snippet).toContain("P[oic Vnou]");
     });
 });
+
+it('ignores unknown seasons and deduplicates repeated usages while supporting legacy providers', async () => {
+    const p = provider();
+    p.getServiceSummary = undefined;
+    p.getSearchTextIndex = undefined;
+    p.getService = jest.fn().mockResolvedValue({ displayName: 'Vespers' });
+    (p.getReferenceIndex as jest.Mock).mockResolvedValue({
+        hymn: { ...reference('Glory'), usages: [
+            { seasonId: 'missing', serviceId: 'vespers', name: 'Glory' },
+            { seasonId: 'annual', serviceId: 'vespers', name: 'Glory' },
+            { seasonId: 'annual', serviceId: 'vespers', name: 'Glory' },
+        ] },
+        unavailable: { ...reference('Glory'), usages: [{ seasonId: 'missing', serviceId: 'vespers', name: 'Glory' }] }
+    });
+    const result = await searchContent(p, 'glory', 'en', true);
+    expect(result).toHaveLength(1);
+    expect(result[0].hymn?.references).toHaveLength(1);
+    expect(result[0].hymn?.references[0].serviceName).toBe('Vespers');
+    expect(p.getService).toHaveBeenCalledTimes(1);
+});
+
+it('rejects matching results whose service cannot be loaded', async () => {
+    const p = provider();
+    (p.getServiceSummary as jest.Mock).mockResolvedValue(undefined);
+    await expect(searchContent(p, 'psalm', 'en')).rejects.toThrow('Unable to load a search result');
+});
+
+it.each([
+    ['beginning', 'Glory ' + 'filler '.repeat(80), false, true],
+    ['end', 'filler '.repeat(80) + 'Glory', true, false],
+] as const)('centers long snippets at the %s and marks only truncated ends', async (_, passage, leading, trailing) => {
+    const p = provider();
+    (p.getSearchTextIndex as jest.Mock).mockResolvedValue([
+        { hymnId: 'alternate', seasonId: 'annual', serviceId: 'matins', passages: [passage] }
+    ]);
+    const snippet = (await searchContent(p, 'glory', 'en', true))[0].hymn!.snippet!;
+    expect(snippet).toContain('Glory');
+    expect(snippet.startsWith('…')).toBe(leading);
+    expect(snippet.endsWith('…')).toBe(trailing);
+    expect(snippet.length).toBeLessThanOrEqual(242);
+});
+
+it('does not apply a one-letter English-normalized query to ordinary passages', async () => {
+    const p = provider();
+    (p.getSearchTextIndex as jest.Mock).mockResolvedValue([
+        { hymnId: 'alternate', seasonId: 'annual', serviceId: 'matins', passages: [{ text: 'a', language: 'English' }] }
+    ]);
+    const titles = await searchContent(p, 'a,', 'en');
+    expect(await searchContent(p, 'a,', 'en', true)).toEqual(titles);
+    expect(titles.every(result => !result.hymn?.snippet)).toBe(true);
+});
