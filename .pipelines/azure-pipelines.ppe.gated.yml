@@ -9,12 +9,12 @@ pr:
 - develop
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-26.04'
 
 steps:
-- task: NodeTool@0
+- task: UseNode@1
   inputs:
-    versionSpec: '24.x'
+    version: '24.x'
   displayName: 'Install Node.js'
 
 - task: Npm@1
