@@ -1,3 +1,4 @@
+import InvalidAddressMessage from "./InvalidAddressMessage";
 import { useContext, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { strings } from "../l8n";
@@ -61,6 +62,7 @@ function HelpPage() {
                 <Route path={`/SmallLetters`} element={<img src={mapSmallImg} alt={strings.smallLetters} style={{ maxWidth: "90%" }} />} />
                 <Route path={`/CapitalLetters`} element={<img src={mapCapsImg} alt={strings.capitalLetters} style={{ maxWidth: "90%" }} />} />
                 <Route path={`/HazzatKeyboardMap`} element={<img src={mapImg} alt={strings.hazzatKeybdMap} style={{ maxWidth: "90%" }} />} />
+                <Route path="*" element={<InvalidAddressMessage />} />
             </Routes>
         </MainPaper >
     );

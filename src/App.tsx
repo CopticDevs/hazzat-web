@@ -47,7 +47,7 @@ function App() {
                                 <Route path="/ContactUs" element={<ContactUsPage />} />
                                 <Route path="*" element={
                                     <MainPaper size={Size.Wide}>
-                                        <p><InvalidAddressMessage /></p>
+                                        <InvalidAddressMessage />
                                     </MainPaper>} />
                             </Routes>
                         </div>
