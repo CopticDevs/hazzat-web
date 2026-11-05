@@ -6,8 +6,8 @@ See [shared content v4](docs/shared-content-v4.md) for schema compatibility, loc
 
 See [Azure release migration](docs/azure-release-migration.md) for the manual PPE
 deployment scaffold, verified artifact contract, and cutover prerequisites.
-The separate [manual dev migration test](docs/azure-dev-release-test.md) describes
-the executable dev-only candidate and restricted secret setup.
+The separate [manual dev release runbook](docs/azure-dev-release.md) records the
+successful dev validation, restricted secret setup, and controlled deployment steps.
 
 ## Available Scripts
 

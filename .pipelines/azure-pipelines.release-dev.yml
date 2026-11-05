@@ -1,4 +1,4 @@
-# Manual dev-only migration test. Setup: docs/azure-dev-release-test.md.
+# Manual dev-only release pipeline. Runbook: docs/azure-dev-release.md.
 trigger: none
 pr: none
 

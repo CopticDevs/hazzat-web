@@ -1,8 +1,9 @@
 # Azure release migration (#274)
 
-Status: local, reviewable scaffold; **not ready to deploy or close #274**. No Azure
-pipeline has been created or run, and no trigger, permission, or secret has been
-changed. The existing build YAML and its artifact contract are unchanged.
+Status: **dev validation succeeded; PPE remains blocked and #274 remains open**.
+Pipeline 16 successfully redeployed the existing dev artifact in run 3614. Existing
+build YAML and its artifact contract are unchanged. No PPE/production cutover or
+automatic-trigger change is part of the dev validation or naming update.
 
 ## Verified inventory
 
@@ -176,31 +177,30 @@ This is a separate target from PPE; the PPE scaffold was not repointed or unlock
   URLs after redirects. All three SHA-256 hashes are
   `d7d81472b68f75cfa28c9d40a8c62e4163f493429e5050014d360d89cc7b57b0`.
 
-This verifies the historical dev release-to-site association and selected artifact
-availability; it is **not an end-to-end YAML deployment test**. The managed runtime
-has no configured Azure outbound identity, Azure credential bindings, or Azure
-connector/browser tools. Public reads do not grant pipeline queue permission or
-access to the saved deployment secret. No token value was retrieved.
+Those initial reads established readiness, not deployment execution. Subsequently,
+the owner configured pipeline 16 and its dev-only secret binding and confirmed the
+target and exclusive window. The browser queued exactly one manual test:
+[run 3614](https://dev.azure.com/CopticDevs/hazzat-api/_build/results?buildId=3614&view=results).
+It succeeded using code commit `3a0aac7df575e3f2c4657b70b7fa971c7a6930d9` and
+artifact build 3354. The actual deployment task completed, skipped Oryx, and deployed
+no API. Its 81-file manifest matched the retained artifact; homepage, main JS and
+main CSS matched live dev responses. See the [dev release runbook](azure-dev-release.md)
+for exact provenance, hashes and the subsequent permanent naming plan.
 
-The remaining dev-test blocker is an existing authenticated Azure DevOps session
-with permission to queue a dev-only YAML test and securely reference the existing
-dev secret. The user subsequently approved a persistent secret binding restricted
-to the new dev-test pipeline. The separate [executable dev candidate and setup
-runbook](azure-dev-release-test.md) records that scope and the required owner entry.
-No token creation or broad permission expansion is authorized.
-Before a future authorized run, verify current dev secret/target binding and check
-all queued/in-flight dev deployments; serialize the test without changing classic
-triggers. Keep PPE and production untouched. No Azure test run was submitted.
+This is a successful dev-only migration test, not PPE cutover. Future dev deployments
+still require current target/rollback verification and an exclusive window. The
+classic definition stays in place and automatic triggers stay unchanged. No token
+value was retrieved or committed.
 
 ### Local validation
 
 Local tests: `python3 -m unittest discover -s .pipelines/tests -v`. Parse the YAML
 with a YAML parser and review the exact-build inputs and literal deployment block.
-Azure schema compilation/preview and actual inspection/deployment runs remain
-unperformed; local parsing is not Azure validation. No application build is needed
-for this pipeline-only change.
+Local parsing alone is not Azure validation. Run 3614 validates the pre-rename dev
+pipeline's actual execution; PPE schema/runtime validation and deployment remain
+unperformed. No application build is needed for the naming/documentation update.
 
-#274 remains open until a known artifact is deployed successfully through YAML,
+#274 remains open until a known PPE artifact is deployed successfully through YAML,
 security/target equivalence is verified, and cutover evidence is recorded.
 
 Task references: [DownloadBuildArtifacts@1](https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/download-build-artifacts-v1?view=azure-pipelines),
