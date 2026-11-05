@@ -561,4 +561,24 @@ describe('GlobalSearch - Search Functionality', () => {
       expect(screen.getByRole('heading', { level: 5, name: 'مزمور ١٥٠' })).toBeInTheDocument();
     }, { timeout: 500 });
   });
+  it('navigates to a season selected from search results', async () => {
+    const originalPath = window.location.pathname;
+    render(<BrowserRouter><GlobalSearch dataProvider={mockDataProvider} /></BrowserRouter>);
+    try {
+      fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'nativity' } });
+      fireEvent.click(await screen.findByRole('button', { name: 'Nativity' }));
+      expect(window.location.pathname).toBe('/Seasons/nativity');
+    } finally { window.history.replaceState(null, '', originalPath); }
+  });
+
+  it('retries a failed title index before any partial results are available', async () => {
+    mockDataProvider.getReferenceIndex.mockRejectedValueOnce(new Error('Index unavailable')).mockResolvedValueOnce(mockReferenceIndex);
+    render(<BrowserRouter><GlobalSearch dataProvider={mockDataProvider} /></BrowserRouter>);
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'Psalm' } });
+    expect(await screen.findByRole('alert')).toHaveTextContent('complete content could not be loaded');
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(await screen.findByRole('heading', { level: 5, name: 'Psalm 150' })).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
 });
