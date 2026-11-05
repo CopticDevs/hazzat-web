@@ -50,6 +50,23 @@ class DevGuardTests(unittest.TestCase):
             with self.subTest(artifacts=artifacts), self.assertRaises(ValueError):
                 guard.validate_metadata(self.selected, self.build, artifacts)
 
+    def test_resource_metadata_must_match_selected_run(self):
+        # Selection is supplied by the run's pinned pipeline resource, not typed
+        # branch/commit parameters or a second lookup for the latest build.
+        for selected in [(3355, self.selected[1], self.selected[2]),
+                         (3354, "refs/heads/develop", self.selected[2]),
+                         (3354, self.selected[1], "b" * 40)]:
+            with self.subTest(selected=selected), self.assertRaises(ValueError):
+                guard.validate_metadata(selected, self.build, self.artifacts)
+
+    def test_picker_does_not_bypass_existing_eligibility_guard(self):
+        # The picker can display these runs. Rejecting them is an explicit
+        # retained restriction, not a claim about classic release eligibility.
+        for field, value in [("result", "failed"), ("result", "partiallySucceeded"),
+                             ("status", "inProgress"), ("reason", "pullRequest")]:
+            with self.subTest(field=field, value=value), self.assertRaises(ValueError):
+                guard.validate_metadata(self.selected, {**self.build, field: value}, self.artifacts)
+
     def test_layout_hashes_and_rejects_missing_or_linked_content(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

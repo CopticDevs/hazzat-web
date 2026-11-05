@@ -1,9 +1,9 @@
 # Manual dev YAML release
 
 This separate manual release pipeline targets **https://dev.hazzat.com/**. Its first
-controlled deployment succeeded in pipeline 16, run 3614. Permanent naming does not
-transfer deployment ownership or enable automation. The classic release remains in
-place; the PPE scaffold remains blocked, and production is unchanged.
+controlled deployment succeeded in pipeline 16, run 3614. The current candidate replaces typed build parameters with Azure’s manual resource
+version picker. Replacement verification and disabling classic are still pending;
+no automatic triggers are enabled. The classic release remains in place; the PPE scaffold remains blocked, and production is unchanged.
 
 ## Successful controlled validation (2026-11-05)
 
@@ -52,42 +52,61 @@ not establish full interactive application coverage, PPE validation, or cutover.
   deployed successful manual [build 3354](https://dev.azure.com/CopticDevs/hazzat-api/_apis/build/builds/3354?api-version=7.1),
   branch `refs/heads/codex/public-skin-cleanup`, commit
   `4a98e8d2451d23de23102bd47fb2df87f4775ec0`. Dev is not restricted to PPE's develop
-  branch assumption: the operator must explicitly pin the selected branch AND commit.
+  branch assumption: the selected resource supplies its branch and commit automatically.
 - The successful dev log names `yellow-forest-07103e310.1.azurestaticapps.net`.
   That host redirects to `dev.hazzat.com`; both homepage responses exactly matched
   build 3354's retained artifact during the read-only readiness check.
 
-## Existing Azure pipeline and rename sequencing
+## Existing Azure pipeline
 
-1. Keep **definition ID 16** and its token binding, permissions and run history.
-   Do not recreate it. Before this rename its name was `hazzat-web-dev-yaml-test`,
-   folder was root, and default ref was `refs/heads/issue-274-manual-release`.
-2. Publish the reviewed file rename to that branch first. With no run in flight,
-   the authenticated owner updates pipeline 16's `process.yamlFilename` to
-   `.pipelines/azure-pipelines.release-dev.yml`. A display-name change alone does
-   not update this binding. Save without queueing a run; leave the ref unchanged.
-3. Move the existing pipeline into **`\hazzat-web`**, the verified existing folder
-   containing frontend build definitions 12, 13, 14 and 15. Set display name
-   **`CopticDevs.hazzat-web-dev-release`** to distinguish it from dev build 12.
-   Compare effective inherited permissions before and after the move. Folder
-   inheritance can differ; if the move would change access, pause for that specific
-   issue rather than silently broadening or altering permissions.
-4. Verify ID, repository, YAML path, default ref, secret metadata, effective access,
-   disabled automatic triggers and existing run history after saving. Preserve
-   the existing `deployment_token` secret; do not copy, reveal, replace or rotate it.
-   No value goes in YAML, parameters, chat, logs, artifacts or command arguments.
-   Retain the reviewed queue-time override and operator-access settings. Do not
-   change classic, PPE, production, repository-wide or project-wide permissions.
-5. For future deployments, the owner confirms that the token belongs to the SWA resource with default host
-   `yellow-forest-07103e310.1.azurestaticapps.net` and custom domain `dev.hazzat.com`.
-   `default_hostname` is supplied to the task but is not claimed as an independent
-   security boundary. Token ownership must be checked before queueing. Blank
-   deployment environment means the default slot of this **dev resource**.
+Definition **16**, `CopticDevs.hazzat-web-dev-release`, is in `\hazzat-web` and
+uses `.pipelines/azure-pipelines.release-dev.yml` from
+`refs/heads/issue-274-manual-release`. The rename/move preserved its secret binding,
+permissions and run history. Keep this pipeline identity; do not recreate it.
+Only the deployment task receives the existing secret `deployment_token`.
+Never put its value in parameters, logs, artifacts, documentation or commands.
+The owner confirmed its SWA default hostname is
+`yellow-forest-07103e310.1.azurestaticapps.net`, with custom domain `dev.hazzat.com`.
+The task's `default_hostname` is not an independent security boundary.
 
-Approval exists for pipeline 16's persistent dev secret binding and this rename/move.
-It does not authorize minting credentials, broadening shared-resource access,
-merging the draft PR, or changing PPE/production. Parent coordinates
-the authenticated UI and secure owner entry; this executor does not handle tokens.
+## Manual selection and remaining parity checks
+
+Classic definition 9 is enabled, but its artifact CD trigger and PR trigger are
+disabled and it has no schedule. Create release defaults to **Latest** from build
+12 without a branch filter, permits explicit versions, and starts DEV after release
+creation without approvals/gates. Its execution policy permits one deployment at a time.
+The replacement likewise has no CI, PR, schedule or pipeline-completion trigger.
+Starting a manual run deploys its selected artifact, without extra opt-in boxes or
+branch/commit typing.
+
+The `devBuild` pipeline resource names the verified build-12 folder/name. Omitting
+`version`, `branch` and `tags` uses Azure's default selection across branches.
+The selected resource version is pinned for the entire run. Provenance checks compare
+its ID, source branch and commit with build metadata; the download uses that same ID,
+never a later lookup of Latest. No rebuilding occurs.
+
+**Eligibility is not yet proven identical to classic.** Microsoft documents YAML's
+default as the latest successful pipeline run. The manual picker can display failed
+and in-progress versions as well. The existing validator intentionally permits only
+completed successful builds with reason `manual`, `individualCI` or `batchedCI`,
+with a `refs/heads/...` source branch and the expected Container artifact. PR,
+partially successful, failed, canceled and other build reasons remain rejected before
+deployment. Classic's saved Latest setting does not establish its result/reason
+eligibility. Confirm this restriction is acceptable before declaring full parity;
+do not silently broaden it or claim exact eligibility equivalence.
+
+The latest observed successful definition-12 build was **3599**, on develop, commit
+`66e85d4070738eea89d3d39658a0a9b4afc8b12e`. Recheck current classic and YAML picker
+defaults side by side without queueing; defaults may advance. Microsoft's resource
+guide also describes default resolution in terms of successful CI runs, so specifically
+verify selection of these existing manual builds in Azure. For a no-content-change
+validation, explicitly select retained build **3354** after rechecking the live baseline.
+
+`DeployDev` has `lockBehavior: sequential`. Azure documents an automatically created
+stage-level lock for a named stage with this setting. It serializes this pipeline's
+runs; it does not lock classic or other writers. Azure compilation, picker behavior
+and this new stage arrangement still require service validation. Run 3614 tested the
+previous typed-parameter job, not this revision.
 
 ## Queue and verify a controlled manual deployment
 
@@ -95,17 +114,19 @@ the authenticated UI and secure owner entry; this executor does not handle token
    dev resource, across classic definition 9 and any other pipeline/manual client.
    Agree an exclusive window with other operators. Keep classic triggers unchanged.
    If automation or another writer can race the deployment, do not queue it; report the
-   coordination requirement. A checkbox is an operator attestation, not a mutex.
+   coordination requirement. This inspection is a snapshot, not a cross-pipeline lock.
 2. Record the currently deployed build and known-good rollback ID/ref/commit and
    retain its artifact. Recheck that build 3354 is still the live baseline before
    treating it as rollback. Record existing trigger/settings snapshots for comparison.
-3. Choose a successful existing definition-12 build. Independently read and record
-   its ID, exact `refs/heads/...` source ref, 40-character commit and Container artifact.
-   PR builds are rejected even if their sourceBranch resembles an accepted branch.
-4. Queue manually from the reviewed pipeline-code ref. Enter `buildId`,
-   `expectedSourceBranch`, `expectedSourceCommit`; set `deployDev=true` and
-   `exclusiveDevWindowConfirmed=true` only after the preceding checks. Defaults
-   skip the job. No automatic trigger can satisfy its `Build.Reason == Manual` guard.
+3. Open **Run pipeline** on definition 16 using the reviewed pipeline-code ref.
+   Under **Resources**, open **devBuild** and inspect the default version, or select
+   an explicit existing definition-12 version across branches. Record its run ID.
+   Branch and commit come from the resource metadata; there is nothing to type.
+   If Azure requests resource permission, authorize only pipeline 16 to build 12
+   through the existing owner workflow; do not grant all pipelines access.
+4. Review that version and click Run once. This now starts deployment directly.
+   The stage additionally requires `Build.Reason == Manual`; automatic triggers
+   remain disabled. Provenance failures stop before the deployment task.
 5. The single job checks provenance, downloads that exact build, rejects missing
    output or symlinks, publishes a file-hash manifest, then deploys without building.
    Only the Azure deployment task receives `$(deployment_token)`. The final read-only
@@ -123,16 +144,33 @@ through the verified classic definition or this pipeline, then repeat validation
 Do not rebuild, change triggers, or deploy to PPE/production as rollback. Finish by
 confirming classic triggers and PPE/production settings remain unchanged.
 
+## Retire classic only after replacement verification
+
+After the manual picker/default and controlled deployment have been verified, drain
+all queued, pending and running classic DEV releases and pipeline-16 deployments.
+The authenticated owner uses classic definition **9 → More actions → Disable**.
+Preserve history, artifacts and existing trigger settings; do not delete the definition
+or change PPE/production. Verify its disabled state and that stale releases cannot
+resume. Pipeline 16 then owns manual dev releases. No automatic CI/CD is introduced.
+
+If the replacement needs to be withdrawn, stop new YAML runs and drain/cancel them,
+inspect actual target state, then re-enable classic 9 as the sole owner. Never leave
+both available to deploy concurrently. Choose the retained known-good build explicitly;
+Latest may have changed. Record ownership transitions and deployed artifact IDs.
+
 ## Local validation and limits
 
 `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s .pipelines/tests -v`
 tests metadata selection, rejection paths, downloaded layout and mocked live checks.
-Read-only metadata/layout/live checks against retained dev build 3354 can establish
-readiness, but cannot establish Azure YAML compilation or successful deployment.
-Run 3614 established successful Azure execution of the pre-rename dev YAML. Local
-semantic-equivalence checks cover the rename; the new Azure path binding must be
-verified after the owner saves it. No new deployment is needed merely to rename.
+These tests do not establish Azure YAML compilation, manual picker defaults or locking.
+Run 3614 established actual execution of the earlier dev YAML. The current resource
+picker revision requires a controlled Azure validation before classic is disabled.
 PPE execution and full interactive smoke testing remain separate unfinished work.
 
-References: [Secret scope](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/set-secret-variables?view=azure-devops),
-[AzureStaticWebApp task schema](https://github.com/microsoft/azure-pipelines-tasks/blob/master/Tasks/AzureStaticWebAppV0/task.json).
+References:
+- [Pipeline resource defaults and metadata](https://learn.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/resources-pipelines-pipeline?view=azure-pipelines).
+- [Manual resource version picker](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/resources?view=azure-devops).
+- [Classic artifact selection](https://learn.microsoft.com/en-us/azure/devops/pipelines/release/artifacts?view=azure-devops).
+- [Stage-level exclusive lock](https://learn.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/stages-stage?view=azure-pipelines#exclusive-lock-at-stage-level).
+- [Secret scope](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/set-secret-variables?view=azure-devops).
+- [AzureStaticWebApp task schema](https://github.com/microsoft/azure-pipelines-tasks/blob/master/Tasks/AzureStaticWebAppV0/task.json).
