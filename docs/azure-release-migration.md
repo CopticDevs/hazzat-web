@@ -1,9 +1,10 @@
 # Azure release migration (#274)
 
-Status: **dev validation succeeded; PPE remains blocked and #274 remains open**.
-Pipeline 16 successfully redeployed the existing dev artifact in run 3614. Existing
-build YAML and its artifact contract are unchanged. No PPE/production cutover or
-automatic-trigger change is part of the dev validation or naming update.
+Status: **dev cutover complete; PPE deployment remains blocked and #274 remains open**.
+Dev pipeline 16 now uses develop and classic dev definition 9 is disabled. PPE classic
+10 remains enabled with automatic develop releases. The local PPE candidate and
+fresh read-only inventory are described in [the PPE plan](azure-ppe-release-plan.md).
+No PPE/production cutover has occurred.
 
 ## Verified inventory
 
@@ -47,32 +48,25 @@ tasks, target and trigger migration are out of this first PPE change. The existi
 production build publishes `HazzatWebBuildProd`; never substitute a PPE artifact
 for it merely because both contain a static frontend.
 
-## Local scaffold
+## Local PPE candidate
 
-`.pipelines/azure-pipelines.release-ppe.yml` is a **separate** release pipeline.
-CI and PR triggers are `none`; there is no schedule or pipeline-completion
-resource. `inspectArtifact` defaults to false. With future authorization to
-register/run it, a manual inspection explicitly sets `inspectArtifact=true` and
-selects a numeric `buildId`. The script verifies ID, successful completion,
-definition, project, repository, branch, source commit, and Container artifact.
-Only `individualCI`, `batchedCI`, and `manual` build reasons are accepted; PR,
-missing, and other reasons fail even if the branch is reported as `develop`.
-Scheduled/completion/resource-triggered builds require a separately reviewed policy
-change before acceptance. Reference PPE build 3598 has reason `individualCI`.
-Invalid/missing metadata fails closed. It uses public read access and no token.
+See [the refreshed PPE plan](azure-ppe-release-plan.md) for the latest release 1038 /
+build 3620 evidence, observed hostname, unchanged automatic classic behavior, and
+specific remaining security/eligibility decisions.
 
-`DownloadBuildArtifacts@1` uses `buildVersionToDownload: specific` and the selected
-build ID, never `latest`, `current`, or a triggering-build fallback. It preserves
-the alias/artifact directory layout beneath a clean workspace directory. Inspection
-checks `index.html` and `static`, and publishes a SHA-256 file manifest as evidence;
-it does not modify or republish the website. No npm, Oryx, compilation, or config
-substitution runs during inspection.
+The separate PPE YAML now selects the `ppeBuild` pipeline resource and pins its run
+ID, branch and commit. Inspection accepts manual or the intended resource-trigger
+context, verifies definition 14/project/repository/success provenance (develop for automatic
+runs; any non-PR branch for manual selection), and
+downloads the exact Container artifact without rebuilding. Automatic contexts also
+must match the triggering alias and pipeline code commit. The Python layout check
+rejects symlinks/missing static output and publishes a JSON hash manifest.
 
-`DeployPpe` has the literal condition `and(succeeded(), eq(1, 0))`. It cannot run
-through a parameter or variable override. Its task inputs preserve the verified
-classic values, including the original secret reference. There is deliberately
-no guessed Azure environment name or service connection. The blocked ordinary
-job is a task translation, **not an approved deployment/security design**.
+All automatic triggers remain disabled. DeployPpe retains the literal false condition;
+no parameter unlocks it. Its sequential lock and repeated provenance/layout checks
+prepare a controlled execution path, but no PPE deployment or Azure validation has
+occurred. The observed hostname is supplied to the blocked task; token ownership and
+effective permissions still require owner verification.
 
 ## Required before unblocking deployment
 
@@ -84,11 +78,11 @@ job is a task translation, **not an approved deployment/security design**.
    Public definition reads do not establish these. Confirm whether organizational
    checks/policies exist outside this definition; empty gate lists do not prove
    there are none.
-3. Select and pre-create the intended YAML Azure environment, configure its access
-   controls/checks, and authorize only the intended pipeline and build-artifact
-   readers. Replace the blocked job with a deployment job bound to that verified
-   environment. Configure explicit artifact download (`download: none` disables
-   deployment-job automatic downloads). Review queue/cancel timeout, failure
+3. Select the intended access-control boundary and authorize only the intended
+   pipeline and build-artifact readers. If a protected Azure environment is chosen,
+   pre-create it with reviewed checks and bind a deployment job to it; disable its
+   automatic downloads with `download: none`. Classic has automated approvals only,
+   so an extra manual gate is an intentional change. Review queue/cancel timeout, failure
    notification, status publishing, retention, and lock/queue behavior separately;
    classic and YAML defaults are not assumed equivalent.
 4. Provision the existing `deployment_token` secret reference securely for the
@@ -136,8 +130,8 @@ These are future operator steps, not actions performed by this change.
   work as above. Verify no classic writer remains before transferring ownership.
 - After manual PPE validation, a separate reviewed change may enable YAML completion
   triggers matching the verified branch/filter behavior. Design how the triggering
-  run ID is bound to artifact selection; this manual scaffold intentionally rejects
-  non-manual runs and must not simply have an automatic trigger appended to it.
+  run ID is bound to artifact selection; the candidate verifies resource-trigger context but automation remains off until
+  the reviewed cutover and same-repository code-ref policy are in place.
 - Retain the classic definition disabled, with its secrets/references and known-good
   artifacts available for rollback. Record a single automatic owner per target.
 - On rollback, first disable YAML automatic triggers and stop/drain its queued and
