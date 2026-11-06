@@ -38,8 +38,8 @@ it("updates reader columns immediately, persists choices, and restores them on r
     const view = render(reader());
     await screen.findByText("ارحمنا");
     fireEvent.click(screen.getByRole("button", { name: strings.settings }));
-    fireEvent.click(screen.getByRole("checkbox", { name: "Coptic", exact: true }));
-    fireEvent.click(screen.getByRole("checkbox", { name: "Arabic", exact: true }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Coptic" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Arabic" }));
     expect(screen.queryByText("ارحمنا")).not.toBeInTheDocument();
     expect(document.querySelectorAll("colgroup col:not(.separator-text-content)")).toHaveLength(1);
     expect(screen.getByText("English verse")).toBeInTheDocument();
@@ -49,10 +49,10 @@ it("updates reader columns immediately, persists choices, and restores them on r
     await screen.findByText("English verse");
     expect(screen.queryByText("ارحمنا")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: strings.settings }));
-    expect(screen.getByRole("checkbox", { name: "Arabic", exact: true })).not.toBeChecked();
-    fireEvent.click(screen.getByRole("checkbox", { name: "English", exact: true }));
+    expect(screen.getByRole("checkbox", { name: "Arabic" })).not.toBeChecked();
+    fireEvent.click(screen.getByRole("checkbox", { name: "English" }));
     expect(screen.getByRole("status")).toHaveTextContent(strings.noSelectedLanguageContent);
-    fireEvent.click(screen.getByRole("checkbox", { name: "Arabic", exact: true }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Arabic" }));
     expect(screen.getByText("ارحمنا")).toBeInTheDocument();
 });
 

@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import EnvironmentProvider from './Contexts/Environment/EnvironmentProvider';
 import { UserSettingProvider } from './Contexts/UserSettingsContext';
@@ -11,7 +11,10 @@ import './css/theme.css';
 import './css/print.css';
 import { ThemeProvider } from './Contexts/ThemeContext';
 
-ReactDOM.render(
+const container = document.getElementById('root');
+if (!container) throw new Error('Missing application root');
+export const root = createRoot(container);
+root.render(
     <React.StrictMode>
         <ThemeProvider>
         <BrowserRouter>
@@ -24,8 +27,7 @@ ReactDOM.render(
         </EnvironmentProvider>
         </BrowserRouter>
         </ThemeProvider>
-    </React.StrictMode>,
-    document.getElementById('root')
+    </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
