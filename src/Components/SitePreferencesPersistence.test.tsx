@@ -154,7 +154,7 @@ test("unavailable browser signals use light and English, with navigator.language
     expect(languageFromTag("arabic")).toBeNull();
 });
 test("the early bootstrap applies browser or saved themes before React without persisting them", () => {
-    const html = require("fs").readFileSync(require("path").join(process.cwd(), "public/index.html"), "utf8");
+    const html = require("fs").readFileSync(require("path").join(process.cwd(), "index.html"), "utf8");
     const bootstrap = html.match(/<script>([\s\S]*?)<\/script>/)[1];
     dark = true; languages = ["fr", "ar-EG"];
     window.eval(bootstrap);
