@@ -1,5 +1,10 @@
 # PPE migration preparation — local candidate
 
+**Current branch:** a [controlled manual test candidate](azure-ppe-controlled-test.md)
+replaces the literal block with default-off manual guards locally. The inventory and
+blocked-scaffold descriptions below record the merged preparation baseline; consult
+the test plan for current branch behavior. No PPE YAML deployment has run.
+
 Snapshot: 2026-11-05, develop `fd9250a77541fb8413204ad428929871dbccc16e`.
 Dev cutover is complete and manual-only. This PPE candidate is local, unpublished,
 not registered in Azure, and cannot deploy: `DeployPpe` retains its literal false
