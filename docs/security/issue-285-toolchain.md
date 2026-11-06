@@ -17,3 +17,33 @@ Reproduce the mapping with:
 ```
 node scripts/reconcile-dependabot.cjs . /path/to/hazzat-dependabot-open.json 8c61d27ea7fe5897073761990c0fb62e6931f4ac
 ```
+
+## Vite-only publication validation (2026-11-06)
+
+The publication branch contains the configuration extraction and Vite checkpoint only. Jest 27.5.1, jsdom 16.7.0, jest-junit 13.1.0 and TypeScript 4.9.5 remain; the separately assessed Jest 30/TypeScript 5.9 candidate and its application changes are excluded. Freshly fetched develop remains `8c61d27ea7fe5897073761990c0fb62e6931f4ac`.
+
+Validation was rerun on the exact Vite code in its own worktree, not borrowed from the later candidate:
+
+- `npm ci --strict-peer-deps`: succeeds (1,089 packages); `npm ls --all`: succeeds.
+- Full `test-unit` run with Azure's Cobertura/lcov/text reporters: 53 suites/616 tests pass; one optional suite/two tests skipped. JUnit XML parses with zero failures/errors; Cobertura and lcov output verified. Line coverage 96.19%, branch coverage 90.81%.
+- Typecheck and production build pass. All three configuration tests and 31 release-guard tests pass.
+- Lint remains a failing baseline check: **120 errors/nine warnings**. Diagnostics are identical after normalizing the worktree path; no rules were disabled.
+- Resolved browser targets match the repository's production browserslist (Chrome 109, Edge 151, Firefox 121, iOS 16.6, Opera 135, Safari 18.5 at this database snapshot). SPA mode and build/static output are verified.
+- A separate actual build with PUBLIC_URL=/hazzat-contract places the prefix in HTML/static references and embeds the approved pipeline content URL; unlisted REACT_APP_* and VITE_* canaries are absent from JavaScript. SVG and binary artwork files are emitted.
+- Local production fixture browser checks at 1280x844 and 390x844 pass home/SVG rendering, direct reader links/reload, format switching, Back/Forward, theme persistence, Arabic RTL persistence, horizontal overflow, Fonts, legacy redirect, and repeated/interrupted mobile menu interactions. Development checks perform a real source edit, verify HMR without a full reload, restore the source, and verify manual refresh. Browser console/uncaught errors, failed local requests, and HTTP asset failures are checked. Representative screenshots were visually inspected.
+
+The fixtures contain synthetic English/Arabic content; these checks are not live PPE regression coverage. Audio and all PDF/font rendering combinations remain outside this smoke pass. Build warnings about the large main chunk and the mixed static/dynamic opensheetmusicdisplay import remain visible.
+
+### Current audit comparison
+
+The same current audit was applied to exact lockfiles for all three assessed checkpoints. Counts below distinguish unique advisory URLs from dependency entries; neither is a GitHub alert-closure count.
+
+| Checkpoint | Distinct advisories | npm affected dependency entries |
+| --- | ---: | --- |
+| develop 8c61d27 | 22 | 34: 10 high, 8 moderate, 16 low |
+| **This Vite stage, 43349b8** | **3: once, uuid, deepmerge** | **12: 2 moderate, 10 low** |
+| Deferred Jest candidate c122fe3 (excluded) | 3: glob, minimatch, deepmerge | 19: 18 moderate, 1 low |
+
+This stage addresses **19 additional entries from the supplied 47-alert export**; 25 were already addressed by its base, and #134 once, #135 uuid, #246 deepmerge remain affected. The separate Jest candidate introduces glob/minimatch advisories and is not included in this PR. This Vite stage introduces neither of them. Exact original-export paths/ranges are recorded in `issue-285-vite-reconciliation.json`; no alert is dismissed and issue 285 remains open.
+
+Publication-validation logs, the browser harness, screenshots, and report files are retained outside the repository in `/workspace/issue285-toolchain-evidence/vite-publication/`.
