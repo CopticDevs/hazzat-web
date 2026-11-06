@@ -70,6 +70,15 @@ class BuildGuardTests(unittest.TestCase):
             guard.validate_metadata(3598, {**build, "reason": "pullRequest"}, self.artifacts,
                                     required_branch=None)
 
+    def test_ownership_requires_explicit_classic_retirement(self):
+        guard.validate_classic_retired({"id": 10, "isDisabled": True})
+        for definition in [{}, {"id": 10}, {"id": 9, "isDisabled": True},
+                           {"id": 10, "isDisabled": False},
+                           {"id": 10, "isDisabled": "true"},
+                           {"id": 10, "isDisabled": 1}]:
+            with self.subTest(definition=definition), self.assertRaises(ValueError):
+                guard.validate_classic_retired(definition)
+
     def test_resource_context_pins_identity_and_automatic_code(self):
         branch, commit = self.build["sourceBranch"], self.build["sourceVersion"]
         guard.validate_resource_context(self.build, branch, commit, "Manual", "", "candidate", "b" * 40)
