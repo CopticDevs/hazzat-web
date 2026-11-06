@@ -1,5 +1,11 @@
 # Production release migration (#274)
 
+The manual test completed as run 3648 and classic ownership was restored. See
+[the automatic cutover candidate](azure-production-cutover.md) for the current
+proposed activation and rollback procedure. The sections below preserve the
+manual-test preparation and inventory history; they do not describe automatic
+cutover as already active.
+
 ## Status and scope
 
 Local manual-test candidate based on develop `8650de34435e2bb1f2d3d50536e542f066d2ed26`.
