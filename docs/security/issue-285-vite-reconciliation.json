@@ -1,0 +1,1302 @@
+{
+  "base": "8c61d27ea7fe5897073761990c0fb62e6931f4ac",
+  "exportSha256": "70ed64b80bc2f344e2cfeadc621cbe83ddea9f500bd6e1d8dcb684c060ab5341",
+  "lockfileSha256": "e91a244f040ba327f274b5fa375ec3c7c9e81789ba40d62e5ec14516be71d070",
+  "caveat": "Local version-range reconciliation only; not GitHub closure or reachability proof. See the review for current advisory corrections.",
+  "counts": {
+    "resolved by code": 19,
+    "already not affected": 25,
+    "still affected": 3
+  },
+  "alerts": [
+    {
+      "number": 1,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/1",
+      "package": "nth-check",
+      "severity": "high",
+      "exportedRange": "< 2.0.1",
+      "exportedFirstPatch": "2.0.1",
+      "ghsa": "GHSA-rp65-9cf3-cjxr",
+      "advisory": "https://github.com/advisories/GHSA-rp65-9cf3-cjxr",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/nth-check",
+          "version": "2.0.1",
+          "affected": false
+        },
+        {
+          "path": "node_modules/svgo/node_modules/nth-check",
+          "version": "1.0.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 25,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/25",
+      "package": "postcss",
+      "severity": "medium",
+      "exportedRange": "< 8.4.31",
+      "exportedFirstPatch": "8.4.31",
+      "ghsa": "GHSA-7fh5-64p2-3v2j",
+      "advisory": "https://github.com/advisories/GHSA-7fh5-64p2-3v2j",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/postcss",
+          "version": "8.5.32",
+          "affected": false
+        },
+        {
+          "path": "node_modules/resolve-url-loader/node_modules/postcss",
+          "version": "7.0.39",
+          "affected": true
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/postcss",
+          "version": "8.5.32",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 36,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/36",
+      "package": "ip",
+      "severity": "high",
+      "exportedRange": "<= 2.0.1",
+      "exportedFirstPatch": null,
+      "ghsa": "GHSA-2p57-rm9w-gvfp",
+      "advisory": "https://github.com/advisories/GHSA-2p57-rm9w-gvfp",
+      "status": "already not affected",
+      "before": [],
+      "after": []
+    },
+    {
+      "number": 66,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/66",
+      "package": "webpack-dev-server",
+      "severity": "medium",
+      "exportedRange": "<= 5.2.0",
+      "exportedFirstPatch": "5.2.1",
+      "ghsa": "GHSA-4v9v-hfq4-rm2v",
+      "advisory": "https://github.com/advisories/GHSA-4v9v-hfq4-rm2v",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/webpack-dev-server",
+          "version": "4.15.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 67,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/67",
+      "package": "webpack-dev-server",
+      "severity": "medium",
+      "exportedRange": "<= 5.2.0",
+      "exportedFirstPatch": "5.2.1",
+      "ghsa": "GHSA-9jgg-88mc-972h",
+      "advisory": "https://github.com/advisories/GHSA-9jgg-88mc-972h",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/webpack-dev-server",
+          "version": "4.15.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 91,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/91",
+      "package": "ajv",
+      "severity": "medium",
+      "exportedRange": ">= 7.0.0-alpha.0, < 8.18.0",
+      "exportedFirstPatch": "8.18.0",
+      "ghsa": "GHSA-2g4f-4pwh-qvx6",
+      "advisory": "https://github.com/advisories/GHSA-2g4f-4pwh-qvx6",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/ajv",
+          "version": "6.15.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/ajv-formats/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/css-minimizer-webpack-plugin/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/mini-css-extract-plugin/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/minimizer-webpack-plugin/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/webpack-dev-middleware/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/webpack-dev-server/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/webpack/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/workbox-build/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/ajv",
+          "version": "6.15.0",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 92,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/92",
+      "package": "ajv",
+      "severity": "medium",
+      "exportedRange": "< 6.14.0",
+      "exportedFirstPatch": "6.14.0",
+      "ghsa": "GHSA-2g4f-4pwh-qvx6",
+      "advisory": "https://github.com/advisories/GHSA-2g4f-4pwh-qvx6",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/ajv",
+          "version": "6.15.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/ajv-formats/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/css-minimizer-webpack-plugin/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/mini-css-extract-plugin/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/minimizer-webpack-plugin/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/webpack-dev-middleware/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/webpack-dev-server/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/webpack/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/workbox-build/node_modules/ajv",
+          "version": "8.20.0",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/ajv",
+          "version": "6.15.0",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 93,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/93",
+      "package": "minimatch",
+      "severity": "high",
+      "exportedRange": "< 3.1.3",
+      "exportedFirstPatch": "3.1.3",
+      "ghsa": "GHSA-3ppc-4f35-3m26",
+      "advisory": "https://github.com/advisories/GHSA-3ppc-4f35-3m26",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/filelist/node_modules/minimatch",
+          "version": "5.1.9",
+          "affected": false
+        },
+        {
+          "path": "node_modules/minimatch",
+          "version": "3.1.5",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/minimatch",
+          "version": "3.1.5",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 94,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/94",
+      "package": "minimatch",
+      "severity": "high",
+      "exportedRange": ">= 5.0.0, < 5.1.7",
+      "exportedFirstPatch": "5.1.7",
+      "ghsa": "GHSA-3ppc-4f35-3m26",
+      "advisory": "https://github.com/advisories/GHSA-3ppc-4f35-3m26",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/filelist/node_modules/minimatch",
+          "version": "5.1.9",
+          "affected": false
+        },
+        {
+          "path": "node_modules/minimatch",
+          "version": "3.1.5",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/minimatch",
+          "version": "3.1.5",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 95,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/95",
+      "package": "rollup",
+      "severity": "high",
+      "exportedRange": "< 2.80.0",
+      "exportedFirstPatch": "2.80.0",
+      "ghsa": "GHSA-mw96-cpmx-2vgc",
+      "advisory": "https://github.com/advisories/GHSA-mw96-cpmx-2vgc",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/rollup",
+          "version": "2.80.0",
+          "affected": false
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 96,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/96",
+      "package": "minimatch",
+      "severity": "high",
+      "exportedRange": "< 3.1.4",
+      "exportedFirstPatch": "3.1.4",
+      "ghsa": "GHSA-23c5-xmqv-rm74",
+      "advisory": "https://github.com/advisories/GHSA-23c5-xmqv-rm74",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/filelist/node_modules/minimatch",
+          "version": "5.1.9",
+          "affected": false
+        },
+        {
+          "path": "node_modules/minimatch",
+          "version": "3.1.5",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/minimatch",
+          "version": "3.1.5",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 97,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/97",
+      "package": "minimatch",
+      "severity": "high",
+      "exportedRange": "< 3.1.3",
+      "exportedFirstPatch": "3.1.3",
+      "ghsa": "GHSA-7r86-cg39-jmmj",
+      "advisory": "https://github.com/advisories/GHSA-7r86-cg39-jmmj",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/filelist/node_modules/minimatch",
+          "version": "5.1.9",
+          "affected": false
+        },
+        {
+          "path": "node_modules/minimatch",
+          "version": "3.1.5",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/minimatch",
+          "version": "3.1.5",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 99,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/99",
+      "package": "svgo",
+      "severity": "high",
+      "exportedRange": ">= 2.1.0, < 2.8.1",
+      "exportedFirstPatch": "2.8.1",
+      "ghsa": "GHSA-xpqw-6gx7-v673",
+      "advisory": "https://github.com/advisories/GHSA-xpqw-6gx7-v673",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/postcss-svgo/node_modules/svgo",
+          "version": "2.8.4",
+          "affected": false
+        },
+        {
+          "path": "node_modules/svgo",
+          "version": "1.3.2",
+          "affected": false
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 100,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/100",
+      "package": "serialize-javascript",
+      "severity": "high",
+      "exportedRange": "<= 7.0.2",
+      "exportedFirstPatch": "7.0.3",
+      "ghsa": "GHSA-5c6j-r48x-rmvq",
+      "advisory": "https://github.com/advisories/GHSA-5c6j-r48x-rmvq",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/rollup-plugin-terser/node_modules/serialize-javascript",
+          "version": "4.0.0",
+          "affected": true
+        },
+        {
+          "path": "node_modules/serialize-javascript",
+          "version": "6.0.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 101,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/101",
+      "package": "minimatch",
+      "severity": "high",
+      "exportedRange": ">= 5.0.0, < 5.1.8",
+      "exportedFirstPatch": "5.1.8",
+      "ghsa": "GHSA-7r86-cg39-jmmj",
+      "advisory": "https://github.com/advisories/GHSA-7r86-cg39-jmmj",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/filelist/node_modules/minimatch",
+          "version": "5.1.9",
+          "affected": false
+        },
+        {
+          "path": "node_modules/minimatch",
+          "version": "3.1.5",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/minimatch",
+          "version": "3.1.5",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 102,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/102",
+      "package": "minimatch",
+      "severity": "high",
+      "exportedRange": ">= 5.0.0, < 5.1.8",
+      "exportedFirstPatch": "5.1.8",
+      "ghsa": "GHSA-23c5-xmqv-rm74",
+      "advisory": "https://github.com/advisories/GHSA-23c5-xmqv-rm74",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/filelist/node_modules/minimatch",
+          "version": "5.1.9",
+          "affected": false
+        },
+        {
+          "path": "node_modules/minimatch",
+          "version": "3.1.5",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/minimatch",
+          "version": "3.1.5",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 103,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/103",
+      "package": "flatted",
+      "severity": "high",
+      "exportedRange": "< 3.4.0",
+      "exportedFirstPatch": "3.4.0",
+      "ghsa": "GHSA-25h7-pfq9-p65f",
+      "advisory": "https://github.com/advisories/GHSA-25h7-pfq9-p65f",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/flatted",
+          "version": "3.4.4",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/flatted",
+          "version": "3.4.4",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 104,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/104",
+      "package": "flatted",
+      "severity": "high",
+      "exportedRange": "<= 3.4.1",
+      "exportedFirstPatch": "3.4.2",
+      "ghsa": "GHSA-rf6f-7fwh-wjgh",
+      "advisory": "https://github.com/advisories/GHSA-rf6f-7fwh-wjgh",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/flatted",
+          "version": "3.4.4",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/flatted",
+          "version": "3.4.4",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 105,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/105",
+      "package": "yaml",
+      "severity": "medium",
+      "exportedRange": ">= 1.0.0, < 1.10.3",
+      "exportedFirstPatch": "1.10.3",
+      "ghsa": "GHSA-48c2-rrv3-qjmp",
+      "advisory": "https://github.com/advisories/GHSA-48c2-rrv3-qjmp",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/yaml",
+          "version": "1.10.3",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/cosmiconfig/node_modules/yaml",
+          "version": "1.10.3",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 106,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/106",
+      "package": "picomatch",
+      "severity": "high",
+      "exportedRange": "< 2.3.2",
+      "exportedFirstPatch": "2.3.2",
+      "ghsa": "GHSA-c2c7-rcm5-vvqj",
+      "advisory": "https://github.com/advisories/GHSA-c2c7-rcm5-vvqj",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/picomatch",
+          "version": "2.3.2",
+          "affected": false
+        },
+        {
+          "path": "node_modules/tinyglobby/node_modules/picomatch",
+          "version": "4.0.7",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/picomatch",
+          "version": "2.3.2",
+          "affected": false
+        },
+        {
+          "path": "node_modules/tinyglobby/node_modules/picomatch",
+          "version": "4.0.7",
+          "affected": false
+        },
+        {
+          "path": "node_modules/vite-plugin-svgr/node_modules/picomatch",
+          "version": "4.0.7",
+          "affected": false
+        },
+        {
+          "path": "node_modules/vite/node_modules/picomatch",
+          "version": "4.0.7",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 107,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/107",
+      "package": "picomatch",
+      "severity": "medium",
+      "exportedRange": "< 2.3.2",
+      "exportedFirstPatch": "2.3.2",
+      "ghsa": "GHSA-3v7f-55p6-f55p",
+      "advisory": "https://github.com/advisories/GHSA-3v7f-55p6-f55p",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/picomatch",
+          "version": "2.3.2",
+          "affected": false
+        },
+        {
+          "path": "node_modules/tinyglobby/node_modules/picomatch",
+          "version": "4.0.7",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/picomatch",
+          "version": "2.3.2",
+          "affected": false
+        },
+        {
+          "path": "node_modules/tinyglobby/node_modules/picomatch",
+          "version": "4.0.7",
+          "affected": false
+        },
+        {
+          "path": "node_modules/vite-plugin-svgr/node_modules/picomatch",
+          "version": "4.0.7",
+          "affected": false
+        },
+        {
+          "path": "node_modules/vite/node_modules/picomatch",
+          "version": "4.0.7",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 130,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/130",
+      "package": "@babel/plugin-transform-modules-systemjs",
+      "severity": "high",
+      "exportedRange": ">= 7.12.0, <= 7.29.3",
+      "exportedFirstPatch": "7.29.4",
+      "ghsa": "GHSA-fv7c-fp4j-7gwp",
+      "advisory": "https://github.com/advisories/GHSA-fv7c-fp4j-7gwp",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/@babel/plugin-transform-modules-systemjs",
+          "version": "7.29.8",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/@babel/plugin-transform-modules-systemjs",
+          "version": "7.29.8",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 133,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/133",
+      "package": "webpack-dev-server",
+      "severity": "medium",
+      "exportedRange": "<= 5.2.3",
+      "exportedFirstPatch": "5.2.4",
+      "ghsa": "GHSA-79cf-xcqc-c78w",
+      "advisory": "https://github.com/advisories/GHSA-79cf-xcqc-c78w",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/webpack-dev-server",
+          "version": "4.15.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 134,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/134",
+      "package": "@tootallnate/once",
+      "severity": "low",
+      "exportedRange": "< 2.0.1",
+      "exportedFirstPatch": "2.0.1",
+      "ghsa": "GHSA-vpq2-c234-7xj6",
+      "advisory": "https://github.com/advisories/GHSA-vpq2-c234-7xj6",
+      "status": "still affected",
+      "before": [
+        {
+          "path": "node_modules/@tootallnate/once",
+          "version": "1.1.2",
+          "affected": true
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/@tootallnate/once",
+          "version": "1.1.2",
+          "affected": true
+        }
+      ]
+    },
+    {
+      "number": 135,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/135",
+      "package": "uuid",
+      "severity": "medium",
+      "exportedRange": "< 11.1.1",
+      "exportedFirstPatch": "11.1.1",
+      "ghsa": "GHSA-w5hq-g745-h8pq",
+      "advisory": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+      "status": "still affected",
+      "before": [
+        {
+          "path": "node_modules/uuid",
+          "version": "8.3.2",
+          "affected": true
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/uuid",
+          "version": "8.3.2",
+          "affected": true
+        }
+      ]
+    },
+    {
+      "number": 136,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/136",
+      "package": "serialize-javascript",
+      "severity": "medium",
+      "exportedRange": ">= 5.0.0, < 7.0.5",
+      "exportedFirstPatch": "7.0.5",
+      "ghsa": "GHSA-qj8w-gfj5-8c6v",
+      "advisory": "https://github.com/advisories/GHSA-qj8w-gfj5-8c6v",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/rollup-plugin-terser/node_modules/serialize-javascript",
+          "version": "4.0.0",
+          "affected": false
+        },
+        {
+          "path": "node_modules/serialize-javascript",
+          "version": "6.0.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 138,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/138",
+      "package": "postcss",
+      "severity": "medium",
+      "exportedRange": "< 8.5.10",
+      "exportedFirstPatch": "8.5.10",
+      "ghsa": "GHSA-qx2v-qp2m-jg93",
+      "advisory": "https://github.com/advisories/GHSA-qx2v-qp2m-jg93",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/postcss",
+          "version": "8.5.32",
+          "affected": false
+        },
+        {
+          "path": "node_modules/resolve-url-loader/node_modules/postcss",
+          "version": "7.0.39",
+          "affected": true
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/postcss",
+          "version": "8.5.32",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 141,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/141",
+      "package": "ws",
+      "severity": "medium",
+      "exportedRange": ">= 8.0.0, < 8.20.1",
+      "exportedFirstPatch": "8.20.1",
+      "ghsa": "GHSA-58qx-3vcg-4xpx",
+      "advisory": "https://github.com/advisories/GHSA-58qx-3vcg-4xpx",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/webpack-dev-server/node_modules/ws",
+          "version": "8.22.1",
+          "affected": false
+        },
+        {
+          "path": "node_modules/ws",
+          "version": "7.5.13",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/ws",
+          "version": "7.5.13",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 155,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/155",
+      "package": "webpack-dev-server",
+      "severity": "medium",
+      "exportedRange": "< 5.2.5",
+      "exportedFirstPatch": "5.2.5",
+      "ghsa": "GHSA-mx8g-39q3-5c79",
+      "advisory": "https://github.com/advisories/GHSA-mx8g-39q3-5c79",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/webpack-dev-server",
+          "version": "4.15.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 156,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/156",
+      "package": "form-data",
+      "severity": "high",
+      "exportedRange": ">= 3.0.0, < 3.0.5",
+      "exportedFirstPatch": "3.0.5",
+      "ghsa": "GHSA-hmw2-7cc7-3qxx",
+      "advisory": "https://github.com/advisories/GHSA-hmw2-7cc7-3qxx",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/axios/node_modules/form-data",
+          "version": "4.0.6",
+          "affected": false
+        },
+        {
+          "path": "node_modules/form-data",
+          "version": "3.0.5",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/axios/node_modules/form-data",
+          "version": "4.0.6",
+          "affected": false
+        },
+        {
+          "path": "node_modules/form-data",
+          "version": "3.0.5",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 158,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/158",
+      "package": "ws",
+      "severity": "high",
+      "exportedRange": ">= 7.0.0, < 7.5.11",
+      "exportedFirstPatch": "7.5.11",
+      "ghsa": "GHSA-96hv-2xvq-fx4p",
+      "advisory": "https://github.com/advisories/GHSA-96hv-2xvq-fx4p",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/webpack-dev-server/node_modules/ws",
+          "version": "8.22.1",
+          "affected": false
+        },
+        {
+          "path": "node_modules/ws",
+          "version": "7.5.13",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/ws",
+          "version": "7.5.13",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 160,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/160",
+      "package": "ws",
+      "severity": "high",
+      "exportedRange": ">= 8.0.0, < 8.21.0",
+      "exportedFirstPatch": "8.21.0",
+      "ghsa": "GHSA-96hv-2xvq-fx4p",
+      "advisory": "https://github.com/advisories/GHSA-96hv-2xvq-fx4p",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/webpack-dev-server/node_modules/ws",
+          "version": "8.22.1",
+          "affected": false
+        },
+        {
+          "path": "node_modules/ws",
+          "version": "7.5.13",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/ws",
+          "version": "7.5.13",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 161,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/161",
+      "package": "@babel/core",
+      "severity": "low",
+      "exportedRange": "<= 7.29.0",
+      "exportedFirstPatch": "7.29.6",
+      "ghsa": "GHSA-4x5r-pxfx-6jf8",
+      "advisory": "https://github.com/advisories/GHSA-4x5r-pxfx-6jf8",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/@babel/core",
+          "version": "7.29.13",
+          "affected": false
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/@babel/core",
+          "version": "7.29.13",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 166,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/166",
+      "package": "http-proxy-middleware",
+      "severity": "medium",
+      "exportedRange": ">= 0.16.0, < 2.0.10",
+      "exportedFirstPatch": "2.0.10",
+      "ghsa": "GHSA-64mm-vxmg-q3vj",
+      "advisory": "https://github.com/advisories/GHSA-64mm-vxmg-q3vj",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/http-proxy-middleware",
+          "version": "2.0.11",
+          "affected": false
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 169,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/169",
+      "package": "websocket-driver",
+      "severity": "critical",
+      "exportedRange": "< 0.7.5",
+      "exportedFirstPatch": "0.7.5",
+      "ghsa": "GHSA-xv26-6w52-cph6",
+      "advisory": "https://github.com/advisories/GHSA-xv26-6w52-cph6",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/websocket-driver",
+          "version": "0.7.5",
+          "affected": false
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 170,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/170",
+      "package": "websocket-driver",
+      "severity": "medium",
+      "exportedRange": "< 0.7.5",
+      "exportedFirstPatch": "0.7.5",
+      "ghsa": "GHSA-mp7j-qc5w-4988",
+      "advisory": "https://github.com/advisories/GHSA-mp7j-qc5w-4988",
+      "status": "already not affected",
+      "before": [
+        {
+          "path": "node_modules/websocket-driver",
+          "version": "0.7.5",
+          "affected": false
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 174,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/174",
+      "package": "svgo",
+      "severity": "high",
+      "exportedRange": ">= 1.0.0, < 2.8.3",
+      "exportedFirstPatch": "2.8.3",
+      "ghsa": "GHSA-2p49-hgcm-8545",
+      "advisory": "https://github.com/advisories/GHSA-2p49-hgcm-8545",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/postcss-svgo/node_modules/svgo",
+          "version": "2.8.4",
+          "affected": false
+        },
+        {
+          "path": "node_modules/svgo",
+          "version": "1.3.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 175,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/175",
+      "package": "webpack-dev-server",
+      "severity": "medium",
+      "exportedRange": "<= 5.2.5",
+      "exportedFirstPatch": "5.2.6",
+      "ghsa": "GHSA-m28w-2pqf-7qgj",
+      "advisory": "https://github.com/advisories/GHSA-m28w-2pqf-7qgj",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/webpack-dev-server",
+          "version": "4.15.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 176,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/176",
+      "package": "webpack-dev-server",
+      "severity": "medium",
+      "exportedRange": "<= 5.2.5",
+      "exportedFirstPatch": "5.2.6",
+      "ghsa": "GHSA-f5vj-f2hx-8m93",
+      "advisory": "https://github.com/advisories/GHSA-f5vj-f2hx-8m93",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/webpack-dev-server",
+          "version": "4.15.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 189,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/189",
+      "package": "postcss",
+      "severity": "high",
+      "exportedRange": "<= 8.5.11",
+      "exportedFirstPatch": "8.5.12",
+      "ghsa": "GHSA-6g55-p6wh-862q",
+      "advisory": "https://github.com/advisories/GHSA-6g55-p6wh-862q",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/postcss",
+          "version": "8.5.32",
+          "affected": false
+        },
+        {
+          "path": "node_modules/resolve-url-loader/node_modules/postcss",
+          "version": "7.0.39",
+          "affected": true
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/postcss",
+          "version": "8.5.32",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 191,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/191",
+      "package": "postcss",
+      "severity": "high",
+      "exportedRange": "<= 8.5.17",
+      "exportedFirstPatch": "8.5.18",
+      "ghsa": "GHSA-r28c-9q8g-f849",
+      "advisory": "https://github.com/advisories/GHSA-r28c-9q8g-f849",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/postcss",
+          "version": "8.5.32",
+          "affected": false
+        },
+        {
+          "path": "node_modules/resolve-url-loader/node_modules/postcss",
+          "version": "7.0.39",
+          "affected": true
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/postcss",
+          "version": "8.5.32",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 199,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/199",
+      "package": "postcss",
+      "severity": "medium",
+      "exportedRange": "<= 8.5.22",
+      "exportedFirstPatch": "8.5.23",
+      "ghsa": "GHSA-fxqj-rqcc-2cmp",
+      "advisory": "https://github.com/advisories/GHSA-fxqj-rqcc-2cmp",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/postcss",
+          "version": "8.5.32",
+          "affected": false
+        },
+        {
+          "path": "node_modules/resolve-url-loader/node_modules/postcss",
+          "version": "7.0.39",
+          "affected": true
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/postcss",
+          "version": "8.5.32",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "number": 212,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/212",
+      "package": "svgo",
+      "severity": "high",
+      "exportedRange": ">= 1.0.0, < 2.8.4",
+      "exportedFirstPatch": "2.8.4",
+      "ghsa": "GHSA-w27v-7q3p-w38r",
+      "advisory": "https://github.com/advisories/GHSA-w27v-7q3p-w38r",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/postcss-svgo/node_modules/svgo",
+          "version": "2.8.4",
+          "affected": false
+        },
+        {
+          "path": "node_modules/svgo",
+          "version": "1.3.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 213,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/213",
+      "package": "svgo",
+      "severity": "medium",
+      "exportedRange": ">= 1.0.0, < 2.8.4",
+      "exportedFirstPatch": "2.8.4",
+      "ghsa": "GHSA-4vpr-x523-8j87",
+      "advisory": "https://github.com/advisories/GHSA-4vpr-x523-8j87",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/postcss-svgo/node_modules/svgo",
+          "version": "2.8.4",
+          "affected": false
+        },
+        {
+          "path": "node_modules/svgo",
+          "version": "1.3.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 225,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/225",
+      "package": "webpack-dev-middleware",
+      "severity": "high",
+      "exportedRange": "< 7.4.5",
+      "exportedFirstPatch": "7.4.6",
+      "ghsa": "GHSA-g84c-rxfj-3j2c",
+      "advisory": "https://github.com/advisories/GHSA-g84c-rxfj-3j2c",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/webpack-dev-middleware",
+          "version": "5.3.4",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 242,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/242",
+      "package": "serialize-javascript",
+      "severity": "low",
+      "exportedRange": "< 7.1.3",
+      "exportedFirstPatch": "7.1.3",
+      "ghsa": "GHSA-m5mm-p8h7-m29v",
+      "advisory": "https://github.com/advisories/GHSA-m5mm-p8h7-m29v",
+      "status": "resolved by code",
+      "before": [
+        {
+          "path": "node_modules/rollup-plugin-terser/node_modules/serialize-javascript",
+          "version": "4.0.0",
+          "affected": true
+        },
+        {
+          "path": "node_modules/serialize-javascript",
+          "version": "6.0.2",
+          "affected": true
+        }
+      ],
+      "after": []
+    },
+    {
+      "number": 246,
+      "url": "https://github.com/CopticDevs/hazzat-web/security/dependabot/246",
+      "package": "deepmerge",
+      "severity": "low",
+      "exportedRange": ">= 4.2.0, <= 4.3.1",
+      "exportedFirstPatch": null,
+      "ghsa": "GHSA-gcqx-w48m-w2h4",
+      "advisory": "https://github.com/advisories/GHSA-gcqx-w48m-w2h4",
+      "status": "still affected",
+      "before": [
+        {
+          "path": "node_modules/deepmerge",
+          "version": "4.2.2",
+          "affected": true
+        }
+      ],
+      "after": [
+        {
+          "path": "node_modules/deepmerge",
+          "version": "4.2.2",
+          "affected": true
+        }
+      ]
+    }
+  ]
+}
