@@ -74,7 +74,7 @@ test.each(["light", "dark"])("preserves legacy saved %s regardless of the browse
 });
 test("manual choices survive remount and override later browser changes", () => {
     const view = render(<Preview />);
-    fireEvent.click(screen.getByRole("button", { name: "Dark", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Dark" }));
     fireEvent.click(screen.getByRole("link", { name: "Switch to Arabic" }));
     for (const name of ["Size 24", "Text maroon", "Notes navy", "Coptic only"]) fireEvent.click(screen.getByRole("button", { name }));
     expect(localStorage.getItem("hazzat.theme")).toBe("dark");
@@ -134,7 +134,7 @@ test("blocked storage still permits in-memory theme, language and reading change
     jest.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new Error("blocked"); });
     jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("blocked"); });
     render(<Preview />);
-    fireEvent.click(screen.getByRole("button", { name: "Dark", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Dark" }));
     fireEvent.click(screen.getByRole("link", { name: "Switch to Arabic" }));
     fireEvent.click(screen.getByRole("button", { name: "Size 24" }));
     systemTheme(false); systemTheme(true);

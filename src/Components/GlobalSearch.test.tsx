@@ -387,7 +387,7 @@ describe('GlobalSearch - Search Functionality', () => {
     expect(mockDataProvider.getSeasonList).not.toHaveBeenCalled();
 
     // Fast-forward time by 300ms
-    jest.advanceTimersByTime(300);
+    await act(async () => { jest.advanceTimersByTime(300); });
 
     await waitFor(() => {
       expect(mockDataProvider.getSeasonList).toHaveBeenCalledTimes(1);

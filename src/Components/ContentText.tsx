@@ -13,8 +13,8 @@ interface IProps {
 }
 
 interface IContentTable {
-    colGroup: React.DetailedHTMLProps<React.ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
-    rows: React.DetailedHTMLProps<React.HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>[];
+    colGroup: React.ReactElement;
+    rows: React.ReactElement[];
 }
 
 function ContentText(props: IProps) {
@@ -74,7 +74,7 @@ function ContentText(props: IProps) {
         }
 
         // define cols
-        const colDefs: React.DetailedHTMLProps<React.ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>[] = [];
+        const colDefs: React.ReactElement[] = [];
 
         if ((currentMask & englishMask) !== 0) {
             colDefs.push(<col key={colDefId++} className="english-text-content" />);

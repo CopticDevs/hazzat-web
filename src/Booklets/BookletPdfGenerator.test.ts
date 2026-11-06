@@ -1105,7 +1105,7 @@ describe("browser-backed booklet artwork", () => {
     });
 
     it("loads URL images by their extension and tolerates a missing optional logo", async () => {
-        global.fetch = jest.fn(async (source: RequestInfo) => ({
+        global.fetch = jest.fn(async (source: RequestInfo | URL) => ({
             ok: source !== "/missing-logo",
             arrayBuffer: async () => readImage(String(source).endsWith(".jpg") ? "bookletBackCoverBackground.jpg" : "logo.png")
         } as Response));
