@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter, useNavigate } from 'react-router-dom';
+import { StrictMode } from 'react';
+import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import App from './App';
 import { HymnsDataProvider } from './Providers/HymnsDataProvider/HymnsDataProvider';
 import { ISeasonInfo } from './Providers/HymnsDataProvider/Models/ISeasonInfo';
@@ -19,7 +20,7 @@ const service: IServiceInfo = { id: 'basil', name: 'Basil', displayName: 'Basil'
         variations: [{ id: 'standard', name: 'Standard', displayName: 'Standard', content: { contentType: ContentType.TextContent,
             paragraphs: [{ columns: [{ language: ContentLanguage.English, content: 'Route fixture words' }] }] } }] }] }] };
 let navigate: ReturnType<typeof useNavigate>;
-function Navigation() { navigate = useNavigate(); return null; }
+function Navigation() { navigate = useNavigate(); const location = useLocation(); return <output data-testid="location">{location.pathname}{location.search}{location.hash}</output>; }
 function open(path: string) { return render(<MemoryRouter initialEntries={[path]}><Navigation /><App /></MemoryRouter>); }
 
 beforeEach(() => {
@@ -31,6 +32,45 @@ beforeEach(() => {
     jest.spyOn(HymnsDataProvider.prototype, 'getService').mockImplementation(async (_season, id) => id === 'basil' ? service : id === 'empty' ? { ...service, id, hymns: [] } : undefined);
 });
 afterEach(() => { jest.restoreAllMocks(); strings.setLanguage('en'); });
+
+it('preserves nested hymn links, query settings and Back/Forward across repeated navigation', async () => {
+    open('/Seasons/annual/services/basil?lang=en&env=ppe');
+    const goBack = async () => { await act(async () => navigate(-1)); };
+    const goForward = async () => { await act(async () => navigate(1)); };
+    for (let visit = 0; visit < 2; visit++) {
+        const hymn = await screen.findByRole('link', { name: 'First hymn' });
+        expect(hymn).toHaveAttribute('href', '/seasons/annual/services/basil/hymns/first/formats/1?lang=en&env=ppe');
+        fireEvent.click(hymn);
+        await screen.findByText('Route fixture words');
+        expect(screen.getByTestId('location')).toHaveTextContent('/seasons/annual/services/basil/hymns/first/formats/1?lang=en&env=ppe');
+        await goBack();
+        await screen.findByRole('link', { name: 'First hymn' });
+        await goForward();
+        await screen.findByText('Route fixture words');
+        await goBack();
+    }
+});
+
+it('replaces deprecated routes in history instead of creating a redirect loop', async () => {
+    open('/Fonts');
+    await act(async () => navigate('/Types/legacy'));
+    await screen.findByRole('link', { name: /Annual/ });
+    expect(screen.getByTestId('location')).toHaveTextContent('/Seasons');
+    await act(async () => navigate(-1));
+    expect(screen.getByText('Coptic Fonts')).toBeInTheDocument();
+    await act(async () => navigate(1));
+    expect(screen.getByTestId('location')).toHaveTextContent('/Seasons');
+});
+
+it('loads the nested reader after StrictMode effect cleanup and ignores the stale request', async () => {
+    let resolveStale!: (value: ISeasonInfo[]) => void;
+    (HymnsDataProvider.prototype.getSeasonList as jest.Mock).mockImplementationOnce(() => new Promise(resolve => { resolveStale = resolve; }));
+    render(<StrictMode><MemoryRouter initialEntries={['/Seasons/annual/services/basil/hymns/first/formats/1']}><App /></MemoryRouter></StrictMode>);
+    await screen.findByText('Route fixture words');
+    await act(async () => resolveStale([]));
+    expect(screen.getByText('Route fixture words')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+});
 
 it.each([
     '/unknown', '/Search/unknown', '/ContactUs/unknown', '/Fonts/unknown', '/Fonts/HazzatFont/extra',

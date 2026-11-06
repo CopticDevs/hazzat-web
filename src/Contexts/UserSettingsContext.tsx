@@ -35,7 +35,7 @@ type SettingsContext = {
     setContentLanguages: (languages: ContentLanguage[]) => void;
 };
 export const UserSettingsContext = createContext<SettingsContext>({ userSettings: defaults, setContentFontColor: () => {}, setHazzatFontColor: () => {}, setContentFontSize: () => {}, setContentLanguages: () => {} });
-export const UserSettingProvider: React.FC = ({ children }) => {
+export const UserSettingProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
     const [userSettings, setSettings] = useState(() => parseSettings(readPreference(storageKey)));
     useEffect(() => {
         const sync = (event: StorageEvent) => {
