@@ -1,5 +1,10 @@
 # Azure release migration (#274)
 
+**Current branch:** a [controlled manual test candidate](azure-ppe-controlled-test.md)
+replaces the literal block with default-off manual guards locally. The inventory and
+blocked-scaffold descriptions below record the merged preparation baseline; consult
+the test plan for current branch behavior. No PPE YAML deployment has run.
+
 Status: **dev cutover complete; PPE deployment remains blocked and #274 remains open**.
 Dev pipeline 16 now uses develop and classic dev definition 9 is disabled. PPE classic
 10 remains enabled with automatic develop releases. The local PPE candidate and
