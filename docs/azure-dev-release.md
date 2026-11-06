@@ -1,9 +1,10 @@
 # Manual dev YAML release
 
-This separate manual release pipeline targets **https://dev.hazzat.com/**. Its first
-controlled deployment succeeded in pipeline 16, run 3614. The current candidate replaces typed build parameters with Azure’s manual resource
-version picker. The revised picker deployment succeeded in run 3617; disabling classic is still pending;
-no automatic triggers are enabled. The classic release remains in place; the PPE scaffold remains blocked, and production is unchanged.
+Dev cutover is complete. Pipeline 16 is `CopticDevs.hazzat-web-dev-release`, folder
+`\hazzat-web`, default `refs/heads/develop`, YAML `.pipelines/azure-pipelines.release-dev.yml`.
+Classic definition 9 is retained disabled (revision 5). Dev remains manual-only,
+matching its former trigger behavior. See [rollout status](azure-release-migration.md)
+for all environments. The following run records preserve the validation history.
 
 ## Successful controlled validation (2026-11-05)
 
@@ -94,7 +95,7 @@ The task's `default_hostname` is not an independent security boundary.
 
 ## Manual selection and remaining parity checks
 
-Classic definition 9 is enabled, but its artifact CD trigger and PR trigger are
+At inventory time classic definition 9 was enabled, but its artifact CD trigger and PR trigger were
 disabled and it has no schedule. Create release defaults to **Latest** from build
 12 without a branch filter, permits explicit versions, and starts DEV after release
 creation without approvals/gates. Its execution policy permits one deployment at a time.

@@ -1,18 +1,11 @@
-# PPE migration preparation — local candidate
+# PPE pre-migration inventory (historical)
 
-**Current branch:** see [the automatic replacement/cutover candidate](azure-ppe-cutover.md).
-The manual-test and blocked-scaffold descriptions below are historical preparation
-states. Run3627 passed; automatic activation remains pending.
-
-**Current branch:** a [controlled manual test candidate](azure-ppe-controlled-test.md)
-replaces the literal block with default-off manual guards locally. The inventory and
-blocked-scaffold descriptions below record the merged preparation baseline; consult
-the test plan for current branch behavior. No PPE YAML deployment has run.
-
-Snapshot: 2026-11-05, develop `fd9250a77541fb8413204ad428929871dbccc16e`.
-Dev cutover is complete and manual-only. This PPE candidate is local, unpublished,
-not registered in Azure, and cannot deploy: `DeployPpe` retains its literal false
-condition. No new token binding, Azure configuration or production change occurred.
+This document preserves the pre-cutover plan and settings as historical evidence.
+It is not the current operating procedure. PPE manual run 3627 and automatic run
+3630 succeeded; pipeline 17 now owns PPE and classic 10 is disabled. See
+[PPE operations](azure-ppe-cutover.md) and [rollout status](azure-release-migration.md).
+Statements below about pending setup or candidate behavior describe that historical
+stage only; do not execute the old activation steps against the live rollout.
 
 ## Fresh evidence and drift
 

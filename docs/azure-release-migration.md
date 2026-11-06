@@ -1,21 +1,110 @@
 # Azure release migration (#274)
 
-**Current branch:** see [the automatic replacement/cutover candidate](azure-ppe-cutover.md).
-The manual-test and blocked-scaffold descriptions below are historical preparation
-states. Run3627 passed; automatic activation remains pending.
+## Completed rollout — 2026-11-06
 
-**Current branch:** a [controlled manual test candidate](azure-ppe-controlled-test.md)
-replaces the literal block with default-off manual guards locally. The inventory and
-blocked-scaffold descriptions below record the merged preparation baseline; consult
-the test plan for current branch behavior. No PPE YAML deployment has run.
+Dev, PPE and production now use separate YAML release pipelines. Their existing
+build pipelines and Container artifact contracts are unchanged. Classic definitions
+are retained disabled, with history, for coordinated rollback.
 
-Status: **dev cutover complete; PPE deployment remains blocked and #274 remains open**.
-Dev pipeline 16 now uses develop and classic dev definition 9 is disabled. PPE classic
-10 remains enabled with automatic develop releases. The local PPE candidate and
-fresh read-only inventory are described in [the PPE plan](azure-ppe-release-plan.md).
-No PPE/production cutover has occurred.
+| Environment | Release pipeline (folder `\hazzat-web`) | Default ref / YAML | Release behavior | Classic disabled |
+| --- | --- | --- | --- | --- |
+| Dev | [16: CopticDevs.hazzat-web-dev-release](https://dev.azure.com/CopticDevs/hazzat-api/_build?definitionId=16) | `refs/heads/develop` / `.pipelines/azure-pipelines.release-dev.yml` | Manual resource picker | 9, revision 5 |
+| PPE | [17: CopticDevs.hazzat-web-ppe-release](https://dev.azure.com/CopticDevs/hazzat-api/_build?definitionId=17) | `refs/heads/develop` / `.pipelines/azure-pipelines.release-ppe.yml` | Successful build 14 completion on develop; manual picker also available | 10, revision 6 |
+| Production | [18: CopticDevs.hazzat-web-prod-release](https://dev.azure.com/CopticDevs/hazzat-api/_build?definitionId=18) | `refs/heads/master` / `.pipelines/azure-pipelines.release-prod.yml` | Successful build 15 completion on master; guarded manual picker | 11, revision 7 |
 
-## Verified inventory
+Root release CI/PR triggers are off. PPE/production CD comes from their pipeline
+resources, not root CI. Dev intentionally remains manual, matching classic's
+previous disabled CD/PR/schedule configuration. All future changes land in develop
+first and reach master through a separate promotion PR.
+
+## Deployment evidence
+
+- Dev: [PR 284](https://github.com/CopticDevs/hazzat-web/pull/284), merge
+  `fd9250a77541fb8413204ad428929871dbccc16e`; revised picker
+  [run 3617](https://dev.azure.com/CopticDevs/hazzat-api/_build/results?buildId=3617)
+  deployed build 3354 / `HazzatWebBuildDev`; actual upload and 81-file manifest/live
+  checks passed. [Dev operations](azure-dev-release.md).
+- PPE: [PR 288](https://github.com/CopticDevs/hazzat-web/pull/288), merge
+  `2050932f765f50587017977f0b75f0b76b046b88`; manual test 3627 preceded automatic
+  [run 3630](https://dev.azure.com/CopticDevs/hazzat-api/_build/results?buildId=3630)
+  from build 3629. Later automatic [3652](https://dev.azure.com/CopticDevs/hazzat-api/_build/results?buildId=3652)
+  succeeded from exact build 3651, source `09641a56f48b20dbd489455ea66163465fa9aeb6`.
+  [PPE operations](azure-ppe-cutover.md).
+- Production: [PR 294](https://github.com/CopticDevs/hazzat-web/pull/294) first landed
+  in develop; [promotion PR 295](https://github.com/CopticDevs/hazzat-web/pull/295)
+  merged master `f1e467c1c8b91b4f2544b18cce15240e1474539c` after classic disable/drain.
+  Manual test 3648 preceded automatic [3656](https://dev.azure.com/CopticDevs/hazzat-api/_build/results?buildId=3656),
+  which consumed exact build 3655 / `20261106.12`. Actual upload, 83-file manifest
+  comparison and live homepage/main JS/main CSS checks passed. Browser desktop
+  smoke after 3656 passed home, Agios search (9 results), multilingual Trisagion,
+  Hazzat notation glyphs and deep-link reload. [Production operations](azure-production-cutover.md).
+
+These run IDs are dated evidence, not permanent defaults. Refresh the latest live
+run, downloadable artifact and manifest before rollback or a new controlled test.
+
+## Artifact, target and access contract
+
+Release downloads the exact selected resource runID with DownloadBuildArtifacts;
+no rebuild or latest lookup occurs after selection. Validators enforce expected
+project/repository/build definition, completed success, non-PR branch/reason,
+commit and named Container artifact. Automatic runs additionally bind trigger
+alias and source branch/commit to pipeline code. Layout/symlinks and file hashes
+are checked before AzureStaticWebApp uploads the existing static output.
+
+| Environment | Build / artifact | Default hostname → public site |
+| --- | --- | --- |
+| Dev | 12 / HazzatWebBuildDev | yellow-forest-07103e310.1.azurestaticapps.net → dev.hazzat.com |
+| PPE | 14 / HazzatWebBuildPpe | brave-field-055faf010.1.azurestaticapps.net → ppe.hazzat.com |
+| Production | 15 / HazzatWebBuildProd | proud-glacier-0cea24010.1.azurestaticapps.net → www.hazzat.com |
+
+Existing owner-entered `deployment_token` references are pipeline-scoped secrets;
+no values are in Git, no token rotation or shared variable group was introduced.
+Owners confirmed target binding. Browser verified masking/override controls where
+reported; omitted REST `allowOverride` is not independent proof of false. Saved
+classic definitions had automated pre/post approvals and empty gates, not manual
+approval requirements. Pipeline definitions and authenticated UI were reviewed;
+public REST alone does not prove effective per-user access.
+
+Permission differences are explicit: browser observed Contributors inherited
+edit/queue rights on production YAML and release edit/create/deploy/approver rights
+on classic; service identities could queue YAML while classic showed Not set.
+Membership and combined effective per-user rights were not visible. Owner approvals
+and secure setup were coordinated; this is not a claim of identical ACLs. Default
+branch and YAML conditions do not isolate a pipeline secret from authorized edited
+YAML on another ref. Any further ACL/ref hardening needs separate scoped review.
+
+## Single-owner rollback
+
+PPE/production guard upload by requiring their classic definition's strict boolean
+isDisabled=true; missing/inaccessible metadata fails closed. The stage lock only
+serializes its own YAML runs. Neither it nor the ownership snapshot excludes
+in-flight classic work, re-enablement or external writers. Dev also requires an
+exclusive operational window; do not assume a cross-pipeline lock.
+
+For content rollback, use the current YAML manual picker and an explicitly retained,
+downloadable known-good artifact; production requires both default-false manual
+confirmations and master code. Do not rebuild. For ownership rollback, first stop
+new YAML triggers/queues under authorization, inspect/drain YAML and upstream work,
+then restore the recorded classic configuration. Never enable both automatic owners.
+Keep histories and compare live content after the authorized action. A failed
+post-deploy check can follow a completed upload; inspect before retrying.
+
+## Validation limits and follow-up
+
+Actual controlled/manual and automatic deployments are verified as above. Concurrent
+lock contention, audio playback and mobile/responsive behavior were not tested.
+Desktop smoke covers only the listed paths. Additional ACL/ref isolation, retention
+and notification policy review may be useful; they are not evidence that cutover
+failed. Do not infer YAML/classic notification or retention equivalence from upload
+success. Preserve/download rollback evidence according to the chosen retention policy.
+
+## Historical inventory
+
+The inventory below records pre-migration settings; current ownership and trigger
+state are in the tables above. Production was a separate classic definition, and
+its migration was sequenced after PPE validation.
+
+### Original inventory
 
 Read on 2026-11-05 against default branch `develop` at
 `8686323afdd841dff5c82a3244a906d1146b8750` and these public Azure REST resources:

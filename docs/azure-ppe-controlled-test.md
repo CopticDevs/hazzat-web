@@ -1,13 +1,11 @@
-# Controlled manual PPE test candidate
+# PPE controlled manual test record (historical)
 
-**Current branch:** see [the automatic replacement/cutover candidate](azure-ppe-cutover.md).
-The manual-test and blocked-scaffold descriptions below are historical preparation
-states. Run3627 passed; automatic activation remains pending.
-
-This branch prepares a single controlled test of pipeline17. Publication and the
-exclusive test window are still pending. It has not deployed anything. The existing
-classic PPE release remains enabled and automatic; root CI, PR and pipeline-resource
-completion triggers in this candidate are all off.
+This document preserves the pre-cutover plan and settings as historical evidence.
+It is not the current operating procedure. PPE manual run 3627 and automatic run
+3630 succeeded; pipeline 17 now owns PPE and classic 10 is disabled. See
+[PPE operations](azure-ppe-cutover.md) and [rollout status](azure-release-migration.md).
+Statements below about pending setup or candidate behavior describe that historical
+stage only; do not execute the old activation steps against the live rollout.
 
 ## Confirmed setup
 
