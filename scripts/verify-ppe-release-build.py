@@ -75,6 +75,12 @@ def validate_resource_context(build, branch, commit, reason, alias, code_branch,
         raise ValueError("Unexpected trigger or automatic pipeline code/artifact mismatch.")
 
 
+def validate_classic_retired(definition):
+    # Strict boolean check: missing/inaccessible metadata must fail closed.
+    if definition.get("id") != 10 or definition.get("isDisabled") is not True:
+        raise ValueError("Classic PPE definition 10 must be disabled before YAML upload.")
+
+
 def inspect_layout(root):
     if not root.is_dir() or root.is_symlink():
         raise ValueError("Artifact root is missing or is a symlink.")
@@ -124,6 +130,11 @@ def main():
                                   os.environ.get("PPE_CODE_BRANCH", ""),
                                   os.environ.get("PPE_CODE_COMMIT", ""))
         print(f"Verified PPE build {build_id}; commit {build['sourceVersion']}; artifact {ARTIFACT}.")
+    elif mode == "ownership":
+        definition = read_json(
+            "https://vsrm.dev.azure.com/CopticDevs/hazzat-api/_apis/release/definitions/10?api-version=7.1")
+        validate_classic_retired(definition)
+        print("Classic PPE definition 10 is disabled; operational drain remains required.")
     elif mode == "layout":
         manifest = inspect_layout(Path(os.environ["PPE_ARTIFACT_ROOT"]))
         Path(os.environ["PPE_MANIFEST"]).write_text(json.dumps(manifest, indent=2) + "\n")
