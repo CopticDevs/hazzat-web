@@ -82,6 +82,19 @@ def validate_manual_test(reason, deploy_confirmed, window_confirmed):
         raise ValueError("An approved manual deployment and exclusive window are required.")
 
 
+def validate_release_intent(reason, code_branch, source_branch, alias,
+                            deploy_confirmed, window_confirmed):
+    # Develop-first publication must not make develop YAML deploy production.
+    if code_branch != "refs/heads/master":
+        raise ValueError("Production deployment code must come from master.")
+    if reason == "Manual":
+        validate_manual_test(reason, deploy_confirmed, window_confirmed)
+    elif (reason != "ResourceTrigger" or alias != "prodBuild"
+          or source_branch != "refs/heads/master"):
+        raise ValueError("Automatic production deployment requires the master prodBuild resource.")
+    # Metadata validation separately pins successful build15, resource and code commit.
+
+
 def validate_classic_retired(definition):
     # Strict boolean check: missing/inaccessible metadata must fail closed.
     if definition.get("id") != 11 or definition.get("isDisabled") is not True:
@@ -142,6 +155,14 @@ def main():
                              os.environ.get("PROD_DEPLOY_CONFIRMED", ""),
                              os.environ.get("PROD_WINDOW_CONFIRMED", ""))
         print("Explicit manual test confirmations verified; ownership check still required.")
+    elif mode == "release-intent":
+        validate_release_intent(os.environ.get("PROD_RUN_REASON", ""),
+                                os.environ.get("PROD_CODE_BRANCH", ""),
+                                os.environ.get("PROD_SOURCE_BRANCH", ""),
+                                os.environ.get("PROD_TRIGGER_ALIAS", ""),
+                                os.environ.get("PROD_DEPLOY_CONFIRMED", ""),
+                                os.environ.get("PROD_WINDOW_CONFIRMED", ""))
+        print("Production release intent verified; provenance and ownership checks still required.")
     elif mode == "ownership":
         definition = read_json(
             "https://vsrm.dev.azure.com/CopticDevs/hazzat-api/_apis/release/definitions/11?api-version=7.1")

@@ -82,6 +82,32 @@ class ProductionBuildGuardTests(unittest.TestCase):
                 with self.subTest(deploy=deploy, window=window), self.assertRaises(ValueError):
                     guard.validate_manual_test("Manual", deploy, window)
 
+    def test_automatic_release_intent_uses_master_resource_without_manual_assertions(self):
+        guard.validate_release_intent("ResourceTrigger", "refs/heads/master",
+                                      "refs/heads/master", "prodBuild", "false", "false")
+        for reason, code, source, alias in [
+            ("ResourceTrigger", "refs/heads/develop", "refs/heads/master", "prodBuild"),
+            ("ResourceTrigger", "refs/heads/master", "refs/heads/develop", "prodBuild"),
+            ("ResourceTrigger", "refs/heads/master", "refs/heads/master", "ppeBuild"),
+            ("IndividualCI", "refs/heads/master", "refs/heads/master", "prodBuild"),
+            ("PullRequest", "refs/heads/master", "refs/heads/master", "prodBuild"),
+            ("Schedule", "refs/heads/master", "refs/heads/master", "prodBuild"),
+        ]:
+            with self.subTest(reason=reason, code=code, source=source, alias=alias), self.assertRaises(ValueError):
+                guard.validate_release_intent(reason, code, source, alias, "true", "true")
+
+    def test_manual_release_keeps_branch_picker_and_explicit_confirmations(self):
+        guard.validate_release_intent("Manual", "refs/heads/master",
+                                      "refs/heads/feature/fix", "", "true", "true")
+        for code, deploy, window in [
+            ("refs/heads/develop", "true", "true"),
+            ("refs/heads/master", "false", "true"),
+            ("refs/heads/master", "true", "false"),
+            ("refs/heads/master", "", ""),
+        ]:
+            with self.subTest(code=code, deploy=deploy, window=window), self.assertRaises(ValueError):
+                guard.validate_release_intent("Manual", code, "refs/heads/master", "", deploy, window)
+
     def test_ownership_requires_explicit_classic_retirement(self):
         guard.validate_classic_retired({"id": 11, "isDisabled": True})
         for definition in [{}, {"id": 11}, {"id": 9, "isDisabled": True},
