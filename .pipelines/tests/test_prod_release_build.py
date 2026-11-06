@@ -70,6 +70,18 @@ class ProductionBuildGuardTests(unittest.TestCase):
             guard.validate_metadata(3633, {**build, "reason": "pullRequest"}, self.artifacts,
                                     required_branch=None)
 
+    def test_manual_test_requires_both_confirmations_and_manual_reason(self):
+        for deploy in ["true", "True"]:
+            for window in ["true", "True"]:
+                guard.validate_manual_test("Manual", deploy, window)
+        for reason in ["", "manual", "ResourceTrigger", "IndividualCI", "PullRequest", "Schedule"]:
+            with self.subTest(reason=reason), self.assertRaises(ValueError):
+                guard.validate_manual_test(reason, "true", "true")
+        for value in ["", "false", "False", "1", "yes", " true ", "$(confirmation)"]:
+            for deploy, window in [(value, "true"), ("true", value), (value, value)]:
+                with self.subTest(deploy=deploy, window=window), self.assertRaises(ValueError):
+                    guard.validate_manual_test("Manual", deploy, window)
+
     def test_ownership_requires_explicit_classic_retirement(self):
         guard.validate_classic_retired({"id": 11, "isDisabled": True})
         for definition in [{}, {"id": 11}, {"id": 9, "isDisabled": True},
