@@ -1,7 +1,7 @@
 import { act } from '@testing-library/react';
-import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
 
+const mockEffectLifecycle = jest.fn();
 jest.mock('./reportWebVitals', () => ({ __esModule: true, default: jest.fn() }));
 jest.mock('./App', () => {
     const React = require('react');
@@ -11,6 +11,10 @@ jest.mock('./App', () => {
     const { UserSettingsContext } = require('./Contexts/UserSettingsContext');
     const { useTheme } = require('./Contexts/ThemeContext');
     return { __esModule: true, default: function BootstrapApp() {
+        React.useEffect(() => {
+            mockEffectLifecycle('mount');
+            return () => mockEffectLifecycle('cleanup');
+        }, []);
         const environment = React.useContext(EnvironmentContext);
         const language = React.useContext(LanguageContext);
         const settings = React.useContext(UserSettingsContext);
@@ -32,8 +36,10 @@ it('mounts the application with routing, environment, localization, reading and 
         expect(document.documentElement).toHaveAttribute('dir', 'rtl');
         expect(reportWebVitals).toHaveBeenCalledTimes(1);
         expect(reportWebVitals).toHaveBeenCalledWith();
+        expect(mockEffectLifecycle.mock.calls.map(([event]) => event)).toEqual(['mount', 'cleanup', 'mount']);
     } finally {
-        act(() => { ReactDOM.unmountComponentAtNode(root); });
+        act(() => { require('./index').root.unmount(); });
+        expect(mockEffectLifecycle.mock.calls.map(([event]) => event)).toEqual(['mount', 'cleanup', 'mount', 'cleanup']);
         root.remove(); localStorage.clear(); window.history.replaceState({}, '', '/');
     }
 });
