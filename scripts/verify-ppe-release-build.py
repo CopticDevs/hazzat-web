@@ -140,5 +140,6 @@ if __name__ == "__main__":
     except Exception as error:
         # Do not echo server response bodies or credentials on access failures.
         print(f"PPE artifact verification failed ({type(error).__name__}). "
-              "Check the selected build and read access; deployment remains blocked.", file=sys.stderr)
+              "Check selection/access or layout. A post-deploy failure does not roll back "
+              "or justify blind redeployment.", file=sys.stderr)
         sys.exit(1)
