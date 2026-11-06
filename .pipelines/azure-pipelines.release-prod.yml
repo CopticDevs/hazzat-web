@@ -1,5 +1,5 @@
-# Controlled manual production test for #274. See docs/azure-production-release-plan.md.
-# Automatic triggers remain off; both explicit deployment confirmations default false.
+# Production completion-trigger candidate for #274.
+# Disable/drain classic 11 BEFORE master promotion. See docs/azure-production-cutover.md.
 trigger: none
 pr: none
 
@@ -17,8 +17,10 @@ resources:
   pipelines:
   - pipeline: prodBuild
     source: '\hazzat-web\CopticDevs.hazzat-web'
-    # Eventual completion filter: refs/heads/master, only after reviewed cutover.
-    trigger: none
+    trigger:
+      branches:
+        include:
+        - refs/heads/master
 
 pool:
   vmImage: ubuntu-26.04
@@ -26,7 +28,7 @@ pool:
 stages:
 - stage: InspectArtifact
   displayName: Verify the selected existing production artifact
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual'))
+  condition: and(succeeded(), or(eq(variables['Build.Reason'], 'Manual'), and(eq(variables['Build.Reason'], 'ResourceTrigger'), eq(variables['Resources.TriggeringAlias'], 'prodBuild'), eq(variables['resources.pipeline.prodBuild.sourceBranch'], 'refs/heads/master'))))
   jobs:
   - job: Inspect
     steps:
@@ -69,21 +71,24 @@ stages:
 # Classic 11 must also be disabled and operationally drained before upload.
 # This stage lock cannot exclude classic or external writers.
 - stage: DeployProd
-  displayName: Controlled manual production deployment
+  displayName: Deploy the exact selected production artifact
   dependsOn: InspectArtifact
   lockBehavior: sequential
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual'), ${{ eq(parameters.deployProd, true) }}, ${{ eq(parameters.exclusiveProdWindowConfirmed, true) }})
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), or(and(eq(variables['Build.Reason'], 'Manual'), ${{ eq(parameters.deployProd, true) }}, ${{ eq(parameters.exclusiveProdWindowConfirmed, true) }}), and(eq(variables['Build.Reason'], 'ResourceTrigger'), eq(variables['Resources.TriggeringAlias'], 'prodBuild'), eq(variables['resources.pipeline.prodBuild.sourceBranch'], 'refs/heads/master'))))
   jobs:
   - job: Deploy
     steps:
     - checkout: self
       persistCredentials: false
-    - bash: python3 scripts/verify-prod-release-build.py manual-test
-      displayName: Require both explicit manual test confirmations
+    - bash: python3 scripts/verify-prod-release-build.py release-intent
+      displayName: Validate automatic trigger or explicit manual deployment intent
       env:
         PROD_RUN_REASON: $(Build.Reason)
         PROD_DEPLOY_CONFIRMED: ${{ parameters.deployProd }}
         PROD_WINDOW_CONFIRMED: ${{ parameters.exclusiveProdWindowConfirmed }}
+        PROD_CODE_BRANCH: $(Build.SourceBranch)
+        PROD_SOURCE_BRANCH: $(resources.pipeline.prodBuild.sourceBranch)
+        PROD_TRIGGER_ALIAS: $(Resources.TriggeringAlias)
     - bash: python3 scripts/verify-prod-release-build.py metadata
       displayName: Reject invalid, failed, or unrelated build runs
       env:
