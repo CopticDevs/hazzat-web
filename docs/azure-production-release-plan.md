@@ -2,15 +2,27 @@
 
 ## Status and scope
 
-Scaffold based on develop `2050932f765f50587017977f0b75f0b76b046b88`.
+Local manual-test candidate based on develop `8650de34435e2bb1f2d3d50536e542f066d2ed26`.
 All changes land in develop first and reach master through a separate promotion
-PR; never introduce production migration changes only on master. The production
-baseline below follows promotion PR [289](https://github.com/CopticDevs/hazzat-web/pull/289).
-The production release YAML has root CI, PR and resource triggers disabled.
-`DeployProd` has the literal condition `and(succeeded(), eq(1, 0))`: no run
-parameter or secret can enable it. No production pipeline has been registered,
-credential bound, deployment tested, or classic release retired by this change.
-Dev and PPE are unaffected.
+PR; never introduce production migration changes only on master.
+Root CI, PR and resource triggers remain disabled. This candidate replaces the
+literal deployment block with a Manual-only condition and two boolean parameters,
+`deployProd` and `exclusiveProdWindowConfirmed`, both default false. A runtime
+check independently requires both confirmations before deployment work proceeds.
+These confirmations record an authorized window; they do not create a lock or
+permission. The ownership guard still requires classic 11 disabled before upload.
+
+The deployed scaffold on master `08ef9bb3c891b7ae02ea47d92a2e698d59d4ebb4`
+remains literally blocked until this candidate is separately reviewed/promoted.
+Pipeline 18 is registered as `CopticDevs.hazzat-web-prod-release` in `\hazzat-web`,
+using the production YAML and default `refs/heads/master`. Inspection run
+[3640](https://dev.azure.com/CopticDevs/hazzat-api/_build/results?buildId=3640)
+succeeded without a token, selected build 3639, published an exact 83-file hash
+manifest and skipped deployment. The owner subsequently saved pipeline-scoped
+`deployment_token`; revision 4 metadata reports `isSecret: true`. The API omits
+`allowOverride`, so the browser must verify queue-time override is off. Secret
+values were not inspected. No production YAML deployment has been tested and
+classic remains enabled. Dev/PPE permissions do not constitute production approval.
 
 A future authorized manual inspection can select an existing build through
 **Run pipeline > Pipeline artifacts > prodBuild**. With no version or branch
@@ -45,6 +57,13 @@ a PR and rebase merges and prohibit force updates/deletion; public rules do not
 expose every bypass or write permission. Do not bypass current branch policies.
 
 ## Current baseline and rollback evidence
+
+Latest verified baseline: classic release **1042** deployed retained build **3639**
+(`20261106.6`, master `08ef9bb3c891b7ae02ea47d92a2e698d59d4ebb4`) successfully
+at 2026-11-06T04:30:34Z. Its 83-file manifest exactly matched inspection 3640.
+Homepage/main JS/CSS hashes equal the earlier baseline below. Refresh this
+evidence immediately before testing; do not assume 3639 will still be live.
+
 
 Classic [release 1041](https://dev.azure.com/CopticDevs/hazzat-api/_releaseProgress?_a=release-environment-logs&releaseId=1041)
 successfully deployed [build 3633](https://dev.azure.com/CopticDevs/hazzat-api/_build/results?buildId=3633&view=results),
@@ -86,7 +105,7 @@ not active: resource trigger is off and inspection is Manual-only. No use of
 `latest` occurs after resource resolution. Layout rejects symlinks and missing
 index/static output and hashes every file without modifying it.
 
-The blocked deployment mirrors the classic task's static upload inputs and adds
+The opt-in deployment mirrors the classic task's static upload inputs and adds
 the observed default hostname as a target check. It references `deployment_token`
 without configuring one. Target checking and live hashes do not replace secure
 owner confirmation of the token's application/domain binding. The live check
@@ -99,12 +118,43 @@ applies to any future manual or automatic execution of the deployment job.
 Neither that lock nor the ownership snapshot excludes classic in-flight work,
 external deployments, or subsequent re-enablement. Contention is untested.
 
-## Staged validation and activation
+## Controlled test procedure (not yet authorized)
 
-1. Publish the scaffold as a draft PR against **develop**, then obtain separate
+1. Publish/review this candidate against develop, merge only after approval and
+   gates, then promote via a separate reviewed PR to master. Keep every automatic
+   release trigger off. Existing classic production may deploy that promotion;
+   wait for it to finish and refresh the current live artifact.
+2. Obtain explicit authorization for temporary classic disable/drain and exactly
+   one same-content production test. Confirm the token target with its owner and
+   approve the actual production queue/edit trust boundary. No token setup or
+   prior inspection run grants deployment or disable permission.
+3. Agree an exclusive window: no master promotion, build 15 queue, classic create
+   release/retry or external writer. Check all pending/queued/running deployments,
+   not only recent releases. Have the owner disable classic 11 and drain already
+   created work. Re-read disabled state. A snapshot is not a mutex; do not bypass
+   ownership or infer that disabling cancels in-flight releases.
+4. Identify the latest successful classic artifact and download it; compare the
+   full retained manifest and live homepage/JS/CSS. Verify a retained rollback
+   artifact is downloadable. At the recorded baseline use prodBuild **3639**,
+   display **20261106.6**, only if the fresh checks still agree.
+5. Queue once on the exact reviewed promoted master SHA. In Run pipeline > Pipeline
+   artifacts > prodBuild select that explicit build, then set `deployProd=true`
+   and `exclusiveProdWindowConfirmed=true`. Default false keeps inspection-only
+   behavior. Never infer a window from an old confirmation.
+6. Verify runtime confirmations, provenance, exact download/layout/hash, classic
+   ownership, actual Static Web App upload target and live content. Record the
+   run ID before any follow-up. Do not retry blindly after a failed post-check:
+   upload may already have changed the site. Browser smoke remains separate.
+7. After the test, decide explicitly whether to restore classic ownership or hold
+   it disabled for a separately approved automatic cutover. A passing manual test
+   does not enable completion triggers or authorize automatic cutover.
+
+## Staged migration history and future activation
+
+1. Publish each candidate as a draft PR against **develop**, then obtain separate
    merge approval after review and gates. Promote develop to **master** through
-   another reviewed PR; never make master-only changes. The scaffold cannot
-   deploy, but a develop merge may invoke existing PPE automation and a later
+   another reviewed PR; never make master-only changes. The original scaffold cannot
+   deploy; this manual candidate requires explicit opt-ins. A develop merge may invoke existing PPE automation and a later
    master promotion may start build 15 and classic 11 automatically. Preserve
    those behaviors; no hidden production cutover on either merge.
 2. After publication approval and review, register a dedicated release pipeline
@@ -123,7 +173,7 @@ external deployments, or subsequent re-enablement. Contention is untested.
    secret with queue-time override off. Confirm the application/default hostname
    and `www.hazzat.com` domain and accept the actual permission boundary. No token
    extraction, rotation, shared variable group or broad authorization is implied.
-5. Prepare/review a separate manual-only deployment candidate removing the literal
+5. Review this manual-only deployment candidate replacing the literal
    block with explicit opt-ins. Because the ownership guard requires retirement,
    its production test needs a reversible, separately approved classic disable
    and drain window. Do not silently bypass the guard to test alongside classic.
@@ -162,11 +212,11 @@ Restore recorded classic settings without deleting history; verify a single
 owner. Neither option rebuilds, rotates credentials or changes production content
 without explicit authorization. Recheck the site after every authorized change.
 
-Outstanding: develop PR review/merge and separate master promotion, Azure
-schema/runtime inspection, production-specific
+Outstanding: candidate publication, develop PR review/merge and separate master
+promotion, Azure compilation of the changed conditions, production-specific
 safeguard approval, effective ACL/resource access review, token-target owner
-confirmation and specific persistent access approval, a production test window,
-reviewed block removal, test/deployment approval and coordinated cutover approval.
+confirmation and production access acceptance, a production test window,
+classic disable/drain and test/deployment approval, and later cutover approval.
 No deployment, credential setup, or classic change is authorized by local scaffold
 preparation alone.
 
