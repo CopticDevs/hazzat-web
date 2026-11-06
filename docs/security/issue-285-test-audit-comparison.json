@@ -1,0 +1,80 @@
+{
+  "develop": {
+    "npmDependencyEntries": {
+      "info": 0,
+      "low": 10,
+      "moderate": 2,
+      "high": 0,
+      "critical": 0,
+      "total": 12
+    },
+    "distinctAdvisories": [
+      {
+        "name": "@tootallnate/once",
+        "title": "@tootallnate/once vulnerable to Incorrect Control Flow Scoping",
+        "severity": "low",
+        "range": "<2.0.1",
+        "url": "https://github.com/advisories/GHSA-vpq2-c234-7xj6"
+      },
+      {
+        "name": "deepmerge",
+        "title": "deepmerge mergeObject() allows prototype poisoning of returned objects",
+        "severity": "low",
+        "range": ">=4.2.0 <=4.3.1",
+        "url": "https://github.com/advisories/GHSA-gcqx-w48m-w2h4"
+      },
+      {
+        "name": "uuid",
+        "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+        "severity": "moderate",
+        "range": "<11.1.1",
+        "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq"
+      }
+    ]
+  },
+  "reporter": {
+    "npmDependencyEntries": {
+      "info": 0,
+      "low": 10,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 10
+    },
+    "distinctAdvisories": [
+      {
+        "name": "@tootallnate/once",
+        "title": "@tootallnate/once vulnerable to Incorrect Control Flow Scoping",
+        "severity": "low",
+        "range": "<2.0.1",
+        "url": "https://github.com/advisories/GHSA-vpq2-c234-7xj6"
+      },
+      {
+        "name": "deepmerge",
+        "title": "deepmerge mergeObject() allows prototype poisoning of returned objects",
+        "severity": "low",
+        "range": ">=4.2.0 <=4.3.1",
+        "url": "https://github.com/advisories/GHSA-gcqx-w48m-w2h4"
+      }
+    ]
+  },
+  "jest29": {
+    "npmDependencyEntries": {
+      "info": 0,
+      "low": 6,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 6
+    },
+    "distinctAdvisories": [
+      {
+        "name": "deepmerge",
+        "title": "deepmerge mergeObject() allows prototype poisoning of returned objects",
+        "severity": "low",
+        "range": ">=4.2.0 <=4.3.1",
+        "url": "https://github.com/advisories/GHSA-gcqx-w48m-w2h4"
+      }
+    ]
+  }
+}
