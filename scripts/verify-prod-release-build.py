@@ -75,6 +75,13 @@ def validate_resource_context(build, branch, commit, reason, alias, code_branch,
         raise ValueError("Unexpected trigger or automatic pipeline code/artifact mismatch.")
 
 
+def validate_manual_test(reason, deploy_confirmed, window_confirmed):
+    # Azure boolean parameters may render as True/False; no other truthy values.
+    if (reason != "Manual" or deploy_confirmed.lower() != "true"
+            or window_confirmed.lower() != "true"):
+        raise ValueError("An approved manual deployment and exclusive window are required.")
+
+
 def validate_classic_retired(definition):
     # Strict boolean check: missing/inaccessible metadata must fail closed.
     if definition.get("id") != 11 or definition.get("isDisabled") is not True:
@@ -130,6 +137,11 @@ def main():
                                   os.environ.get("PROD_CODE_BRANCH", ""),
                                   os.environ.get("PROD_CODE_COMMIT", ""))
         print(f"Verified Production build {build_id}; commit {build['sourceVersion']}; artifact {ARTIFACT}.")
+    elif mode == "manual-test":
+        validate_manual_test(os.environ.get("PROD_RUN_REASON", ""),
+                             os.environ.get("PROD_DEPLOY_CONFIRMED", ""),
+                             os.environ.get("PROD_WINDOW_CONFIRMED", ""))
+        print("Explicit manual test confirmations verified; ownership check still required.")
     elif mode == "ownership":
         definition = read_json(
             "https://vsrm.dev.azure.com/CopticDevs/hazzat-api/_apis/release/definitions/11?api-version=7.1")

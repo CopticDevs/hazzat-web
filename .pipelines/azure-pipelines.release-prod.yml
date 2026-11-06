@@ -1,7 +1,17 @@
-# Production migration scaffold for #274. See docs/azure-production-release-plan.md.
-# All triggers are off. No parameter can enable the literal-blocked deployment stage.
+# Controlled manual production test for #274. See docs/azure-production-release-plan.md.
+# Automatic triggers remain off; both explicit deployment confirmations default false.
 trigger: none
 pr: none
+
+parameters:
+- name: deployProd
+  displayName: Deploy the selected artifact to production
+  type: boolean
+  default: false
+- name: exclusiveProdWindowConfirmed
+  displayName: Confirm an approved exclusive production deployment window
+  type: boolean
+  default: false
 
 resources:
   pipelines:
@@ -56,18 +66,24 @@ stages:
         targetPath: $(Pipeline.Workspace)/prod-artifact-sha256.json
         artifact: prod-artifact-inspection
 
-# Literal block is independent of variables/parameters. The future ownership check
-# requires classic11 disabled; a stage lock cannot exclude classic/external writers.
+# Classic 11 must also be disabled and operationally drained before upload.
+# This stage lock cannot exclude classic or external writers.
 - stage: DeployProd
-  displayName: BLOCKED - production access and deployment authorization required
+  displayName: Controlled manual production deployment
   dependsOn: InspectArtifact
   lockBehavior: sequential
-  condition: and(succeeded(), eq(1, 0))
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual'), ${{ eq(parameters.deployProd, true) }}, ${{ eq(parameters.exclusiveProdWindowConfirmed, true) }})
   jobs:
   - job: Deploy
     steps:
     - checkout: self
       persistCredentials: false
+    - bash: python3 scripts/verify-prod-release-build.py manual-test
+      displayName: Require both explicit manual test confirmations
+      env:
+        PROD_RUN_REASON: $(Build.Reason)
+        PROD_DEPLOY_CONFIRMED: ${{ parameters.deployProd }}
+        PROD_WINDOW_CONFIRMED: ${{ parameters.exclusiveProdWindowConfirmed }}
     - bash: python3 scripts/verify-prod-release-build.py metadata
       displayName: Reject invalid, failed, or unrelated build runs
       env:
