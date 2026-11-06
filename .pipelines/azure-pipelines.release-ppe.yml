@@ -1,25 +1,16 @@
-# Controlled manual PPE test candidate for #274.
-# See docs/azure-ppe-controlled-test.md. Automatic triggers remain disabled.
+# Automatic PPE replacement candidate for #274.
+# Disable/drain classic10 before merging/activating. See docs/azure-ppe-cutover.md.
 trigger: none
 pr: none
-
-parameters:
-- name: deployPpe
-  displayName: Deploy the selected retained PPE artifact
-  type: boolean
-  default: false
-- name: exclusivePpeWindowConfirmed
-  displayName: Owner confirmed an exclusive PPE window and retained rollback build
-  type: boolean
-  default: false
 
 resources:
   pipelines:
   - pipeline: ppeBuild
     source: '\hazzat-web\CopticDevs.hazzat-web-ppe'
-    # Deliberately disabled until classic is retired after controlled validation.
-    # Final completion branch filter must be refs/heads/develop; see PPE plan.
-    trigger: none
+    trigger:
+      branches:
+        include:
+        - refs/heads/develop
 
 pool:
   vmImage: ubuntu-26.04
@@ -27,7 +18,7 @@ pool:
 stages:
 - stage: InspectArtifact
   displayName: Verify the selected existing PPE artifact
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual'))
+  condition: and(succeeded(), or(eq(variables['Build.Reason'], 'Manual'), and(eq(variables['Build.Reason'], 'ResourceTrigger'), eq(variables['Resources.TriggeringAlias'], 'ppeBuild'), eq(variables['resources.pipeline.ppeBuild.sourceBranch'], 'refs/heads/develop'))))
   jobs:
   - job: Inspect
     steps:
@@ -67,15 +58,15 @@ stages:
         targetPath: $(Pipeline.Workspace)/ppe-artifact-sha256.json
         artifact: ppe-artifact-inspection
 
-# Manual opt-ins are operator attestations, not a cross-pipeline mutex.
-# The stage lock serializes pipeline17 only; classic must be excluded by the window.
+# The stage lock serializes pipeline17 only. The ownership check requires classic
+# disabled; operators must also drain old releases and exclude external writers.
 - stage: DeployPpe
-  displayName: Controlled manual deployment to PPE
+  displayName: Deploy the selected PPE artifact
   dependsOn: InspectArtifact
   lockBehavior: sequential
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual'), ${{ eq(parameters.deployPpe, true) }}, ${{ eq(parameters.exclusivePpeWindowConfirmed, true) }})
+  condition: and(succeeded(), or(eq(variables['Build.Reason'], 'Manual'), and(eq(variables['Build.Reason'], 'ResourceTrigger'), eq(variables['Resources.TriggeringAlias'], 'ppeBuild'), eq(variables['resources.pipeline.ppeBuild.sourceBranch'], 'refs/heads/develop'))))
   jobs:
-  - job: ControlledDeployment
+  - job: Deploy
     steps:
     - checkout: self
       persistCredentials: false
@@ -106,8 +97,10 @@ stages:
       env:
         PPE_ARTIFACT_ROOT: $(Pipeline.Workspace)/ppe-release/_CopticDevs.hazzat-web-ppe/HazzatWebBuildPpe
         PPE_MANIFEST: $(Pipeline.Workspace)/ppe-artifact-sha256.json
+    - bash: python3 scripts/verify-ppe-release-build.py ownership
+      displayName: Require classic PPE retirement before upload
     - task: AzureStaticWebApp@0
-      displayName: 'Static Web App: hazzat-web-ppe (controlled test)'
+      displayName: 'Static Web App: hazzat-web-ppe'
       inputs:
         cwd: $(Pipeline.Workspace)/ppe-release
         app_location: _CopticDevs.hazzat-web-ppe/HazzatWebBuildPpe

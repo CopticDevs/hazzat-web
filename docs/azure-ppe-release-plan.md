@@ -1,5 +1,9 @@
 # PPE migration preparation — local candidate
 
+**Current branch:** see [the automatic replacement/cutover candidate](azure-ppe-cutover.md).
+The manual-test and blocked-scaffold descriptions below are historical preparation
+states. Run3627 passed; automatic activation remains pending.
+
 **Current branch:** a [controlled manual test candidate](azure-ppe-controlled-test.md)
 replaces the literal block with default-off manual guards locally. The inventory and
 blocked-scaffold descriptions below record the merged preparation baseline; consult
