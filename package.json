@@ -60,8 +60,8 @@
   },
   "devDependencies": {
     "jest-junit": "^13.1.0",
-    "jest": "27.5.1",
-    "jest-environment-jsdom": "27.5.1",
+    "jest": "30.5.2",
+    "jest-environment-jsdom": "30.5.2",
     "babel-jest": "27.5.1",
     "@babel/core": "7.29.13",
     "@babel/preset-env": "7.16.11",
