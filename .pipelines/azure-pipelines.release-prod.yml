@@ -1,0 +1,123 @@
+# Production migration scaffold for #274. See docs/azure-production-release-plan.md.
+# All triggers are off. No parameter can enable the literal-blocked deployment stage.
+trigger: none
+pr: none
+
+resources:
+  pipelines:
+  - pipeline: prodBuild
+    source: '\hazzat-web\CopticDevs.hazzat-web'
+    # Eventual completion filter: refs/heads/master, only after reviewed cutover.
+    trigger: none
+
+pool:
+  vmImage: ubuntu-26.04
+
+stages:
+- stage: InspectArtifact
+  displayName: Verify the selected existing production artifact
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'Manual'))
+  jobs:
+  - job: Inspect
+    steps:
+    - checkout: self
+      persistCredentials: false
+    - bash: python3 scripts/verify-prod-release-build.py metadata
+      displayName: Reject invalid, failed, or unrelated build runs
+      env:
+        PROD_BUILD_ID: $(resources.pipeline.prodBuild.runID)
+        PROD_SOURCE_BRANCH: $(resources.pipeline.prodBuild.sourceBranch)
+        PROD_SOURCE_COMMIT: $(resources.pipeline.prodBuild.sourceCommit)
+        PROD_RUN_REASON: $(Build.Reason)
+        PROD_TRIGGER_ALIAS: $(Resources.TriggeringAlias)
+        PROD_CODE_BRANCH: $(Build.SourceBranch)
+        PROD_CODE_COMMIT: $(Build.SourceVersion)
+    - task: DownloadBuildArtifacts@1
+      displayName: Download the exact selected build artifact
+      inputs:
+        buildType: specific
+        project: c3ad63de-5431-426e-8009-fe5331eea17a
+        pipeline: '15'
+        specificBuildWithTriggering: false
+        buildVersionToDownload: specific
+        buildId: $(resources.pipeline.prodBuild.runID)
+        downloadType: single
+        artifactName: HazzatWebBuildProd
+        downloadPath: $(Pipeline.Workspace)/prod-release/_CopticDevs.hazzat-web
+        cleanDestinationFolder: true
+    - bash: python3 scripts/verify-prod-release-build.py layout
+      displayName: Check output layout and record unmodified file hashes
+      env:
+        PROD_ARTIFACT_ROOT: $(Pipeline.Workspace)/prod-release/_CopticDevs.hazzat-web/HazzatWebBuildProd
+        PROD_MANIFEST: $(Pipeline.Workspace)/prod-artifact-sha256.json
+    - task: PublishPipelineArtifact@1
+      displayName: Preserve inspection evidence (not a replacement build artifact)
+      inputs:
+        targetPath: $(Pipeline.Workspace)/prod-artifact-sha256.json
+        artifact: prod-artifact-inspection
+
+# Literal block is independent of variables/parameters. The future ownership check
+# requires classic11 disabled; a stage lock cannot exclude classic/external writers.
+- stage: DeployProd
+  displayName: BLOCKED - production access and deployment authorization required
+  dependsOn: InspectArtifact
+  lockBehavior: sequential
+  condition: and(succeeded(), eq(1, 0))
+  jobs:
+  - job: Deploy
+    steps:
+    - checkout: self
+      persistCredentials: false
+    - bash: python3 scripts/verify-prod-release-build.py metadata
+      displayName: Reject invalid, failed, or unrelated build runs
+      env:
+        PROD_BUILD_ID: $(resources.pipeline.prodBuild.runID)
+        PROD_SOURCE_BRANCH: $(resources.pipeline.prodBuild.sourceBranch)
+        PROD_SOURCE_COMMIT: $(resources.pipeline.prodBuild.sourceCommit)
+        PROD_RUN_REASON: $(Build.Reason)
+        PROD_TRIGGER_ALIAS: $(Resources.TriggeringAlias)
+        PROD_CODE_BRANCH: $(Build.SourceBranch)
+        PROD_CODE_COMMIT: $(Build.SourceVersion)
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        buildType: specific
+        project: c3ad63de-5431-426e-8009-fe5331eea17a
+        pipeline: '15'
+        specificBuildWithTriggering: false
+        buildVersionToDownload: specific
+        buildId: $(resources.pipeline.prodBuild.runID)
+        downloadType: single
+        artifactName: HazzatWebBuildProd
+        downloadPath: $(Pipeline.Workspace)/prod-release/_CopticDevs.hazzat-web
+        cleanDestinationFolder: true
+    - bash: python3 scripts/verify-prod-release-build.py layout
+      displayName: Check output layout and record unmodified file hashes
+      env:
+        PROD_ARTIFACT_ROOT: $(Pipeline.Workspace)/prod-release/_CopticDevs.hazzat-web/HazzatWebBuildProd
+        PROD_MANIFEST: $(Pipeline.Workspace)/prod-artifact-sha256.json
+    - bash: python3 scripts/verify-prod-release-build.py ownership
+      displayName: Require classic production retirement before upload
+    - task: AzureStaticWebApp@0
+      displayName: 'Static Web App: hazzat-web'
+      inputs:
+        cwd: $(Pipeline.Workspace)/prod-release
+        app_location: _CopticDevs.hazzat-web/HazzatWebBuildProd
+        app_build_command: ''
+        output_location: ''
+        api_location: ''
+        api_build_command: ''
+        routes_location: ''
+        config_file_location: ''
+        skip_app_build: true
+        skip_api_build: false
+        is_static_export: false
+        verbose: false
+        deployment_environment: ''
+        production_branch: ''
+        data_api_location: ''
+        default_hostname: proud-glacier-0cea24010.1.azurestaticapps.net
+        azure_static_web_apps_api_token: $(deployment_token)
+    - bash: python3 scripts/verify-prod-release-build.py live
+      displayName: Compare production homepage with selected artifact
+      env:
+        PROD_MANIFEST: $(Pipeline.Workspace)/prod-artifact-sha256.json
