@@ -31,19 +31,14 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "test-unit": "react-scripts test --watchAll=false --testResultsProcessor ./node_modules/jest-junit",
+    "test": "jest",
+    "test-unit": "jest --watchAll=false --testResultsProcessor ./node_modules/jest-junit",
     "eject": "react-scripts eject",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx"
   },
   "engines": {
     "node": ">=20"
-  },
-  "jest": {
-    "moduleNameMapper": {
-      "^react-router/dom$": "<rootDir>/node_modules/react-router/dist/development/dom-export.js"
-    }
   },
   "eslintConfig": {
     "extends": [
@@ -64,6 +59,17 @@
     ]
   },
   "devDependencies": {
-    "jest-junit": "^13.1.0"
+    "jest-junit": "^13.1.0",
+    "jest": "27.5.1",
+    "jest-environment-jsdom": "27.5.1",
+    "babel-jest": "27.5.1",
+    "@babel/core": "7.29.13",
+    "@babel/preset-env": "7.16.11",
+    "@babel/preset-react": "7.16.7",
+    "@babel/preset-typescript": "7.29.7",
+    "eslint": "8.11.0",
+    "eslint-config-react-app": "7.0.1",
+    "identity-obj-proxy": "3.0.0",
+    "react-app-polyfill": "3.0.0"
   }
 }
