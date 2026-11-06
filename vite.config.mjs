@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
           }
         },
       },
-      svgr({ svgrOptions: { exportType: 'named', namedExport: 'ReactComponent', jsxRuntime: 'automatic', plugins: ['@svgr/plugin-jsx'] } }),
+      svgr({ svgrOptions: { exportType: 'named', namedExport: 'ReactComponent', jsxRuntime: 'automatic', titleProp: true, ref: true, plugins: ['@svgr/plugin-jsx'] } }),
       react(),
     ],
     assetsInclude: ['**/*.bin'],

@@ -15,3 +15,104 @@ test('named SVG components are transformed without changing default PDF artwork 
   const source = `import { ReactComponent as Logo } from './logo.svg';\nimport logo from './logo.svg';`;
   assert.equal(svgComponentImports(source), `import { ReactComponent as Logo } from './logo.svg?react';\nimport logo from './logo.svg';`);
 });
+
+test('actual Vite SVG output supports dynamic titles, SVG refs and separate asset URLs', async t => {
+  const previousNodeEnv = process.env.NODE_ENV;
+  t.after(() => {
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = previousNodeEnv;
+  });
+  const { build } = await import('vite');
+  const { createRequire } = await import('node:module');
+  const { readFileSync } = await import('node:fs');
+  const path = await import('node:path');
+  const require = createRequire(import.meta.url);
+  const entry = '\0hazzat-svg-contract.tsx';
+  const svgPath = path.resolve('src/images/logo.svg').replaceAll('\\', '/');
+  const result = await build({
+    logLevel: 'silent',
+    plugins: [{
+      name: 'svg-contract-entry',
+      resolveId: id => id === entry ? entry : undefined,
+      load: id => id === entry
+        ? `import { ReactComponent as Icon } from ${JSON.stringify(svgPath)};\nimport url from ${JSON.stringify(svgPath)};\nexport { Icon, url };`
+        : undefined,
+    }],
+    build: {
+      write: false, minify: false, sourcemap: false,
+      rolldownOptions: {
+        input: entry, preserveEntrySignatures: 'strict',
+        external: ['react', 'react/jsx-runtime'],
+        output: { format: 'cjs' },
+      },
+    },
+  });
+  const output = (Array.isArray(result) ? result[0] : result).output;
+  const chunk = output.find(item => item.type === 'chunk' && item.isEntry);
+  assert(chunk, 'Vite emitted the actual SVG import entry');
+  const module = { exports: {} };
+  new Function('require', 'module', 'exports', chunk.code)(require, module, module.exports);
+  const { Icon, url } = module.exports;
+  assert.equal(typeof url, 'string');
+  const asset = output.find(item => item.type === 'asset' && `/${item.fileName}` === url);
+  assert(asset, 'default import remains an emitted asset URL');
+  assert.deepEqual(Buffer.from(asset.source), readFileSync(svgPath), 'URL artwork is unchanged');
+
+  const { JSDOM } = require('jsdom');
+  const dom = new JSDOM('<!doctype html><div id="root"></div>');
+  const globals = { window: dom.window, document: dom.window.document, navigator: dom.window.navigator };
+  const previous = Object.fromEntries(Object.keys(globals).map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
+  for (const [key, value] of Object.entries(globals)) Object.defineProperty(globalThis, key, { configurable: true, writable: true, value });
+  let root;
+  try {
+    const React = require('react');
+    const { createRoot } = require('react-dom/client');
+    const { flushSync } = require('react-dom');
+    const ref = React.createRef();
+    root = createRoot(document.getElementById('root'));
+    flushSync(() => root.render(React.createElement(Icon, { ref, title: 'First title', titleId: 'logo-title', className: 'contract-icon', width: 123, 'data-contract': 'svg' })));
+    assert(ref.current instanceof dom.window.SVGElement, 'ref reaches the root SVG');
+    const svg = ref.current;
+    const title = svg.querySelector('title');
+    assert(title, 'dynamic title creates a title child rather than an SVG attribute');
+    assert.equal(title.textContent, 'First title');
+    assert.equal(title.id, 'logo-title');
+    assert.equal(svg.getAttribute('aria-labelledby'), 'logo-title');
+    assert.equal(svg.getAttribute('class'), 'contract-icon');
+    assert.equal(svg.getAttribute('width'), '123');
+    assert.equal(svg.getAttribute('data-contract'), 'svg');
+    flushSync(() => root.render(React.createElement(Icon, { ref, title: 'Changed title', titleId: 'logo-title' })));
+    assert.equal(ref.current, svg);
+    assert.equal(svg.querySelectorAll('title').length, 1);
+    assert.equal(svg.querySelector('title').textContent, 'Changed title');
+    flushSync(() => root.unmount());
+    root = undefined;
+    assert.equal(ref.current, null);
+  } finally {
+    if (root) require('react-dom').flushSync(() => root.unmount());
+    dom.window.close();
+    for (const [key, descriptor] of Object.entries(previous)) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete globalThis[key];
+    }
+  }
+});
+
+test('SVG declarations accept SVG refs and title IDs, and reject an HTML element ref', async () => {
+  const { default: ts } = await import('typescript');
+  const path = await import('node:path');
+  const file = path.resolve('config/svg-contract.types.tsx');
+  const source = `import * as React from 'react';
+import { ReactComponent as Icon } from '../src/images/logo.svg';
+const svg = <Icon ref={React.createRef<SVGSVGElement>()} title="Logo" titleId="logo-title" className="logo" />;
+// @ts-expect-error SVG components cannot forward an HTML div ref.
+const invalid = <Icon ref={React.createRef<HTMLDivElement>()} />;
+`;
+  const options = { noEmit: true, strict: true, skipLibCheck: true, jsx: ts.JsxEmit.ReactJSX, moduleResolution: ts.ModuleResolutionKind.NodeJs, target: ts.ScriptTarget.ES2020 };
+  const host = ts.createCompilerHost(options);
+  const getSourceFile = host.getSourceFile.bind(host);
+  host.getSourceFile = (name, languageVersion, ...rest) => name === file
+    ? ts.createSourceFile(name, source, languageVersion, true, ts.ScriptKind.TSX)
+    : getSourceFile(name, languageVersion, ...rest);
+  const program = ts.createProgram([file, path.resolve('src/react-app-env.d.ts')], options, host);
+  const diagnostics = ts.getPreEmitDiagnostics(program);
+  assert.deepEqual(diagnostics.map(d => ts.flattenDiagnosticMessageText(d.messageText, '\n')), []);
+});

@@ -2,8 +2,11 @@
 /// <reference types="react" />
 
 declare module '*.svg' {
-  import type { FunctionComponent, SVGProps } from 'react';
-  export const ReactComponent: FunctionComponent<SVGProps<SVGSVGElement> & { title?: string }>;
+  import type { ForwardRefExoticComponent, PropsWithoutRef, RefAttributes, SVGProps } from 'react';
+  export const ReactComponent: ForwardRefExoticComponent<
+    PropsWithoutRef<SVGProps<SVGSVGElement> & { title?: string; titleId?: string }>
+    & RefAttributes<SVGSVGElement>
+  >;
   const url: string;
   export default url;
 }

@@ -47,3 +47,11 @@ The same current audit was applied to exact lockfiles for all three assessed che
 This stage addresses **19 additional entries from the supplied 47-alert export**; 25 were already addressed by its base, and #134 once, #135 uuid, #246 deepmerge remain affected. The separate Jest candidate introduces glob/minimatch advisories and is not included in this PR. This Vite stage introduces neither of them. Exact original-export paths/ranges are recorded in `issue-285-vite-reconciliation.json`; no alert is dismissed and issue 285 remains open.
 
 Publication-validation logs, the browser harness, screenshots, and report files are retained outside the repository in `/workspace/issue285-toolchain-evidence/vite-publication/`.
+
+## SVG compatibility correction
+
+CRA 5.0.1 already disabled SVGO for component imports and enabled `titleProp` and `ref`. This Vite configuration now also enables `titleProp: true` and `ref: true`, while retaining only the JSX plugin. No optimizer or dependency is added. The SVG declaration describes the actual forwarded SVG ref and optional title/titleId props.
+
+The tooling suite now has five tests. Its new integration test uses the real Vite configuration to compile the application's named-component/default-URL imports, renders the generated component with React DOM, and checks dynamic title updates, title IDs/aria-labelledby, root SVG ref forwarding/unmount, ordinary props, and byte-identical URL artwork. A compiler test accepts SVG refs and rejects HTML div refs. Disabling either titleProp or ref independently makes the integration test fail; it does not rely on the existing Jest SVG mock.
+
+After this correction: all 616 tests, five tooling checks, typecheck/build, 31 release guards and console-aware desktop/mobile fixture smoke pass. Lint remains identical at 120 errors/nine warnings. package.json/package-lock.json and the complete original-export reconciliation are byte-identical to the previous PR head; no SVGO or additional deepmerge path is introduced, and the existing once/uuid/deepmerge findings remain. The separate Jest candidate is untouched.
