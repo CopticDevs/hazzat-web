@@ -31,7 +31,7 @@
     "start": "vite",
     "build": "npm run typecheck && vite build",
     "test": "jest",
-    "test-unit": "jest --watchAll=false --testResultsProcessor ./node_modules/jest-junit",
+    "test-unit": "jest --watchAll=false --reporters=default --reporters=jest-junit",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
     "preview": "vite preview",
@@ -59,7 +59,7 @@
     ]
   },
   "devDependencies": {
-    "jest-junit": "^13.1.0",
+    "jest-junit": "17.0.0",
     "jest": "27.5.1",
     "jest-environment-jsdom": "27.5.1",
     "babel-jest": "27.5.1",
