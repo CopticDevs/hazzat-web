@@ -48,3 +48,32 @@ describe("shared browser resource cache", () => {
         expect(get).toHaveBeenCalledTimes(9);
     });
 });
+
+it('evicts the oldest cached resource when the bounded cache fills', async () => {
+    ContentResourceClient.clear();
+    const get = jest.fn(async (path: string) => ({ data: path }));
+    const client = new ContentResourceClient({ get } as unknown as AxiosInstance, 'https://eviction.example');
+    const validate = (value: unknown) => String(value);
+    for (let i = 0; i < 513; i++) await client.read(`/resource/${i}`, validate);
+    await client.read('/resource/512', validate);
+    expect(get).toHaveBeenCalledTimes(513);
+    await client.read('/resource/0', validate);
+    expect(get).toHaveBeenCalledTimes(514);
+    expect(get).toHaveBeenLastCalledWith('/resource/0');
+});
+
+it('allows success and not-modified statuses, but rejects error statuses on revalidation', async () => {
+    ContentResourceClient.clear();
+    const now = jest.spyOn(Date, 'now').mockReturnValue(0);
+    try {
+        const get = jest.fn().mockResolvedValueOnce({ data: 'first', headers: { etag: 'v1' }, status: 200 })
+            .mockResolvedValueOnce({ data: 'second', status: 200 });
+        const client = new ContentResourceClient({ get } as unknown as AxiosInstance, 'https://statuses.example', true);
+        await client.read('/resource', String);
+        now.mockReturnValue(60_001);
+        expect(await client.read('/resource', String)).toBe('second');
+        const { validateStatus } = get.mock.calls[1][1];
+        for (const status of [200, 204, 299, 304]) expect(validateStatus(status)).toBe(true);
+        for (const status of [199, 300, 400, 500]) expect(validateStatus(status)).toBe(false);
+    } finally { now.mockRestore(); }
+});
