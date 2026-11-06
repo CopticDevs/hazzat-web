@@ -1,0 +1,125 @@
+# Automatic PPE replacement candidate for #274.
+# Disable/drain classic10 before merging/activating. See docs/azure-ppe-cutover.md.
+trigger: none
+pr: none
+
+resources:
+  pipelines:
+  - pipeline: ppeBuild
+    source: '\hazzat-web\CopticDevs.hazzat-web-ppe'
+    trigger:
+      branches:
+        include:
+        - refs/heads/develop
+
+pool:
+  vmImage: ubuntu-26.04
+
+stages:
+- stage: InspectArtifact
+  displayName: Verify the selected existing PPE artifact
+  condition: and(succeeded(), or(eq(variables['Build.Reason'], 'Manual'), and(eq(variables['Build.Reason'], 'ResourceTrigger'), eq(variables['Resources.TriggeringAlias'], 'ppeBuild'), eq(variables['resources.pipeline.ppeBuild.sourceBranch'], 'refs/heads/develop'))))
+  jobs:
+  - job: Inspect
+    steps:
+    - checkout: self
+      persistCredentials: false
+    - bash: python3 scripts/verify-ppe-release-build.py metadata
+      displayName: Reject invalid, failed, or unrelated build runs
+      env:
+        PPE_BUILD_ID: $(resources.pipeline.ppeBuild.runID)
+        PPE_SOURCE_BRANCH: $(resources.pipeline.ppeBuild.sourceBranch)
+        PPE_SOURCE_COMMIT: $(resources.pipeline.ppeBuild.sourceCommit)
+        PPE_RUN_REASON: $(Build.Reason)
+        PPE_TRIGGER_ALIAS: $(Resources.TriggeringAlias)
+        PPE_CODE_BRANCH: $(Build.SourceBranch)
+        PPE_CODE_COMMIT: $(Build.SourceVersion)
+    - task: DownloadBuildArtifacts@1
+      displayName: Download the exact selected build artifact
+      inputs:
+        buildType: specific
+        project: c3ad63de-5431-426e-8009-fe5331eea17a
+        pipeline: '14'
+        specificBuildWithTriggering: false
+        buildVersionToDownload: specific
+        buildId: $(resources.pipeline.ppeBuild.runID)
+        downloadType: single
+        artifactName: HazzatWebBuildPpe
+        downloadPath: $(Pipeline.Workspace)/ppe-release/_CopticDevs.hazzat-web-ppe
+        cleanDestinationFolder: true
+    - bash: python3 scripts/verify-ppe-release-build.py layout
+      displayName: Check output layout and record unmodified file hashes
+      env:
+        PPE_ARTIFACT_ROOT: $(Pipeline.Workspace)/ppe-release/_CopticDevs.hazzat-web-ppe/HazzatWebBuildPpe
+        PPE_MANIFEST: $(Pipeline.Workspace)/ppe-artifact-sha256.json
+    - task: PublishPipelineArtifact@1
+      displayName: Preserve inspection evidence (not a replacement build artifact)
+      inputs:
+        targetPath: $(Pipeline.Workspace)/ppe-artifact-sha256.json
+        artifact: ppe-artifact-inspection
+
+# The stage lock serializes pipeline17 only. The ownership check requires classic
+# disabled; operators must also drain old releases and exclude external writers.
+- stage: DeployPpe
+  displayName: Deploy the selected PPE artifact
+  dependsOn: InspectArtifact
+  lockBehavior: sequential
+  condition: and(succeeded(), or(eq(variables['Build.Reason'], 'Manual'), and(eq(variables['Build.Reason'], 'ResourceTrigger'), eq(variables['Resources.TriggeringAlias'], 'ppeBuild'), eq(variables['resources.pipeline.ppeBuild.sourceBranch'], 'refs/heads/develop'))))
+  jobs:
+  - job: Deploy
+    steps:
+    - checkout: self
+      persistCredentials: false
+    - bash: python3 scripts/verify-ppe-release-build.py metadata
+      displayName: Reject invalid, failed, or unrelated build runs
+      env:
+        PPE_BUILD_ID: $(resources.pipeline.ppeBuild.runID)
+        PPE_SOURCE_BRANCH: $(resources.pipeline.ppeBuild.sourceBranch)
+        PPE_SOURCE_COMMIT: $(resources.pipeline.ppeBuild.sourceCommit)
+        PPE_RUN_REASON: $(Build.Reason)
+        PPE_TRIGGER_ALIAS: $(Resources.TriggeringAlias)
+        PPE_CODE_BRANCH: $(Build.SourceBranch)
+        PPE_CODE_COMMIT: $(Build.SourceVersion)
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        buildType: specific
+        project: c3ad63de-5431-426e-8009-fe5331eea17a
+        pipeline: '14'
+        specificBuildWithTriggering: false
+        buildVersionToDownload: specific
+        buildId: $(resources.pipeline.ppeBuild.runID)
+        downloadType: single
+        artifactName: HazzatWebBuildPpe
+        downloadPath: $(Pipeline.Workspace)/ppe-release/_CopticDevs.hazzat-web-ppe
+        cleanDestinationFolder: true
+    - bash: python3 scripts/verify-ppe-release-build.py layout
+      displayName: Check output layout and record unmodified file hashes
+      env:
+        PPE_ARTIFACT_ROOT: $(Pipeline.Workspace)/ppe-release/_CopticDevs.hazzat-web-ppe/HazzatWebBuildPpe
+        PPE_MANIFEST: $(Pipeline.Workspace)/ppe-artifact-sha256.json
+    - bash: python3 scripts/verify-ppe-release-build.py ownership
+      displayName: Require classic PPE retirement before upload
+    - task: AzureStaticWebApp@0
+      displayName: 'Static Web App: hazzat-web-ppe'
+      inputs:
+        cwd: $(Pipeline.Workspace)/ppe-release
+        app_location: _CopticDevs.hazzat-web-ppe/HazzatWebBuildPpe
+        app_build_command: ''
+        output_location: ''
+        api_location: ''
+        api_build_command: ''
+        routes_location: ''
+        config_file_location: ''
+        skip_app_build: true
+        skip_api_build: false
+        is_static_export: false
+        verbose: false
+        deployment_environment: ''
+        production_branch: ''
+        data_api_location: ''
+        default_hostname: brave-field-055faf010.1.azurestaticapps.net
+        azure_static_web_apps_api_token: $(deployment_token)
+    - bash: python3 scripts/verify-ppe-release-build.py live
+      displayName: Compare PPE homepage with selected artifact
+      env:
+        PPE_MANIFEST: $(Pipeline.Workspace)/ppe-artifact-sha256.json
