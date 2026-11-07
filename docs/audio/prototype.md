@@ -1,6 +1,6 @@
 # Local SoundCloud embedding prototype
 
-Prototype for [#283](https://github.com/CopticDevs/hazzat-web/issues/283), based on `develop`. No public rollout, upload, account/API setup, sing-along, or published content change. This prototype does not complete the broader provider evaluation in that issue.
+Prototype for [#283](https://github.com/CopticDevs/hazzat-web/issues/283), based on `develop`. No public rollout, upload, account/API setup, sing-along, or published content change. SoundCloud is the intended replacement for Azure-hosted audio. This development-only prototype does not migrate the existing recordings or complete the broader work in that issue.
 
 ## Run and review
 
@@ -11,18 +11,19 @@ npm ci --strict-peer-deps
 npm start
 ```
 
-Open `http://localhost:3000/Preview/SoundCloud`. Use **Use SoundCloud demo link**, then **Load SoundCloud player**, or paste an appropriate public full track URL. The route intentionally has no main-navigation link.
+Open `http://localhost:3000/Preview/SoundCloud`. The sample player loads automatically, with audio autoplay disabled. Paste an appropriate public full track URL to replace it automatically after a 500 ms pause in typing. The route intentionally has no main-navigation link.
 
-The optional sample is **Flickermood by Forss**, an official [SoundCloud developer-documentation example](https://developers.soundcloud.com/docs/oembed), not a Hazzat hymn or a verified mapping to one. A Hazzat track can be entered when its actual public URL is supplied. No sample music is uploaded or copied.
+The default sample is **Flickermood by Forss**, an official [SoundCloud developer-documentation example](https://developers.soundcloud.com/docs/oembed), not a Hazzat hymn or a verified mapping to one. A verified public Hazzat SoundCloud recording link is still needed to replace this example. Actual track-to-hymn mappings and rights must be checked before migrating live content. No sample music is uploaded or copied.
 
 Use the existing website preferences for Arabic and light/dark appearance. Only public HTTPS `soundcloud.com`, `www.soundcloud.com`, or `m.soundcloud.com` artist/track-shaped links are accepted; short/profile/playlist/private-token URLs are rejected. Tracking parameters are removed. Syntax validation does not prove the track exists or is playable.
 
 ## What it does
 
 - Uses the existing Hazzat page shell and reader styling on a separate development-only route.
-- Loads one official standard SoundCloud iframe after an explicit form submission. Filling the sample or typing does not load the player.
+- Loads one official standard SoundCloud iframe on page opening. Valid URL edits load automatically after a 500 ms debounce; superseded edits are canceled. Clearing or invalidating the URL removes the frame.
+- Clearly discloses automatic third-party connections and possible SoundCloud cookies. This is automatic frame loading, not automatic audio playback.
 - Does not request autoplay. Keeps SoundCloud's controls and branding, a visible recording label, an external fallback, Reload and Close.
-- Replacing/reloading removes the prior iframe. Closing restores input focus. Unmounting the route removes the iframe rather than leaving background playback.
+- Replacing/reloading removes the prior iframe. Closing restores input focus and keeps the frame dismissed until the URL changes or the demo is restored. Label edits do not reload or reopen it. Unmounting the route removes the iframe rather than leaving background playback.
 - Includes English/Arabic copy, responsive layout and descriptive frame labeling.
 - Does not save the URL/label. Existing Azure audio rendering, payloads and mappings are untouched.
 
@@ -39,8 +40,8 @@ A wider deployment remains a separate decision, including SoundCloud's [embed te
 Passed locally:
 
 - TypeScript `npm run typecheck`.
-- All 30 prototype tests: URL normalization/rejection, explicit loading, no iframe before consent, sample labeling, frame replacement, safe fallback, close/focus, reload, timeout cleanup, late detached-frame events, previous timers and Arabic labels.
-- Full Jest: **54 suites passed; 646 tests passed; 2 dataset-dependent tests skipped**.
+- All 34 prototype tests: URL normalization/rejection, automatic initial loading with autoplay off, debounced replacement/cancellation, sample labeling, safe fallback, invalid/cleared URLs, close/focus/dismissal, reload, timeout cleanup, late detached-frame events, previous timers and Arabic labels.
+- Full Jest: **54 suites passed; 650 tests passed; 2 dataset-dependent tests skipped**.
 - All **5 build-tooling tests**.
 - Production build, with the existing large-chunk and mixed OpenSheetMusicDisplay import warnings.
 - Production JS/CSS scan: no `/Preview/SoundCloud`, `w.soundcloud.com/player/`, or prototype CSS selectors.
@@ -56,7 +57,7 @@ No audible/full-track playback, real iOS Safari/Android Chrome, or assistive-tec
 ## Browser review checklist
 
 - Capture the initial page and the loaded sample player at desktop and narrow viewport widths.
-- Confirm there is no SoundCloud frame request until **Load SoundCloud player** is pressed.
+- Confirm the sample frame loads automatically on opening, audio does not autoplay, and valid URL edits replace it without a Load click. Confirm invalid/private URLs do not reach the player.
 - Check Play/Pause, seek and the external fallback with an available public recording.
 - Replace and reload the recording, then close it and navigate Back/Forward. Confirm there is never more than one frame or lingering playback.
 - Try an invalid link and an unavailable track, and check the fallback/loading feedback.

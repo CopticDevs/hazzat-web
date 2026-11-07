@@ -5,10 +5,12 @@ import { LanguageContext } from '../LanguageContext';
 import { ArabicLanguageProperties } from '../l8n';
 
 const track = 'https://soundcloud.com/forss/flickermood';
-function load(url = track) {
+function changeUrl(url: string) {
     fireEvent.change(screen.getByLabelText('Public SoundCloud track link'), { target: { value: url } });
-    fireEvent.click(screen.getByRole('button', { name: /Load (SoundCloud|\/ replace)/ }));
 }
+function settleUrl() { act(() => jest.advanceTimersByTime(500)); }
+beforeEach(() => { jest.useFakeTimers(); });
+afterEach(() => { jest.useRealTimers(); });
 
 it.each([
     // eslint-disable-next-line no-script-url -- Regression fixture: script URLs must be rejected.
@@ -36,30 +38,42 @@ test('builds only an official player URL with autoplay off and no tracking data'
     expect(() => soundCloudEmbedUrl('https://example.com/a')).toThrow();
 });
 
-test('does not load third-party resources until a valid form is submitted', () => {
+test('loads the developer sample immediately, without a Load click or audio autoplay', () => {
     render(<SoundCloudPrototypePage />);
-    expect(screen.queryByTitle(/^SoundCloud player:/)).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Use SoundCloud demo link' }));
-    expect(screen.getByLabelText('Public SoundCloud track link')).toHaveValue(track);
-    expect(screen.queryByTitle(/^SoundCloud player:/)).toBeNull();
-    expect(screen.getByText(/not a Hazzat recording/)).toBeInTheDocument();
-});
-
-test('invalid links show an accessible error and focus the input without loading', () => {
-    render(<SoundCloudPrototypePage />);
-    load('https://example.com/private');
-    expect(screen.getByRole('alert')).toHaveTextContent('public HTTPS track link');
-    expect(screen.getByLabelText('Public SoundCloud track link')).toHaveFocus();
-    expect(screen.getByLabelText('Public SoundCloud track link')).toHaveAttribute('aria-invalid', 'true');
-    expect(screen.queryByTitle(/^SoundCloud player:/)).toBeNull();
-});
-
-test('loads the labeled frame with a safe fallback and does not claim audio playback succeeded', () => {
-    render(<SoundCloudPrototypePage />);
-    fireEvent.change(screen.getByLabelText('Recording label (optional)'), { target: { value: 'Test recording' } });
-    load(`${track}?utm_source=demo`);
-    const frame = screen.getByTitle('SoundCloud player: Test recording');
+    const frame = screen.getByTitle('SoundCloud player: Flickermood by Forss · Developer example');
     expect(frame).toHaveAttribute('src', soundCloudEmbedUrl(track));
+    expect(screen.getByLabelText('Public SoundCloud track link')).toHaveValue(track);
+    expect(screen.queryByRole('button', { name: /^Load/ })).not.toBeInTheDocument();
+    expect(screen.getByText(/not a Hazzat recording/)).toBeInTheDocument();
+    expect(screen.getByText(/automatically on opening/)).toHaveTextContent('Audio stays paused until you press Play');
+});
+
+test('invalid links remove the previous frame and show an error without moving focus', () => {
+    render(<SoundCloudPrototypePage />);
+    const input = screen.getByLabelText('Public SoundCloud track link');
+    input.focus();
+    changeUrl('https://example.com/private');
+    expect(screen.getByRole('alert')).toHaveTextContent('public HTTPS track link');
+    expect(input).toHaveFocus();
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    settleUrl();
+    expect(screen.queryByTitle(/^SoundCloud player:/)).toBeNull();
+});
+
+test('clearing the link removes the frame without showing an invalid-link error', () => {
+    render(<SoundCloudPrototypePage />);
+    changeUrl('');
+    settleUrl();
+    expect(screen.queryByTitle(/^SoundCloud player:/)).toBeNull();
+    expect(screen.queryByRole('alert')).toBeNull();
+});
+
+test('label edits update the title without reloading, and the fallback never claims playback succeeded', () => {
+    render(<SoundCloudPrototypePage />);
+    const original = screen.getByTitle(/^SoundCloud player:/);
+    fireEvent.change(screen.getByLabelText('Recording label (optional)'), { target: { value: 'Test recording' } });
+    const frame = screen.getByTitle('SoundCloud player: Test recording');
+    expect(frame).toBe(original);
     expect(frame).toHaveAttribute('referrerPolicy', 'no-referrer');
     expect(screen.getByRole('status')).toHaveTextContent('Loading the SoundCloud frame');
     fireEvent.load(frame);
@@ -70,70 +84,106 @@ test('loads the labeled frame with a safe fallback and does not claim audio play
     expect(fallback).toHaveAttribute('target', '_blank');
 });
 
-test('editing a link does not replace the active frame until submission; replacing removes the old frame', () => {
+test('a valid edited link automatically replaces the frame after typing settles', () => {
     render(<SoundCloudPrototypePage />);
-    load();
-    const original = screen.queryByTitle(/^SoundCloud player:/);
-    fireEvent.change(screen.getByLabelText('Public SoundCloud track link'), { target: { value: 'https://soundcloud.com/example/another-track' } });
-    expect(screen.queryByTitle(/^SoundCloud player:/)).toBe(original);
-    fireEvent.click(screen.getByRole('button', { name: 'Load / replace player' }));
+    const original = screen.getByTitle(/^SoundCloud player:/);
+    const next = 'https://soundcloud.com/example/another-track';
+    changeUrl(next);
+    expect(screen.getByTitle(/^SoundCloud player:/)).toBe(original);
+    act(() => jest.advanceTimersByTime(499));
+    expect(screen.getByTitle(/^SoundCloud player:/)).toBe(original);
+    act(() => jest.advanceTimersByTime(1));
     expect(original).not.toBeInTheDocument();
     expect(screen.queryAllByTitle(/^SoundCloud player:/)).toHaveLength(1);
-    expect(screen.queryByTitle(/^SoundCloud player:/)).toHaveAttribute('src', soundCloudEmbedUrl('https://soundcloud.com/example/another-track'));
+    expect(screen.getByTitle(/^SoundCloud player:/)).toHaveAttribute('src', soundCloudEmbedUrl(next));
 });
 
-test('reload replaces the frame, close removes it and returns focus, reopening leaves only one frame', () => {
+test('rapid edits cancel previous replacements, and a later invalid link cancels the pending load', () => {
     render(<SoundCloudPrototypePage />);
-    load();
-    const first = screen.queryByTitle(/^SoundCloud player:/);
+    changeUrl('https://soundcloud.com/example/first');
+    act(() => jest.advanceTimersByTime(300));
+    changeUrl('https://soundcloud.com/example/second');
+    act(() => jest.advanceTimersByTime(200));
+    expect(screen.getByTitle(/^SoundCloud player:/)).toHaveAttribute('src', soundCloudEmbedUrl(track));
+    act(() => jest.advanceTimersByTime(300));
+    expect(screen.getByTitle(/^SoundCloud player:/)).toHaveAttribute('src', soundCloudEmbedUrl('https://soundcloud.com/example/second'));
+    changeUrl('https://soundcloud.com/example/third');
+    changeUrl('https://soundcloud.com/example/private?secret_token=s-private');
+    settleUrl();
+    expect(screen.queryByTitle(/^SoundCloud player:/)).toBeNull();
+});
+
+test('equivalent normalized links do not reload the frame or forward tracking data', () => {
+    render(<SoundCloudPrototypePage />);
+    const original = screen.getByTitle(/^SoundCloud player:/);
+    changeUrl(`https://www.soundcloud.com/forss/flickermood/?utm_source=test#t=10`);
+    settleUrl();
+    expect(screen.getByTitle(/^SoundCloud player:/)).toBe(original);
+    expect(original).toHaveAttribute('src', soundCloudEmbedUrl(track));
+});
+
+test('reload replaces the frame; close stays dismissed and restores input focus; demo reopens automatically', () => {
+    render(<SoundCloudPrototypePage />);
+    const first = screen.getByTitle(/^SoundCloud player:/);
     fireEvent.click(screen.getByRole('button', { name: 'Reload player' }));
     expect(first).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Close player' }));
+    act(() => jest.advanceTimersByTime(13000));
     expect(screen.queryByTitle(/^SoundCloud player:/)).toBeNull();
     expect(screen.getByLabelText('Public SoundCloud track link')).toHaveFocus();
     expect(screen.queryByRole('link', { name: 'Open on SoundCloud ↗' })).not.toBeInTheDocument();
-    load();
+    fireEvent.change(screen.getByLabelText('Recording label (optional)'), { target: { value: 'A label' } });
+    settleUrl();
+    expect(screen.queryByTitle(/^SoundCloud player:/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Use SoundCloud demo link' }));
+    settleUrl();
     expect(screen.queryAllByTitle(/^SoundCloud player:/)).toHaveLength(1);
 });
 
-test('slow loading offers retry/fallback, while close and unmount clean up timeouts', () => {
-    jest.useFakeTimers();
-    try {
-        const { unmount } = render(<SoundCloudPrototypePage />);
-        load();
-        act(() => jest.advanceTimersByTime(12000));
-        expect(screen.getByRole('status')).toHaveTextContent('taking longer');
-        fireEvent.load(screen.getByTitle(/^SoundCloud player:/));
-        expect(screen.getByRole('status')).toHaveTextContent('Use the player');
-        fireEvent.click(screen.getByRole('button', { name: 'Reload player' }));
-        expect(screen.getByRole('status')).toHaveTextContent('Loading');
-        fireEvent.click(screen.getByRole('button', { name: 'Close player' }));
-        expect(jest.getTimerCount()).toBe(0);
-        load();
-        unmount();
-        expect(jest.getTimerCount()).toBe(0);
-    } finally { jest.useRealTimers(); }
+test('closing during a pending replacement cancels it until the link changes again', () => {
+    render(<SoundCloudPrototypePage />);
+    changeUrl('https://soundcloud.com/example/next');
+    fireEvent.click(screen.getByRole('button', { name: 'Close player' }));
+    settleUrl();
+    expect(screen.queryByTitle(/^SoundCloud player:/)).toBeNull();
+    expect(jest.getTimerCount()).toBe(0);
+    changeUrl('https://soundcloud.com/example/reopen');
+    settleUrl();
+    expect(screen.getByTitle(/^SoundCloud player:/)).toHaveAttribute('src', soundCloudEmbedUrl('https://soundcloud.com/example/reopen'));
 });
 
-test('localizes the preview and keeps the URL input left-to-right in Arabic', () => {
+test('slow loading offers retry/fallback, while close and unmount clean up all timers', () => {
+    const { unmount } = render(<SoundCloudPrototypePage />);
+    act(() => jest.advanceTimersByTime(12000));
+    expect(screen.getByRole('status')).toHaveTextContent('taking longer');
+    fireEvent.load(screen.getByTitle(/^SoundCloud player:/));
+    expect(screen.getByRole('status')).toHaveTextContent('Use the player');
+    fireEvent.click(screen.getByRole('button', { name: 'Reload player' }));
+    expect(screen.getByRole('status')).toHaveTextContent('Loading');
+    fireEvent.click(screen.getByRole('button', { name: 'Close player' }));
+    expect(jest.getTimerCount()).toBe(0);
+    changeUrl('https://soundcloud.com/example/next');
+    unmount();
+    expect(jest.getTimerCount()).toBe(0);
+});
+
+test('localizes the automatically loaded preview and keeps the URL input left-to-right in Arabic', () => {
     render(<LanguageContext.Provider value={{ languageProperties: ArabicLanguageProperties }}><SoundCloudPrototypePage /></LanguageContext.Provider>);
     expect(screen.getByRole('heading', { name: 'استمع عبر SoundCloud' })).toBeInTheDocument();
     expect(screen.getByLabelText('رابط تسجيل عام على SoundCloud')).toHaveAttribute('dir', 'ltr');
+    expect(screen.getByTitle(/^مشغّل SoundCloud:/)).toHaveAttribute('src', soundCloudEmbedUrl(track));
+    expect(screen.getByText(/يتم تحميل مشغّل SoundCloud تلقائياً/)).toBeInTheDocument();
 });
 
- test('late frame events and previous timeouts do not change a replacement frame', () => {
-    jest.useFakeTimers();
-    try {
-        render(<SoundCloudPrototypePage />);
-        load();
-        const oldFrame = screen.getByTitle(/^SoundCloud player:/);
-        act(() => jest.advanceTimersByTime(6000));
-        fireEvent.click(screen.getByRole('button', { name: 'Reload player' }));
-        fireEvent.load(oldFrame);
-        expect(screen.getByRole('status')).toHaveTextContent('Loading');
-        act(() => jest.advanceTimersByTime(6000));
-        expect(screen.getByRole('status')).toHaveTextContent('Loading');
-        act(() => jest.advanceTimersByTime(6000));
-        expect(screen.getByRole('status')).toHaveTextContent('taking longer');
-    } finally { jest.useRealTimers(); }
+test('late frame events and previous timeouts do not change a replacement frame', () => {
+    render(<SoundCloudPrototypePage />);
+    const oldFrame = screen.getByTitle(/^SoundCloud player:/);
+    act(() => jest.advanceTimersByTime(6000));
+    fireEvent.click(screen.getByRole('button', { name: 'Reload player' }));
+    fireEvent.load(oldFrame);
+    expect(screen.getByRole('status')).toHaveTextContent('Loading');
+    act(() => jest.advanceTimersByTime(6000));
+    expect(screen.getByRole('status')).toHaveTextContent('Loading');
+    act(() => jest.advanceTimersByTime(6000));
+    expect(screen.getByRole('status')).toHaveTextContent('taking longer');
 });

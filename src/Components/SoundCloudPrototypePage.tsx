@@ -1,4 +1,4 @@
-import { FormEvent, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { LanguageContext } from '../LanguageContext';
 import MainPaper, { Size } from './MainPaper';
 import { ReactComponent as SoundCloudIcon } from '../images/soundcloud.svg';
@@ -6,17 +6,22 @@ import { soundCloudPrototypeCopy } from './SoundCloudPrototypeCopy';
 import { soundCloudTrackUrl, soundCloudEmbedUrl } from './SoundCloudPrototypeUrl';
 import './SoundCloudPrototype.css';
 
+const demoTrack = 'https://soundcloud.com/forss/flickermood';
+
 /** Local review only. App excludes this module and route from production builds. */
 export default function SoundCloudPrototypePage() {
     const { languageProperties } = useContext(LanguageContext);
     const copy = soundCloudPrototypeCopy[languageProperties.localeName === 'ar' ? 'ar' : 'en'];
-    const [url, setUrl] = useState('');
+    const [url, setUrl] = useState(demoTrack);
     const [label, setLabel] = useState('');
-    const [invalid, setInvalid] = useState(false);
-    const [active, setActive] = useState<{ url: string; label: string; attempt: number }>();
+    const [closed, setClosed] = useState(false);
+    const [active, setActive] = useState<{ url: string; attempt: number } | undefined>({ url: demoTrack, attempt: 0 });
     const [frameState, setFrameState] = useState<'loading' | 'opened' | 'slow'>('loading');
     const input = useRef<HTMLInputElement>(null);
     const attempt = useRef(0);
+    const canonical = soundCloudTrackUrl(url);
+    const invalid = url.trim() !== '' && !canonical;
+    const recordingLabel = label.trim() || (active?.url === demoTrack ? copy.demoLabel : copy.recording);
 
     useEffect(() => {
         const previous = document.title;
@@ -30,20 +35,22 @@ export default function SoundCloudPrototypePage() {
         return () => window.clearTimeout(timeout);
     }, [active, frameState]);
 
-    function load(event: FormEvent) {
-        event.preventDefault();
-        const canonical = soundCloudTrackUrl(url);
-        if (!canonical) {
-            setInvalid(true);
-            input.current?.focus();
+    useEffect(() => {
+        if (!canonical || closed) {
+            setActive(undefined);
             return;
         }
-        setInvalid(false);
-        setFrameState('loading');
-        setActive({ url: canonical, label: label.trim() || copy.recording, attempt: ++attempt.current });
-    }
+        if (active?.url === canonical) return;
+        // Wait briefly for typing to settle; only validated public track links reach the frame.
+        const timeout = window.setTimeout(() => {
+            setFrameState('loading');
+            setActive({ url: canonical, attempt: ++attempt.current });
+        }, 500);
+        return () => window.clearTimeout(timeout);
+    }, [canonical, closed, active?.url]);
 
     function close() {
+        setClosed(true); // Keep it dismissed until the link changes or the demo is restored.
         setActive(undefined); // Removing the iframe also stops its playback.
         setFrameState('loading');
         input.current?.focus();
@@ -61,37 +68,36 @@ export default function SoundCloudPrototypePage() {
             <p className="soundcloud-prototype-intro">{copy.intro}</p>
             <div className="soundcloud-prototype-notice">{copy.scope}</div>
 
-            <form onSubmit={load} noValidate className="soundcloud-prototype-form">
+            <div className="soundcloud-prototype-form">
+                <p className="soundcloud-prototype-privacy">{copy.privacy}</p>
                 <label htmlFor="soundcloud-track-url">{copy.urlLabel}</label>
                 <input ref={input} id="soundcloud-track-url" type="url" inputMode="url" dir="ltr"
-                    value={url} onChange={event => { setUrl(event.target.value); setInvalid(false); }}
+                    value={url} onChange={event => { setUrl(event.target.value); setClosed(false); }}
                     placeholder="https://soundcloud.com/artist/track" autoComplete="off" spellCheck={false}
                     maxLength={2048} aria-invalid={invalid} aria-describedby={`soundcloud-url-help${invalid ? ' soundcloud-url-error' : ''}`} />
                 <p id="soundcloud-url-help" className="soundcloud-prototype-help">{copy.urlHelp}</p>
                 {invalid && <p id="soundcloud-url-error" className="soundcloud-prototype-error" role="alert">{copy.invalid}</p>}
                 <div className="soundcloud-prototype-example">
                     <button type="button" onClick={() => {
-                        setUrl('https://soundcloud.com/forss/flickermood');
-                        setLabel(copy.demoLabel);
-                        setInvalid(false);
+                        setUrl(demoTrack);
+                        setLabel('');
+                        setClosed(false);
                     }}>{copy.useDemo}</button>
                     <span>{copy.demoHint}</span>
                 </div>
                 <label htmlFor="soundcloud-recording-label">{copy.labelLabel}</label>
                 <input id="soundcloud-recording-label" value={label} onChange={event => setLabel(event.target.value)}
                     maxLength={120} placeholder={copy.labelPlaceholder} />
-                <p className="soundcloud-prototype-privacy">{copy.privacy}</p>
-                <button type="submit" className="soundcloud-prototype-load">{active ? copy.replace : copy.load}</button>
-            </form>
+            </div>
 
             <section className="soundcloud-prototype-card" aria-labelledby="soundcloud-recording-heading">
                 <div className="soundcloud-prototype-card-heading">
                     <SoundCloudIcon aria-hidden="true" focusable="false" />
-                    <div><p>{copy.provider}</p><h2 id="soundcloud-recording-heading">{active?.label || copy.emptyTitle}</h2></div>
+                    <div><p>{copy.provider}</p><h2 id="soundcloud-recording-heading">{active ? recordingLabel : copy.emptyTitle}</h2></div>
                 </div>
                 {active ? <>
                     <iframe key={active.attempt} className="soundcloud-prototype-frame" height="166" width="100%"
-                        title={`${copy.playerTitle}: ${active.label}`} src={soundCloudEmbedUrl(active.url)}
+                        title={`${copy.playerTitle}: ${recordingLabel}`} src={soundCloudEmbedUrl(active.url)}
                         allow="autoplay" referrerPolicy="no-referrer"
                         onLoad={() => setFrameState('opened')} />
                     <p className="soundcloud-prototype-status" role="status">
