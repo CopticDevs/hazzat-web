@@ -34,7 +34,7 @@ function ContentInformation(props: IProps) {
                             </div>
                         </>
                     )}
-                    <div className="information-columns dirLtr" style={typography}>
+                    <div data-testid="information-columns" className="information-columns dirLtr" style={typography}>
                         {variation.content.englishInformation ?
                             <div className="information-language" lang="en" style={{ direction: "ltr", textAlign: "left", fontSize: userSettings.englishFontSize, color: readerColor(userSettings.contentFontColor) }} dangerouslySetInnerHTML={{ __html: variation.content.englishInformation }} />
                             : ""}

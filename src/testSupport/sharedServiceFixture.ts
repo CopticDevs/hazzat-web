@@ -3,13 +3,14 @@ const types = ["Text", "Hazzat", "VerticalHazzat", "MusicalNotes", "Audio", "Vid
 export function sharedServiceFixture(service: any, extra: Record<string, unknown> = {}) {
     const files: Record<string, unknown> = { ...extra };
     let counter = 0;
+    const nextContentId = () => `00000000-0000-4000-8000-${String(++counter).padStart(12, '0')}`;
     const hymns = (service.hymns ?? []).map((hymn: any) => {
         files[`/v5/hymns/${hymn.id}/hymn.json`] = { schemaVersion: 5, id: hymn.id, name: hymn.name, ...(hymn.nameAr ? { nameAr: hymn.nameAr } : {}) };
         const formats: Record<string, any[]> = {}, formatMetadata: Record<string, unknown> = {};
         for (const [position, format] of (hymn.formats ?? []).entries()) {
             formatMetadata[format.id] = { name: format.name, order: format.order ?? position + 1, position };
             formats[format.id] = (format.variations ?? []).map((variation: any) => {
-                const id = `00000000-0000-4000-8000-${String(++counter).padStart(12, '0')}`;
+                const id = nextContentId();
                 files[`/v5/content/${id}.json`] = { schemaVersion: 5, id, name: variation.name, ...(variation.nameAr ? { nameAr: variation.nameAr } : {}), contentType: variation.contentType ?? types[Number(format.id) - 1], content: variation.content };
                 return {contentId: id, name: variation.name, ...(variation.nameAr ? {nameAr: variation.nameAr} : {})};
             });

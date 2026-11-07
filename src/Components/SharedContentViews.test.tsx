@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
@@ -55,11 +55,13 @@ describe("shared content reader views", () => {
 
     it("retains the hymn and service dropdown links", async () => {
         jest.spyOn(HymnsDataProvider.prototype, "getService").mockResolvedValue(service);
-        const { container } = render(<MemoryRouter><ServiceContents seasonId="annual" serviceId="basil" serviceName="Basil" /></MemoryRouter>);
+        render(<MemoryRouter><ServiceContents seasonId="annual" serviceId="basil" serviceName="Basil" /></MemoryRouter>);
         await screen.findByText("Contextual later title");
-        expect(container.querySelector('a[href="/seasons/annual/services/basil/formats/2"]')).toBeInTheDocument();
-        expect(container.querySelector('a[href="/seasons/annual/services/basil/hymns/later/formats/2"]')).toBeInTheDocument();
-        expect(container.querySelectorAll('.contentLinksDiv svg[data-icon="chevron-down"]')).toHaveLength(3);
+        expect(screen.getByRole('link', { name: 'Basil' })).toHaveAttribute('href', '/seasons/annual/services/basil/formats/2');
+        expect(screen.getByRole('link', { name: 'Contextual later title' })).toHaveAttribute('href', '/seasons/annual/services/basil/hymns/later/formats/2');
+        const toggles = screen.getAllByRole('button', { name: /^Formats:/ });
+        expect(toggles).toHaveLength(3);
+        toggles.forEach(toggle => expect(within(toggle).getByTestId('format-dropdown-icon')).toHaveAttribute('data-icon', 'chevron-down'));
     });
 
     it("reports a missing dependency and retries instead of leaving a spinner", async () => {
@@ -79,8 +81,8 @@ describe("shared content reader views", () => {
         const { rerender } = render(<MemoryRouter><ServiceContents seasonId="annual" serviceId="old" serviceName="Old service" /></MemoryRouter>);
         rerender(<MemoryRouter><ServiceContents seasonId="annual" serviceId="new" serviceName="New service" /></MemoryRouter>);
         await screen.findByText("Contextual later title");
-        oldResponse({ ...service, hymns: [] });
-        await waitFor(() => expect(screen.getByText("Contextual later title")).toBeInTheDocument());
+        await act(async () => { oldResponse({ ...service, hymns: [] }); });
+        expect(screen.getByText("Contextual later title")).toBeInTheDocument();
     });
 
     it("keeps Text alternatives separate and handles blank paragraphs", () => {

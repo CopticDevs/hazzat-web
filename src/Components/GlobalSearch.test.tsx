@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act, within } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import GlobalSearch from './GlobalSearch';
 import { IHymnsDataProvider } from '../Providers/HymnsDataProvider/IHymnsDataProvider';
@@ -121,10 +121,10 @@ describe('GlobalSearch - Search Functionality', () => {
     expect(screen.getByRole('checkbox')).toBeChecked();
     expect(mockDataProvider.getSearchTextIndex).toHaveBeenCalledTimes(1);
     await act(async () => finish([{ hymnId: 'doxology', seasonId: 'nativity', serviceId: 'vespers', passages: [{ text: 'P[oic Vnou] `nte nijom@', language: 'Coptic' }] }]));
-    const snippet = document.querySelector('.search-snippet')!;
+    const snippet = screen.getByTestId('search-snippet');
     expect(snippet).toHaveClass('CopticFont');
     expect(snippet).toHaveAttribute('lang', 'cop');
-    expect(snippet.querySelector('mark')).toHaveTextContent('P[oic Vnou]');
+    expect(within(snippet).getByTestId('search-match')).toHaveTextContent('P[oic Vnou]');
     fireEvent.click(screen.getByRole('radio', { name: 'Normal' }));
     expect(input).not.toHaveClass('CopticFont');
     expect(input).toHaveValue('P[oic Vnou]');
@@ -164,7 +164,7 @@ describe('GlobalSearch - Search Functionality', () => {
     await screen.findByText('Showing 1–10 of 23 results');
     expect(screen.getAllByRole('heading', { level: 5 })).toHaveLength(10);
     expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled();
-    expect(document.querySelector('.search-spinner')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.queryByTestId('search-spinner')).toHaveAttribute('aria-hidden', 'true');
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     expect(screen.getByText('Showing 11–20 of 23 results')).toHaveFocus();
     expect(screen.getByText('Page 2 of 3')).toBeInTheDocument();
@@ -172,7 +172,7 @@ describe('GlobalSearch - Search Functionality', () => {
     await act(async () => { finish([{ hymnId: 'psalm-150', seasonId: 'nativity', serviceId: 'vespers', passages: ['Sing doxology'] }]); });
     expect(screen.getByText('Page 2 of 3')).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { level: 5 })[0]).toHaveTextContent(first!);
-    expect(document.querySelector('.search-spinner')).toBeNull();
+    expect(screen.queryByTestId('search-spinner')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     expect(screen.getByText('Showing 21–24 of 24 results')).toHaveFocus();
     expect(screen.getAllByRole('heading', { level: 5 })).toHaveLength(4);
@@ -192,11 +192,11 @@ describe('GlobalSearch - Search Functionality', () => {
     mockDataProvider.getReferenceIndex.mockResolvedValue(index);
     const view = (localeName: string) => <BrowserRouter><LanguageContext.Provider value={{ ...mockLanguageContext,
       languageProperties: { ...mockLanguageContext.languageProperties, localeName } }}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>;
-    const rendered = render(view('en'));
+    const { rerender } = render(view('en'));
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'doxology' } });
     await screen.findByText('Page 1 of 2');
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
-    rendered.rerender(view('ar'));
+    rerender(view('ar'));
     await screen.findByText('الصفحة 1 من 2');
     expect(screen.getByRole('button', { name: 'السابق' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'التالي' })).toBeEnabled();
@@ -319,11 +319,11 @@ describe('GlobalSearch - Search Functionality', () => {
     mockDataProvider.getSearchTextIndex = jest.fn(() => new Promise(resolve => { finishes.push(resolve); }));
     const view = (localeName: string) => <BrowserRouter><LanguageContext.Provider value={{ ...mockLanguageContext,
       languageProperties: { ...mockLanguageContext.languageProperties, localeName } }}><GlobalSearch dataProvider={mockDataProvider} /></LanguageContext.Provider></BrowserRouter>;
-    const rendered = render(view('en'));
+    const { rerender } = render(view('en'));
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'doxology' } });
     await screen.findByRole('heading', { level: 5, name: 'Doxology' });
-    rendered.rerender(view('ar'));
+    rerender(view('ar'));
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('جارٍ البحث في كلمات الألحان'));
     await act(async () => { finishes[0]([]); });
     expect(screen.queryByRole('heading', { level: 5, name: 'Doxology' })).not.toBeInTheDocument();
@@ -410,8 +410,8 @@ describe('GlobalSearch - Search Functionality', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Nativity/)).toBeInTheDocument();
-      expect(screen.getByText(/Vespers/)).toBeInTheDocument();
     }, { timeout: 1000 });
+    expect(await screen.findByText(/Vespers/)).toBeInTheDocument();
 
     // Should show both references for psalm-150
     expect(mockDataProvider.getService).toHaveBeenCalledWith('nativity', 'vespers');
