@@ -1,0 +1,26 @@
+.soundcloud-prototype { max-inline-size: 720px; margin-inline: auto; padding-block: 12px 24px; }
+.soundcloud-prototype-badge { display: inline-block; padding: 4px 10px; border: 1px solid #c5a87b; border-radius: 4px; font-size: .75rem; font-weight: 700; letter-spacing: .06em; }
+.soundcloud-prototype h1 { margin-block: 12px 8px; font-size: clamp(1.65rem, 4vw, 2.2rem); line-height: 1.25; }
+.soundcloud-prototype-intro { color: var(--muted-ink); font-size: 1.1rem; }
+.soundcloud-prototype-notice { border-inline-start: 3px solid #c5a87b; padding: 10px 14px; margin-block: 18px 24px; background: #c5a87b12; }
+.soundcloud-prototype-form { display: flex; flex-direction: column; gap: 8px; }
+.soundcloud-prototype-form label { font-weight: 600; }
+.soundcloud-prototype-form input { width: 100%; min-inline-size: 0; min-height: 44px; border: 1px solid var(--rule); border-radius: 5px; background: transparent; color: inherit; padding: 10px 12px; }
+.soundcloud-prototype-form input[aria-invalid="true"] { border-color: #a13d27; }
+.soundcloud-prototype-help { margin-block: 0 10px; }
+.soundcloud-prototype-help, .soundcloud-prototype-privacy, .soundcloud-prototype-footnote { font-size: .9rem; color: var(--muted-ink); }
+.soundcloud-prototype-error { color: #a13d27; }
+.soundcloud-prototype-privacy { margin-block: 4px 8px; }
+.soundcloud-prototype-card { margin-block: 28px 16px; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.soundcloud-prototype-card-heading { display: flex; gap: 12px; align-items: center; padding: 18px 20px; border-block-end: 1px solid var(--rule); }
+.soundcloud-prototype-card-heading svg { width: 44px; height: 30px; flex-shrink: 0; fill: currentColor; color: #c9631f; }
+.soundcloud-prototype-card-heading p { color: var(--muted-ink); font-size: .7rem; font-weight: 700; letter-spacing: .08em; margin: 0 0 4px; }
+.soundcloud-prototype-card h2 { font-size: 1.2rem; line-height: 1.3; margin: 0; overflow-wrap: anywhere; }
+.soundcloud-prototype-empty { min-height: 166px; padding: 30px 20px; display: flex; flex-direction: column; justify-content: center; text-align: center; color: var(--muted-ink); }
+.soundcloud-prototype-empty p { margin: 0 0 8px; }
+.soundcloud-prototype-empty p + p { font-size: .85rem; }
+.soundcloud-prototype-footnote { margin-block: 18px 0; }
+
+.soundcloud-prototype-example { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-block: -6px 12px; font-size: .9rem; }
+.soundcloud-prototype-example button { background: transparent; color: inherit; border: 0; padding: 0; min-height: 44px; text-decoration: underline; }
+.soundcloud-prototype-example span { color: var(--muted-ink); }

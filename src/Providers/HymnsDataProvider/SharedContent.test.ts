@@ -81,6 +81,18 @@ describe("v5 service resolution and contextual titles", () => {
         expect(get.mock.calls.filter(([path]) => path === `/v5/content/${FIRST}.json`)).toHaveLength(1);
     });
 
+    it("keeps SoundCloud and legacy audio strings in v5 without changing record identity or placement", async () => {
+        const soundCloud = "https://soundcloud.com/coptichazzat/meghalo";
+        files[`/v5/content/${AUDIO}.json`] = record(AUDIO, "Audio", { audioFilePath: soundCloud });
+        const hymn = (await provider().getService("annual", "basil"))!.hymns![1];
+        const audio = hymn.formats!.find(format => format.id === "5")!.variations![0];
+        expect(audio.id).toBe(AUDIO);
+        expect(audio.name).toBe("Standard");
+        expect(audio.order).toBe(1);
+        expect(audio.content).toEqual({ audioFilePath: soundCloud });
+        expect((files[`/v5/content/${AUDIO}.json`] as SharedLibraryRecord).schemaVersion).toBe(5);
+    });
+
     it("keeps contextual Arabic titles and shared variation translations independent", async () => {
         const source = files["/v5/seasons/annual/services/basil.json"] as SharedService;
         source.hymns[0].nameAr = "عنوان خاص";
