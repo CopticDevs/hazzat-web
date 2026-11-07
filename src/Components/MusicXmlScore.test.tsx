@@ -1,4 +1,5 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { strings } from "../l8n";
 import MusicXmlScore from "./MusicXmlScore";
 import UserSettingsChanger from "./UserSettingsChanger";
 import { contentLanguages } from "../ContentLanguages";
@@ -41,7 +42,7 @@ test('mobile notes use smaller engraving and size changes redraw without reloadi
     expect(screen.getByText('Source subtitle')).toBeInTheDocument();
     view.rerender(score(26));
     await waitFor(() => expect(instance.Zoom).toBeCloseTo(0.5 * 26 / 18));
-    expect(view.container.querySelector('.musicXmlScoreWrap')).toHaveStyle({ fontSize: '26px' });
+    expect(screen.getByTestId('music-xml-score')).toHaveStyle({ fontSize: '26px' });
     view.rerender(score(12));
     await waitFor(() => expect(instance.Zoom).toBeCloseTo(0.5 * 12 / 18));
     expect(instance.load).toHaveBeenCalledTimes(1);
@@ -101,11 +102,11 @@ test('reports a renderer load failure instead of leaving an empty score', async 
 test('settings controls start from the current size rather than resetting to 18', () => {
     window.gtag = jest.fn();
     const view = render(<UserSettingsContext.Provider value={value(22)}><UserSettingsChanger /></UserSettingsContext.Provider>);
-    fireEvent.click(view.container.querySelector('button')!);
-    fireEvent.click(document.querySelectorAll('.size-button')[1]);
+    fireEvent.click(screen.getByRole('button', { name: strings.settings }));
+    fireEvent.click(screen.getByRole('button', { name: strings.increaseTextSize }));
     expect(sizeSetter).toHaveBeenLastCalledWith(24);
     view.rerender(<UserSettingsContext.Provider value={value(24)}><UserSettingsChanger /></UserSettingsContext.Provider>);
-    fireEvent.click(document.querySelectorAll('.size-button')[0]);
+    fireEvent.click(screen.getByRole('button', { name: strings.decreaseTextSize }));
     expect(sizeSetter).toHaveBeenLastCalledWith(22);
 });
 

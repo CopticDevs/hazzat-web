@@ -41,7 +41,7 @@ it("updates reader columns immediately, persists choices, and restores them on r
     fireEvent.click(screen.getByRole("checkbox", { name: "Coptic" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Arabic" }));
     expect(screen.queryByText("ارحمنا")).not.toBeInTheDocument();
-    expect(document.querySelectorAll("colgroup col:not(.separator-text-content)")).toHaveLength(1);
+    expect(screen.getAllByTestId("content-language-column")).toHaveLength(1);
     expect(screen.getByText("English verse")).toBeInTheDocument();
     expect(load).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(JSON.parse(localStorage.getItem("hazzat.reader-settings")!).contentLanguages).toEqual(["English"]));

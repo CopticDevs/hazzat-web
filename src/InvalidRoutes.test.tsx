@@ -98,11 +98,16 @@ it.each([
     ['/Seasons/annual/services/basil/formats/1', 'Route fixture words'],
     ['/Seasons/annual/services/basil/hymns/first/formats/1?lang=en#reader', 'Route fixture words'],
     ['/Booklets/annual/', 'Build your booklet'], ['/Fonts/', 'Coptic Fonts'],
-    ['/Help/SmallLetters', null], ['/Seasons/annual/services/empty', 'Basil']
+    ['/Seasons/annual/services/empty', 'Basil']
 ])('preserves valid deep link %s', async (path, content) => {
     open(path);
-    if (content) expect((await screen.findAllByText(content)).length).toBeGreaterThan(0);
-    else expect(screen.getByRole('img')).toBeInTheDocument();
+    expect((await screen.findAllByText(content)).length).toBeGreaterThan(0);
+    expect(screen.queryByText(strings.noContent)).not.toBeInTheDocument();
+});
+
+it('preserves the small-letters illustration deep link', () => {
+    open('/Help/SmallLetters');
+    expect(screen.getByRole('img')).toBeInTheDocument();
     expect(screen.queryByText(strings.noContent)).not.toBeInTheDocument();
 });
 
@@ -141,7 +146,7 @@ it('localizes the error and keeps query settings in the recovery link', () => {
 
 it.each(['/Fonts/HazzatFont', '/Help', '/Help/InstallFontWinXP', '/Help/InstallFontWin7', '/Help/UsingHazzatFont',
     '/Help/UsingVerticalHazzatFont', '/Help/CapitalLetters', '/Help/HazzatKeyboardMap', '/Search', '/ContactUs'])('preserves static route %s', path => {
-    const { container } = open(path + '?lang=en&env=ppe');
+    open(path + '?lang=en&env=ppe');
     expect(screen.queryByText(strings.noContent)).not.toBeInTheDocument();
-    expect(container.querySelector('main')?.innerHTML.length).toBeGreaterThan(100);
+    expect(screen.getByRole('main').innerHTML.length).toBeGreaterThan(100);
 });

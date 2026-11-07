@@ -41,7 +41,7 @@ it("shows an entirely lowercase-language variation in the booklet and reader", (
     render(<ContentText variations={[variation]} />);
     expect(screen.getByText("Second paragraph:")).toBeInTheDocument();
     expect(screen.getByText("ارحمنا:")).toBeInTheDocument();
-    expect(document.querySelector(".CopticComment")).toHaveTextContent("Nai nan");
+    expect(screen.getByText("Nai nan", { exact: false })).toHaveClass("CopticComment");
 });
 
 it("accepts legacy casing but rejects unsupported language labels before they can be silently dropped", () => {

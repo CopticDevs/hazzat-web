@@ -230,7 +230,7 @@ function BookletDetails() {
                     {!matchingPreset && startingPreset && <span className="bookletHint">{strings.formatString(strings.bookletStartedWith, startingPreset.label)}</span>}
                 </p>
                 <details className="bookletFormatCustomization"><summary>{strings.bookletCustomizeFormats}</summary>
-                <div className="bookletFormatChoices">
+                <div className="bookletFormatChoices" role="group" aria-label={strings.bookletCustomizeFormats}>
                     {availableFormats.map(kind => <label key={kind}>
                         <input type="checkbox" checked={formats.includes(kind)} onChange={event =>
                             applyFormats(bookletFormatKinds.filter(k => k === kind ? event.target.checked : formats.includes(k)))} />
@@ -284,7 +284,7 @@ function BookletDetails() {
                         </select>
                     </label>
                 </div>
-                <details className="bookletAppearance">
+                <details className="bookletAppearance" aria-label={strings.bookletAdvancedAppearance}>
                     <summary>{strings.bookletAdvancedAppearance}</summary>
                     <div className="bookletColorGroups">
                         {(["textColor", "hazzatColor"] as const).map(field => <fieldset key={field}>
@@ -389,7 +389,7 @@ function BookletContentSelector(props: BookletContentSelectorProps) {
                                 hasBookletVariationContent(variation, formatKindFromId(variation.formatId)));
 
                             return (
-                                <div key={hymnKey(service, hymn)} className="bookletHymnSelector">
+                                <div key={hymnKey(service, hymn)} className="bookletHymnSelector" role="group" aria-label={hymn.displayName || hymn.name}>
                                     <label>
                                         <input
                                             type="checkbox"

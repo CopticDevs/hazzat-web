@@ -77,15 +77,15 @@ function ContentText(props: IProps) {
         const colDefs: React.ReactElement[] = [];
 
         if ((currentMask & englishMask) !== 0) {
-            colDefs.push(<col key={colDefId++} className="english-text-content" />);
+            colDefs.push(<col key={colDefId++} data-testid="content-language-column" className="english-text-content" />);
         }
 
         if ((currentMask & copticMask) !== 0) {
-            colDefs.push(<col key={colDefId++} className="coptic-text-content" />);
+            colDefs.push(<col key={colDefId++} data-testid="content-language-column" className="coptic-text-content" />);
         }
 
         if ((currentMask & arabicMask) !== 0) {
-            colDefs.push(<col key={colDefId++} className="arabic-text-content" />);
+            colDefs.push(<col key={colDefId++} data-testid="content-language-column" className="arabic-text-content" />);
         }
 
         colDefs.push(<col key={colDefId++} className="separator-text-content" />)

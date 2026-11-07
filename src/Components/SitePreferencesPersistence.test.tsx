@@ -157,12 +157,12 @@ test("the early bootstrap applies browser or saved themes before React without p
     const html = require("fs").readFileSync(require("path").join(process.cwd(), "index.html"), "utf8");
     const bootstrap = html.match(/<script>([\s\S]*?)<\/script>/)[1];
     dark = true; languages = ["fr", "ar-EG"];
-    window.eval(bootstrap);
+    require('vm').runInNewContext(bootstrap, { window, document, localStorage, navigator, URLSearchParams });
     expect(document.documentElement).toHaveAttribute("data-theme", "dark");
     expect(document.documentElement).toHaveAttribute("dir", "rtl");
     expect(localStorage.length).toBe(0);
     localStorage.setItem("hazzat.theme", "light"); localStorage.setItem("hazzat.navigation-language", "en");
-    window.eval(bootstrap);
+    require('vm').runInNewContext(bootstrap, { window, document, localStorage, navigator, URLSearchParams });
     expect(document.documentElement).toHaveAttribute("data-theme", "light");
     expect(document.documentElement).toHaveAttribute("lang", "en");
 });

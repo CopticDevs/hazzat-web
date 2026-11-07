@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import SearchHighlight, { searchHighlightRanges } from './SearchHighlight';
 
 describe('search highlighting', () => {
@@ -16,16 +16,19 @@ describe('search highlighting', () => {
         ['Unrelated text', 'xyzxyz', []],
         ['Literal text', '!!!', []]
     ])('highlights original characters in %s', (text, query, matches) => {
-        const { container } = render(<SearchHighlight text={text} query={query} />);
-        expect(container.textContent).toBe(text);
-        expect(Array.from(container.querySelectorAll('mark'), node => node.textContent)).toEqual(matches);
+        render(<span data-testid="highlighted-text"><SearchHighlight text={text} query={query} /></span>);
+        expect(screen.getByTestId('highlighted-text').textContent).toBe(text);
+        const highlights = screen.queryAllByTestId('search-match');
+        expect(highlights.map(node => node.textContent)).toEqual(matches);
+        highlights.forEach(node => expect(node.tagName).toBe('MARK'));
     });
     it('renders markup as plain text instead of executing or inserting it', () => {
         const text = '<img src=x onerror=alert(1)> Lord & God';
-        const { container } = render(<SearchHighlight text={text} query="lord" />);
-        expect(container.querySelector('img')).toBeNull();
-        expect(container.textContent).toBe(text);
-        expect(container.querySelector('mark')).toHaveTextContent('Lord');
+        render(<span data-testid="highlighted-text"><SearchHighlight text={text} query="lord" /></span>);
+        expect(screen.queryByRole('img', { hidden: true })).toBeNull();
+        expect(screen.getByTestId('highlighted-text').textContent).toBe(text);
+        expect(screen.getByTestId('search-match')).toHaveTextContent('Lord');
+        expect(screen.getByTestId('search-match').tagName).toBe('MARK');
     });
     it('merges overlapping terms and rejects excessively long queries', () => {
         expect(searchHighlightRanges('Doxology', 'dox doxology')).toEqual([[0, 8]]);
@@ -35,9 +38,10 @@ describe('search highlighting', () => {
 
 it.each(["P[oic Vnou]", "Acpazec;e", "Pi,rictoc", "nen'u,y", "`nte nijom"])("highlights original legacy Coptic letters: %s", query => {
     const text = `Allylouia@ ${query}.`;
-    const { container } = render(<SearchHighlight text={text} query={query.toLowerCase()} coptic />);
-    expect(container.textContent).toBe(text);
-    expect(container.querySelector('mark')?.textContent).toBe(query);
+    render(<span data-testid="highlighted-text"><SearchHighlight text={text} query={query.toLowerCase()} coptic /></span>);
+    expect(screen.getByTestId('highlighted-text').textContent).toBe(text);
+    expect(screen.getByTestId('search-match').textContent).toBe(query);
+    expect(screen.getByTestId('search-match').tagName).toBe('MARK');
 });
 it('does not highlight erased Coptic punctuation or approximate English tokens in a Coptic snippet', () => {
     expect(searchHighlightRanges("Aspasmos Watos (O Lord)", "P[oic Vnou]")).toEqual([]);

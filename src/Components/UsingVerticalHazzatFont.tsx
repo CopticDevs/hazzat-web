@@ -109,7 +109,7 @@ function UsingVerticalHazzatFont() {
                     <HymnTitle content={strings.keyMappings} />
                 </div>
                 <div className="clear" />
-                <table>
+                <table aria-label={strings.keyMappings}>
                     <thead>
                         <tr>
                             <th className="border" style={{ width: "50px" }}><LocalizedMessage of="key" /></th>

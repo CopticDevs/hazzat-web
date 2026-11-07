@@ -34,9 +34,9 @@ async function openBuilder(settings?: React.ContextType<typeof UserSettingsConte
     const content = <MemoryRouter initialEntries={["/Booklets/annual"]}><Routes>
         <Route path="/Booklets/:bookletId" element={<BookletDetails />} />
     </Routes></MemoryRouter>;
-    const result = render(settings ? <UserSettingsContext.Provider value={settings}>{content}</UserSettingsContext.Provider> : content);
+    const view = render(settings ? <UserSettingsContext.Provider value={settings}>{content}</UserSettingsContext.Provider> : content);
     await screen.findByRole("heading", { name: "Build your booklet" });
-    return result;
+    return view;
 }
 
 describe("booklet builder", () => {
@@ -75,12 +75,12 @@ describe("booklet builder", () => {
         multilingual.hymns![0].formats![1].variations![0].content = { contentType: ContentType.HazzatContent,
             englishHazzat: "English notes", copticHazzat: "Coptic notes", arabicHazzat: "" };
         jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue([multilingual]);
-        const { container } = await openBuilder();
+        await openBuilder();
         expect(screen.getAllByRole("heading", { level: 3 }).map(h => h.textContent)).toEqual([
             "1. Choose formats", "2. Choose languages", "3. Choose hymns", "4. Arrange your booklet", "5. Review and download"
         ]);
-        const languageHeading = screen.getByRole("heading", { name: "2. Choose languages" });
-        expect(within(languageHeading.parentElement!).getByRole("button", { name: "Reset all languages to website settings" })).toBeEnabled();
+        const languageSection = screen.getByRole("region", { name: "2. Choose languages" });
+        expect(within(languageSection).getByRole("button", { name: "Reset all languages to website settings" })).toBeEnabled();
         const shared = within(screen.getByRole("group", { name: "Content languages" }));
         fireEvent.click(shared.getByRole("checkbox", { name: "Arabic" }));
         fireEvent.click(screen.getByLabelText("Choose Hazzat languages separately"));
@@ -89,10 +89,9 @@ describe("booklet builder", () => {
         expect(notes.getByLabelText("Coptic")).toBeChecked();
         expect(notes.getByLabelText("Arabic")).not.toBeChecked();
         fireEvent.click(notes.getByLabelText("English"));
-        const lines = container.querySelectorAll('.bookletLanguageSummary > div');
-        expect(lines).toHaveLength(2);
-        expect(lines[0]).toHaveTextContent("TextEnglish, Coptic");
-        expect(lines[1]).toHaveTextContent("HazzatCoptic");
+        const review = within(screen.getByRole("region", { name: "5. Review and download" }));
+        expect(review.getAllByRole("term").map(term => term.textContent)).toEqual(["Text", "Hazzat"]);
+        expect(review.getAllByRole("definition").map(definition => definition.textContent)).toEqual(["English, Coptic", "Coptic"]);
         expect(screen.queryByText(/Unavailable content will be omitted/)).not.toBeInTheDocument();
         fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
         await screen.findByRole("link", { name: "Download PDF" });
@@ -183,9 +182,9 @@ describe("booklet builder", () => {
     });
 
     it("supports per-hymn overrides and preserves excluded variations when applying a preset", async () => {
-        const { container } = await openBuilder();
-        const hymn = container.querySelector('.bookletHymnSelector') as HTMLElement;
-        expect(hymn.querySelector('.bookletFormatChoices')).not.toBeInTheDocument();
+        await openBuilder();
+        const hymn = screen.getByRole("group", { name: "First hymn" });
+        expect(within(hymn).queryByRole("group", { name: strings.bookletCustomizeFormats })).not.toBeInTheDocument();
         expect(within(hymn).getByRole("checkbox", { name: "Text words (Text)" })).toBeChecked();
         fireEvent.click(within(hymn).getByRole("checkbox", { name: "Notation (Hazzat)" }));
         fireEvent.change(screen.getByLabelText("Group content"), { target: { value: "format" } });
@@ -213,9 +212,9 @@ describe("booklet builder", () => {
         notation.variations!.push({ ...notation.variations![0], id: "second", name: "Long tune", displayName: "Long tune" });
         notation.variationCount = 2;
         jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue([alternatives]);
-        const { container } = await openBuilder();
+        await openBuilder();
         fireEvent.click(screen.getByRole("button", { name: "Text Only" }));
-        const hymn = container.querySelector('.bookletHymnSelector') as HTMLElement;
+        const hymn = screen.getByRole("group", { name: "First hymn" });
         const first = within(hymn).getByRole("checkbox", { name: "Notation (Hazzat)" });
         const second = within(hymn).getByRole("checkbox", { name: "Long tune (Hazzat)" });
         expect(first).not.toBeChecked();
@@ -272,9 +271,9 @@ describe("booklet builder", () => {
             id: "score", name: "Score", displayName: "Score", content: { contentType: ContentType.MusicalNotesContent, musicXml: "<score-partwise />" }
         }] });
         jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue([withMusic]);
-        const { container } = await openBuilder();
+        await openBuilder();
         fireEvent.click(screen.getByRole("button", { name: "Musical Notes" }));
-        const global = container.querySelector('.bookletFormatChoices') as HTMLElement;
+        const global = screen.getByRole("group", { name: strings.bookletCustomizeFormats });
         expect(within(global).getByRole("checkbox", { name: "Musical Notes" })).toBeChecked();
         fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
         const link = await screen.findByRole("link", { name: "Download PDF" });
@@ -283,7 +282,7 @@ describe("booklet builder", () => {
     });
 
     it("hides season formats and presets that have no content, including individual hymn options", async () => {
-        const { container } = await openBuilder();
+        await openBuilder();
         expect(screen.queryByRole("button", { name: "Vertical Hazzat" })).not.toBeInTheDocument();
         expect(screen.queryByRole("button", { name: "Text + Vertical Hazzat" })).not.toBeInTheDocument();
         expect(screen.queryByRole("button", { name: "Musical Notes" })).not.toBeInTheDocument();
@@ -292,7 +291,7 @@ describe("booklet builder", () => {
         expect(screen.getByRole("button", { name: "Text Only" })).toBeInTheDocument();
         fireEvent.click(screen.getByRole("button", { name: "Text Only" }));
         fireEvent.click(screen.getByRole("button", { name: "All Formats" }));
-        const global = container.querySelector('.bookletFormatChoices') as HTMLElement;
+        const global = screen.getByRole("group", { name: strings.bookletCustomizeFormats });
         expect(within(global).getAllByRole("checkbox")).toHaveLength(2);
         within(global).getAllByRole("checkbox").forEach(input => expect(input).toBeChecked());
     });
@@ -304,14 +303,14 @@ describe("booklet builder", () => {
             { id: "4", name: "Musical Notes", order: 4, variationCount: 1, variations: [{ id: "score", name: "Score", displayName: "Score", content: { contentType: ContentType.MusicalNotesContent, musicXml: "<score-partwise />" } }] }
         );
         jest.spyOn(HymnsDataProvider.prototype, "getServiceList").mockResolvedValue([all]);
-        const { container } = await openBuilder();
+        await openBuilder();
         const labels = ["Text Only", "Hazzat", "Vertical Hazzat", "Musical Notes", "Text + Hazzat", "Text + Vertical Hazzat", "All Formats"];
         const choices = [["Text"], ["Hazzat"], ["Vertical Hazzat"], ["Musical Notes"], ["Text", "Hazzat"], ["Text", "Vertical Hazzat"], ["Text", "Hazzat", "Vertical Hazzat", "Musical Notes"]];
-        expect(Array.from(container.querySelectorAll('.bookletPresetRow > .bookletChoice')).map(button => button.textContent)).toEqual(labels);
-        const global = container.querySelector('.bookletFormatChoices') as HTMLElement;
+        expect(within(screen.getByRole("region", { name: "1. Choose formats" })).getAllByRole("button").map(button => button.textContent)).toEqual(labels);
+        const global = screen.getByRole("group", { name: strings.bookletCustomizeFormats });
         labels.forEach((label, i) => {
             fireEvent.click(screen.getByRole("button", { name: label }));
-            expect(within(global).getAllByRole("checkbox").filter(input => (input as HTMLInputElement).checked).map(input => input.parentElement!.textContent)).toEqual(choices[i]);
+            expect(within(global).getAllByRole("checkbox", { checked: true })).toEqual(choices[i].map(name => within(global).getByRole("checkbox", { name })));
         });
     });
 
@@ -363,7 +362,7 @@ describe("booklet builder", () => {
         const settings = { userSettings: { contentFontColor: "NAVY", hazzatFontColor: "MAROON", englishFontSize: "18px", arabicFontSize: "22px", contentLanguages: [...contentLanguages] },
             setContentFontColor: jest.fn(), setHazzatFontColor: jest.fn(), setContentFontSize: jest.fn(), setContentLanguages: jest.fn() };
         await openBuilder(settings);
-        const advanced = screen.getByText("Advanced options · Appearance").closest("details")!;
+        const advanced = screen.getByRole("group", { name: "Advanced options · Appearance" });
         expect(advanced).not.toHaveAttribute("open");
         fireEvent.click(screen.getByText("Advanced options · Appearance"));
         const text = within(screen.getByRole("group", { name: "Text color" }));
