@@ -1,8 +1,10 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import Content from './Content';
+import { soundCloudEmbedUrl } from './SoundCloudUrl';
 import { ContentType } from '../Providers/HymnsDataProvider/Models/IVariationInfo';
 
-const audio = [{ id: 'a', name: 'Recording', displayName: 'Recording', content: { contentType: ContentType.AudioContent, audioFilePath: '/hymn.mp3' } }];
+const track = 'https://soundcloud.com/coptichazzat/meghalo';
+const audio = [{ id: 'a', name: 'Recording', displayName: 'Recording', content: { contentType: ContentType.AudioContent, audioFilePath: track } }];
 
 test('failed content can be retried and replaces the alert with loaded content', async () => {
     const load = jest.fn().mockRejectedValueOnce(new Error('Network unavailable')).mockResolvedValueOnce(audio);
@@ -10,7 +12,7 @@ test('failed content can be retried and replaces the alert with loaded content',
     expect(screen.getByText('Loading...')).toBeInTheDocument();
     await screen.findByRole('alert');
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
-    expect(await screen.findByRole('link')).toHaveAttribute('href', '/hymn.mp3');
+    expect(await screen.findByTitle('SoundCloud player: Recording')).toHaveAttribute('src', soundCloudEmbedUrl(track));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(load).toHaveBeenCalledTimes(2);
 });
@@ -22,9 +24,9 @@ test.each(['resolve', 'reject'])('stale requests that %s cannot overwrite new co
     const { rerender } = render(<Content formatId="5" variationsCallback={oldLoad} />);
     const newLoad = jest.fn().mockResolvedValue(audio);
     rerender(<Content formatId="5" variationsCallback={newLoad} />);
-    await screen.findByRole('link');
+    await screen.findByTitle('SoundCloud player: Recording');
     await act(async () => outcome === 'resolve' ? resolve([]) : reject(new Error('Old request')));
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/hymn.mp3');
+    expect(screen.getByTitle('SoundCloud player: Recording')).toHaveAttribute('src', soundCloudEmbedUrl(track));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });
 
