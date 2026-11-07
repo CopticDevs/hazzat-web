@@ -182,15 +182,15 @@ describe("BookletPdfGenerator", () => {
             const headings = draws.mock.calls.flatMap(([text, options], index) => options?.size === 11.5 && ["Alpha", "Beta"].includes(text) ? [index] : []);
             expect(headings).toHaveLength(groupingKind === "hymn" ? 2 : 6);
             const pages = headings.map(index => draws.mock.instances[index] as unknown as PDFPage);
-            if (layoutKind === "display") {
-                expect(new Set(pages).size).toBe(headings.length);
-                // The first content page is immediately after the cover, inside cover, and TOC.
-                expect(pages[0].doc.getPages().indexOf(pages[0])).toBe(3);
-                expect(pages.map(page => page.doc.getPages().indexOf(page))).toEqual(headings.map((_, index) => index + 3));
-            } else {
-                expect(new Set(pages).size).toBeLessThan(headings.length);
-            }
-            if (groupingKind === "hymn" && layoutKind === "display") for (const name of ["Alpha", "Beta"]) {
+            const pagination = layoutKind === "display"
+                ? { distinctPages: new Set(pages).size, pageIndices: pages.map(page => page.doc.getPages().indexOf(page)) }
+                : { packsHymns: new Set(pages).size < headings.length };
+            // Display content starts immediately after the cover, inside cover, and TOC.
+            expect(pagination).toEqual(layoutKind === "display"
+                ? { distinctPages: headings.length, pageIndices: headings.map((_, index) => index + 3) }
+                : { packsHymns: true });
+            const hymnNames = groupingKind === "hymn" && layoutKind === "display" ? ["Alpha", "Beta"] : [];
+            for (const name of hymnNames) {
                 const bodyPages = ["Text", "Notes", "Vertical"].map(suffix => draws.mock.instances[draws.mock.calls.findIndex(([text]) => text === name + suffix)]);
                 expect(new Set(bodyPages).size).toBe(1);
             }
@@ -226,7 +226,8 @@ describe("BookletPdfGenerator", () => {
             }
             const last = pageFor("SecondVariationEnding"), next = pageFor("NextServiceOpening");
             expect(pageFor("NextService")).toBe(next);
-            if (layoutKind === "display") expect(next.doc.getPages().indexOf(next)).toBe(last.doc.getPages().indexOf(last) + 1);
+            const followingDisplayPages = layoutKind === "display" ? [next.doc.getPages().indexOf(next)] : [];
+            expect(followingDisplayPages).toEqual(layoutKind === "display" ? [last.doc.getPages().indexOf(last) + 1] : []);
             const pages = last.doc.getPages();
             // No empty content page is inserted between long sections.
             for (const page of pages.slice(3, pages.indexOf(next) + 1)) {
@@ -811,8 +812,9 @@ describe("BookletPdfGenerator", () => {
                     formatKinds: ["text", "regular", "vertical", "musical"], groupingKind, localeName,
                     layoutKind: "display", fontSources: createFontSources(), imageSources: createImageSources() });
                 const headings = draws.mock.calls.filter(([, options]) => options?.size === 11).map(([text]) => text).join("|");
-                if (groupingKind === "hymn") expect(headings).toBe("");
-                else for (const title of localeName === "ar" ? ["نص", "هزّات", "عمودية"] : ["Text", "Hazzat", "Vertical Hazzat"]) expect(headings).toContain(title);
+                expect(headings.length === 0).toBe(groupingKind === "hymn");
+                const expectedTitles = groupingKind === "hymn" ? [] : localeName === "ar" ? ["نص", "هزّات", "عمودية"] : ["Text", "Hazzat", "Vertical Hazzat"];
+                for (const title of expectedTitles) expect(headings).toContain(title);
                 expect(headings).not.toContain("Musical Notes");
                 expect(headings).not.toContain("نوتة");
             }
@@ -832,8 +834,8 @@ describe("BookletPdfGenerator", () => {
         expect(layout.rows).toHaveLength(entries.length);
         layout.rows.forEach((row, index) => {
             expect(row.y).toBeGreaterThan(30);
-            if (row.entry.level === "format") expect(layout.rows.slice(index, index + 3).map(r => r.pageIndex)).toEqual([row.pageIndex, row.pageIndex, row.pageIndex]);
-            if (row.entry.level === "service") expect(layout.rows[index + 1].pageIndex).toBe(row.pageIndex);
+            const keptRowCount = row.entry.level === "format" ? 3 : row.entry.level === "service" ? 2 : 1;
+            expect(layout.rows.slice(index, index + keptRowCount).map(r => r.pageIndex)).toEqual(Array(keptRowCount).fill(row.pageIndex));
         });
     });
 
@@ -929,7 +931,7 @@ describe("BookletPdfGenerator", () => {
             const footers = drawText.mock.calls.filter(([text]) => text.startsWith("hazzat.com  ·  "));
             expect(footers.length).toBeGreaterThanOrEqual(2);
             footers.forEach(([text, options]) => {
-                expect(text).toMatch(/^hazzat\.com  ·  \d+$/);
+                expect(text).toMatch(/^hazzat\.com {2}· {2}\d+$/);
                 expect(options?.y).toBe(14);
                 expect(options?.size).toBe(8);
                 const width = options!.font!.widthOfTextAtSize(text, options!.size!);

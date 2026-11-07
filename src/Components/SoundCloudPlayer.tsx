@@ -7,13 +7,13 @@ import './SoundCloudPlayer.css';
 
 const messages = {
     en: {
-        player: 'SoundCloud player', privacy: 'This player connects to SoundCloud automatically and may use cookies. Audio autoplay is off.',
+        player: 'SoundCloud player',
         loading: 'Loading the SoundCloud frame…', slow: 'The frame is taking longer to load. You can open the track on SoundCloud.',
         error: 'The SoundCloud player could not be loaded.',
         open: 'Open on SoundCloud', newTab: '(opens in a new tab)', close: 'Close player',
     },
     ar: {
-        player: 'مشغّل SoundCloud', privacy: 'يتصل هذا المشغّل بـ SoundCloud تلقائياً وقد يستخدم ملفات تعريف الارتباط. التشغيل التلقائي للصوت معطّل.',
+        player: 'مشغّل SoundCloud',
         loading: 'جارٍ تحميل إطار SoundCloud…', slow: 'يستغرق تحميل الإطار وقتاً أطول. يمكنك فتح التسجيل على SoundCloud.',
         error: 'تعذّر تحميل مشغّل SoundCloud.',
         open: 'فتح على SoundCloud', newTab: '(يفتح في علامة تبويب جديدة)', close: 'إغلاق المشغّل',
@@ -41,7 +41,6 @@ function TrackPlayer({ url, label, onClose }: Props) {
     }, [state]);
 
     return <div className="soundcloud-player">
-        <p className="soundcloud-player-privacy">{copy.privacy}</p>
         {onClose && <div className="soundcloud-player-actions">
             <button type="button" onClick={onClose}>{copy.close}</button>
         </div>}

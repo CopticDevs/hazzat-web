@@ -17,7 +17,12 @@ const cases = [
 beforeEach(() => { jest.useFakeTimers(); localStorage.clear(); });
 afterEach(() => { jest.useRealTimers(); localStorage.clear(); delete document.documentElement.dataset.theme; });
 
+function expectNoInlineNotice() {
+    expect(screen.queryByText(/This player connects to SoundCloud|يتصل هذا المشغّل بـ SoundCloud/)).not.toBeInTheDocument();
+}
+
 function expectFailureLink(name: string) {
+    expectNoInlineNotice();
     const fallback = screen.getByRole('link', { name });
     expect(fallback).toHaveAttribute('href', track);
     expect(fallback).toHaveAttribute('target', '_blank');
@@ -49,12 +54,14 @@ for (const failure of ['timeout', 'error'] as const) {
         const frame = screen.getByTitle(/^(SoundCloud player|مشغّل SoundCloud):/);
         expect(screen.queryByRole('link')).not.toBeInTheDocument();
         expect(screen.getByRole('status')).toHaveClass('visually-hidden');
+        expectNoInlineNotice();
         if (failure === 'timeout') act(() => jest.advanceTimersByTime(12000));
         else fireEvent.error(frame);
         expectFailureLink(linkName);
         expect(screen.getByRole('status')).not.toHaveTextContent(/retry|إعادة المحاولة/);
         expect(jest.getTimerCount()).toBe(0);
         fireEvent.load(frame);
+        expectNoInlineNotice();
         expect(screen.queryByRole('link')).not.toBeInTheDocument();
         expect(screen.queryByRole('status')).not.toBeInTheDocument();
         expect(screen.queryByRole('button')).not.toBeInTheDocument();
@@ -72,8 +79,10 @@ test.each(cases)('%s / %s has no loaded-state text, link or controls beneath the
     const frame = screen.getByTitle(/^(SoundCloud player|مشغّل SoundCloud):/) as HTMLIFrameElement;
     expect(new URL(frame.src).searchParams.get('auto_play')).toBe('false');
     expect(new URL(frame.src).searchParams.get('color')).toBe('#302c26');
+    expectNoInlineNotice();
     fireEvent.load(frame);
     act(() => jest.advanceTimersByTime(12000));
+    expectNoInlineNotice();
     expect(document.documentElement).toHaveAttribute('data-theme', theme);
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();

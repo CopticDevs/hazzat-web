@@ -1,10 +1,10 @@
-const ref = (contentId: string) => ({contentId, name: "Standard", nameAr: "المعتاد"});
 import axios from "axios";
 import { ContentResourceClient } from "./ContentResourceClient";
 import { HymnsDataProvider } from "./HymnsDataProvider";
 import { searchContent } from "./Search";
 import { SharedLibraryRecord, SharedService, validateService } from "./SharedContent";
 import { getBookletSections, hasBookletFormat } from "../../Booklets/BookletPdfGenerator";
+const ref = (contentId: string) => ({contentId, name: "Standard", nameAr: "المعتاد"});
 
 jest.mock("axios", () => ({ create: jest.fn() }));
 const TEXT = "11111111-1111-4111-8111-111111111111";

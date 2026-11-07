@@ -14,7 +14,7 @@ export default function FormatOptionsContextMenu({ title, formatsMap }: Props) {
     const navigate = useNavigate();
     return <Dropdown className="format-dropdown">
         <Dropdown.Toggle variant="light" className="format-dropdown-toggle" aria-label={`${strings.formats}: ${title}`}>
-            <FontAwesomeIcon icon={faChevronDown} />
+            <FontAwesomeIcon data-testid="format-dropdown-icon" icon={faChevronDown} />
         </Dropdown.Toggle>
         <Dropdown.Menu>
             {getFormatLinks(formatsMap).map(option => <Dropdown.Item key={option.id} onClick={() => navigate(`${option.navLink}${search}`)}>
