@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { lazy, Suspense, useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { ReactComponent as Logo } from "./images/logo.svg";
@@ -20,6 +20,10 @@ import "./css/hazzat.css";
 import "./fonts/fonts.css";
 import { LanguageContext } from "./LanguageContext";
 
+// The local-only preview is tree-shaken out of production builds.
+const SoundCloudPrototypePage = process.env.NODE_ENV === "development"
+    ? lazy(() => import("./Components/SoundCloudPrototypePage")) : undefined;
+
 function App() {
     const { languageProperties } = useContext(LanguageContext);
 
@@ -36,6 +40,10 @@ function App() {
                     <main id="main-content" tabIndex={-1} className="site-body">
                         <div className="rightleftmain clearfix">
                             <Routes>
+                                {SoundCloudPrototypePage && <Route path="/Preview/SoundCloud" element={
+                                    <Suspense fallback={<MainPaper size={Size.Wide}>{strings.loading}</MainPaper>}>
+                                        <SoundCloudPrototypePage />
+                                    </Suspense>} />}
                                 <Route path="/" element={<Home navItems={AppSettings.navigationMenuItems} />} />
                                 <Route path="/Seasons/*" element={<SeasonsPage />} />
                                 <Route path="/Search" element={<GlobalSearchPage />} />
