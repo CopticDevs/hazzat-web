@@ -25,8 +25,8 @@ export default function FormatOptionMenuItem({ formatId, isActive }: Props) {
     const flip = languageProperties.isRtl ? " flipRtl" : "";
     const name = formatDisplayName(formatId, languageProperties.localeName);
     return <span className="format-option">
-        <Off aria-hidden="true" focusable="false" className={`format-icon-off${flip}`} />
-        <On aria-hidden="true" focusable="false" className={`format-icon-on${flip}`} />
+        <Off data-testid="format-icon-off" aria-hidden="true" focusable="false" className={`format-icon-off${flip}`} />
+        <On data-testid="format-icon-on" aria-hidden="true" focusable="false" className={`format-icon-on${flip}`} />
         {isActive ? <strong>{name}</strong> : <span>{name}</span>}
     </span>;
 }

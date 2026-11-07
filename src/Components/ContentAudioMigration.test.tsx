@@ -33,7 +33,7 @@ test('mixed records embed SoundCloud automatically and preserve the legacy Azure
         expect(link).toHaveAttribute('rel', 'noreferrer');
     }
     expect(screen.queryByRole('img', { name: 'SoundCloud' })).not.toBeInTheDocument();
-    expect(screen.getByText(/connects to SoundCloud automatically/)).toBeInTheDocument();
+    expect(screen.queryByText(/connects to SoundCloud automatically/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Close player' })).not.toBeInTheDocument();
 });
 
@@ -103,11 +103,11 @@ test('slow or unavailable embeds retain fallback without reload controls or a fa
     } finally { jest.useRealTimers(); }
 });
 
-test('Arabic content uses localized player labels and privacy text', () => {
+test('Arabic content uses localized player labels without the inline notice', () => {
     render(<LanguageContext.Provider value={{ languageProperties: ArabicLanguageProperties }}>
         <ContentAudio variations={[audio('ميغالو', track)]} />
     </LanguageContext.Provider>);
     expect(screen.getByTitle('مشغّل SoundCloud: Recording ميغالو')).toHaveAttribute('src', soundCloudEmbedUrl(track));
-    expect(screen.getByText(/يتصل هذا المشغّل بـ SoundCloud تلقائياً/)).toBeInTheDocument();
+    expect(screen.queryByText(/يتصل هذا المشغّل بـ SoundCloud تلقائياً/)).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /فتح على SoundCloud/ })).not.toBeInTheDocument();
 });

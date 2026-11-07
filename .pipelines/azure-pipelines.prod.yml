@@ -26,6 +26,13 @@ steps:
     customCommand: 'install'
 
 - task: Npm@1
+  displayName: 'Lint (zero warnings)'
+  inputs:
+    command: 'custom'
+    verbose: false
+    customCommand: 'run lint'
+
+- task: Npm@1
   displayName: 'npm build (v5)'
   env:
     REACT_APP_HAZZAT_CONTENT_BASE_URL: 'https://d1zhmhuei1bwco.cloudfront.net'

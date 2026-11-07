@@ -53,7 +53,7 @@ export default function SearchHighlight({ text, query, coptic = false }: { text:
     const parts = [], ranges = searchHighlightRanges(text, query, coptic);
     let start = 0;
     ranges.forEach(([from, to]) => {
-        parts.push(text.slice(start, from), <mark className="search-match" key={from}>{text.slice(from, to)}</mark>);
+        parts.push(text.slice(start, from), <mark data-testid="search-match" className="search-match" key={from}>{text.slice(from, to)}</mark>);
         start = to;
     });
     parts.push(text.slice(start));
