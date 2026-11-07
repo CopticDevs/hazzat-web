@@ -5,6 +5,8 @@ import "./Content.css";
 import CrossDivider from "./CrossDivider";
 import HymnTitle from "./HymnTitle";
 import VariationTitle from "./VariationTitle";
+import SoundCloudPlayer from "./SoundCloudPlayer";
+import { soundCloudTrackUrl } from "./SoundCloudUrl";
 
 interface IProps {
     variations: IVariationInfo<IAudioContent>[];
@@ -23,6 +25,7 @@ function ContentAudio(props: IProps) {
                 </>
             )}
             {props.variations.map((variation) => {
+                const soundCloudUrl = variation.content.audioFilePath && soundCloudTrackUrl(variation.content.audioFilePath);
                 return <div key={variation.id}>
                     {props.variations.length > 1 && (
                         <>
@@ -31,7 +34,10 @@ function ContentAudio(props: IProps) {
                             </div>
                         </>
                     )}
-                    {variation.content.audioFilePath ?
+                    {soundCloudUrl ? <div>
+                        <SoundCloudPlayer url={soundCloudUrl} label={variation.displayName || variation.name} />
+                        <CrossDivider />
+                    </div> : variation.content.audioFilePath ?
                         <div style={{ textAlign: "center" }}>
                             <a href={variation.content.audioFilePath} target="_blank" rel="noreferrer">
                                 <img className="contentImage" src={audioImage} alt={variation.name} /><br />

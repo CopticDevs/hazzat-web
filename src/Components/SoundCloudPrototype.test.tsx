@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import SoundCloudPrototypePage from './SoundCloudPrototypePage';
-import { soundCloudTrackUrl, soundCloudEmbedUrl } from './SoundCloudPrototypeUrl';
+import { soundCloudTrackUrl, soundCloudEmbedUrl } from './SoundCloudUrl';
 import { LanguageContext } from '../LanguageContext';
 import { ArabicLanguageProperties } from '../l8n';
 

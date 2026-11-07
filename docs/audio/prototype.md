@@ -1,71 +1,79 @@
-# Local SoundCloud embedding prototype
+# Gradual SoundCloud audio migration
 
-Prototype for [#283](https://github.com/CopticDevs/hazzat-web/issues/283), based on `develop`. No public rollout, upload, account/API setup, sing-along, or published content change. SoundCloud is the intended replacement for Azure-hosted audio. This development-only prototype does not migrate the existing recordings or complete the broader work in that issue.
+For [#283](https://github.com/CopticDevs/hazzat-web/issues/283), the website now chooses the audio experience from the existing `content.audioFilePath` string. This PR changes the reader, not published content. No recording URLs, schemas, Azure assets or deployments are changed.
 
-## Run and review
+## Reader behavior
 
-Use the repository's supported Node version (Node 24 preferred):
+- A validated public HTTPS SoundCloud artist/track link renders the official embedded player automatically. Audio autoplay is disabled.
+- Azure MP3s and all other existing URLs retain the current image and external-link experience. Empty audio values remain empty.
+- Recognition uses exact host checks for `soundcloud.com`, `www.soundcloud.com` and `m.soundcloud.com`, canonicalizing to `soundcloud.com`. Lookalike domains, credentials, nonstandard ports, private tokens, playlists and profile URLs are not embedded.
+- Short share links such as `https://on.soundcloud.com/...` keep the legacy external-link experience. Resolve them to the full canonical artist/track URL before saving a migrated record. Do not put a player iframe URL or HTML into `audioFilePath`.
+- Tracking parameters and fragments are stripped from recognized track URLs. The site never treats a matching word elsewhere in a URL as a SoundCloud host.
+- The player includes English/Arabic privacy text, a labeled responsive iframe, loading feedback, Reload and an always-visible SoundCloud fallback. A frame load event does not prove playable audio, so the UI never claims it does.
+- Replacing a recording under the same content ID removes the old iframe and resets loading state. Moving back to a legacy URL or leaving the audio view removes the iframe and cleans up its timer.
+
+`SoundCloudUrl.ts` provides shared validation. `ContentAudio.tsx` selects the existing legacy markup or `SoundCloudPlayer.tsx`. The development review page uses that same player component.
+
+## Migrate one recording at a time
+
+Keep `schemaVersion: 5`, the content UUID, service placement references, order and labels unchanged when migrating the same recording. No provider field or schema version bump is required for this approach. The v5 validator and loader already accept and preserve the URL string.
+
+1. Deploy the mixed-provider reader through the normal review/release process before changing recording URLs. This PR does not deploy it.
+2. Verify the exact SoundCloud performance, language, public availability, embedding permission and recording rights. Save the original Azure URL in a rollback inventory.
+3. Change only the intended v5 record's `content.audioFilePath` to its full SoundCloud track URL. Use a separate recording identity rather than silently replacing a different performance.
+4. Test that record in context, including signed-out playback, unavailable-track fallback, switching/navigation and real mobile browsers. Revert the string if needed; the legacy experience still works.
+5. Repeat for the remaining records. Remove the website's Azure/legacy handling only after confirming the intended feed no longer relies on it.
+
+A fresh read during this implementation found **17 Audio records, all still pointing to Azure**. None was changed by this PR. Content JSON is served separately from the audio storage; replacing audio hosting does not require moving the JSON feed.
+
+### Other readers and older feeds
+
+The previous web reader opens any nonempty `audioFilePath` externally, so a migrated URL remains a link there rather than becoming an embed. Responsive/mobile web uses this renderer, but iOS Safari and Android Chrome behavior still need real-device checks.
+
+Native-app compatibility and the current publisher/editor's URL restrictions are **not verified**. A native client expecting a downloadable MP3 may not accept a SoundCloud webpage URL. Check clients that consume the same feed before migrating their records. Leave frozen v3/v4 content unchanged.
+
+Removing website legacy handling and deleting Azure files are separate decisions. Older feeds, native apps, cached content and direct links may still need those files even after v5 migration. Do not retire storage based only on the v5 count.
+
+## Local review page
+
+With the repository's supported Node version (Node 24 preferred):
 
 ```sh
 npm ci --strict-peer-deps
 npm start
 ```
 
-Open `http://localhost:3000/Preview/SoundCloud`. The sample player loads automatically, with audio autoplay disabled. Paste an appropriate public full track URL to replace it automatically after a 500 ms pause in typing. The route intentionally has no main-navigation link.
+Open `http://localhost:3000/Preview/SoundCloud`. The default recording loads automatically with audio autoplay off. Valid URL edits replace it after a 500 ms pause in typing. Clearing or invalidating the input removes it. Close stays dismissed until the URL changes or the sample is restored. Labels do not reload the frame. No input is saved.
 
-The default recording is [**Meghalo by Hazzat**](https://soundcloud.com/coptichazzat/meghalo), supplied for **Great Lent Saturdays & Sundays → Liturgy → Meghalo**. The supplied short link resolves to this canonical public track; tracking parameters are omitted from the player URL. No recording is uploaded or copied.
+The default recording is [**Meghalo by Hazzat**](https://soundcloud.com/coptichazzat/meghalo), supplied for **Great Lent Saturdays & Sundays → Liturgy → Meghalo**. Its public title and description match the supplied context and the current [v5 recording](https://d1zhmhuei1bwco.cloudfront.net/v5/content/81a874a9-5ab3-41a8-9265-fb657b238c05.json) and [service placement](https://d1zhmhuei1bwco.cloudfront.net/v5/seasons/great-lent-saturdays-sundays/services/liturgy-25.json).
 
-The pilot association is with content UUID `81a874a9-5ab3-41a8-9265-fb657b238c05`, hymn `meghalo`, season `great-lent-saturdays-sundays`, service `liturgy-25`. The current [v5 recording](https://d1zhmhuei1bwco.cloudfront.net/v5/content/81a874a9-5ab3-41a8-9265-fb657b238c05.json) and [service placement](https://d1zhmhuei1bwco.cloudfront.net/v5/seasons/great-lent-saturdays-sundays/services/liturgy-25.json) match the supplied hymn and context. SoundCloud's public title and description agree. This is a prototype association, not proof that the SoundCloud and Azure files contain the identical performance. Live payloads and schema remain unchanged.
+The prototype association is content UUID `81a874a9-5ab3-41a8-9265-fb657b238c05`, hymn `meghalo`, season `great-lent-saturdays-sundays`, service `liturgy-25`. It is not proof that the Azure and SoundCloud files contain the identical performance. The published Meghalo record remains unchanged.
 
-Use the existing website preferences for Arabic and light/dark appearance. Only public HTTPS `soundcloud.com`, `www.soundcloud.com`, or `m.soundcloud.com` artist/track-shaped links are accepted; short/profile/playlist/private-token URLs are rejected. Tracking parameters are removed. Syntax validation does not prove the track exists or is playable.
+The review route has no navigation link and remains development-only. A normal production build **includes the shared migration renderer/player**, but excludes `/Preview/SoundCloud`, its form/CSS and the hard-coded Meghalo sample. `npm run preview` serves a production build and does not expose the review route.
 
-## What it does
-
-- Uses the existing Hazzat page shell and reader styling on a separate development-only route.
-- Loads one official standard SoundCloud iframe on page opening. Valid URL edits load automatically after a 500 ms debounce; superseded edits are canceled. Clearing or invalidating the URL removes the frame.
-- Clearly discloses automatic third-party connections and possible SoundCloud cookies. This is automatic frame loading, not automatic audio playback.
-- Does not request autoplay. Keeps SoundCloud's controls and branding, a visible recording label, an external fallback, Reload and Close.
-- Replacing/reloading removes the prior iframe. Closing restores input focus and keeps the frame dismissed until the URL changes or the Meghalo recording is restored. Label edits do not reload or reopen it. Unmounting the route removes the iframe rather than leaving background playback.
-- Includes English/Arabic copy, responsive layout and descriptive frame labeling.
-- Does not save the URL/label. Existing Azure audio rendering, payloads and mappings are untouched.
-
-The frame's `load` event does not prove that audio is playable, and cross-origin frame errors are not reliably observable. The UI therefore never claims successful playback. A loading timeout and the always-visible external fallback cover uncertainty; no Widget API or OAuth dependency is introduced.
-
-## Production boundary
-
-`App.tsx` only dynamically imports the prototype when `process.env.NODE_ENV === 'development'`. Normal `npm run build` removes the route, implementation and CSS from executable production assets. `npm run preview` serves a production build and will therefore not show this route. Do not change the gate or production environment configuration merely to expose the review page.
-
-A wider deployment remains a separate decision, including SoundCloud's [embed terms](https://soundcloud.com/terms-of-use), recording rights, track mappings, privacy and device checks. In particular, the player/widget terms include consent requirements for genre-focused sites; Hazzat should clarify the applicable permission before a public rollout.
-
-## Verification
+## Verification and remaining checks
 
 Passed locally:
 
-- TypeScript `npm run typecheck`.
-- All 34 prototype tests: URL normalization/rejection, automatic initial loading with autoplay off, debounced replacement/cancellation, sample labeling, safe fallback, invalid/cleared URLs, close/focus/dismissal, reload, timeout cleanup, late detached-frame events, previous timers and Arabic labels.
-- Full Jest: **54 suites passed; 650 tests passed; 2 dataset-dependent tests skipped**.
-- All **5 build-tooling tests**.
-- Production build, with the existing large-chunk and mixed OpenSheetMusicDisplay import warnings.
-- Production JS/CSS scan: no `/Preview/SoundCloud`, `w.soundcloud.com/player/`, or prototype CSS selectors.
-- ESLint on changed/new TypeScript files: **0 errors, 0 warnings**.
+- TypeScript and scoped lint for new production/player/preview code.
+- Renderer/provider regression tests for mixed records, safe classification, legacy markup, schema preservation, frame replacement, rollback, timer cleanup and Arabic labels.
+- Existing prototype tests for automatic loading, debounce/cancellation, close/reopen and stale events.
+- Build-tooling checks and production build. Existing large-chunk and mixed OpenSheetMusicDisplay import warnings remain.
+- Production JS/CSS check: shared player present; development-only route, form/CSS and default track absent.
 - `git diff --check`.
 
-Full repository lint does not pass: **120 errors and 9 warnings in unchanged files**. These include pre-existing test-rule violations; no unrelated cleanup is included.
+The full repository has pre-existing lint failures; this change does not include unrelated cleanup. Full-suite totals and remote CI status are recorded in the PR.
 
-The standalone official SoundCloud widget was checked in a browser for this recording: it displayed **Meghalo** by **Hazzat**, artwork, a waveform and a **9:56** duration. Play changed to Pause and the elapsed time advanced to **0:16**; it was paused afterward. SoundCloud then showed its own promotional overlay. No login or unavailable-track error appeared. Audible output was not independently checked.
+The standalone official SoundCloud widget was checked in a browser: **Meghalo** by **Hazzat**, artwork, waveform, **9:56** duration, Play/Pause and elapsed time advancing to **0:16**. It was paused afterward, when SoundCloud showed its own promotional overlay. No login or unavailable-track error appeared. Audible output and full-track listening were not independently checked.
 
 ![Standalone official SoundCloud widget for Meghalo at 0:16, not integrated Hazzat UI](screenshots/meghalo-soundcloud-widget.jpg)
 
-This is an unchanged screenshot of the **standalone official SoundCloud widget, not the integrated Hazzat UI**. Integrated-page browser verification and screenshots remain blocked because the available browser cannot reach the local development server.
+This is an unchanged screenshot of the **standalone official SoundCloud widget, not the integrated Hazzat UI**. Integrated-page browser verification/screenshots remain blocked because the available browser cannot reach the local development server. Responsive CSS is not proof of real-device behavior.
 
-Full-track listening, real iOS Safari/Android Chrome and assistive-technology checks remain unverified. Responsive CSS is not equivalent to verified mobile behavior.
+Before release, check:
 
-## Browser review checklist
-
-- Capture the initial page and the loaded sample player at desktop and narrow viewport widths.
-- Confirm the sample frame loads automatically on opening, audio does not autoplay, and valid URL edits replace it without a Load click. Confirm invalid/private URLs do not reach the player.
-- Check Play/Pause, seek and the external fallback with an available public recording.
-- Replace and reload the recording, then close it and navigate Back/Forward. Confirm there is never more than one frame or lingering playback.
-- Try an invalid link and an unavailable track, and check the fallback/loading feedback.
-- Check Arabic direction, light/dark appearance, keyboard focus and a real mobile browser.
-- Verify the page is absent from a normal production build.
+- Mixed migrated/unmigrated records in the actual hymn view, desktop and narrow layouts, Arabic and light/dark appearance.
+- Automatic frame loading without automatic audio, Play/Pause/seek and external fallback.
+- Repeated reloads, a missing/private/unavailable track, same-ID URL replacement, navigation Back/Forward and rollback to Azure, with no lingering playback.
+- Keyboard/focus behavior, assistive technology and real iOS Safari/Android Chrome.
+- Recording rights, privacy and applicable SoundCloud permission. The [player/widget terms](https://soundcloud.com/terms-of-use) include consent requirements for genre-focused sites; clarify the permission applicable to Hazzat before public rollout.

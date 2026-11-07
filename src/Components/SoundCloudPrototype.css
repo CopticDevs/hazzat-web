@@ -7,8 +7,8 @@
 .soundcloud-prototype-form label { font-weight: 600; }
 .soundcloud-prototype-form input { width: 100%; min-inline-size: 0; min-height: 44px; border: 1px solid var(--rule); border-radius: 5px; background: transparent; color: inherit; padding: 10px 12px; }
 .soundcloud-prototype-form input[aria-invalid="true"] { border-color: #a13d27; }
-.soundcloud-prototype-help, .soundcloud-prototype-privacy, .soundcloud-prototype-footnote, .soundcloud-prototype-status { font-size: .9rem; color: var(--muted-ink); }
 .soundcloud-prototype-help { margin-block: 0 10px; }
+.soundcloud-prototype-help, .soundcloud-prototype-privacy, .soundcloud-prototype-footnote { font-size: .9rem; color: var(--muted-ink); }
 .soundcloud-prototype-error { color: #a13d27; }
 .soundcloud-prototype-privacy { margin-block: 4px 8px; }
 .soundcloud-prototype-card { margin-block: 28px 16px; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
@@ -19,11 +19,6 @@
 .soundcloud-prototype-empty { min-height: 166px; padding: 30px 20px; display: flex; flex-direction: column; justify-content: center; text-align: center; color: var(--muted-ink); }
 .soundcloud-prototype-empty p { margin: 0 0 8px; }
 .soundcloud-prototype-empty p + p { font-size: .85rem; }
-.soundcloud-prototype-frame { display: block; width: 100%; height: 166px; border: 0; background: #fff; }
-.soundcloud-prototype-status { margin: 0; padding: 14px 20px 0; }
-.soundcloud-prototype-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 18px; padding: 8px 20px 14px; }
-.soundcloud-prototype-actions a, .soundcloud-prototype-actions button { display: inline-flex; align-items: center; min-height: 44px; padding: 0; text-decoration: underline; }
-.soundcloud-prototype-actions button { background: transparent; border: 0; color: inherit; }
 .soundcloud-prototype-footnote { margin-block: 18px 0; }
 
 .soundcloud-prototype-example { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-block: -6px 12px; font-size: .9rem; }

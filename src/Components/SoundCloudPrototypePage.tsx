@@ -3,7 +3,8 @@ import { LanguageContext } from '../LanguageContext';
 import MainPaper, { Size } from './MainPaper';
 import { ReactComponent as SoundCloudIcon } from '../images/soundcloud.svg';
 import { soundCloudPrototypeCopy } from './SoundCloudPrototypeCopy';
-import { soundCloudTrackUrl, soundCloudEmbedUrl } from './SoundCloudPrototypeUrl';
+import { soundCloudTrackUrl } from './SoundCloudUrl';
+import SoundCloudPlayer from './SoundCloudPlayer';
 import './SoundCloudPrototype.css';
 
 const sampleTrack = 'https://soundcloud.com/coptichazzat/meghalo';
@@ -16,7 +17,6 @@ export default function SoundCloudPrototypePage() {
     const [label, setLabel] = useState('');
     const [closed, setClosed] = useState(false);
     const [active, setActive] = useState<{ url: string; attempt: number } | undefined>({ url: sampleTrack, attempt: 0 });
-    const [frameState, setFrameState] = useState<'loading' | 'opened' | 'slow'>('loading');
     const input = useRef<HTMLInputElement>(null);
     const attempt = useRef(0);
     const canonical = soundCloudTrackUrl(url);
@@ -30,12 +30,6 @@ export default function SoundCloudPrototypePage() {
     }, [copy.title]);
 
     useEffect(() => {
-        if (!active || frameState !== 'loading') return;
-        const timeout = window.setTimeout(() => setFrameState('slow'), 12000);
-        return () => window.clearTimeout(timeout);
-    }, [active, frameState]);
-
-    useEffect(() => {
         if (!canonical || closed) {
             setActive(undefined);
             return;
@@ -43,7 +37,6 @@ export default function SoundCloudPrototypePage() {
         if (active?.url === canonical) return;
         // Wait briefly for typing to settle; only validated public track links reach the frame.
         const timeout = window.setTimeout(() => {
-            setFrameState('loading');
             setActive({ url: canonical, attempt: ++attempt.current });
         }, 500);
         return () => window.clearTimeout(timeout);
@@ -52,13 +45,7 @@ export default function SoundCloudPrototypePage() {
     function close() {
         setClosed(true); // Keep it dismissed until the link changes or the sample is restored.
         setActive(undefined); // Removing the iframe also stops its playback.
-        setFrameState('loading');
         input.current?.focus();
-    }
-
-    function retry() {
-        setFrameState('loading');
-        setActive(value => value ? { ...value, attempt: ++attempt.current } : value);
     }
 
     return <MainPaper size={Size.Wide}>
@@ -95,20 +82,7 @@ export default function SoundCloudPrototypePage() {
                     <SoundCloudIcon aria-hidden="true" focusable="false" />
                     <div><p>{copy.provider}</p><h2 id="soundcloud-recording-heading">{active ? recordingLabel : copy.emptyTitle}</h2></div>
                 </div>
-                {active ? <>
-                    <iframe key={active.attempt} className="soundcloud-prototype-frame" height="166" width="100%"
-                        title={`${copy.playerTitle}: ${recordingLabel}`} src={soundCloudEmbedUrl(active.url)}
-                        allow="autoplay" referrerPolicy="no-referrer"
-                        onLoad={() => setFrameState('opened')} />
-                    <p className="soundcloud-prototype-status" role="status">
-                        {frameState === 'loading' ? copy.loading : frameState === 'slow' ? copy.slow : copy.opened}
-                    </p>
-                    <div className="soundcloud-prototype-actions">
-                        <a href={active.url} target="_blank" rel="noopener noreferrer">{copy.open}</a>
-                        <button type="button" onClick={retry}>{copy.retry}</button>
-                        <button type="button" onClick={close}>{copy.close}</button>
-                    </div>
-                </> : <div className="soundcloud-prototype-empty">
+                {active ? <SoundCloudPlayer key={active.attempt} url={active.url} label={recordingLabel} onClose={close} /> : <div className="soundcloud-prototype-empty">
                     <p>{copy.empty}</p><p>{copy.noRequests}</p>
                 </div>}
             </section>
