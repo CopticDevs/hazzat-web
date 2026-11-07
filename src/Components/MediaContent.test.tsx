@@ -12,22 +12,24 @@ const audio = (id: string, path: string) => variation<IAudioContent>(id, { conte
 const video = (id: string, copticVideo = '', englishVideo = '', arabicVideo = '') => variation<IVideoContent>(id, { contentType: ContentType.VideoContent, copticVideo, englishVideo, arabicVideo });
 const score = (id: string, musicXml: string) => variation<IMusicalNotesContent>(id, { contentType: ContentType.MusicalNotesContent, musicXml });
 
-test('audio labels alternatives and opens valid recordings safely in another tab', () => {
-    render(<ContentAudio hymnTitle="Alleluia" variations={[audio('cantor', '/recording.mp3'), audio('empty', '')]} />);
+test('audio labels supported alternatives in order and skips empty recordings', () => {
+    render(<ContentAudio hymnTitle="Alleluia" variations={[
+        audio('cantor', 'https://soundcloud.com/hazzat/first'), audio('empty', ''),
+        audio('choir', 'https://soundcloud.com/hazzat/second'),
+    ]} />);
     expect(screen.getByText('Alleluia')).toBeInTheDocument();
-    expect(screen.getByText('Version cantor')).toBeInTheDocument();
-    expect(screen.getByText('Version empty')).toBeInTheDocument();
-    const link = screen.getByRole('link');
-    expect(link).toHaveAttribute('href', '/recording.mp3');
-    expect(link).toHaveAttribute('target', '_blank');
-    expect(link).toHaveAttribute('rel', 'noreferrer');
-    expect(screen.getByRole('img', { name: 'cantor' })).toBeInTheDocument();
+    expect(screen.getAllByRole('heading', { level: 3 }).map(heading => heading.textContent)).toEqual(['Version cantor', 'Version choir']);
+    expect(screen.queryByText('Version empty')).not.toBeInTheDocument();
+    expect(screen.getAllByTitle(/^SoundCloud player:/).map(frame => frame.getAttribute('title'))).toEqual([
+        'SoundCloud player: Version cantor', 'SoundCloud player: Version choir',
+    ]);
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
 });
 
-test('a single audio variation does not repeat a variation heading', () => {
-    render(<ContentAudio variations={[audio('cantor', '/recording.mp3')]} />);
+test('a single supported audio variation does not repeat a variation heading', () => {
+    render(<ContentAudio variations={[audio('cantor', 'https://soundcloud.com/hazzat/first')]} />);
     expect(screen.queryByText('Version cantor')).not.toBeInTheDocument();
-    expect(screen.getAllByRole('link')).toHaveLength(1);
+    expect(screen.getAllByTitle(/^SoundCloud player:/)).toHaveLength(1);
 });
 
 test('video displays every available language in order and skips absent videos', () => {

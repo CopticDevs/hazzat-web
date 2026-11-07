@@ -11,33 +11,40 @@ const audio = (id: string, path: string): IVariationInfo<IAudioContent> => ({
     id, name: id, displayName: `Recording ${id}`, content: { contentType: ContentType.AudioContent, audioFilePath: path },
 });
 
-test('mixed records embed SoundCloud automatically and preserve the legacy Azure and unknown-link experience', () => {
+test('mixed records embed SoundCloud automatically without legacy links, artwork or empty headings', () => {
     render(<ContentAudio hymnTitle="Meghalo" variations={[
         audio('Azure', azure), audio('SoundCloud', track), audio('Other', '/recording.mp3'), audio('Empty', ''),
     ]} />);
     expect(screen.getByText('Meghalo')).toBeInTheDocument();
-    expect(screen.getAllByText(/^Recording /).map(node => node.textContent)).toEqual([
-        'Recording Azure', 'Recording SoundCloud', 'Recording Other', 'Recording Empty',
-    ]);
+    expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Recording /)).not.toBeInTheDocument();
     expect(screen.getAllByTitle(/^SoundCloud player:/)).toHaveLength(1);
     const frame = screen.getByTitle('SoundCloud player: Recording SoundCloud');
     expect(frame).toHaveAttribute('src', soundCloudEmbedUrl(track));
     expect(new URL(frame.getAttribute('src')!).searchParams.get('auto_play')).toBe('false');
     expect(frame).toHaveAttribute('width', '100%');
     expect(frame).toHaveAttribute('height', '166');
-    for (const [name, href] of [['Azure', azure], ['Other', '/recording.mp3']]) {
-        expect(screen.getByRole('img', { name })).toBeInTheDocument();
-        const link = screen.getByRole('link', { name: new RegExp(name) });
-        expect(link).toHaveAttribute('href', href);
-        expect(link).toHaveAttribute('target', '_blank');
-        expect(link).toHaveAttribute('rel', 'noreferrer');
-    }
-    expect(screen.queryByRole('img', { name: 'SoundCloud' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
     expect(screen.queryByText(/connects to SoundCloud automatically/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Close player' })).not.toBeInTheDocument();
 });
 
+test('an entirely unsupported audio collection keeps only the hymn title', () => {
+    render(<ContentAudio hymnTitle="Meghalo" variations={[
+        audio('Azure', azure), audio('Empty', ''), audio('Other', '/recording.mp3'),
+    ]} />);
+    expect(screen.getByRole('heading', { level: 2, name: 'Meghalo' })).toBeInTheDocument();
+    expect(screen.queryByTitle(/^SoundCloud player:/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument();
+});
+
 test.each([
+    azure, '', ' ', '/recording.mp3', 'data:audio/mpeg;base64,AAAA',
+    // eslint-disable-next-line no-script-url -- Rejected URL input must never become an executable link.
+    'javascript:alert(1)',
     'https://soundcloud.com.evil.test/artist/track',
     'https://soundcloud.com@evil.test/artist/track',
     'https://user:password@soundcloud.com/artist/track',
@@ -48,11 +55,12 @@ test.each([
     'https://soundcloud.com/artist/track?secret_token=private',
     'https://on.soundcloud.com/VJE3hsqdiIB2EW6d8H',
     'https://example.com/audio.mp3?source=soundcloud.com',
-])('unsupported or lookalike URL stays an unchanged external link: %s', path => {
-    render(<ContentAudio variations={[audio('legacy', path)]} />);
-    expect(screen.queryByTitle(/^SoundCloud player:/)).toBeNull();
-    expect(screen.getByRole('link')).toHaveAttribute('href', path);
-    expect(screen.getByRole('img', { name: 'legacy' })).toBeInTheDocument();
+])('unsupported or lookalike URL renders no player, link or artwork: %s', path => {
+    const { container } = render(<ContentAudio variations={[audio('legacy', path)]} />);
+    expect(container.textContent).toBe('');
+    expect(screen.queryByTitle(/^SoundCloud player:/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
 });
 
 test.each(['https://www.soundcloud.com/coptichazzat/meghalo/?utm_source=share#t=12', 'https://m.soundcloud.com/coptichazzat/meghalo'])('normalizes supported SoundCloud hosts without forwarding tracking: %s', path => {
@@ -61,7 +69,7 @@ test.each(['https://www.soundcloud.com/coptichazzat/meghalo/?utm_source=share#t=
     expect(screen.queryByRole('link', { name: /Open on SoundCloud/ })).not.toBeInTheDocument();
 });
 
-test('a stable content ID can migrate, change recording and roll back without leaving an old frame', () => {
+test('a stable content ID can migrate, change recording and become unsupported without leaving an old frame', () => {
     jest.useFakeTimers();
     try {
         const { rerender, unmount } = render(<ContentAudio variations={[audio('same-id', azure)]} />);
@@ -78,7 +86,8 @@ test('a stable content ID can migrate, change recording and roll back without le
         expect(screen.getByRole('status')).toHaveTextContent('Loading');
         rerender(<ContentAudio variations={[audio('same-id', azure)]} />);
         expect(screen.queryByTitle(/^SoundCloud player:/)).toBeNull();
-        expect(screen.getByRole('img', { name: 'same-id' })).toBeInTheDocument();
+        expect(screen.queryByRole('link')).not.toBeInTheDocument();
+        expect(screen.queryByRole('img', { name: 'same-id' })).not.toBeInTheDocument();
         expect(jest.getTimerCount()).toBe(0);
         rerender(<ContentAudio variations={[audio('same-id', track)]} />);
         unmount();

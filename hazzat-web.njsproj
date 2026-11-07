@@ -202,7 +202,6 @@
     <Content Include="src\images\hymnTop.png" />
     <Content Include="src\images\info_off.svg" />
     <Content Include="src\images\info_on.svg" />
-    <Content Include="src\images\Instrumental.png" />
     <Content Include="src\images\logo.png" />
     <Content Include="src\images\logo.svg" />
     <Content Include="src\images\map.jpg" />
