@@ -59,6 +59,8 @@ describe('shared content input validation', () => {
   it.each([
     ['Hazzat', { arabicHazzat: null }], ['VerticalHazzat', { copticVerticalHazzat: '<p>Notes</p>' }],
     ['MusicalNotes', { musicXml: '<score-partwise />' }], ['Audio', { audioFilePath: null }],
+    ['Audio', { audioFilePath: 'https://soundcloud.com/coptichazzat/meghalo' }],
+    ['Audio', { audioFilePath: 'https://hazzatstorage.blob.core.windows.net/downloads/Audio/example.mp3' }],
     ['Video', { englishVideo: null, copticVideo: 'https://example.com/watch' }], ['Information', { arabicInformation: '' }],
     ['Text', { paragraphs: [{ isComment: false, columns: [{ language: 'English', content: '' }] }] }],
   ])('accepts valid %s payloads', (contentType, content) => {
