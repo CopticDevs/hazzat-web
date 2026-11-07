@@ -5,11 +5,12 @@ For [#283](https://github.com/CopticDevs/hazzat-web/issues/283), the website now
 ## Reader behavior
 
 - A validated public HTTPS SoundCloud artist/track link renders the official embedded player automatically. Audio autoplay is disabled.
+- SoundCloud's supported `color` parameter uses Hazzat's charcoal ink (`#302c26`). The accent remains the same in light/dark site themes because the standard widget keeps its own light canvas and branding. A theme toggle does not change the iframe URL or restart playback. This is an accent adjustment, not a dark SoundCloud player.
 - Azure MP3s and all other existing URLs retain the current image and external-link experience. Empty audio values remain empty.
 - Recognition uses exact host checks for `soundcloud.com`, `www.soundcloud.com` and `m.soundcloud.com`, canonicalizing to `soundcloud.com`. Lookalike domains, credentials, nonstandard ports, private tokens, playlists and profile URLs are not embedded.
 - Short share links such as `https://on.soundcloud.com/...` keep the legacy external-link experience. Resolve them to the full canonical artist/track URL before saving a migrated record. Do not put a player iframe URL or HTML into `audioFilePath`.
 - Tracking parameters and fragments are stripped from recognized track URLs. The site never treats a matching word elsewhere in a URL as a SoundCloud host.
-- The player includes English/Arabic privacy text, a labeled responsive iframe, loading feedback, Reload and an always-visible SoundCloud fallback. A frame load event does not prove playable audio, so the UI never claims it does.
+- The player includes English/Arabic privacy text and a labeled responsive iframe. Loading feedback is screen-reader-only. After the frame loads, no instructions, status text, link or Reload button appear underneath. A timeout or iframe error shows a localized SoundCloud fallback with an accessible new-tab announcement and a theme-colored icon. A frame load event does not prove playable audio; the site does not inspect cross-origin widget content or detect every playback failure.
 - Replacing a recording under the same content ID removes the old iframe and resets loading state. Moving back to a legacy URL or leaving the audio view removes the iframe and cleans up its timer.
 
 `SoundCloudUrl.ts` provides shared validation. `ContentAudio.tsx` selects the existing legacy markup or `SoundCloudPlayer.tsx`. The development review page uses that same player component.
@@ -73,7 +74,7 @@ This is an unchanged screenshot of the **standalone official SoundCloud widget, 
 Before release, check:
 
 - Mixed migrated/unmigrated records in the actual hymn view, desktop and narrow layouts, Arabic and light/dark appearance.
-- Automatic frame loading without automatic audio, Play/Pause/seek and external fallback.
-- Repeated reloads, a missing/private/unavailable track, same-ID URL replacement, navigation Back/Forward and rollback to Azure, with no lingering playback.
+- Automatic frame loading without automatic audio, Play/Pause/seek and the timeout/error fallback.
+- A missing/private/unavailable track, same-ID URL replacement, navigation Back/Forward and rollback to Azure, with no lingering playback.
 - Keyboard/focus behavior, assistive technology and real iOS Safari/Android Chrome.
 - Recording rights, privacy and applicable SoundCloud permission. The [player/widget terms](https://soundcloud.com/terms-of-use) include consent requirements for genre-focused sites; clarify the permission applicable to Hazzat before public rollout.

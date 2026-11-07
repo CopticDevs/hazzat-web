@@ -17,6 +17,8 @@ export function soundCloudTrackUrl(value: string): string | undefined {
 export function soundCloudEmbedUrl(trackUrl: string): string {
     const canonical = soundCloudTrackUrl(trackUrl);
     if (!canonical) throw new Error('A public SoundCloud track link is required');
-    const params = new URLSearchParams({ url: canonical, auto_play: 'false', color: '#9b4f24', visual: 'false' });
+    // Match Hazzat's charcoal ink on SoundCloud's light canvas in either site theme.
+    // Keeping the accent stable avoids reloading an active iframe on a theme switch.
+    const params = new URLSearchParams({ url: canonical, auto_play: 'false', color: '#302c26', visual: 'false' });
     return `https://w.soundcloud.com/player/?${params.toString()}`;
 }

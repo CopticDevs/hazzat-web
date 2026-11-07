@@ -58,7 +58,7 @@ test.each([
 test.each(['https://www.soundcloud.com/coptichazzat/meghalo/?utm_source=share#t=12', 'https://m.soundcloud.com/coptichazzat/meghalo'])('normalizes supported SoundCloud hosts without forwarding tracking: %s', path => {
     render(<ContentAudio variations={[audio('Meghalo', path)]} />);
     expect(screen.getByTitle('SoundCloud player: Recording Meghalo')).toHaveAttribute('src', soundCloudEmbedUrl(track));
-    expect(screen.getByRole('link', { name: 'Open on SoundCloud ↗' })).toHaveAttribute('href', track);
+    expect(screen.queryByRole('link', { name: /Open on SoundCloud/ })).not.toBeInTheDocument();
 });
 
 test('a stable content ID can migrate, change recording and roll back without leaving an old frame', () => {
@@ -69,7 +69,7 @@ test('a stable content ID can migrate, change recording and roll back without le
         rerender(<ContentAudio variations={[audio('same-id', track)]} />);
         const first = screen.getByTitle(/^SoundCloud player:/);
         fireEvent.load(first);
-        expect(screen.getByRole('status')).toHaveTextContent('If the recording is unavailable');
+        expect(screen.queryByRole('status')).not.toBeInTheDocument();
         rerender(<ContentAudio variations={[audio('same-id', 'https://soundcloud.com/example/another')]} />);
         expect(first).not.toBeInTheDocument();
         expect(screen.getAllByTitle(/^SoundCloud player:/)).toHaveLength(1);
@@ -86,20 +86,20 @@ test('a stable content ID can migrate, change recording and roll back without le
     } finally { jest.useRealTimers(); }
 });
 
-test('slow or unavailable embeds retain fallback and retry without claiming audio is playable', () => {
+test('slow or unavailable embeds retain fallback without reload controls or a false playback claim', () => {
     jest.useFakeTimers();
     try {
         render(<ContentAudio variations={[audio('Meghalo', track)]} />);
         const first = screen.getByTitle(/^SoundCloud player:/);
         act(() => jest.advanceTimersByTime(12000));
         expect(screen.getByRole('status')).toHaveTextContent('taking longer');
-        const fallback = screen.getByRole('link', { name: 'Open on SoundCloud ↗' });
+        const fallback = screen.getByRole('link', { name: 'Open on SoundCloud (opens in a new tab)' });
         expect(fallback).toHaveAttribute('rel', 'noopener noreferrer');
-        fireEvent.click(screen.getByRole('button', { name: 'Reload player' }));
-        expect(first).not.toBeInTheDocument();
-        expect(screen.getByRole('status')).toHaveTextContent('Loading');
-        fireEvent.load(screen.getByTitle(/^SoundCloud player:/));
-        expect(screen.getByRole('status')).toHaveTextContent('If the recording is unavailable');
+        expect(screen.queryByRole('button', { name: 'Reload player' })).not.toBeInTheDocument();
+        expect(screen.getByRole('status')).not.toHaveTextContent('retry');
+        expect(first).toBeInTheDocument();
+        fireEvent.load(first);
+        expect(screen.queryByRole('status')).not.toBeInTheDocument();
     } finally { jest.useRealTimers(); }
 });
 
@@ -109,5 +109,5 @@ test('Arabic content uses localized player labels and privacy text', () => {
     </LanguageContext.Provider>);
     expect(screen.getByTitle('مشغّل SoundCloud: Recording ميغالو')).toHaveAttribute('src', soundCloudEmbedUrl(track));
     expect(screen.getByText(/يتصل هذا المشغّل بـ SoundCloud تلقائياً/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'فتح على SoundCloud ↗' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /فتح على SoundCloud/ })).not.toBeInTheDocument();
 });

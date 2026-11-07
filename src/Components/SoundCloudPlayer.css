@@ -4,3 +4,6 @@
 .soundcloud-player-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 18px; padding: 0 16px 12px; }
 .soundcloud-player-actions a, .soundcloud-player-actions button { display: inline-flex; align-items: center; min-height: 44px; padding: 0; text-decoration: underline; }
 .soundcloud-player-actions button { background: transparent; border: 0; color: inherit; }
+.soundcloud-player-actions .soundcloud-player-external-link { gap: .4em; color: var(--ink); }
+.soundcloud-player-actions .soundcloud-player-external-link:hover { color: var(--muted-ink); }
+.soundcloud-player-external-link svg { flex: 0 0 auto; font-size: .85em; }
