@@ -1,5 +1,3 @@
-import audioImage from "../images/Instrumental.png";
-import LocalizedMessage from "../LocalizedMessage";
 import { IAudioContent, IVariationInfo } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
 import "./Content.css";
 import CrossDivider from "./CrossDivider";
@@ -13,41 +11,30 @@ interface IProps {
     hymnTitle?: string;
 }
 
-function ContentAudio(props: IProps) {
+function ContentAudio({ variations, hymnTitle }: IProps) {
+    const recordings = variations.flatMap(variation => {
+        const url = soundCloudTrackUrl(variation.content.audioFilePath || "");
+        return url ? [{ variation, url }] : [];
+    });
 
     return (
         <>
-            {props.hymnTitle && (
-                <>
-                    <div className="content-heading">
-                        <HymnTitle content={props.hymnTitle} />
-                    </div>
-                </>
-            )}
-            {props.variations.map((variation) => {
-                const soundCloudUrl = variation.content.audioFilePath && soundCloudTrackUrl(variation.content.audioFilePath);
-                return <div key={variation.id}>
-                    {props.variations.length > 1 && (
-                        <>
-                            <div className="content-heading">
-                                <VariationTitle content={variation.displayName} />
-                            </div>
-                        </>
-                    )}
-                    {soundCloudUrl ? <div>
-                        <SoundCloudPlayer url={soundCloudUrl} label={variation.displayName || variation.name} />
-                        <CrossDivider />
-                    </div> : variation.content.audioFilePath ?
-                        <div style={{ textAlign: "center" }}>
-                            <a href={variation.content.audioFilePath} target="_blank" rel="noreferrer">
-                                <img className="contentImage" src={audioImage} alt={variation.name} /><br />
-                                {variation.name}<br />
-                                <LocalizedMessage of="audioLinkSuffix" />
-                            </a>
-                            <CrossDivider />
-                        </div> : ""}
+            {hymnTitle && (
+                <div className="content-heading">
+                    <HymnTitle content={hymnTitle} />
                 </div>
-            })}
+            )}
+            {recordings.map(({ variation, url }) => (
+                <div key={variation.id}>
+                    {recordings.length > 1 && (
+                        <div className="content-heading">
+                            <VariationTitle content={variation.displayName} />
+                        </div>
+                    )}
+                    <SoundCloudPlayer url={url} label={variation.displayName || variation.name} />
+                    <CrossDivider />
+                </div>
+            ))}
         </>
     );
 }
