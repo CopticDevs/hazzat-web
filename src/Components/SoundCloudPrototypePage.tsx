@@ -6,22 +6,22 @@ import { soundCloudPrototypeCopy } from './SoundCloudPrototypeCopy';
 import { soundCloudTrackUrl, soundCloudEmbedUrl } from './SoundCloudPrototypeUrl';
 import './SoundCloudPrototype.css';
 
-const demoTrack = 'https://soundcloud.com/forss/flickermood';
+const sampleTrack = 'https://soundcloud.com/coptichazzat/meghalo';
 
 /** Local review only. App excludes this module and route from production builds. */
 export default function SoundCloudPrototypePage() {
     const { languageProperties } = useContext(LanguageContext);
     const copy = soundCloudPrototypeCopy[languageProperties.localeName === 'ar' ? 'ar' : 'en'];
-    const [url, setUrl] = useState(demoTrack);
+    const [url, setUrl] = useState(sampleTrack);
     const [label, setLabel] = useState('');
     const [closed, setClosed] = useState(false);
-    const [active, setActive] = useState<{ url: string; attempt: number } | undefined>({ url: demoTrack, attempt: 0 });
+    const [active, setActive] = useState<{ url: string; attempt: number } | undefined>({ url: sampleTrack, attempt: 0 });
     const [frameState, setFrameState] = useState<'loading' | 'opened' | 'slow'>('loading');
     const input = useRef<HTMLInputElement>(null);
     const attempt = useRef(0);
     const canonical = soundCloudTrackUrl(url);
     const invalid = url.trim() !== '' && !canonical;
-    const recordingLabel = label.trim() || (active?.url === demoTrack ? copy.demoLabel : copy.recording);
+    const recordingLabel = label.trim() || (active?.url === sampleTrack ? copy.sampleLabel : copy.recording);
 
     useEffect(() => {
         const previous = document.title;
@@ -50,7 +50,7 @@ export default function SoundCloudPrototypePage() {
     }, [canonical, closed, active?.url]);
 
     function close() {
-        setClosed(true); // Keep it dismissed until the link changes or the demo is restored.
+        setClosed(true); // Keep it dismissed until the link changes or the sample is restored.
         setActive(undefined); // Removing the iframe also stops its playback.
         setFrameState('loading');
         input.current?.focus();
@@ -79,11 +79,11 @@ export default function SoundCloudPrototypePage() {
                 {invalid && <p id="soundcloud-url-error" className="soundcloud-prototype-error" role="alert">{copy.invalid}</p>}
                 <div className="soundcloud-prototype-example">
                     <button type="button" onClick={() => {
-                        setUrl(demoTrack);
+                        setUrl(sampleTrack);
                         setLabel('');
                         setClosed(false);
-                    }}>{copy.useDemo}</button>
-                    <span>{copy.demoHint}</span>
+                    }}>{copy.useSample}</button>
+                    <span>{copy.sampleHint}</span>
                 </div>
                 <label htmlFor="soundcloud-recording-label">{copy.labelLabel}</label>
                 <input id="soundcloud-recording-label" value={label} onChange={event => setLabel(event.target.value)}

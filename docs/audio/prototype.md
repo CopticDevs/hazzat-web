@@ -13,7 +13,9 @@ npm start
 
 Open `http://localhost:3000/Preview/SoundCloud`. The sample player loads automatically, with audio autoplay disabled. Paste an appropriate public full track URL to replace it automatically after a 500 ms pause in typing. The route intentionally has no main-navigation link.
 
-The default sample is **Flickermood by Forss**, an official [SoundCloud developer-documentation example](https://developers.soundcloud.com/docs/oembed), not a Hazzat hymn or a verified mapping to one. A verified public Hazzat SoundCloud recording link is still needed to replace this example. Actual track-to-hymn mappings and rights must be checked before migrating live content. No sample music is uploaded or copied.
+The default recording is [**Meghalo by Hazzat**](https://soundcloud.com/coptichazzat/meghalo), supplied for **Great Lent Saturdays & Sundays → Liturgy → Meghalo**. The supplied short link resolves to this canonical public track; tracking parameters are omitted from the player URL. No recording is uploaded or copied.
+
+The pilot association is with content UUID `81a874a9-5ab3-41a8-9265-fb657b238c05`, hymn `meghalo`, season `great-lent-saturdays-sundays`, service `liturgy-25`. The current [v5 recording](https://d1zhmhuei1bwco.cloudfront.net/v5/content/81a874a9-5ab3-41a8-9265-fb657b238c05.json) and [service placement](https://d1zhmhuei1bwco.cloudfront.net/v5/seasons/great-lent-saturdays-sundays/services/liturgy-25.json) match the supplied hymn and context. SoundCloud's public title and description agree. This is a prototype association, not proof that the SoundCloud and Azure files contain the identical performance. Live payloads and schema remain unchanged.
 
 Use the existing website preferences for Arabic and light/dark appearance. Only public HTTPS `soundcloud.com`, `www.soundcloud.com`, or `m.soundcloud.com` artist/track-shaped links are accepted; short/profile/playlist/private-token URLs are rejected. Tracking parameters are removed. Syntax validation does not prove the track exists or is playable.
 
@@ -23,7 +25,7 @@ Use the existing website preferences for Arabic and light/dark appearance. Only 
 - Loads one official standard SoundCloud iframe on page opening. Valid URL edits load automatically after a 500 ms debounce; superseded edits are canceled. Clearing or invalidating the URL removes the frame.
 - Clearly discloses automatic third-party connections and possible SoundCloud cookies. This is automatic frame loading, not automatic audio playback.
 - Does not request autoplay. Keeps SoundCloud's controls and branding, a visible recording label, an external fallback, Reload and Close.
-- Replacing/reloading removes the prior iframe. Closing restores input focus and keeps the frame dismissed until the URL changes or the demo is restored. Label edits do not reload or reopen it. Unmounting the route removes the iframe rather than leaving background playback.
+- Replacing/reloading removes the prior iframe. Closing restores input focus and keeps the frame dismissed until the URL changes or the Meghalo recording is restored. Label edits do not reload or reopen it. Unmounting the route removes the iframe rather than leaving background playback.
 - Includes English/Arabic copy, responsive layout and descriptive frame labeling.
 - Does not save the URL/label. Existing Azure audio rendering, payloads and mappings are untouched.
 
@@ -50,9 +52,13 @@ Passed locally:
 
 Full repository lint does not pass: **120 errors and 9 warnings in unchanged files**. These include pre-existing test-rule violations; no unrelated cleanup is included.
 
-Browser verification and screenshots are pending because the available browser could not reach the local development server. No screenshots are included, and this is not evidence of a working or broken SoundCloud recording.
+The standalone official SoundCloud widget was checked in a browser for this recording: it displayed **Meghalo** by **Hazzat**, artwork, a waveform and a **9:56** duration. Play changed to Pause and the elapsed time advanced to **0:16**; it was paused afterward. SoundCloud then showed its own promotional overlay. No login or unavailable-track error appeared. Audible output was not independently checked.
 
-No audible/full-track playback, real iOS Safari/Android Chrome, or assistive-technology checks have been claimed from unit tests. Responsive CSS is not equivalent to verified mobile behavior.
+![Standalone official SoundCloud widget for Meghalo at 0:16, not integrated Hazzat UI](screenshots/meghalo-soundcloud-widget.jpg)
+
+This is an unchanged screenshot of the **standalone official SoundCloud widget, not the integrated Hazzat UI**. Integrated-page browser verification and screenshots remain blocked because the available browser cannot reach the local development server.
+
+Full-track listening, real iOS Safari/Android Chrome and assistive-technology checks remain unverified. Responsive CSS is not equivalent to verified mobile behavior.
 
 ## Browser review checklist
 

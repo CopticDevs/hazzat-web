@@ -4,7 +4,7 @@ import { soundCloudTrackUrl, soundCloudEmbedUrl } from './SoundCloudPrototypeUrl
 import { LanguageContext } from '../LanguageContext';
 import { ArabicLanguageProperties } from '../l8n';
 
-const track = 'https://soundcloud.com/forss/flickermood';
+const track = 'https://soundcloud.com/coptichazzat/meghalo';
 function changeUrl(url: string) {
     fireEvent.change(screen.getByLabelText('Public SoundCloud track link'), { target: { value: url } });
 }
@@ -23,8 +23,8 @@ it.each([
     ['https://soundcloud.com/discover/sets', undefined], ['https://on.soundcloud.com/short', undefined],
     ['https://w.soundcloud.com/player/?url=anything', undefined], ['https://soundcloud.com/artist/song%2Fevil', undefined],
     ['https://soundcloud.com/artist/%2e%2e/thing', undefined],
-    [track, track], [' https://www.soundcloud.com/forss/flickermood/?utm_source=share#t=4 ', track],
-    ['https://m.soundcloud.com/forss/flickermood', track],
+    [track, track], [' https://www.soundcloud.com/coptichazzat/meghalo/?utm_source=share#t=4 ', track],
+    ['https://m.soundcloud.com/coptichazzat/meghalo', track],
 ])('validates and canonicalizes %s', (value, expected) => {
     expect(soundCloudTrackUrl(value)).toBe(expected);
 });
@@ -38,13 +38,13 @@ test('builds only an official player URL with autoplay off and no tracking data'
     expect(() => soundCloudEmbedUrl('https://example.com/a')).toThrow();
 });
 
-test('loads the developer sample immediately, without a Load click or audio autoplay', () => {
+test('loads the supplied Meghalo recording immediately, without a Load click or audio autoplay', () => {
     render(<SoundCloudPrototypePage />);
-    const frame = screen.getByTitle('SoundCloud player: Flickermood by Forss · Developer example');
+    const frame = screen.getByTitle('SoundCloud player: Meghalo · Great Lent Saturdays & Sundays · Liturgy');
     expect(frame).toHaveAttribute('src', soundCloudEmbedUrl(track));
     expect(screen.getByLabelText('Public SoundCloud track link')).toHaveValue(track);
     expect(screen.queryByRole('button', { name: /^Load/ })).not.toBeInTheDocument();
-    expect(screen.getByText(/not a Hazzat recording/)).toBeInTheDocument();
+    expect(screen.getByText(/Meghalo from Hazzat on SoundCloud/)).toBeInTheDocument();
     expect(screen.getByText(/automatically on opening/)).toHaveTextContent('Audio stays paused until you press Play');
 });
 
@@ -116,13 +116,13 @@ test('rapid edits cancel previous replacements, and a later invalid link cancels
 test('equivalent normalized links do not reload the frame or forward tracking data', () => {
     render(<SoundCloudPrototypePage />);
     const original = screen.getByTitle(/^SoundCloud player:/);
-    changeUrl(`https://www.soundcloud.com/forss/flickermood/?utm_source=test#t=10`);
+    changeUrl(`https://www.soundcloud.com/coptichazzat/meghalo/?utm_source=test#t=10`);
     settleUrl();
     expect(screen.getByTitle(/^SoundCloud player:/)).toBe(original);
     expect(original).toHaveAttribute('src', soundCloudEmbedUrl(track));
 });
 
-test('reload replaces the frame; close stays dismissed and restores input focus; demo reopens automatically', () => {
+test('reload replaces the frame; close stays dismissed and restores input focus; Meghalo reopens automatically', () => {
     render(<SoundCloudPrototypePage />);
     const first = screen.getByTitle(/^SoundCloud player:/);
     fireEvent.click(screen.getByRole('button', { name: 'Reload player' }));
@@ -135,7 +135,7 @@ test('reload replaces the frame; close stays dismissed and restores input focus;
     fireEvent.change(screen.getByLabelText('Recording label (optional)'), { target: { value: 'A label' } });
     settleUrl();
     expect(screen.queryByTitle(/^SoundCloud player:/)).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Use SoundCloud demo link' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Use Meghalo recording' }));
     settleUrl();
     expect(screen.queryAllByTitle(/^SoundCloud player:/)).toHaveLength(1);
 });

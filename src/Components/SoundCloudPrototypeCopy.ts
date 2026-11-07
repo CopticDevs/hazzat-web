@@ -1,6 +1,6 @@
 export const soundCloudPrototypeCopy = {
     en: {
-        useDemo: 'Use SoundCloud demo link', demoLabel: 'Flickermood by Forss · Developer example', demoHint: 'An official developer example, not a Hazzat recording. It loads automatically in this preview.',
+        useSample: 'Use Meghalo recording', sampleLabel: 'Meghalo · Great Lent Saturdays & Sundays · Liturgy', sampleHint: 'Meghalo from Hazzat on SoundCloud, supplied for Great Lent Saturdays & Sundays under Liturgy. It loads automatically in this preview.',
         badge: 'LOCAL PROTOTYPE', title: 'Listen with SoundCloud',
         intro: 'Preview SoundCloud as the audio source for Hazzat, replacing Azure-hosted recordings.',
         scope: 'Review only. SoundCloud is the intended replacement for Azure audio. Existing live recordings stay unchanged until public SoundCloud track links and rights are verified. This page does not publish or upload recordings.',
@@ -10,14 +10,14 @@ export const soundCloudPrototypeCopy = {
         privacy: 'This preview loads a SoundCloud player automatically on opening and when you enter a valid link. This connects your browser to SoundCloud, which may use cookies. Audio stays paused until you press Play. The link and label are not saved.',
         provider: 'SOUNDCLOUD', recording: 'Selected recording',
         playerTitle: 'SoundCloud player', emptyTitle: 'Your recording appears here',
-        empty: 'Enter a public track link above to load the player automatically. After closing it, change the link or restore the demo to reopen it.', noRequests: 'No SoundCloud player is currently loaded.',
+        empty: 'Enter a public track link above to load the player automatically. After closing it, change the link or restore the Meghalo recording to reopen it.', noRequests: 'No SoundCloud player is currently loaded.',
         loading: 'Loading the SoundCloud frame…', slow: 'The frame is taking longer to load. You can retry or open the track on SoundCloud.',
         opened: 'Use the player’s Play button. If the recording is unavailable, try the SoundCloud link below.',
         open: 'Open on SoundCloud ↗', retry: 'Reload player', close: 'Close player',
-        terms: 'No sing-along or track-to-hymn mapping is included. Recording rights and SoundCloud permission for a public Hazzat rollout still need review.',
+        terms: 'This preview defaults to the supplied Meghalo recording. Other track mappings, recording rights and SoundCloud permission for a public Hazzat rollout still need review. No sing-along is included.',
     },
     ar: {
-        useDemo: 'استخدام رابط SoundCloud التجريبي', demoLabel: 'Flickermood by Forss · مثال للمطوّرين', demoHint: 'مثال رسمي للمطوّرين وليس تسجيلاً لهزّات. يتم تحميله تلقائياً في هذه المعاينة.',
+        useSample: 'استخدام تسجيل ميغالو', sampleLabel: 'ميغالو · سبوت وآحاد الصوم الكبير · القداس', sampleHint: 'تسجيل ميغالو من Hazzat لسبوت وآحاد الصوم الكبير تحت القداس. يتم تحميله تلقائياً في هذه المعاينة.',
         badge: 'نموذج أولي محلي', title: 'استمع عبر SoundCloud',
         intro: 'عاين SoundCloud كمصدر لتسجيلات هزّات بدلاً من التسجيلات المستضافة على Azure.',
         scope: 'للمراجعة فقط. SoundCloud هو البديل المقصود لتسجيلات Azure. تبقى التسجيلات الحالية دون تغيير حتى يتم التحقق من روابط التسجيلات العامة على SoundCloud وحقوقها. هذه الصفحة لا تنشر التسجيلات ولا ترفعها.',
@@ -27,10 +27,10 @@ export const soundCloudPrototypeCopy = {
         privacy: 'يتم تحميل مشغّل SoundCloud تلقائياً عند فتح هذه المعاينة وعند إدخال رابط صحيح. هذا يربط متصفحك بـ SoundCloud، وقد يستخدم ملفات تعريف الارتباط. يبقى الصوت متوقفاً حتى تضغط على تشغيل. لا يتم حفظ الرابط أو الاسم.',
         provider: 'SOUNDCLOUD', recording: 'التسجيل المختار',
         playerTitle: 'مشغّل SoundCloud', emptyTitle: 'يظهر تسجيلك هنا',
-        empty: 'أدخل رابط تسجيل عام أعلاه لتحميل المشغّل تلقائياً. بعد إغلاقه، غيّر الرابط أو استعد المثال التجريبي لفتحه مجدداً.', noRequests: 'لا يوجد مشغّل SoundCloud محمّل حالياً.',
+        empty: 'أدخل رابط تسجيل عام أعلاه لتحميل المشغّل تلقائياً. بعد إغلاقه، غيّر الرابط أو استعد تسجيل ميغالو لفتحه مجدداً.', noRequests: 'لا يوجد مشغّل SoundCloud محمّل حالياً.',
         loading: 'جارٍ تحميل إطار SoundCloud…', slow: 'يستغرق تحميل الإطار وقتاً أطول. يمكنك إعادة المحاولة أو فتح التسجيل على SoundCloud.',
         opened: 'استخدم زر التشغيل داخل المشغّل. إذا كان التسجيل غير متاح، جرّب رابط SoundCloud أدناه.',
         open: 'فتح على SoundCloud ↗', retry: 'إعادة تحميل المشغّل', close: 'إغلاق المشغّل',
-        terms: 'لا يتضمن النموذج تزامن الكلمات مع الصوت أو ربط التسجيلات بالألحان. ما زالت حقوق التسجيلات وموافقة SoundCloud للنشر العام على هزّات بحاجة إلى مراجعة.',
+        terms: 'تستخدم هذه المعاينة تسجيل ميغالو المقدم بشكل افتراضي. ما زال ربط بقية التسجيلات وحقوقها وموافقة SoundCloud للنشر العام على هزّات بحاجة إلى مراجعة. لا يتضمن النموذج تزامن الكلمات مع الصوت.',
     },
 };
