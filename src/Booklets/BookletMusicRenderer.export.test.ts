@@ -1,4 +1,4 @@
-import { renderBookletMusic } from "./BookletMusicRenderer";
+import { renderBookletMusic as exportBookletMusic } from "./BookletMusicRenderer";
 
 const mockLoad = jest.fn();
 const mockClear = jest.fn();
@@ -59,9 +59,7 @@ afterEach(() => {
 
 it("exports every complete score page at double resolution with black ink and a white background", async () => {
     const childCount = document.body.children.length;
-    // This renderer returns score-page data, not a Testing Library render result.
-    // eslint-disable-next-line testing-library/render-result-naming-convention
-    const pages = await renderBookletMusic("<score-timewise />");
+    const pages = await exportBookletMusic("<score-timewise />");
     expect(pages).toEqual(mockPages.map(([width, height]) => ({ width, height, pngBytes: new Uint8Array([137, 80, 78, 71]) })));
     expect(mockLoad).toHaveBeenCalledWith("<score-timewise />");
     expect(mockFormat).toHaveBeenCalledWith(324, 440);
@@ -97,7 +95,7 @@ it.each([
     if (failure === "constructor") mockConstruct.mockImplementationOnce(() => { throw new Error(message); });
     if (failure === "render") mockRender.mockImplementationOnce(() => { throw new Error(message); });
     const childCount = document.body.children.length;
-    await expect(renderBookletMusic("<score-partwise />")).rejects.toThrow(message);
+    await expect(exportBookletMusic("<score-partwise />")).rejects.toThrow(message);
     expect(document.body.children.length).toBe(childCount);
     expect(mockClear).toHaveBeenCalledTimes(failure === "constructor" ? 0 : 1);
     expect(URL.revokeObjectURL).toHaveBeenCalledTimes(["image", "canvas", "blob"].includes(failure) ? 1 : 0);

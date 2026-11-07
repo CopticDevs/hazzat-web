@@ -64,7 +64,10 @@ test('footer stays put on mount and reveals its links when opened', () => {
 test('format dropdown has a native keyboard toggle and preserves language and environment', async () => {
     render(<MemoryRouter initialEntries={['/?lang=ar&env=PPE']}><FormatOptionsContextMenu title="Hymn" formatsMap={{'6':'/video','1':'/text'}} /><Location /></MemoryRouter>);
     const toggle = screen.getByRole('button', { name: 'Formats: Hymn' });
-    toggle.focus(); await act(async () => { await userEvent.keyboard('{ArrowDown}'); });
+    toggle.focus();
+    // Flush asynchronous Popper positioning after the keyboard-triggered menu opens.
+    const keyboardInput = userEvent.keyboard('{ArrowDown}');
+    await act(async () => { await keyboardInput; });
     const text = await screen.findByRole('button', { name: 'Text' });
     userEvent.click(text);
     expect(screen.getByTestId('location')).toHaveTextContent('/text?lang=ar&env=PPE');
@@ -111,7 +114,7 @@ test('information shares reader size/color settings and preferences survive remo
     expect(screen.getByText('English information')).toHaveStyle({fontSize:'20px'});
     expect(screen.getByText('معلومات')).toHaveStyle({fontSize:'24px'});
     userEvent.click(within(screen.getByRole('group', { name: 'Text' })).getByRole('radio', { name:'Navy' }));
-    expect((screen.getByText('English information').closest('.information-columns') as HTMLElement).style.getPropertyValue('--content-font-color')).toBe('var(--reader-navy, NAVY)');
+    expect(screen.getByTestId('information-columns').style.getPropertyValue('--content-font-color')).toBe('var(--reader-navy, NAVY)');
     view.unmount(); render(<UserSettingProvider><Settings /></UserSettingProvider>);
     expect(screen.getByTestId('settings')).toHaveTextContent('20px');
     expect(screen.getByTestId('settings')).toHaveTextContent('NAVY');
@@ -126,11 +129,12 @@ test.each(['broken json', JSON.stringify({size:999,contentFontColor:'invalid',ha
 
 test('notation uses a keyboard reachable RTL scroll region and retains encoded musical HTML', () => {
     const content = '<span class="HazzatVAFont">ى.ىىىىءزىىىءز+ىء</span><br><span class="ArabicFont">صلاة</span>';
-    const { container } = render(<NotationContent content={content} language="ar" style={{fontSize:'30px'}} />);
+    render(<NotationContent content={content} language="ar" style={{fontSize:'30px'}} />);
     const region = screen.getByRole('region', { name: strings.notationScroll });
     expect(region).toHaveAttribute('dir','rtl'); expect(region).toHaveAttribute('tabindex','0');
     expect(region.innerHTML).toBe(content);
-    expect(container.querySelectorAll('.HazzatVAFont')).toHaveLength(1);
+    expect(screen.getAllByText('ى.ىىىىءزىىىءز+ىء')).toHaveLength(1);
+    expect(screen.getByText('ى.ىىىىءزىىىءز+ىء')).toHaveClass('HazzatVAFont');
 });
 
 test('the retired contact form cannot falsely acknowledge an unsent message', () => {
@@ -160,7 +164,7 @@ test('new navigation starts at the top and Back restores the prior reading posit
 test('visible icon format links change format without dropping query parameters', () => {
     render(<MemoryRouter initialEntries={['/video?lang=ar&env=PPE']}><FormatBar title="Hymn" formatsMap={{'6':'/video','1':'/text'}} activeFormatId="6" /><Location /></MemoryRouter>);
     const textLink = screen.getByRole('link', { name: 'Text' });
-    expect(textLink.querySelector('svg')).not.toBeNull();
+    expect(within(textLink).getByTestId('format-icon-off')).toBeInTheDocument();
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
     userEvent.click(textLink);
     expect(screen.getByTestId('location')).toHaveTextContent('/text?lang=ar&env=PPE');

@@ -100,7 +100,7 @@ function MusicXmlScore(props: IProps) {
     useEffect(() => { redrawRef.current?.(); }, [fontSize]);
 
     return (
-        <div className="musicXmlScoreWrap" style={{ fontSize }}>
+        <div data-testid="music-xml-score" className="musicXmlScoreWrap" style={{ fontSize }}>
             {error && <div className="musicXmlScoreError">{error}</div>}
             {!error && heading.title && heading.title.trim() !== props.hymnTitle?.trim() && <h3 className="musicXmlScoreTitle" dir="auto">{heading.title}</h3>}
             {!error && heading.subtitle && <p className="musicXmlScoreSubtitle" dir="auto">{heading.subtitle}</p>}

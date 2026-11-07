@@ -130,7 +130,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                 </div>
 
                 <div role="status" aria-live="polite" aria-atomic="true" className={wordsLoading || isLoading ? 'alert alert-info search-loading' : 'visually-hidden'}>
-                    {(wordsLoading || isLoading) && <span className="search-spinner" aria-hidden="true" />}
+                    {(wordsLoading || isLoading) && <span data-testid="search-spinner" className="search-spinner" aria-hidden="true" />}
                     <span>{wordsLoading ? (languageProperties.localeName === 'ar' ? `عدد نتائج العناوين: ${results.length}. جارٍ البحث في كلمات الألحان…`
                         : `${results.length} title ${results.length === 1 ? 'match' : 'matches'}. Still searching hymn words…`)
                         : isLoading ? (languageProperties.localeName === 'ar' ? 'جارٍ البحث' : 'Searching')
@@ -189,7 +189,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                                     {visibleResults.filter(r => r.type === 'hymn').map(result => (
                                         <div key={result.hymn!.id} className="list-group-item">
                                             <h5 className="mb-2"><SearchHighlight text={result.hymn!.name} query={query} /></h5>
-                                            {result.hymn!.snippet && <p dir={isCopticPassage(result.hymn!.snippetLanguage) ? "ltr" : "auto"} lang={isCopticPassage(result.hymn!.snippetLanguage) ? "cop" : undefined} className={`mb-2 search-snippet${isCopticPassage(result.hymn!.snippetLanguage) ? " CopticFont" : ""}`}><SearchHighlight text={result.hymn!.snippet} query={query} coptic={isCopticPassage(result.hymn!.snippetLanguage)} /></p>}
+                                            {result.hymn!.snippet && <p data-testid="search-snippet" dir={isCopticPassage(result.hymn!.snippetLanguage) ? "ltr" : "auto"} lang={isCopticPassage(result.hymn!.snippetLanguage) ? "cop" : undefined} className={`mb-2 search-snippet${isCopticPassage(result.hymn!.snippetLanguage) ? " CopticFont" : ""}`}><SearchHighlight text={result.hymn!.snippet} query={query} coptic={isCopticPassage(result.hymn!.snippetLanguage)} /></p>}
                                             <div className="hymn-references">
                                                 <small className="text-muted">
                                                     <LocalizedMessage of="foundIn" />:

@@ -33,9 +33,9 @@
     "test": "jest",
     "test-unit": "jest --watchAll=false --reporters=default --reporters=jest-junit",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx",
+    "lint": "eslint src --ext .ts,.tsx --max-warnings 0",
     "preview": "vite preview",
-    "test-tooling": "node --test config/build-contract.test.mjs"
+    "test-tooling": "node --test config/build-contract.test.mjs config/lint-contract.test.mjs"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"

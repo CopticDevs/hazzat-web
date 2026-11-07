@@ -3,7 +3,7 @@ import { MemoryRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 describe('Route Redirects - Deprecated Routes', () => {
   it('should redirect /Types to /Seasons', () => {
-    const { container } = render(
+    render(
       <MemoryRouter initialEntries={['/Types']}>
         <Routes>
           <Route path="/Seasons" element={<div>Seasons Page</div>} />
@@ -16,7 +16,7 @@ describe('Route Redirects - Deprecated Routes', () => {
   });
 
   it('should redirect /Tunes to /Seasons', () => {
-    const { container } = render(
+    render(
       <MemoryRouter initialEntries={['/Tunes']}>
         <Routes>
           <Route path="/Seasons" element={<div>Seasons Page</div>} />

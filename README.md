@@ -10,8 +10,8 @@ See [Azure release migration](docs/azure-release-migration.md) and the [manual d
 - `npm start`: development server at http://localhost:3000 with React Fast Refresh. `HOST` and `PORT` can override the binding.
 - `npm test`: run Jest; add `-- --watch` for interactive watch mode.
 - `npm run test-unit -- --runInBand --coverage --coverageReporters=cobertura --coverageReporters=lcov --coverageReporters=text`: Azure-compatible tests, `junit.xml`, and coverage outputs.
-- `npm run test-tooling`: build configuration contract tests.
-- `npm run typecheck` and `npm run lint`: explicit compiler and lint checks. The development server transpiles without running these checks.
+- `npm run test-tooling`: build and lint configuration contract tests, including checks that ESLint rejects errors and warnings.
+- `npm run typecheck` and `npm run lint`: explicit compiler and lint checks. Lint covers all TypeScript/TSX source files and fails on any error or warning. All Azure PR/build pipelines run the same `npm run lint` command before building. The development server transpiles without running these checks.
 - `npm run build`: typecheck and produce the production artifact in `build/`, with hashed assets under `build/static/` as required by the release guards.
 - `npm run preview`: serve the built artifact locally. Hosting must retain the existing SPA fallback to `index.html` for direct reader URLs.
 

@@ -1,7 +1,7 @@
-const ref = (contentId: string) => ({contentId, name: "Standard", nameAr: "المعتاد"});
 import { FORMAT_NAMES_EN, FORMAT_NAMES_AR, formatDisplayName } from './FormatNames';
 import { resolveSharedService, SHARED_TYPES, SharedService } from './SharedContent';
 import { strings } from '../../l8n';
+const ref = (contentId: string) => ({contentId, name: "Standard", nameAr: "المعتاد"});
 
 test('all seven format types have the canonical English and Arabic labels in the UI', () => {
     const keys = ['textFormatName', 'hazzatFormatName', 'verticalHazzatFormatName', 'musicFormatName', 'audioFormatName', 'videoFormatName', 'informationFormatName'] as const;

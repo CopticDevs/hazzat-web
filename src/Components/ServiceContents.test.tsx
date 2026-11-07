@@ -1,6 +1,6 @@
 import { assignedFormatFixture, sharedServiceFixture } from "../testSupport/sharedServiceFixture";
-import { render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom';
+import { render, waitFor } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import ServiceContents from './ServiceContents';
 import { EnvironmentContext, prodEnvProps } from '../Contexts/Environment/EnvironmentContext';
 import { LanguageContext } from '../LanguageContext';
@@ -110,8 +110,8 @@ describe('ServiceContents - URL Deep Linking', () => {
 
     await waitFor(() => {
       expect(mockCloudFrontClient.get.mock.calls.filter(([path]) => path === "/v5/seasons/nativity/services/vespers.json")).toHaveLength(1);
-      expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v5/seasons/nativity/services/vespers.json');
     });
+    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v5/seasons/nativity/services/vespers.json');
   });
 
   it('should load service once for /seasons/{id}/services/{id}/hymns/{id}/formats/{id} URL', async () => {
@@ -131,12 +131,12 @@ describe('ServiceContents - URL Deep Linking', () => {
 
     await waitFor(() => {
       expect(mockCloudFrontClient.get.mock.calls.filter(([path]) => path === "/v5/seasons/nativity/services/vespers.json")).toHaveLength(1);
-      expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v5/seasons/nativity/services/vespers.json');
     });
+    expect(mockCloudFrontClient.get).toHaveBeenCalledWith('/v5/seasons/nativity/services/vespers.json');
   });
 
   it('should navigate to specific hymn within loaded data', async () => {
-    const { container } = render(
+    render(
       <MemoryRouter initialEntries={['/seasons/nativity/services/vespers/hymns/psalm-150']}>
         <LanguageContext.Provider value={mockLanguageContext}>
           <EnvironmentContext.Provider value={mockEnvironmentContext}>
