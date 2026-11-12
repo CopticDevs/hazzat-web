@@ -1,3 +1,4 @@
+import { trackAnalyticsEvent } from "../analytics";
 import { useContext } from "react";
 import { useLocation } from "react-router-dom";
 import { AppSettings } from "../AppSettings";
@@ -15,7 +16,7 @@ export default function LanguageSwitcher() {
             onClick={() => {
                 const language = validLanguage(lang.localeName);
                 if (language) setNavigationLanguage?.(language);
-                window.gtag?.("event", "change_nav_lang", { event_category: "Customization", event_label: `${lang.localeName} Language Selected` });
+                trackAnalyticsEvent("change_nav_lang", { event_category: "Customization", event_label: `${lang.localeName} Language Selected` });
             }}>
             {lang.friendlyName}
         </MyNavLink></li>;

@@ -1,3 +1,4 @@
+import { ContentLandingView } from "../Contexts/ContentViewContext";
 import InvalidAddressMessage from "./InvalidAddressMessage";
 import MyNavLink from "./MyNavLink";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -86,6 +87,7 @@ function ServicesMenu(props: IProps) {
             {
                 !!services ?
                     <div>
+                        {!serviceIdParam && <ContentLandingView view={{ view_type: "season", season_id: props.seasonId }} />}
                         <div className="seasonDownloadActions">
                             <MyNavLink className="seasonDownloadPdfsButton" to={`/Booklets/${props.seasonId}`}>
                                 {strings.downloadPdfs}
