@@ -1,3 +1,4 @@
+import { trackAnalyticsEvent } from "../analytics";
 import { faGlobe, faMoon } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext } from "react";
@@ -22,7 +23,7 @@ export default function SitePreferences() {
             aria-label={languageAction} title={languageAction}
             onClick={() => {
                 setNavigationLanguage?.(nextLanguage);
-                window.gtag?.('event', 'change_nav_lang', { event_category: 'Customization', event_label: `${nextLanguage} Language Selected` });
+                trackAnalyticsEvent('change_nav_lang', { event_category: 'Customization', event_label: `${nextLanguage} Language Selected` });
             }}>
             <FontAwesomeIcon icon={faGlobe} aria-hidden="true" />
             <span lang={languageProperties.localeName} aria-hidden="true">{languageProperties.localeName === 'en' ? 'EN' : 'ع'}</span>

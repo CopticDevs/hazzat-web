@@ -8,6 +8,7 @@ import VariationTitle from "./VariationTitle";
 interface IProps {
     variations: IVariationInfo<IMusicalNotesContent>[];
     hymnTitle?: string;
+    onRendered?: () => void;
 }
 
 function ContentMusicalNotes(props: IProps) {
@@ -32,7 +33,7 @@ function ContentMusicalNotes(props: IProps) {
                     )}
                     {variation.content.musicXml ?
                         <>
-                            <MusicXmlScore musicXml={variation.content.musicXml} hymnTitle={props.hymnTitle} />
+                            <MusicXmlScore musicXml={variation.content.musicXml} hymnTitle={props.hymnTitle} onRendered={props.onRendered} />
                             <CrossDivider />
                         </> : ""}
                 </div>

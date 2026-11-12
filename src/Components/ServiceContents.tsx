@@ -1,3 +1,4 @@
+import { ContentLandingView } from "../Contexts/ContentViewContext";
 import InvalidAddressMessage from "./InvalidAddressMessage";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -18,7 +19,7 @@ import "./HymnRow.css";
 interface Props { seasonId: string; serviceId: string; serviceName: string }
 
 export default function ServiceContents({ seasonId, serviceId, serviceName }: Props) {
-    const { hymnId, formatId } = useParams();
+    const { hymnId, formatId, serviceId: routeServiceId } = useParams();
     const { languageProperties } = useContext(LanguageContext);
     const { environmentProperties } = useContext(EnvironmentContext);
     const [hymns, setHymns] = useState<IHymnInfo[]>([]);
@@ -48,6 +49,7 @@ export default function ServiceContents({ seasonId, serviceId, serviceName }: Pr
     }
     const firstLink = Object.keys(formatsMap).sort((a, b) => Number(a) - Number(b)).map(id => formatsMap[id])[0];
     return <div style={{ padding: "7px 3px 7px 3px", marginTop: "30px" }}>
+        {routeServiceId === serviceId && !hymnId && <ContentLandingView view={{ view_type: "service", season_id: seasonId, service_id: serviceId }} />}
         <div className="contentLinksDiv">
             {firstLink ? <div style={{ display: "grid", gridTemplateColumns: "auto auto" }}>
                 <MyNavLink to={firstLink}><HymnTitle content={serviceName} /></MyNavLink>

@@ -8,7 +8,7 @@ import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { IServiceInfo } from "../Providers/HymnsDataProvider/Models/IServiceInfo";
 import { StringMap } from "../Types/StringMap";
 import BreadCrumb from "./BreadCrumb";
-import Content from "./Content";
+import ReaderContents from "./ReaderContents";
 import ContentLoadError from "./ContentLoadError";
 import ContentPageSettingPane from "./ContentPageSettingPane";
 import FormatBar from "./FormatBar";
@@ -67,10 +67,11 @@ export default function HymnContentFromService({ seasonInfo }: { seasonInfo: ISe
         ]} />
         <ContentPageSettingPane />
         <FormatBar title={title ?? service.displayName} formatsMap={formatsMap} activeFormatId={formatId} />
-        {shownHymns.map(hymn => {
-            const format = hymn.formats?.find(f => f.id === formatId);
-            return format ? <Content key={`${seasonId}/${serviceId}/${hymn.id}/${formatId}`} formatId={formatId}
-                hymnTitle={hymn.displayName} variationsCallback={async () => format.variations ?? []} /> : null;
-        })}
+        <ReaderContents key={`${seasonId}/${serviceId}/${hymnId ?? ""}/${formatId}`} formatId={formatId}
+            view={{ view_type: hymnId ? "hymn" : "service", season_id: seasonId, service_id: serviceId, hymn_id: hymnId }}
+            entries={shownHymns.flatMap(hymn => {
+                const format = hymn.formats?.find(f => f.id === formatId);
+                return format ? [{ id: hymn.id, title: hymn.displayName, variations: format.variations ?? [] }] : [];
+            })} />
     </>;
 }

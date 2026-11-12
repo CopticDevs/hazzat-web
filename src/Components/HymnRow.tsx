@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { IHymnInfo } from "../Providers/HymnsDataProvider/Models/IHymnInfo";
 import { StringMap } from "../Types/StringMap";
-import Content from "./Content";
+import ReaderContents from "./ReaderContents";
 import FormatBar from "./FormatBar";
 import FormatOptionsContextMenu from "./FormatOptionsContextMenu";
 import "./HymnRow.css";
@@ -89,11 +89,9 @@ function HymnRow(props: IProps) {
                     activeFormatId={activeFormatId}
                 />
                 {activeFormat && (
-                    <Content 
-                        formatId={activeFormatId}
-                        hymnTitle={props.hymn.displayName}
-                        variationsCallback={async () => activeFormat.variations || []}
-                    />
+                    <ReaderContents key={`${seasonId}/${serviceId}/${hymn.id}/${activeFormatId}`} formatId={activeFormatId}
+                        view={{ view_type: "hymn", season_id: seasonId, service_id: serviceId, hymn_id: hymn.id }}
+                        entries={[{ id: hymn.id, title: hymn.displayName, variations: activeFormat.variations ?? [] }]} />
                 )}
             </div>
         );

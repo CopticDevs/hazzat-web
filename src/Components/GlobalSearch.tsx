@@ -7,7 +7,6 @@ import { LanguageContext } from "../LanguageContext";
 import LocalizedMessage from "../LocalizedMessage";
 import { IHymnsDataProvider } from "../Providers/HymnsDataProvider/IHymnsDataProvider";
 import { ISearchResult } from "../Providers/HymnsDataProvider/Models/ISearchResult";
-import { ISeasonInfo } from "../Providers/HymnsDataProvider/Models/ISeasonInfo";
 import { searchContent } from "../Providers/HymnsDataProvider/Search";
 import ContentLoadError from "./ContentLoadError";
 import SearchHighlight from "./SearchHighlight";
@@ -15,6 +14,7 @@ import "./GlobalSearch.css";
 import { validSearchQuery, isCopticPassage } from "../Providers/HymnsDataProvider/SearchMatching";
 import MainPaper, { Size } from "./MainPaper";
 import MyNavLink from "./MyNavLink";
+import { trackAnalyticsEvent } from "../analytics";
 
 interface GlobalSearchProps {
     dataProvider: IHymnsDataProvider;
@@ -62,7 +62,16 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                         setWordsLoading(true);
                     }
                 });
-                if (active) { setResults(found); setHasSearched(true); }
+                if (active) {
+                    setResults(found);
+                    setHasSearched(true);
+                    // Only the current, completed response counts, not interim titles or failed word searches.
+                    trackAnalyticsEvent('search_results', {
+                        event_category: 'Engagement', search_mode: includeText ? 'titles_and_text' : 'titles',
+                        result_count: found.length,
+                        result_status: found.length ? 'results' : 'empty'
+                    });
+                }
             } catch {
                 if (active) { if (titlesReady) setWordsFailed(true); else setFailed(true); }
             } finally {
@@ -72,8 +81,9 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
         return () => { active = false; clearTimeout(timer); };
     }, [query, dataProvider, languageProperties.localeName, retry, includeText]);
 
-    const handleSeasonClick = (season: ISeasonInfo) => {
-        navigate(`/Seasons/${season.id}`);
+    const handleSeasonClick = (seasonId: string) => {
+        trackAnalyticsEvent('search_result_select', { event_category: 'Engagement', result_type: 'season', season_id: seasonId });
+        navigate(`/Seasons/${seasonId}`);
     };
 
     const pageCount = Math.max(1, Math.ceil(results.length / 10));
@@ -172,7 +182,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                                         <button
                                             key={result.season!.id}
                                             className="list-group-item list-group-item-action"
-                                            onClick={() => handleSeasonClick(result.season!)}
+                                            onClick={() => handleSeasonClick(result.season!.id)}
                                         >
                                             <h5 className="mb-1"><SearchHighlight text={result.season!.displayName} query={query} /></h5>
                                         </button>
@@ -199,6 +209,10 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ dataProvider }) => {
                                                         <li key={idx}>
                                                             <MyNavLink
                                                                 to={`/Seasons/${ref.seasonId}/services/${ref.serviceId}/hymns/${result.hymn!.id}`}
+                                                                onClick={() => trackAnalyticsEvent('search_result_select', {
+                                                                    event_category: 'Engagement', result_type: 'hymn', season_id: ref.seasonId,
+                                                                    service_id: ref.serviceId, hymn_id: result.hymn!.id
+                                                                })}
                                                             >
                                                                 <SearchHighlight text={`${ref.seasonName} → ${ref.serviceName}${ref.hymnName ? ` → ${ref.hymnName}` : ""}`} query={query} />
                                                             </MyNavLink>
