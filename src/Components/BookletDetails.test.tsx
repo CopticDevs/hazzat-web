@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { StrictMode } from "react";
+import { Link, MemoryRouter, Route, Routes } from "react-router-dom";
 import { generateSeasonBookletPdf } from "../Booklets/BookletPdfGenerator";
 import { HymnsDataProvider } from "../Providers/HymnsDataProvider/HymnsDataProvider";
 import { ContentLanguage, ContentType } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
@@ -69,6 +70,166 @@ describe("booklet builder", () => {
         generator.mockResolvedValue(new Uint8Array([37, 80, 68, 70]));
     });
     afterEach(() => { jest.restoreAllMocks(); jest.clearAllMocks(); strings.setLanguage("en"); });
+
+    describe("successful generation analytics", () => {
+        const analytics = jest.fn();
+        let originalGtag: typeof window.gtag;
+
+        beforeEach(() => {
+            originalGtag = window.gtag;
+            window.gtag = analytics;
+        });
+        afterEach(() => { window.gtag = originalGtag; });
+
+        it("counts one completed generation, not the initial or repeated clicks while pending", async () => {
+            let finish!: (bytes: Uint8Array) => void;
+            generator.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+            await openBuilder();
+            const review = screen.getByRole("button", { name: "Review booklet" });
+            // Batch native clicks so the guard is exercised before React disables the fieldset.
+            act(() => {
+                review.click();
+                review.click();
+            });
+            expect(generator).toHaveBeenCalledTimes(1);
+            expect(analytics).not.toHaveBeenCalled();
+            const pending = screen.getByRole("button", { name: strings.generatingBooklet });
+            expect(pending).toBeDisabled();
+            fireEvent.click(pending);
+            expect(generator).toHaveBeenCalledTimes(1);
+            expect(analytics).not.toHaveBeenCalled();
+
+            await act(async () => finish(new Uint8Array([37, 80, 68, 70])));
+            expect(screen.getByRole("link", { name: "Download PDF" })).toHaveAttribute("href", "blob:booklet-preview");
+            expect(analytics.mock.calls).toEqual([["event", "booklet_generated", {
+                event_category: "Engagement", event_label: "Booklet Generated"
+            }]]);
+        });
+
+        it("does not recount rerenders, preview opens or downloads, but counts a later regeneration", async () => {
+            const content = () => <StrictMode><MemoryRouter initialEntries={["/Booklets/annual"]}><Routes>
+                <Route path="/Booklets/:bookletId" element={<BookletDetails />} />
+            </Routes></MemoryRouter></StrictMode>;
+            const view = render(content());
+            await screen.findByRole("heading", { name: "Build your booklet" });
+            fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+            await screen.findByRole("link", { name: "Download PDF" });
+            expect(analytics).toHaveBeenCalledTimes(1);
+
+            view.rerender(content());
+            for (const name of [strings.bookletOpenPdf, strings.bookletDownloadPdf]) {
+                const link = screen.getByRole("link", { name });
+                link.addEventListener("click", event => event.preventDefault(), { once: true });
+                fireEvent.click(link);
+            }
+            expect(generator).toHaveBeenCalledTimes(1);
+            expect(analytics).toHaveBeenCalledTimes(1);
+
+            fireEvent.change(screen.getByLabelText("PDF layout"), { target: { value: "print" } });
+            fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+            await screen.findByRole("link", { name: "Download PDF" });
+            expect(generator).toHaveBeenCalledTimes(2);
+            expect(analytics).toHaveBeenCalledTimes(2);
+        });
+
+        it("does not count failures and counts a successful retry once", async () => {
+            jest.spyOn(console, "error").mockImplementation(() => {});
+            generator.mockRejectedValueOnce(new Error("Font load failed"));
+            await openBuilder();
+            fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+            await screen.findByRole("alert");
+            expect(analytics).not.toHaveBeenCalled();
+            expect(screen.queryByRole("link", { name: "Download PDF" })).not.toBeInTheDocument();
+
+            fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+            await screen.findByRole("link", { name: "Download PDF" });
+            expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+            expect(analytics).toHaveBeenCalledTimes(1);
+        });
+
+        it("does not count a PDF that cannot be made available for preview or download", async () => {
+            jest.spyOn(console, "error").mockImplementation(() => {});
+            createUrl.mockImplementationOnce(() => { throw new Error("Object URL creation failed"); });
+            await openBuilder();
+            fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+            await screen.findByRole("alert");
+            expect(analytics).not.toHaveBeenCalled();
+            expect(screen.queryByRole("link", { name: "Download PDF" })).not.toBeInTheDocument();
+        });
+
+        it.each(["hymns", "languages", "formats"])("does not generate or count an empty %s selection", async emptySelection => {
+            await openBuilder();
+            if (emptySelection === "hymns") {
+                fireEvent.click(screen.getByRole("checkbox", { name: "Vespers" }));
+            } else {
+                const group = screen.getByRole("group", { name: emptySelection === "languages" ? "Content languages" : strings.bookletCustomizeFormats });
+                within(group).getAllByRole("checkbox", { checked: true }).forEach(input => fireEvent.click(input));
+            }
+            const review = screen.getByRole("button", { name: "Review booklet" });
+            expect(review).toBeDisabled();
+            fireEvent.click(review);
+            expect(generator).not.toHaveBeenCalled();
+            expect(analytics).not.toHaveBeenCalled();
+        });
+
+        it("does not count results discarded after unmount", async () => {
+            let finish!: (bytes: Uint8Array) => void;
+            generator.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+            const { unmount } = await openBuilder();
+            fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+            unmount();
+            await act(async () => finish(new Uint8Array([37, 80, 68, 70])));
+            expect(revokeUrl).toHaveBeenCalledWith("blob:booklet-preview");
+            expect(analytics).not.toHaveBeenCalled();
+        });
+
+        it("discards a previous route's result without counting it or unlocking the new generation", async () => {
+            let finishPrevious!: (bytes: Uint8Array) => void;
+            let finishCurrent!: (bytes: Uint8Array) => void;
+            generator.mockImplementationOnce(() => new Promise(resolve => { finishPrevious = resolve; }))
+                .mockImplementationOnce(() => new Promise(resolve => { finishCurrent = resolve; }));
+            render(<MemoryRouter initialEntries={["/Booklets/annual"]}>
+                <Link to="/Booklets/lent">Switch season</Link>
+                <Routes><Route path="/Booklets/:bookletId" element={<BookletDetails />} /></Routes>
+            </MemoryRouter>);
+            await screen.findByRole("heading", { name: "Build your booklet" });
+            fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+            fireEvent.click(screen.getByRole("link", { name: "Switch season" }));
+            await screen.findByRole("heading", { name: "Build your booklet" });
+            fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+            expect(generator).toHaveBeenCalledTimes(2);
+
+            await act(async () => finishPrevious(new Uint8Array([37, 80, 68, 70])));
+            expect(revokeUrl).toHaveBeenCalledWith("blob:booklet-preview");
+            expect(analytics).not.toHaveBeenCalled();
+            expect(screen.queryByRole("link", { name: "Download PDF" })).not.toBeInTheDocument();
+            const pending = screen.getByRole("button", { name: strings.generatingBooklet });
+            expect(pending).toBeDisabled();
+            fireEvent.click(pending);
+            expect(generator).toHaveBeenCalledTimes(2);
+
+            createUrl.mockReturnValueOnce("blob:current-booklet");
+            await act(async () => finishCurrent(new Uint8Array([37, 80, 68, 70])));
+            expect(screen.getByRole("link", { name: "Download PDF" })).toHaveAttribute("href", "blob:current-booklet");
+            expect(analytics).toHaveBeenCalledTimes(1);
+        });
+
+        it.each(["missing", "throwing", "non-callable"])("keeps generation and download working with %s analytics", async analyticsState => {
+            if (analyticsState === "missing") delete window.gtag;
+            else if (analyticsState === "non-callable") window.gtag = {};
+            else analytics.mockImplementation(() => { throw new Error("Analytics blocked"); });
+            await openBuilder();
+            fireEvent.click(screen.getByRole("button", { name: "Review booklet" }));
+            const download = await screen.findByRole("link", { name: "Download PDF" });
+            expect(download).toHaveAttribute("href", "blob:booklet-preview");
+            expect(download).toHaveAttribute("download", "annual-text-hazzat-booklet-display.pdf");
+            expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+            expect(screen.getByRole("button", { name: "Review booklet" })).toBeEnabled();
+            download.addEventListener("click", event => event.preventDefault(), { once: true });
+            fireEvent.click(download);
+            expect(generator).toHaveBeenCalledTimes(1);
+        });
+    });
 
     it("provides five sections and independent languages in selection, review and PDF without changing website settings", async () => {
         const multilingual = JSON.parse(JSON.stringify(service)) as IServiceInfo;

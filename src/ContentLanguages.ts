@@ -8,6 +8,16 @@ export function normalizeContentLanguages(value: unknown): ContentLanguage[] {
     return value.length && !included.length ? [...contentLanguages] : included;
 }
 
+/** Stable, bounded analytics value independent of selection order and label casing. */
+export function serializeContentLanguages(value: unknown): string {
+    const codes: Record<ContentLanguage, string> = {
+        [ContentLanguage.English]: "en",
+        [ContentLanguage.Coptic]: "cop",
+        [ContentLanguage.Arabic]: "ar"
+    };
+    return normalizeContentLanguages(value).map(language => codes[language]).join("+") || "none";
+}
+
 /** Filter structured language blocks without modifying shared published content. */
 export function filterContentLanguages<T extends IHymnContent>(content: T, included: ContentLanguage[]): T {
     if (!content) return content;

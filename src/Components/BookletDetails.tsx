@@ -13,6 +13,7 @@ import {
     filterBookletServicesLanguages
 } from "../Booklets/BookletPdfGenerator";
 import { filterContentLanguages } from "../ContentLanguages";
+import { trackAnalyticsEvent } from "../analytics";
 import ContentLanguageChoices from "./ContentLanguageChoices";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { UserSettingsContext } from "../Contexts/UserSettingsContext";
@@ -61,6 +62,7 @@ function BookletDetails() {
 
     const isMounted = useRef(true);
     const requestId = useRef(0);
+    const generationRequest = useRef<number>();
     const [loadFailed, setLoadFailed] = useState(false);
     const selectedServices = React.useMemo(() => getSelectedBookletServices(services, selection, formats), [services, selection, formats]);
     const sections = React.useMemo(() => getBookletSections(selectedServices, bookletFormatKinds, grouping), [selectedServices, grouping]);
@@ -126,7 +128,7 @@ function BookletDetails() {
     }, [isLoading, pageTitle]);
 
     const reviewBooklet = async () => {
-        if (!seasonInfo || loadFailed) {
+        if (!seasonInfo || loadFailed || generationRequest.current === requestId.current) {
             return;
         }
 
@@ -135,6 +137,7 @@ function BookletDetails() {
         const selected = getSelectedBookletServices(services, selection, formats);
         const selectedKinds = bookletFormatKinds.filter(kind => getBookletSections(selected, [kind]).length > 0);
         if (!selectedKinds.length) return;
+        generationRequest.current = request;
         setActiveDownload(downloadKey);
         setErrorMessage(undefined);
 
@@ -154,6 +157,7 @@ function BookletDetails() {
             const objectUrl = URL.createObjectURL(blob);
             if (isMounted.current && request === requestId.current) {
                 setPreview({ url: objectUrl, name: getBookletFileName(seasonInfo, selectedKinds, layout) });
+                trackAnalyticsEvent("booklet_generated", { event_category: "Engagement", event_label: "Booklet Generated" });
             } else URL.revokeObjectURL(objectUrl);
         } catch (error) {
             console.error("Failed to generate booklet PDF", error);
@@ -161,6 +165,7 @@ function BookletDetails() {
                 setErrorMessage(strings.bookletDownloadError);
             }
         } finally {
+            if (generationRequest.current === request) generationRequest.current = undefined;
             if (isMounted.current && request === requestId.current) {
                 setActiveDownload(undefined);
             }

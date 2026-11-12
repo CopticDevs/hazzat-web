@@ -1,7 +1,8 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useRef, useState } from "react";
 import { AppSettings } from "../AppSettings";
 import { ContentLanguage } from "../Providers/HymnsDataProvider/Models/IVariationInfo";
-import { contentLanguages, normalizeContentLanguages } from "../ContentLanguages";
+import { contentLanguages, normalizeContentLanguages, serializeContentLanguages } from "../ContentLanguages";
+import { trackAnalyticsEvent } from "../analytics";
 import { readPreference, savePreference } from "../sitePreferences";
 
 export function readerColor(color: string): string {
@@ -37,11 +38,15 @@ type SettingsContext = {
 export const UserSettingsContext = createContext<SettingsContext>({ userSettings: defaults, setContentFontColor: () => {}, setHazzatFontColor: () => {}, setContentFontSize: () => {}, setContentLanguages: () => {} });
 export const UserSettingProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
     const [userSettings, setSettings] = useState(() => parseSettings(readPreference(storageKey)));
+    // Read the latest edit even before React flushes a batch or from a retained callback.
+    const currentSettings = useRef(userSettings);
     useEffect(() => {
         const sync = (event: StorageEvent) => {
             if (event.storageArea && event.storageArea !== localStorage) return;
             if (event.key === storageKey || event.key === null) {
-                setSettings(parseSettings(event.key === null ? null : event.newValue));
+                const next = parseSettings(event.key === null ? null : event.newValue);
+                currentSettings.current = next;
+                setSettings(next);
             }
         };
         window.addEventListener("storage", sync);
@@ -49,7 +54,8 @@ export const UserSettingProvider: React.FC<React.PropsWithChildren> = ({ childre
     }, []);
     // Persist only user edits; loading another tab's values must not write them back.
     const updateSettings = (change: Partial<UserSettings>) => {
-        const next = { ...userSettings, ...change };
+        const next = { ...currentSettings.current, ...change };
+        currentSettings.current = next;
         setSettings(next);
         savePreference(storageKey, JSON.stringify({ ...next, size: parseFloat(next.englishFontSize) }));
     };
@@ -59,7 +65,18 @@ export const UserSettingProvider: React.FC<React.PropsWithChildren> = ({ childre
         window.gtag?.("event", field === 'contentFontColor' ? 'change_text_color' : 'change_hazzat_color', { event_category: 'Customization', event_label: `${color} Color Selected` });
     };
     return <UserSettingsContext.Provider value={{ userSettings,
-        setContentLanguages: languages => updateSettings({ contentLanguages: normalizeContentLanguages(languages) }),
+        setContentLanguages: languages => {
+            const next = normalizeContentLanguages(languages);
+            const previous = serializeContentLanguages(currentSettings.current.contentLanguages);
+            const selected = serializeContentLanguages(next);
+            if (previous === selected) return;
+            updateSettings({ contentLanguages: next });
+            trackAnalyticsEvent("change_content_languages", {
+                event_category: "Customization",
+                previous_content_languages: previous,
+                content_languages: selected
+            });
+        },
         setContentFontColor: color => colorChange('contentFontColor', color),
         setHazzatFontColor: color => colorChange('hazzatFontColor', color),
         setContentFontSize: size => {

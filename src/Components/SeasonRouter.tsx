@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { Route, Routes, useParams } from "react-router-dom";
+import { ContentViewProvider } from "../Contexts/ContentViewContext";
 import { EnvironmentContext } from "../Contexts/Environment/EnvironmentContext";
 import { strings } from "../l8n";
 import { LanguageContext } from "../LanguageContext";
@@ -20,7 +21,7 @@ export default function SeasonRouter() {
     const { environmentProperties } = useContext(EnvironmentContext);
     // Never reuse a previous season's loaded/invalid state during navigation or a feed change.
     const key = JSON.stringify([seasonId, languageProperties.localeName, environmentProperties.baseUrl, environmentProperties.cloudFrontUrl]);
-    return <SeasonRoutes key={key} seasonId={seasonId} />;
+    return <ContentViewProvider><SeasonRoutes key={key} seasonId={seasonId} /></ContentViewProvider>;
 }
 
 function SeasonRoutes({ seasonId }: { seasonId: string }) {
