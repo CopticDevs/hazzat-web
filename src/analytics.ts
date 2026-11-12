@@ -15,10 +15,11 @@ export type EntityViewEvent = typeof entityViewEvents[ViewType];
 export type FormatViewEvent = typeof formatViewEvents[ReaderFormat];
 export type LanguageViewEvent = typeof languageViewEvents[keyof typeof languageViewEvents];
 export type AnalyticsEvent = EntityViewEvent | FormatViewEvent | LanguageViewEvent | 'change_content_languages' | 'booklet_generated'
-    | 'change_nav_lang' | 'change_text_color' | 'change_hazzat_color' | 'change_text_size' | 'button_click';
+    | 'change_nav_lang' | 'change_text_color' | 'change_hazzat_color' | 'change_text_size' | 'button_click'
+    | 'change_theme' | 'search_results' | 'search_result_select' | 'audio_start';
 
 /** Reuse the site's configured tag and consent controls. Never bypass them or retry. */
-export function trackAnalyticsEvent(eventName: AnalyticsEvent, parameters: Record<string, string>): void {
+export function trackAnalyticsEvent(eventName: AnalyticsEvent, parameters: Record<string, string | number>): void {
     try {
         if (typeof window.gtag === 'function') window.gtag('event', eventName, parameters);
     } catch {

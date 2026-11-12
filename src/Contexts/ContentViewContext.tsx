@@ -14,6 +14,8 @@ export type ReaderContentState = 'available' | 'no_selected_language_content' | 
 type ReaderDetails = { content_format: ReaderFormat; content_state: Exclude<ReaderContentState, 'empty'> };
 const ContentViewContext = createContext<(view: ContentView, reader?: ReaderDetails) => void>(() => {});
 export const useContentView = () => useContext(ContentViewContext);
+const RecordingStartContext = createContext<((identity: string) => boolean) | undefined>(undefined);
+export const useRecordingStartGuard = () => useContext(RecordingStartContext);
 
 /** Each navigation has one primary entity view and independent format/language facets. */
 export function ContentViewProvider({ children }: React.PropsWithChildren) {
@@ -21,7 +23,7 @@ export function ContentViewProvider({ children }: React.PropsWithChildren) {
     const { userSettings } = useContext(UserSettingsContext);
     // Query/hash edits (including interface language) are not new content views.
     const path = pathname.toLowerCase().replace(/\/+$/, '');
-    const visit = useMemo(() => ({ path, entityReported: false, formatReported: false, languageReported: false, active: false }), [path]);
+    const visit = useMemo(() => ({ path, entityReported: false, formatReported: false, languageReported: false, recordingsStarted: new Set<string>(), active: false }), [path]);
     useLayoutEffect(() => {
         visit.active = true;
         return () => { visit.active = false; };
@@ -50,7 +52,14 @@ export function ContentViewProvider({ children }: React.PropsWithChildren) {
             trackAnalyticsEvent(languageViewEvents[combination as keyof typeof languageViewEvents], parameters);
         }
     }, [visit, combination]);
-    return <ContentViewContext.Provider value={report}>{children}</ContentViewContext.Provider>;
+    const firstRecordingStart = useCallback((identity: string) => {
+        if (!visit.active || visit.recordingsStarted.has(identity)) return false;
+        visit.recordingsStarted.add(identity);
+        return true;
+    }, [visit]);
+    return <ContentViewContext.Provider value={report}>
+        <RecordingStartContext.Provider value={firstRecordingStart}>{children}</RecordingStartContext.Provider>
+    </ContentViewContext.Provider>;
 }
 
 /** Mount only after the current landing catalog has loaded and validated. */

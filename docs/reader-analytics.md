@@ -1,11 +1,16 @@
-# Reader and language analytics
+# Application analytics
 
 Implements [#325](https://github.com/CopticDevs/hazzat-web/issues/325) and
 [#327](https://github.com/CopticDevs/hazzat-web/issues/327), with the owner's requested
-separate entity, format and language-combination event names. Booklet generation remains
+separate entity, format and language-combination event names, plus deliberate theme changes,
+privacy-safe search results/selections and actual SoundCloud audio starts. Booklet generation remains
 [a separate event](booklet-analytics.md); Search Console setup is separate work in #326.
 
 ## Fixed event names
+
+The complete application taxonomy has 29 names: the 18 entity/format/combination names below,
+`change_content_languages`, four theme/search/audio names, `booklet_generated`, and five retained
+names (`change_nav_lang`, `change_text_color`, `change_hazzat_color`, `change_text_size`, `button_click`).
 
 There is **no generic `content_view` event**. A normal individual-hymn reader visit emits
 three complementary events, for example `hymn_view`, `text_view`, and
@@ -76,6 +81,39 @@ restored settings, cross-tab synchronization, duplicate calls and equivalent/reo
 do not count as manual changes. This is the general reader setting, not the booklet builder's
 separate language controls. Existing `change_nav_lang` still measures the English/Arabic interface.
 
+## Theme, search and actual audio starts
+
+| Event | Meaning / trigger | Parameters |
+| --- | --- | --- |
+| `change_theme` | One deliberate effective light/dark transition. Initial/default/restored themes, OS changes, cross-tab synchronization and no-op selections are silent. | `event_category=Customization`, `previous_theme` and `theme` (each `light` or `dark`) |
+| `search_results` | One successful completed current debounced search. Title-only interim results during a full-text search do not count separately. Empty successful searches count; failed/stale/unmounted results do not. | `event_category=Engagement`, `search_mode=titles` or `titles_and_text`, numeric `result_count`, `result_status=results` or `empty` |
+| `search_result_select` | Actual activation of a season result button or a hymn's season/service reference link. A render, page change or merely seeing a result is not a selection. | `event_category=Engagement`, `result_type=season` or `hymn`, `season_id`; hymn references also send `service_id` and `hymn_id` |
+| `audio_start` | The first actual SoundCloud PLAY callback for a recording in the current reader navigation. Loading/READY/error is not playback. | `event_category=Engagement`, `audio_provider=soundcloud`, `view_type`, `season_id`, `service_id` and `hymn_id` when applicable, `variation_id`, `content_format=audio`, `content_languages` at the first play |
+
+Search queries, query lengths, titles, snippets, result text and errors are never added to these
+payloads. The existing 300 ms debounce settles a search; pagination/rerenders do not send another
+`search_results`. A later search, mode/interface-language change or successful retry can produce a
+new completed result event. Selections count actual activations, including links in interim title
+results. Result count is the complete result-list size, not the current ten-result page size.
+
+Audio observation uses the [official SoundCloud HTML5 Widget API](https://developers.soundcloud.com/docs/api/html5-widget)
+from `https://w.soundcloud.com/player/api.js`. It binds `SC.Widget.Events.PLAY` to the specific iframe,
+without controlling playback or enabling autoplay. One shared, bounded SDK request serves active
+recordings; blocked/missing/failed SDK observation leaves the iframe usable and emits no fabricated
+start. Cleanup unbinds handlers and rejects stale callbacks. No new tracking collector is introduced.
+
+A recording counts at most once per normalized pathname visit. Resume/duplicate PLAY callbacks,
+rerenders and interface-language/feed remounts on the same path do not add starts. Back/Forward,
+leaving and returning, or reload starts a new visit. Separate recordings can each count once.
+Standalone/local-preview players have no catalog context and are not instrumented. Service-wide
+players identify the actual played child hymn/variation with `view_type=service`, without adding a
+child `hymn_view`. No URLs, titles, audio contents, duration or playback position are sent.
+
+`audio_view` and `audio_start` answer different questions: a displayed player surface versus a
+recording that actually began playing. Starts can exceed audio views when several recordings are
+played in one reader visit; do not interpret their unscoped ratio as a conversion percentage.
+Video playback, pause/progress/completion and PDF-download events are not part of this change.
+
 ## Parameters and direct drilldown
 
 All entity, format and combination events send `event_category=Engagement` and these
@@ -133,12 +171,14 @@ season/service, but summing all event families would triple count normal reader 
 
 Inspect existing custom definitions/quotas before adding event-scoped custom dimensions for:
 `view_type`, `content_format`, `content_languages`, `content_state`, and
-`previous_content_languages`. If category/label breakdowns are needed for retained events,
+`previous_content_languages`, `previous_theme`, `theme`, `search_mode`, `result_status`,
+`result_type` and `audio_provider`. Use a custom metric (unit: Standard) for numeric `result_count`
+if search-result counts need aggregation; do not register it as a categorical dimension. If category/label breakdowns are needed for retained events,
 register `event_category` and `event_label` too; they are custom parameters in GA4, not automatic
 Universal Analytics category/action/label reports. Do not recreate existing definitions.
 Definitions are not retroactive; allow normal processing time.
 
-Review cardinality before registering `season_id`, `service_id` or especially `hymn_id`.
+Review cardinality before registering `season_id`, `service_id`, `hymn_id` or `variation_id`.
 High-cardinality dimensions may produce `(other)` rows. An authorized BigQuery export joined
 to public catalog metadata can be preferable. Do not invent compound ID/title parameters or
 translated-name dimensions. If hymn IDs are reused, report by season/service/hymn hierarchy.
@@ -173,6 +213,14 @@ Other useful explorations:
   then `content_languages`; values Event count/Total users. This measures transitions rather
   than all usage. Initial/restored preferences are intentionally not manual changes.
 
+- **Theme transitions:** filter `change_theme`; rows `previous_theme` then `theme`.
+- **Search outcomes:** filter `search_results`; rows `search_mode` and `result_status`; use Event
+  count for completed searches. `result_count` is the number of matches, not a search counter.
+- **Search selections:** filter `search_result_select`; group by `result_type` and public IDs.
+  These are activation counts, not a query-level attribution funnel; no query/join identifier is sent.
+- **Audio use:** filter `audio_start`; group by season/service/hymn/variation, optionally languages
+  and `view_type`. Count first starts per recording visit, not resumes, total plays or completion.
+
 Event count measures repetition. Users and Sessions measure reach. Do not sum users across
 rows to infer unique people. These are setup/report recipes, not a claim that definitions or
 saved explorations have been created in the owner's property.
@@ -206,10 +254,15 @@ Application tests mock the tag and send no GA traffic. Before release:
    service-wide pages, Back/Forward and reload. Confirm no obsolete `content_view` events.
 4. Compare every `hymn_view` payload with its primary format/language breakdown and confirm the
    once-only family counters. Test failures/stale navigation and blocked/denied tracking too.
-5. Verify custom definitions and saved explorations. Record environment, commit, time, consent
+5. Exercise manual light/dark changes and silent initialization/OS/storage updates; completed
+   title/full-text searches, empty results, selection, pagination and failure/retry; and actual
+   SoundCloud play versus loading/READY/resume, multiple recordings, locale changes and navigation.
+   Verify the live provider callback and DebugView receipt in that controlled environment; mocked
+   automated tests establish application wiring, not real provider/GA delivery.
+6. Verify custom definitions and saved explorations. Record environment, commit, time, consent
    state, page-view mechanism and representative results privately, not account/dashboard data
    in the public repository.
 
 Actual GA receipt, configured custom dimensions/explorations, applicable consent policy and
 Enhanced Measurement behavior remain external verification. Automated local/CI results do
-not prove them. This PR adds no search, theme, media-playback or PDF-download custom events.
+not prove them. This PR adds no video playback, pause/progress/completion or PDF-download events.

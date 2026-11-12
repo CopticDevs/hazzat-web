@@ -2,7 +2,7 @@
 
 React 18 and React Router 7 application, built with Vite. Use Node 24 (the Azure pipeline version), or Node ^20.19.0 / >=22.12.0, and install with `npm ci --strict-peer-deps`.
 
-See [reader and language analytics](docs/reader-analytics.md) for view definitions, language settings events, reports, and GA verification.
+See [application analytics](docs/reader-analytics.md) for reader views, language/theme settings, search, audio starts, reports, and GA verification.
 See [booklet generation analytics](docs/booklet-analytics.md) for the success event and test-property verification steps.
 See [shared content v4](docs/shared-content-v4.md) for schema compatibility, local feed configuration, format views, and rollout validation.
 See [Azure release migration](docs/azure-release-migration.md) and the [manual dev release runbook](docs/azure-dev-release.md) for the deployment and artifact contracts.

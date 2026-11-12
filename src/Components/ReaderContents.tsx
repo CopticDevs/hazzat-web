@@ -30,11 +30,11 @@ export default function ReaderContents({ view, formatId, entries }: Props) {
             : values.length && values.every(Boolean) && values.includes('no_selected_language_content') ? 'no_selected_language_content' : undefined;
         if (state) report({ view_type, season_id, service_id, hymn_id }, { content_format: format, content_state: state });
     }, [report, view_type, season_id, service_id, hymn_id, formatId, entries, states, combination]);
-    return <>{entries.map(entry => <ReaderEntry key={entry.id} entry={entry} formatId={formatId} onState={onState} />)}</>;
+    return <>{entries.map(entry => <ReaderEntry key={entry.id} entry={entry} view={view} formatId={formatId} onState={onState} />)}</>;
 }
 
-function ReaderEntry({ entry, formatId, onState }: { entry: Entry; formatId: string; onState: (id: string, variations: Entry["variations"], state: ReaderContentState, combination: string) => void }) {
+function ReaderEntry({ entry, view, formatId, onState }: { entry: Entry; view: ContentView; formatId: string; onState: (id: string, variations: Entry["variations"], state: ReaderContentState, combination: string) => void }) {
     const variationsCallback = useCallback(async () => entry.variations, [entry.variations]);
     const ready = useCallback((state: ReaderContentState, combination: string) => onState(entry.id, entry.variations, state, combination), [onState, entry.id, entry.variations]);
-    return <Content formatId={formatId} hymnTitle={entry.title} variationsCallback={variationsCallback} onContentState={ready} />;
+    return <Content formatId={formatId} hymnTitle={entry.title} variationsCallback={variationsCallback} onContentState={ready} readerView={{ ...view, hymn_id: entry.id }} />;
 }

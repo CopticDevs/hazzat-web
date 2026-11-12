@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { ReaderContentState } from "../Contexts/ContentViewContext";
+import { ContentView, ReaderContentState } from "../Contexts/ContentViewContext";
 import { soundCloudTrackUrl } from "./SoundCloudUrl";
 import { UserSettingsContext } from "../Contexts/UserSettingsContext";
 import { filterContentLanguages, hasLanguageContent, serializeContentLanguages } from "../ContentLanguages";
@@ -18,6 +18,7 @@ import ContentLoadError from "./ContentLoadError";
 interface IProps {
     formatId: string;
     hymnTitle?: string;
+    readerView?: ContentView;
     variationsCallback: () => Promise<IVariationInfo<any>[]>;
     onContentState?: (state: ReaderContentState, combination: string) => void;
 }
@@ -38,7 +39,7 @@ function hasReaderContent(formatId: string, content: any): boolean {
     }
 }
 
-function Content({ formatId, hymnTitle, variationsCallback, onContentState }: IProps) {
+function Content({ formatId, hymnTitle, variationsCallback, onContentState, readerView }: IProps) {
     const { userSettings } = useContext(UserSettingsContext);
     const [retry, setRetry] = useState(0);
     // Keep data and request identity together: a new route/callback must never report
@@ -76,7 +77,7 @@ function Content({ formatId, hymnTitle, variationsCallback, onContentState }: IP
         case "2": return <ContentHazzat variations={variations} hymnTitle={hymnTitle} />;
         case "3": return <ContentVerticalHazzat variations={variations} hymnTitle={hymnTitle} />;
         case "4": return <ContentMusicalNotes variations={variations} hymnTitle={hymnTitle} onRendered={onScoreRendered} />;
-        case "5": return <ContentAudio variations={variations} hymnTitle={hymnTitle} />;
+        case "5": return <ContentAudio variations={variations} hymnTitle={hymnTitle} readerView={readerView} />;
         case "6": return <ContentVideo variations={variations} hymnTitle={hymnTitle} />;
         case "7": return <ContentInformation variations={variations} hymnTitle={hymnTitle} />;
         default: return <div />;

@@ -3,10 +3,10 @@ import { AnalyticsEvent, entityViewEvents, formatViewEvents, languageViewEvents,
 const originalGtag = window.gtag;
 afterEach(() => { window.gtag = originalGtag; });
 const names: AnalyticsEvent[] = [...Object.values(entityViewEvents), ...Object.values(formatViewEvents), ...Object.values(languageViewEvents),
-    'booklet_generated', 'change_content_languages', 'change_nav_lang', 'change_text_color', 'change_hazzat_color', 'change_text_size', 'button_click'];
+    'booklet_generated', 'change_content_languages', 'change_nav_lang', 'change_text_color', 'change_hazzat_color', 'change_text_size', 'button_click', 'change_theme', 'search_results', 'search_result_select', 'audio_start'];
 
-test('the complete fixed taxonomy has 25 distinct GA-compatible names, with no legacy generic content_view', () => {
-    expect(new Set(names).size).toBe(25);
+test('the complete fixed taxonomy has 29 distinct GA-compatible names, with no legacy generic content_view', () => {
+    expect(new Set(names).size).toBe(29);
     expect(names).not.toContain('content_view');
     names.forEach(name => expect(name).toMatch(/^[a-z][a-z0-9_]{0,39}$/));
     expect(Object.keys(entityViewEvents)).toHaveLength(3);
