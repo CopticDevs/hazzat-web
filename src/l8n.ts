@@ -21,6 +21,9 @@ export interface ILanguageProperties {
 
 export const strings = new LocalizedStrings({
     en: {
+        nativeAppName: "Hazzat app",
+        nativeAppGooglePlay: "Get it on Google Play",
+        nativeAppDismiss: "Dismiss app banner",
         buildBooklet: "Build your booklet",
         buildBookletDescription: "Text, notation, or both - together in one PDF.",
         bookletChooseFormats: "1. Choose your formats",
@@ -341,6 +344,9 @@ export const strings = new LocalizedStrings({
         "helpfulTipVerticalDesc1": "Other than <span style=\"color: red\">disabling the Autocorrect and the Grammar and Spelling check</span> on your MS word, here's another helpful tip: When typing the notes for a certain hymn that you have, I understand it's a hassle to switch back and forth between the Coptic or English font and the Hazzat font. So here's the best way to do it:<br /><br />1. Type the words for the whole hymn first.<br /><br />2. Copy a certain letter from the Hazzat font that you know you'll be using a lot. This will place it in your clipboard. Lets say you copy this: <span class=\"HazzatVFont\" style=\"font-size: 29pt\">x</span><br /><br />3. Paste the copied Hazzat character wherever you want to place a note.This will make MS Word have the Hazzat font automatically selected.< br /><br />4. If you don't want to use the <span class=\"HazzatVFont\" style=\"font-size: 29pt\">x </span> character where you pasted it, then you can hit the \"Backspace\" button and type whatever character you wanted instead. This will work because the Hazzat font will still be selected.<br />",
     },
     ar: {
+        nativeAppName: "تطبيق هزات",
+        nativeAppGooglePlay: "احصل عليه من Google Play",
+        nativeAppDismiss: "إخفاء شريط التطبيق",
         buildBooklet: "إنشاء كتيّبك",
         buildBookletDescription: "النص والهزات معًا، أو أيّ منهما، في ملف PDF واحد.",
         bookletChooseFormats: "١. اختر التنسيقات",

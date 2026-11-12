@@ -1,0 +1,44 @@
+/* A site-owned Android link, not a simulated browser installation prompt. */
+.native-app-banner {
+    color: #302c26;
+    background: #f4f1ea;
+    border-block-end: 1px solid #d7d2c7;
+    font: 1rem/1.4 Arial, sans-serif;
+}
+.native-app-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-inline-size: var(--site-width);
+    margin-inline: auto;
+    padding-inline: 12px;
+    min-block-size: 56px;
+}
+.native-app-banner-name { font-weight: 600; }
+.native-app-banner a {
+    margin-inline-start: auto;
+    padding-block: 12px;
+    color: #245b8c;
+    text-decoration: underline;
+}
+.native-app-banner button {
+    flex: 0 0 44px;
+    inline-size: 44px;
+    block-size: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    font-size: 1.75rem;
+    cursor: pointer;
+}
+.native-app-banner button:hover { background: #e6e1d7; }
+[data-theme="dark"] .native-app-banner {
+    color: #eee8dd;
+    background: #26231f;
+    border-color: #5c564b;
+}
+[data-theme="dark"] .native-app-banner a { color: #d7bc72; }
+[data-theme="dark"] .native-app-banner button:hover { background: #403b34; }
+@media print { .native-app-banner { display: none; } }
