@@ -62,7 +62,7 @@ export const UserSettingProvider: React.FC<React.PropsWithChildren> = ({ childre
     const colorChange = (field: 'contentFontColor' | 'hazzatFontColor', color: string) => {
         if (!colors.includes(color)) return;
         updateSettings({ [field]: color });
-        window.gtag?.("event", field === 'contentFontColor' ? 'change_text_color' : 'change_hazzat_color', { event_category: 'Customization', event_label: `${color} Color Selected` });
+        trackAnalyticsEvent(field === 'contentFontColor' ? 'change_text_color' : 'change_hazzat_color', { event_category: 'Customization', event_label: `${color} Color Selected` });
     };
     return <UserSettingsContext.Provider value={{ userSettings,
         setContentLanguages: languages => {
@@ -83,7 +83,7 @@ export const UserSettingProvider: React.FC<React.PropsWithChildren> = ({ childre
             if (!Number.isFinite(size)) return;
             const bounded = Math.min(AppSettings.maxContentTextSize, Math.max(AppSettings.minContentTextSize, size));
             updateSettings({ englishFontSize: `${bounded}px`, arabicFontSize: `${bounded + 4}px` });
-            window.gtag?.('event', 'change_text_size', { event_category: 'Customization', event_label: `${bounded} Size Selected` });
+            trackAnalyticsEvent('change_text_size', { event_category: 'Customization', event_label: `${bounded} Size Selected` });
         }
     }}>{children}</UserSettingsContext.Provider>;
 };

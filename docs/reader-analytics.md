@@ -1,173 +1,215 @@
 # Reader and language analytics
 
-Implements the application events in [#325](https://github.com/CopticDevs/hazzat-web/issues/325)
-and [#327](https://github.com/CopticDevs/hazzat-web/issues/327), alongside the separate
-[booklet generation event](booklet-analytics.md). Search Console access and Google search
-queries are separate work in [#326](https://github.com/CopticDevs/hazzat-web/issues/326).
+Implements [#325](https://github.com/CopticDevs/hazzat-web/issues/325) and
+[#327](https://github.com/CopticDevs/hazzat-web/issues/327), with the owner's requested
+separate entity, format and language-combination event names. Booklet generation remains
+[a separate event](booklet-analytics.md); Search Console setup is separate work in #326.
 
-## Event contract
+## Fixed event names
 
-All events reuse the existing `window.gtag` and configured GA4 property. They are best effort:
-missing, non-callable, blocked, or throwing analytics never prevents rendering or saving settings.
-The helper does not load another tag, send directly to a collection endpoint, retry failed events,
-override consent, or change the site's existing consent configuration.
+There is **no generic `content_view` event**. A normal individual-hymn reader visit emits
+three complementary events, for example `hymn_view`, `text_view`, and
+`content_languages_en_cop_ar_view`. Each answers a different question about that visit.
+**Never sum the three families to count visits.**
 
-### `content_view`
+### Primary entity views
 
-One event describes one logical, validated content visit. `event_category` is `Engagement`.
-
-| Parameter | Values / meaning |
+| Event | Meaning |
 | --- | --- |
-| `view_type` | `season`, `service`, or `hymn` |
-| `season_id` | Stable public catalog ID for every view |
-| `service_id` | Stable public catalog ID for service and hymn views |
-| `hymn_id` | Stable public catalog ID for an individual hymn view only |
-| `content_format` | Reader only: `text`, `hazzat`, `vertical_hazzat`, `musical_notes`, `audio`, `video`, `information` |
-| `content_languages` | Reader only: active normalized language preference; see below |
-| `content_state` | Reader only: `available` or `no_selected_language_content` |
+| `season_view` | An individual season landing has loaded its validated season/service catalog. |
+| `service_view` | A service landing/hymn list is loaded, or actual content is available in a service-wide reader. |
+| `hymn_view` | Actual content is available in an individual hymn's selected/default reader format. |
 
-Season/service landing events omit reader parameters. Their absence distinguishes landing counts
-from deeper reader activity without a redundant landing dimension. The IDs remain on deeper
-views, allowing all activity within a season or service to be reported separately from landings.
-No titles, hymn text, search terms, URLs, raw errors, user IDs, or personal identifiers are added
-by these custom events. IDs originate in validated public catalog records, not arbitrary URL values.
+A season landing does not emit service/hymn views for its nested lists. A service-wide reader
+emits one `service_view`, never one `hymn_view` per child. A list of hymn links is not hymn usage.
 
-Format IDs map exactly as follows:
+### Format views
 
-| Route/catalog format ID | Canonical analytics format |
+| Route/catalog ID | `content_format` | Event |
+| --- | --- | --- |
+| `1` | `text` | `text_view` |
+| `2` | `hazzat` | `hazzat_view` |
+| `3` | `vertical_hazzat` | `vertical_hazzat_view` |
+| `4` | `musical_notes` | `musical_notes_view` |
+| `5` | `audio` | `audio_view` |
+| `6` | `video` | `video_view` |
+| `7` | `information` | `information_view` |
+
+One format event is sent when content is actually displayed on a hymn or service reader.
+The default format counts too. Format links/clicks alone do not. **All Formats** is a booklet
+preset, not an eighth reader format. These events include `view_type` so service-wide format
+usage can be separated from individual-hymn usage.
+
+### Language-combination usage
+
+| `content_languages` | Meaning | Event |
+| --- | --- | --- |
+| `en` | English only | `content_languages_en_view` |
+| `cop` | Coptic only | `content_languages_cop_view` |
+| `ar` | Arabic only | `content_languages_ar_view` |
+| `en+cop` | English and Coptic | `content_languages_en_cop_view` |
+| `en+ar` | English and Arabic | `content_languages_en_ar_view` |
+| `cop+ar` | Coptic and Arabic | `content_languages_cop_ar_view` |
+| `en+cop+ar` | All three; the default | `content_languages_en_cop_ar_view` |
+| `none` | No selected languages | `content_languages_none_view` |
+
+One combination event records the first active normalized reader preference per navigation,
+including defaults and saved choices. Its value is ordered English/Coptic/Arabic regardless
+of input order, duplicates or casing. Missing translations do not change the preference:
+`en+ar` remains `en+ar` even if a hymn only has English. Language-neutral audio/score content
+can remain available with `none`; this does not imply multilingual text is present.
+
+The combination family includes a filtered-empty reader state when real source content exists
+but no selected language matches. It sends `content_state=no_selected_language_content`, not
+a successful entity/format view. Completely absent format data and failed loads count nowhere.
+
+### Deliberate language changes
+
+`change_content_languages` remains separate from combination usage. It sends:
+
+- `event_category=Customization`
+- `previous_content_languages`: previous normalized combination
+- `content_languages`: new normalized combination
+
+It fires once per actual deliberate change, including to/from `none`. Initial defaults,
+restored settings, cross-tab synchronization, duplicate calls and equivalent/reordered values
+do not count as manual changes. This is the general reader setting, not the booklet builder's
+separate language controls. Existing `change_nav_lang` still measures the English/Arabic interface.
+
+## Parameters and direct drilldown
+
+All entity, format and combination events send `event_category=Engagement` and these
+applicable parameters. Event names are selected from explicit fixed maps, never catalog IDs
+or user input.
+
+| Parameter | Values / scope |
 | --- | --- |
-| `1` | `text` |
-| `2` | `hazzat` |
-| `3` | `vertical_hazzat` |
-| `4` | `musical_notes` |
-| `5` | `audio` |
-| `6` | `video` |
-| `7` | `information` |
+| `view_type` | `season`, `service`, `hymn`; also identifies the scope of format/combination events |
+| `season_id` | Stable validated public catalog ID on all views |
+| `service_id` | Stable validated public ID on service and hymn views |
+| `hymn_id` | Stable validated public ID on individual hymn views only |
+| `content_format` | One of the seven canonical values; reader events only |
+| `content_languages` | One of the eight active normalized combinations; reader events only |
+| `content_state` | `available` on successful entity/format reader views; combination usage can also be `no_selected_language_content` |
 
-There is no eighth reader format. **All Formats** is a booklet preset. A list of available
-format links does not count as views of those formats.
+**Every `hymn_view` includes `hymn_id`, `service_id`, `season_id`, `content_format`,
+`content_languages`, and `content_state=available` on that same event.** It is never emitted
+from metadata alone before its dimensions are known. Overall hymn counts and their text/Hazzat
+or language breakdowns therefore use `hymn_view` directly, with no joins to the companion events.
 
-### What counts as one view
+Season/service landings omit reader parameters. Their absence distinguishes direct landing
+counts from deeper reader activity. Reader entity/format events have identical dimensions
+for the same successful visit. IDs retained on deeper events also support activity within a
+season/service, but summing all event families would triple count normal reader visits.
 
-- A visit starts when the content pathname changes, or when the page is freshly mounted after
-  reload/leaving the reader. Back/Forward visits count again. Path case/trailing slashes are
-  normalized; changing only query parameters or fragments does not start another view.
-- A season landing counts after its current season and service catalog validate and load.
-  Nested service hymn lists do not generate additional service/hymn events.
-- A service landing counts after its current service catalog and hymn list load successfully.
-  Hymn links alone are not individual hymn views.
-- A hymn or service-format reader counts when actual content becomes available in the selected
-  format, including the automatically chosen default on an expanded hymn route. A service reader
-  emits one service event, regardless of the number of hymns or variations. It does not emit hymn
-  events for every child. If a service is partially available, its first available content section
-  is sufficient; the event is not a claim that every section was loaded or read.
-- Text, notation and information count after the loaded section is committed. Musical notes wait
-  until engraving succeeds at a visible width. Audio/video count when the valid embedded player
-  surface is displayed. These are format views, not playback, completion, or proof that an external
-  media provider successfully streamed media. Cross-origin playback failures are not observable
-  by this view event.
-- When real source content exists but none matches the selected languages, the reader's filtered
-  empty state counts once with `content_state=no_selected_language_content`. This measures the
-  selected combination without pretending multilingual content was rendered. For a service,
-  this state waits for all sections so a missing translation in one hymn cannot hide content in another.
-  Completely empty format records, invalid routes, failed content requests, failed musical engraving,
-  and discarded/unmounted results do not count as successful content views.
-- A visit shares one counter across nested components. StrictMode effect replay, rerenders, retries
-  after a success, UI-language reloads, content-language changes, theme/font changes and repeated
-  child callbacks do not increment it. A later pathname/format visit counts again. This deliberately
-  measures navigation/format usage rather than time spent, scroll depth, or each preference toggle.
-- A language change after the view was recorded is measured by the settings event below; the next
-  reader visit records its new combination. The prior view is not rewritten or counted a second time.
+## Exactly what counts
 
-### `change_content_languages`
+- A navigation starts on a content-pathname change, or a fresh mount after reload/leaving the
+  reader. Back/Forward and explicit format changes count again. Path case/trailing slashes
+  are normalized; query/hash-only changes do not begin another view.
+- Each navigation has independent once-only entity, format and combination counters shared
+  by all nested components. StrictMode effect replay, rerenders, repeated callbacks,
+  interface-language reloads and theme/font changes cannot duplicate a family.
+- A normal loaded reader emits one primary entity event, one matching format event and one
+  language-combination event. A service reader counts once regardless of hymns/variations.
+  Its first available section is sufficient; this does not claim all sections were read.
+- Text/notation/information count after the loaded section is committed. Musical notes wait
+  for successful engraving at visible width. Audio/video count the displayed embedded player
+  surface, not play/pause/progress/completion or proof of an externally playable stream.
+  Cross-origin failures or invalid external-media content are not observable playback metrics.
+- If the initial language selection filters out all content, only its combination event fires.
+  A service waits for all section states before reporting filtered-empty, so missing translations
+  in one hymn do not hide available content in another. If a later language choice makes content
+  available on the same page, the entity/format events fire once then, with the current combination.
+  The already-recorded initial combination is not counted again or rewritten.
+- Later language changes emit `change_content_languages` but do not duplicate an already-counted
+  entity, format or usage event. The next navigation records the then-active combination.
+- Invalid routes, failed requests, empty format records, failed musical engraving and stale or
+  unmounted results do not emit successful entity/format views. No extra failure events are added.
+- Counts represent views, not unique hymns/people: visiting text, then Hazzat, then returning to text
+  is three `hymn_view` events (two text, one Hazzat). Users/sessions distinguish reach from repeat use.
 
-Emitted once when the visitor deliberately changes the normalized reader-language setting.
-Parameters are `event_category=Customization`, `previous_content_languages`, and `content_languages`
-(the new combination). There are not eight separate dynamically named events.
+## GA4 setup and reporting
 
-The initial default, loading saved preferences, cross-tab synchronization, duplicate checkbox
-callbacks, reordered/duplicate equivalent selections and unchanged values emit no manual-change
-event. A real change to or from the empty selection does. Existing `change_nav_lang` tracks the
-English/Arabic interface separately and is not duplicated by these events.
+Inspect existing custom definitions/quotas before adding event-scoped custom dimensions for:
+`view_type`, `content_format`, `content_languages`, `content_state`, and
+`previous_content_languages`. If category/label breakdowns are needed for retained events,
+register `event_category` and `event_label` too; they are custom parameters in GA4, not automatic
+Universal Analytics category/action/label reports. Do not recreate existing definitions.
+Definitions are not retroactive; allow normal processing time.
 
-### Language combinations
+Review cardinality before registering `season_id`, `service_id` or especially `hymn_id`.
+High-cardinality dimensions may produce `(other)` rows. An authorized BigQuery export joined
+to public catalog metadata can be preferable. Do not invent compound ID/title parameters or
+translated-name dimensions. If hymn IDs are reused, report by season/service/hymn hierarchy.
 
-Every combination is deterministic in English, Coptic, Arabic order:
-`en`, `cop`, `ar`, `en+cop`, `en+ar`, `cop+ar`, `en+cop+ar`, `none`.
+### Overall hymn views, then text versus Hazzat
 
-The default is `en+cop+ar`; saved selections use the same encoding. These parameters represent
-visitor preference, not content translation availability. A hymn missing an Arabic translation
-does not change a preference of `en+ar` to `en`. Language-neutral audio/score content can remain
-available with `none`; this still makes no claim of multilingual text being present.
+In **Explore → Free form**:
 
-## GA4 setup and reports
+1. Filter **Event name exactly equals `hymn_view`**. Optionally filter a particular season,
+   service or hymn ID. This is the canonical overall hymn-view total.
+2. Values: **Event count**, **Total users**, **Sessions**. Rows: hymn ID (or the scoped catalog
+   hierarchy), followed by **Content format**. Add **Content languages** as another breakdown.
+3. The total and breakdown come from the same events: for example, 100 hymn views can break down
+   to 70 text and 30 Hazzat views. No event-name join, timestamp matching, or user-ID correlation
+   is required. Default formats and default/restored language combinations are already included.
+4. Keep `hymn_view` as the filter when drilling by language so the language dimensions refer to
+   those same successful views. The separate combination events answer initial reader-preference
+   usage, including filtered-empty states; they are not a substitute for the hymn-view denominator.
 
-Use the existing property. Before registering dimensions, inspect its current definitions and
-available quotas. Register event-scoped custom dimensions for `view_type`, `content_format`,
-`content_languages`, `previous_content_languages`, and `content_state` only when not already present.
-Definitions are not retroactive; allow normal processing time before interpreting reports.
+Other useful explorations:
 
-Review cardinality before registering `season_id`, `service_id` or `hymn_id`. Hymn identifiers may
-produce high-cardinality reporting and `(other)` rows. Prefer an authorized GA4 BigQuery export
-and joins to the public catalog where suitable. Do not add compound season/service/hymn/title
-strings, duplicate translated name dimensions, or personal identifiers to work around cardinality.
-Public IDs and their relationship can be resolved to names from the catalog. If hymn IDs are reused
-across services, group by season/service/hymn in the report or export rather than inventing a
-concatenated event parameter.
+- **Primary views:** select only `season_view`, `service_view`, `hymn_view`; do not add format/usage
+  events to this total. Direct season/service landings have unset `content_format`; deeper reader
+  activity has a format. Summarize by applicable IDs and resolve names from public metadata.
+- **Format popularity:** select the seven format-event names; rows `content_format`, then
+  `view_type`. Filter `view_type=hymn` to compare against individual-hymn views, since unfiltered
+  format totals also include service-wide readers.
+- **Combination usage:** select the eight `content_languages_*_view` names listed above; rows
+  `content_languages`, then `content_state` and optionally `content_format`/`view_type`.
+  Separate filtered-empty from available usage. This includes defaults and saved choices.
+- **Deliberate changes:** filter `change_content_languages`; rows `previous_content_languages`,
+  then `content_languages`; values Event count/Total users. This measures transitions rather
+  than all usage. Initial/restored preferences are intentionally not manual changes.
 
-Suggested **Explore → Free form** reports (create in the owner-authorized property):
+Event count measures repetition. Users and Sessions measure reach. Do not sum users across
+rows to infer unique people. These are setup/report recipes, not a claim that definitions or
+saved explorations have been created in the owner's property.
 
-1. **Reader language usage:** filter `Event name = content_view` and `content_format` set.
-   Rows: `content_languages`. Columns optionally: `content_state` or `content_format`.
-   Values: Event count, Total users, Sessions. Use `content_state=available` to rank actual rendered
-   usage; inspect filtered-empty visits separately. Include defaults and saved preferences.
-2. **Deliberate language changes:** filter `Event name = change_content_languages`.
-   Rows: `previous_content_languages`, then `content_languages`. Values: Event count and Total users.
-   This reports transitions and customization, not overall combination popularity.
-3. **Format popularity:** filter `Event name = content_view`, `content_state=available`.
-   Rows: `content_format`. Values: Event count, Total users, Sessions.
-4. **Season/service/hymn popularity:** filter `Event name = content_view`; group by the applicable
-   catalog ID(s). For direct season/service landings filter their `view_type` and unset
-   `content_format`; for individual hymn reads filter `view_type=hymn` and `content_state=available`.
-   To examine broader season/service activity, include all applicable view types with that ID.
-   Do not label service-wide events as individual hymn reads.
+## Privacy, transport and verification
 
-Event count is the number of logical views, including revisits; it is not unique people.
-Total users and Sessions show reach alongside repeat use. Do not sum users across rows to infer
-unique users of the whole site. The reports above are a recipe, not a claim that property-side
-custom definitions or saved explorations have already been created.
+All custom call sites reuse `trackAnalyticsEvent` and the existing `window.gtag`, including
+retained events (`button_click`, `change_nav_lang`, `change_text_color`, `change_hazzat_color`,
+`change_text_size`). Missing/non-callable/throwing tracking stays non-blocking. Existing event
+names, labels and triggers are preserved; the old color/size setters can still emit on repeated
+valid direct calls, unlike normalized language changes.
 
-## Verification and release checklist
+The helper does not load another tag, send directly to a collector, retry, override consent,
+or change property settings. New payloads contain no hymn/PDF contents, search text, titles,
+media URLs, raw errors or personal identifiers. GA's own automatically supplied fields are
+separate from these custom payloads.
 
-Application unit/integration tests use a mock tag and send no GA traffic. They cover all seven
-formats, default and saved combinations, manual changes, empty-language states, landing/deep routes,
-reload/Back/Forward, nested-view deduplication, failures/retry, stale data, and unavailable analytics.
+Application tests mock the tag and send no GA traffic. Before release:
 
-The existing `index.html` Google tag remains unchanged. There are no application-generated
-`page_view` events and no added manual SPA page-view mechanism. Property-side Enhanced Measurement
-history settings cannot be inferred from the source and must be checked before release:
+1. Inspect the existing stream's **Enhanced measurement → Page views → Advanced settings** and
+   observe direct load/client navigation/Back/Forward. Source cannot establish its history settings.
+   Keep exactly one page-view mechanism. This PR leaves `index.html` intact and adds no manual
+   `page_view`, no history listener and no second analytics property.
+2. Use an approved isolated test property/deployment or controlled internal/developer filtering.
+   The existing measurement ID is shared by the build template: separate test traffic deliberately.
+   For a local test copy, replace both measurement-ID occurrences with the approved test ID and do
+   not commit that temporary edit. Do not send uncontrolled test traffic into production reports.
+3. Enable Tag Assistant for that test session and inspect **Admin → DebugView**. Check one entity
+   event for a landing, and the exact three-event set for a normal reader. Exercise every format,
+   every combination, defaults/restored preferences, manual changes, filtered-empty→available,
+   service-wide pages, Back/Forward and reload. Confirm no obsolete `content_view` events.
+4. Compare every `hymn_view` payload with its primary format/language breakdown and confirm the
+   once-only family counters. Test failures/stale navigation and blocked/denied tracking too.
+5. Verify custom definitions and saved explorations. Record environment, commit, time, consent
+   state, page-view mechanism and representative results privately, not account/dashboard data
+   in the public repository.
 
-1. In the existing GA4 web stream, inspect **Enhanced measurement → Page views → Advanced settings**
-   and confirm whether browser-history changes are enabled. Observe actual `page_view` events on
-   direct load and client navigation, including Back/Forward. Record the setting and event counts.
-2. Keep exactly one page-view mechanism. Do not enable a second tag/history listener or add manual
-   `page_view` calls on top of Enhanced Measurement. If automatic history measurement is disabled,
-   resolve and verify that property setting separately instead of silently adding another mechanism.
-3. Use an approved test deployment/property or controlled internal/developer traffic filters, ensuring
-   test traffic is excluded from ordinary production reporting. For an isolated local test copy,
-   replace both measurement-ID occurrences in `index.html` with the approved test property ID;
-   do not commit that temporary change or send uncontrolled test traffic to the production tag.
-4. Enable Tag Assistant debug traffic for that test session and open GA4 **Admin → DebugView**.
-   Exercise a season landing, service landing, expanded/default hymn, every explicit format,
-   service-wide reader, language changes, Back/Forward, and reload. Compare exact event names,
-   parameter values and counts against the contract above. Reopen/re-render settings and verify
-   there are no extra content views. For media, verify the player appears without claiming playback.
-5. Confirm denied consent or blocking does not get bypassed and the reader/settings remain usable.
-   Test missing analytics, failures/retry and navigation while data is loading.
-6. Record test environment, time, commit, page-view mechanism, consent state, and representative
-   DebugView results in an appropriate private release record. Keep dashboard/account data out of
-   public repository docs. Verify the saved explorations/custom definitions separately.
-
-**Outstanding external verification:** actual GA receipt, property custom dimensions/explorations,
-consent-policy configuration and Enhanced Measurement settings require an authorized property and
-controlled test traffic. Local tests and an unchanged tag do not prove those acceptance criteria.
+Actual GA receipt, configured custom dimensions/explorations, applicable consent policy and
+Enhanced Measurement behavior remain external verification. Automated local/CI results do
+not prove them. This PR adds no search, theme, media-playback or PDF-download custom events.
