@@ -116,3 +116,12 @@ const invalid = <Icon ref={React.createRef<HTMLDivElement>()} />;
   const diagnostics = ts.getPreEmitDiagnostics(program);
   assert.deepEqual(diagnostics.map(d => ts.flattenDiagnosticMessageText(d.messageText, '\n')), []);
 });
+
+// Safari reads the initial document, rather than a React-inserted tag.
+test('initial HTML advertises the verified iOS app without unverified deep links', async () => {
+  const { readFileSync } = await import('node:fs');
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const tags = html.match(/<meta\s+name="apple-itunes-app"[^>]*>/g);
+  assert.equal(tags?.length, 1);
+  assert.match(tags[0], /content="app-id=6753879416"/);
+});
