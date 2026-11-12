@@ -11,6 +11,7 @@ import FontsPage from "./Components/FontsPage";
 import Footer from "./Components/Footer";
 import GlobalSearchPage from "./Components/GlobalSearchPage";
 import Header from "./Components/Header";
+import NativeAppBanner from "./Components/NativeAppBanner";
 import HelpPage from "./Components/HelpPage";
 import Home from './Components/Home';
 import InvalidAddressMessage from "./Components/InvalidAddressMessage";
@@ -31,6 +32,7 @@ function App() {
         <>
             <RouteScroll />
             <a href="#main-content" className="skip-link">{strings.skipToContent}</a>
+            <NativeAppBanner />
             <div className={languageProperties.isRtl ? "main dirRtl" : "main"}>
                 <div className="mainContainer">
                     <div className="print-brand" dir="ltr">
