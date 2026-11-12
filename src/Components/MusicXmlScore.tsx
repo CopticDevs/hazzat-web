@@ -7,9 +7,12 @@ import "./Content.css";
 interface IProps {
     musicXml: string;
     hymnTitle?: string;
+    onRendered?: () => void;
 }
 
 function MusicXmlScore(props: IProps) {
+    const onRendered = useRef(props.onRendered);
+    onRendered.current = props.onRendered;
     const { userSettings } = useContext(UserSettingsContext);
     const requestedSize = parseFloat(userSettings.englishFontSize);
     const fontSize = Math.min(AppSettings.maxContentTextSize, Math.max(AppSettings.minContentTextSize, Number.isFinite(requestedSize) ? requestedSize : 18));
@@ -38,6 +41,7 @@ function MusicXmlScore(props: IProps) {
                 const baseZoom = Math.min(0.9, Math.max(0.5, container.clientWidth / 800));
                 osmd.Zoom = baseZoom * fontSizeRef.current / 18;
                 osmd.render();
+                onRendered.current?.();
             } catch (ex) {
                 setError(ex instanceof Error ? ex.message : "Unable to render musical notes.");
             }

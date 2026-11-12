@@ -1,3 +1,4 @@
+import { trackAnalyticsEvent } from "../analytics";
 import { faCog, faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useState } from "react";
@@ -18,7 +19,7 @@ export default function UserSettingsChanger() {
     const sampleStyle = { '--english-font-size': userSettings.englishFontSize, '--content-font-color': readerColor(userSettings.contentFontColor), '--hazzat-font-color': readerColor(userSettings.hazzatFontColor) } as React.CSSProperties;
     return <>
         <Button className="reader-tool" variant="light" aria-label={strings.settings} onClick={() => {
-            setExpanded(true); window.gtag?.("event", "button_click", { event_category: "Engagement", event_label: "Customization Button Clicked" });
+            setExpanded(true); trackAnalyticsEvent("button_click", { event_category: "Engagement", event_label: "Customization Button Clicked" });
         }}><FontAwesomeIcon icon={faCog} /></Button>
         <Modal animation={false} show={expanded} onHide={() => setExpanded(false)} aria-labelledby="reader-settings-title" className={languageProperties.isRtl ? "dirRtl" : "dirLtr"}>
             <Modal.Header closeButton closeLabel={strings.close}><Modal.Title id="reader-settings-title">{strings.settings}</Modal.Title></Modal.Header>
