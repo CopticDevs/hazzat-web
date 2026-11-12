@@ -26,3 +26,5 @@ Only the five public content configuration variables listed in `.env.example` an
 SVG named `ReactComponent` imports are compiled with SVGR without its optional SVGO optimizer. Default SVG imports remain asset URLs for PDF artwork. Fonts, images, and binary booklet artwork are emitted as files.
 
 Jest configuration and asset/CSS mocks live in `jest.config.cjs` and `config/jest/`; they do not depend on react-scripts. Optional content-dataset tests remain opt-in through their existing environment variables.
+
+See [native app promotion](docs/native-app-promotion.md) for Safari and Android app-store banners and verification.
