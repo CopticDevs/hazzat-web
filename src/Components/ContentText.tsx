@@ -98,11 +98,9 @@ function ContentText(props: IProps) {
         });
     };
 
-    const getColCell = (col: TextColumn, isComment: boolean, currentMask: number) => {
+    const getColCell = (col: TextColumn, isComment: boolean, hasFollowingColumn: boolean) => {
         const langMask = getLanguageMask(col.language);
         const cssClasses: string[] = [];
-        const rowHasCoptic = (currentMask & copticMask) !== 0;
-        const rowHasArabic = (currentMask & arabicMask) !== 0;
         const lang: string = langMask === arabicMask ? "ar" : "en";
         const overrideStyle = langMask === arabicMask ? overrideArabicStyle : overrideEnglishStyle;
 
@@ -123,11 +121,8 @@ function ContentText(props: IProps) {
         // align text to top
         cssClasses.push("textAlignTop");
 
-        // Add right border if applicable
-        if (!isComment) {
-            if (langMask === englishMask && rowHasCoptic) cssClasses.push("contentRBorder");
-            if (langMask === copticMask && rowHasArabic) cssClasses.push("contentRBorder");
-        }
+        // Separate adjacent rendered languages, including English + Arabic.
+        if (!isComment && hasFollowingColumn) cssClasses.push("contentRBorder");
 
         // Add rtl for Arabic
         if (langMask === arabicMask) cssClasses.push("dirRtl");
@@ -145,7 +140,7 @@ function ContentText(props: IProps) {
         return cell;
     };
 
-    const addContentRow = (columns: TextColumn[], isComment: boolean, currentMask: number) => {
+    const addContentRow = (columns: TextColumn[], isComment: boolean) => {
         // Sort columns to ensure correct order: English, Coptic, Arabic
         const sortedColumns = [...columns].sort((a, b) => {
             const orderMap: { [key: string]: number } = {
@@ -158,8 +153,8 @@ function ContentText(props: IProps) {
             return orderA - orderB;
         });
 
-        const cells = sortedColumns.map((col) => {
-            return getColCell(col, isComment, currentMask);
+        const cells = sortedColumns.map((col, index) => {
+            return getColCell(col, isComment, index < sortedColumns.length - 1);
         });
 
         if (isComment) {
@@ -193,7 +188,7 @@ function ContentText(props: IProps) {
             ensureTableInstantiated(currentMask);
 
             // add a new row with only non-empty columns
-            addContentRow(nonEmptyColumns, !!paragraph.isComment, currentMask);
+            addContentRow(nonEmptyColumns, !!paragraph.isComment);
 
             // update mask
             prevMask = currentMask;
